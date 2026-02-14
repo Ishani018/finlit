@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Mm]emoryCaptures/
+/[Uu]ser[Ss]ettings/
+
+# Visual Studio / VS Code
+.vscode/
+.idea/
+*.sln
+*.csproj
+*.unityproj
+
+# Node.js / React / Expo
+node_modules/
+npm-debug.log
+yarn-error.log
+.expo/
+*.jks
+*.keystore
+android/app/debug.keystore
+ios/Pods/
+dist/
+web-build/
