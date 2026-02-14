@@ -35,3 +35,12 @@ android/app/debug.keystore
 ios/Pods/
 dist/
 web-build/
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+images/
+# Exception: Keep logos/icons if needed, but user asked to ignore images
