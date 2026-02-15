@@ -62,11 +62,21 @@ export const GameProvider = ({ children }) => {
         // console.log("Crisis Engine Triggered (Placeholder)");
     };
 
+    const [degrees, setDegrees] = useState([]); // Education
+
     const checkJobRequirements = (job) => {
         const reqNetWorth = job.req_net_worth || 0;
+        const reqDegrees = job.req_degrees || [];
+
         if (netWorth < reqNetWorth) {
             return { allowed: false, reason: `Requires Net Worth ₹${reqNetWorth.toLocaleString()}` };
         }
+
+        const missingDegrees = reqDegrees.filter(d => !degrees.includes(d));
+        if (missingDegrees.length > 0) {
+            return { allowed: false, reason: `Missing: ${missingDegrees.join(', ')}` };
+        }
+
         return { allowed: true };
     };
 
@@ -88,16 +98,23 @@ export const GameProvider = ({ children }) => {
 
     const buyInvestment = (item) => {
         if (balance >= item.cost) {
+            // Check if already owned (for non-repeatable items like education)
+            if (item.type === 'education' && degrees.includes(item.name)) {
+                return false; // Already have this degree
+            }
+
             setBalance(prev => prev - item.cost);
             const newInventory = [...inventory, item.id];
             setInventory(newInventory);
 
-            // If it's a house, move into it!
+            // Handle Item Types
             if (item.type === 'housing') {
                 setCurrentHousing({
                     ...item,
-                    rent: 0 // No rent for owned property
+                    rent: 0
                 });
+            } else if (item.type === 'education') {
+                setDegrees(prev => [...prev, item.name]);
             }
 
             setHistory(prev => [...prev, {
@@ -189,7 +206,8 @@ export const GameProvider = ({ children }) => {
         nextMonth,
         applyForJob,
         checkJobRequirements,
-        buyInvestment
+        buyInvestment,
+        degrees
     };
 
     return (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, ScrollView, StatusBar, SafeAreaView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, ScrollView, StatusBar } from 'react-native';
 import { GameProvider, useGame } from './src/context/GameContext';
 import { JOBS } from './src/data/jobs';
 import { INVESTMENTS } from './src/data/investments';
@@ -17,7 +17,8 @@ const GameLayout = () => {
     balance, turn, nextMonth, netWorth,
     currentJob, currentHousing, dependents,
     applyForJob, buyInvestment,
-    isPlaying, setIsPlaying, checkJobRequirements
+    isPlaying, setIsPlaying, checkJobRequirements,
+    degrees
   } = useGame();
 
   const [activeMenu, setActiveMenu] = useState(null); // null, 'jobs', 'investments'
@@ -193,13 +194,15 @@ const GameLayout = () => {
                     <StyledImage source={inv.image} className="w-full h-full" resizeMode="cover" />
                     <StyledView className="absolute bottom-3 left-4 bg-black/50 px-2 py-1 rounded">
                       <StyledText className="font-bold text-white text-lg">{inv.name}</StyledText>
-                      <StyledText className="text-xs text-gray-300">{inv.type === 'housing' ? 'Housing' : 'Business'}</StyledText>
+                      <StyledText className="text-xs text-gray-300">
+                        {inv.type === 'housing' ? 'Housing' : inv.type === 'education' ? 'Education' : 'Business'}
+                      </StyledText>
                     </StyledView>
                   </StyledView>
                   <StyledView className="p-4 flex-row justify-between items-center bg-white/5">
                     <StyledView>
                       <StyledText className="text-xl font-bold text-yellow-500">₹{inv.cost.toLocaleString()}</StyledText>
-                      <StyledText className="text-xs text-gray-400">Maint: ₹{inv.maintenance.toLocaleString()}/mo</StyledText>
+                      <StyledText className="text-xs text-gray-400">{inv.type === 'education' ? 'One-time Cost' : `Maint: ₹${inv.maintenance.toLocaleString()}/mo`}</StyledText>
                     </StyledView>
                     <StyledTouchableOpacity
                       onPress={() => buyInvestment(inv)}
@@ -254,12 +257,15 @@ const GameLayout = () => {
                 </StyledView>
               )}
 
-              {selectedJob?.req_degrees.map((deg, i) => (
-                <StyledView key={i} className="p-3 rounded-lg border border-red-500/20 bg-red-500/10 mb-2 flex-row justify-between items-center">
-                  <StyledText className="text-sm font-bold text-red-400">{deg}</StyledText>
-                  <FontAwesome5 name="exclamation-circle" size={16} color="#F87171" />
-                </StyledView>
-              ))}
+              {selectedJob?.req_degrees.map((deg, i) => {
+                const hasDegree = degrees ? degrees.includes(deg) : false;
+                return (
+                  <StyledView key={i} className={`p-3 rounded-lg border border-red-500/20 bg-red-500/10 mb-2 flex-row justify-between items-center ${hasDegree ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                    <StyledText className={`text-sm font-bold ${hasDegree ? 'text-green-400' : 'text-red-400'}`}>{deg}</StyledText>
+                    <FontAwesome5 name={hasDegree ? "check-circle" : "exclamation-circle"} size={16} color={hasDegree ? "#4ADE80" : "#F87171"} />
+                  </StyledView>
+                );
+              })}
             </StyledView>
 
             <StyledText className="text-gray-400 text-sm leading-relaxed mb-6">
