@@ -130,7 +130,7 @@ const GameLayout = () => {
 
       {/* --- MENUS (HALF-SCREEN SHEETS) --- */}
       <Modal
-        visible={!!activeMenu}
+        visible={!!activeMenu && !selectedJob}
         transparent={true}
         animationType="slide"
         onRequestClose={() => setActiveMenu(null)}
@@ -169,20 +169,29 @@ const GameLayout = () => {
                 return (
                   <StyledTouchableOpacity
                     key={job.id}
-                    onPress={() => setSelectedJob(job)}
-                    className={`p-4 mb-3 rounded-xl border flex-row items-center gap-4 ${isLocked ? 'bg-white/5 border-white/5 opacity-70' : 'bg-white/10 border-white/10'}`}
+                    onPress={() => {
+                      console.log('Selected Job:', job.name);
+                      setSelectedJob(job);
+                    }}
+                    activeOpacity={0.7}
+                    className={`p-4 mb-3 rounded-xl border flex-row items-center gap-4 ${isLocked ? 'bg-gray-800/80 border-gray-700' : 'bg-white/10 border-white/10'}`}
                   >
-                    <StyledImage source={job.image} className="w-12 h-12 rounded-lg bg-black/50" />
+                    <StyledImage source={job.image} className={`w-12 h-12 rounded-lg bg-black/50 ${isLocked ? 'opacity-50' : ''}`} />
                     <StyledView className="flex-1">
                       <StyledView className="flex-row items-center gap-2">
-                        <StyledText className="font-bold text-white text-base">{job.name}</StyledText>
+                        <StyledText className={`font-bold text-base ${isLocked ? 'text-gray-400' : 'text-white'}`}>{job.name}</StyledText>
                         {isLocked && <FontAwesome5 name="lock" size={12} color="#6B7280" />}
                       </StyledView>
-                      <StyledView className="mt-1 flex-row">
-                        <StyledText className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded">₹{job.salary.toLocaleString()}/mo</StyledText>
+                      <StyledView className="mt-1 flex-col">
+                        <StyledText className={`text-xs font-bold px-2 py-0.5 rounded self-start ${isLocked ? 'text-green-800 bg-green-900/10' : 'text-green-400 bg-green-400/10'}`}>₹{job.salary.toLocaleString()}/mo</StyledText>
+                        {isLocked && (
+                          <StyledText className="text-[10px] text-red-400 mt-1">
+                            {reqStatus.reason} (Net: {netWorth})
+                          </StyledText>
+                        )}
                       </StyledView>
                     </StyledView>
-                    <MaterialIcons name="chevron-right" size={20} color="#6B7280" />
+                    <MaterialIcons name="chevron-right" size={20} color={isLocked ? "#4B5563" : "#6B7280"} />
                   </StyledTouchableOpacity>
                 );
               })}

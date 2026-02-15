@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ASSETS_DIR = path.join(__dirname, 'assets');
-const MAX_WIDTH = 1024;
-const QUALITY = 80;
+const MAX_WIDTH = 512;
+const QUALITY = 75;
 
 async function processDirectory(directory) {
     if (!fs.existsSync(directory)) return;
