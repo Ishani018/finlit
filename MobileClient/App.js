@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, ScrollView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, Modal, StatusBar, LayoutAnimation, Platform, UIManager, Dimensions, TextInput } from 'react-native';
 import { GameProvider, useGame } from './src/context/GameContext';
 import { JOBS } from './src/data/jobs';
-import { INVESTMENTS } from './src/data/investments';
+import { EDUCATION } from './src/data/education';
+import { STOCKS } from './src/data/stocks';
+import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from './src/data/realEstate';
+
+// Combine both arrays for display
+const REAL_ESTATE = [...RESIDENTIAL_PROPERTIES, ...COMMERCIAL_PROPERTIES];
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { styled } from 'nativewind';
@@ -11,26 +16,45 @@ const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledImage = styled(Image);
 const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledTextInput = styled(TextInput);
 
 const GameLayout = () => {
   const {
     balance, turn, nextMonth, netWorth,
-    currentJob, currentHousing, dependents,
-    applyForJob, buyInvestment,
-    isPlaying, setIsPlaying, checkJobRequirements,
-    degrees
+    currentJob, currentHousing, isPlaying, setIsPlaying,
+    degrees, portfolio, properties, marketPrices,
+    enrollInCourse, tradeStock, buyProperty, applyForJob, checkJobRequirements, getCAAdvice
   } = useGame();
 
-  const [activeMenu, setActiveMenu] = useState(null); // null, 'jobs', 'investments'
-  const [selectedJob, setSelectedJob] = useState(null); // For detailed view
+  const [activeMenu, setActiveMenu] = useState(null); // 'university', 'invest', 'advisor', 'careers'
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [investCategory, setInvestCategory] = useState(null); // null, 'stocks', 'houses', 'commercial'
+
+  console.log('Active Menu:', activeMenu);
 
   if (!currentHousing || balance === undefined) {
     return (
       <StyledView className="flex-1 items-center justify-center bg-black">
-        <StyledText className="text-white font-bold">Loading Simulation...</StyledText>
+        <StyledText className="text-white font-bold">Booting Life OS...</StyledText>
       </StyledView>
     );
   }
+
+  // --- HANDLERS ---
+  const handleEnroll = (course) => {
+    const res = enrollInCourse(course);
+    alert(res.msg);
+  };
+
+  const handleTrade = (stock, qty, action) => {
+    const res = tradeStock(stock, qty, action);
+    if (!res.success) alert(res.msg);
+  };
+
+  const handleBuyProperty = (prop) => {
+    const res = buyProperty(prop);
+    alert(res.msg);
+  };
 
   const handleApply = (job) => {
     const result = applyForJob(job);
@@ -47,132 +71,338 @@ const GameLayout = () => {
       <StatusBar barStyle="light-content" />
 
       {/* --- TOP HEADER (STATUS) --- */}
-      <StyledView className="z-20 pt-12 pb-4 flex-row justify-center bg-black/80 border-b border-white/10">
-        <BlurView intensity={20} className="absolute inset-0" />
-        <StyledView className="bg-gray-900/50 rounded-full px-6 py-2 flex-row items-center gap-6 border border-white/10">
-          <StyledView className="items-center">
-            <StyledText className="text-[10px] text-gray-400 uppercase font-bold">Balance</StyledText>
-            <StyledText className="text-xl font-bold text-green-400">₹{balance?.toLocaleString()}</StyledText>
+      {activeMenu !== 'advisor' && (
+        <StyledView className="z-20 pt-12 pb-4 flex-row justify-center bg-black/80 border-b border-white/10">
+          <BlurView intensity={20} className="absolute inset-0" />
+          <StyledView className="bg-gray-900/50 rounded-full px-6 py-2 flex-row items-center gap-6 border border-white/10">
+            <StyledView className="items-center">
+              <StyledText className="text-[10px] text-gray-400 uppercase font-bold">Balance</StyledText>
+              <StyledText className="text-xl font-bold text-green-400">₹{balance?.toLocaleString()}</StyledText>
+            </StyledView>
+            <StyledView className="h-8 w-px bg-white/10" />
+            <StyledView className="items-center">
+              <StyledText className="text-[10px] text-gray-400 uppercase font-bold">Net Worth</StyledText>
+              <StyledText className="text-sm font-bold text-blue-400">₹{netWorth?.toLocaleString()}</StyledText>
+            </StyledView>
           </StyledView>
-          <StyledView className="h-8 w-px bg-white/10" />
-          <StyledView className="items-center">
-            <StyledText className="text-[10px] text-gray-400 uppercase font-bold">Net Worth</StyledText>
-            <StyledText className="text-sm font-bold text-blue-400">₹{netWorth?.toLocaleString()}</StyledText>
+        </StyledView>
+      )}
+
+      {/* --- DESKTOP / ROOM VISUAL --- */}
+      <StyledView className="flex-1 relative bg-gray-900 overflow-hidden">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}
+          maximumZoomScale={3.0}
+          minimumZoomScale={1.0}
+          centerContent={true}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <StyledImage
+            key={activeMenu} // Force re-render on menu change
+            source={activeMenu === 'advisor' ? require('./assets/properties/CA_Office.png') : currentHousing.image}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="contain"
+          />
+        </ScrollView>
+
+        {/* Date Display (Only show if not in Advisor mode for immersion, or keep it?) */}
+        {activeMenu !== 'advisor' && (
+          <StyledView className="absolute top-4 left-4 bg-black/50 rounded px-3 py-1 border border-white/5">
+            <StyledText className="text-xs text-white/80">{turn.month}/{turn.year}</StyledText>
           </StyledView>
-        </StyledView>
-      </StyledView>
+        )}
 
-      {/* --- MIDDLE STAGE (THE ROOM) --- */}
-      <StyledView className="flex-1 relative bg-gray-900 items-center justify-center overflow-hidden">
-        <StyledImage
-          source={currentHousing.image}
-          className="w-full h-full"
-          resizeMode="contain"
-        />
+        {/* Current Job Badge (Hide in Advisor mode too?) */}
+        {activeMenu !== 'advisor' && (
+          <StyledView className="absolute top-4 right-4 bg-black/50 rounded px-3 py-1 border border-white/5 flex-row items-center gap-2">
+            <FontAwesome5 name="briefcase" size={12} color="#EAB308" />
+            <StyledText className="text-xs text-white/80">{currentJob?.name || 'Unemployed'}</StyledText>
+          </StyledView>
+        )}
 
-        {/* Date Display (Floating) */}
-        <StyledView className="absolute top-4 left-4 bg-black/50 rounded px-3 py-1 border border-white/5">
-          <StyledText className="text-xs text-white/80">{turn.month}/{turn.year}</StyledText>
-        </StyledView>
-
-        {/* Job Badge (Floating) */}
-        <StyledView className="absolute top-4 right-4 bg-black/50 rounded px-3 py-1 border border-white/5 flex-row items-center gap-2">
-          <FontAwesome5 name="briefcase" size={12} color="#EAB308" />
-          <StyledText className="text-xs text-white/80">{currentJob?.name || 'Unemployed'}</StyledText>
-        </StyledView>
-
-        {/* Pause Overlay indicator */}
-        {!isPlaying && (
+        {/* Pause / Play Indicator */}
+        {!isPlaying && activeMenu !== 'advisor' && (
           <StyledView className="absolute bottom-4 bg-black/50 px-4 py-1 rounded-full border border-white/10 flex-row items-center gap-2">
             <Ionicons name="pause" size={10} color="white" />
             <StyledText className="text-[10px] text-white/60">PAUSED</StyledText>
           </StyledView>
         )}
+
+        {/* --- ADVISOR OVERLAY (Only visible in Advisor mode) --- */}
+        {activeMenu === 'advisor' && (
+          <StyledView className="absolute bottom-24 left-4 right-4 bg-black/90 px-6 py-6 rounded-2xl border border-white/20 shadow-lg">
+            <StyledView className="flex-row items-center justify-between mb-4">
+              <StyledView className="flex-row items-center gap-3">
+                <FontAwesome5 name="user-tie" size={24} color="#EAB308" />
+                <StyledText className="text-xl font-bold text-yellow-500 uppercase tracking-widest">CA Advisor</StyledText>
+              </StyledView>
+              <StyledTouchableOpacity onPress={() => setActiveMenu(null)} className="p-2 bg-white/10 rounded-full">
+                <Ionicons name="close" size={20} color="white" />
+              </StyledTouchableOpacity>
+            </StyledView>
+            <ScrollView style={{ maxHeight: 150 }}>
+              <StyledText className="text-white/95 text-lg italic leading-relaxed font-medium">
+                "{getCAAdvice()}"
+              </StyledText>
+            </ScrollView>
+          </StyledView>
+        )}
+
       </StyledView>
 
-      {/* --- BOTTOM DOCK (CONTROLS) --- */}
-      <StyledView className="z-20 pb-8 pt-4 bg-black/80 border-t border-white/10 flex-row justify-center items-end gap-6">
+      {/* --- LIFE OS DOCK --- */}
+      <StyledView className="z-20 pb-8 pt-4 bg-black/80 border-t border-white/10 flex-row justify-around items-end px-4">
         <BlurView intensity={20} className="absolute inset-0" />
 
-        <StyledTouchableOpacity
-          onPress={() => { setActiveMenu(activeMenu === 'jobs' ? null : 'jobs'); setIsPlaying(false); }}
-          className="items-center gap-1"
-        >
-          <StyledView className="w-12 h-12 bg-gray-800 rounded-2xl items-center justify-center border border-white/10">
-            <FontAwesome5 name="briefcase" size={20} color={activeMenu === 'jobs' ? 'white' : '#9CA3AF'} />
+        {/* 1. UNIVERSITY */}
+        <StyledTouchableOpacity onPress={() => setActiveMenu('university')} className="items-center gap-1">
+          <StyledView className={`w-14 h-14 rounded-2xl items-center justify-center border border-white/10 ${activeMenu === 'university' ? 'bg-indigo-600' : 'bg-gray-800'}`}>
+            <FontAwesome5 name="graduation-cap" size={20} color="white" />
           </StyledView>
-          <StyledText className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Jobs</StyledText>
+          <StyledText className="text-[10px] text-gray-400 font-bold uppercase">University</StyledText>
         </StyledTouchableOpacity>
 
-        {/* PLAY / PAUSE HERO BUTTON */}
+        {/* 2. INVEST */}
+        <StyledTouchableOpacity onPress={() => setActiveMenu('invest')} className="items-center gap-1">
+          <StyledView className={`w-14 h-14 rounded-2xl items-center justify-center border border-white/10 ${activeMenu === 'invest' ? 'bg-indigo-600' : 'bg-gray-800'}`}>
+            <FontAwesome5 name="chart-line" size={20} color="white" />
+          </StyledView>
+          <StyledText className="text-[10px] text-gray-400 font-bold uppercase">Invest</StyledText>
+        </StyledTouchableOpacity>
+
+        {/* PLAY / PAUSE (Center Button) */}
         <StyledTouchableOpacity
           onPress={() => setIsPlaying(!isPlaying)}
-          className={`w-20 h-20 rounded-full border-4 border-gray-900 items-center justify-center -mt-8 ${isPlaying ? 'bg-gray-700' : 'bg-indigo-600'}`}
+          className={`w-16 h-16 rounded-full border-4 border-gray-900 items-center justify-center -mb-8 z-30 ${isPlaying ? 'bg-gray-700' : 'bg-green-500'}`}
         >
-          {isPlaying ? (
-            <Ionicons name="pause" size={32} color="white" />
-          ) : (
-            <Ionicons name="play" size={32} color="white" style={{ marginLeft: 4 }} />
-          )}
+          <Ionicons name={isPlaying ? "pause" : "play"} size={28} color="white" style={{ marginLeft: isPlaying ? 0 : 4 }} />
         </StyledTouchableOpacity>
 
-        <StyledTouchableOpacity
-          onPress={() => { setActiveMenu(activeMenu === 'investments' ? null : 'investments'); setIsPlaying(false); }}
-          className="items-center gap-1"
-        >
-          <StyledView className="w-12 h-12 bg-gray-800 rounded-2xl items-center justify-center border border-white/10">
-            <FontAwesome5 name="shopping-bag" size={20} color={activeMenu === 'investments' ? 'white' : '#9CA3AF'} />
+        {/* 3. ADVISOR */}
+        <StyledTouchableOpacity onPress={() => setActiveMenu('advisor')} className="items-center gap-1">
+          <StyledView className={`w-14 h-14 rounded-2xl items-center justify-center border border-white/10 ${activeMenu === 'advisor' ? 'bg-indigo-600' : 'bg-gray-800'}`}>
+            <FontAwesome5 name="user-tie" size={20} color="white" />
           </StyledView>
-          <StyledText className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Shop</StyledText>
+          <StyledText className="text-[10px] text-gray-400 font-bold uppercase">Advisor</StyledText>
+        </StyledTouchableOpacity>
+
+        {/* 4. CAREERS */}
+        <StyledTouchableOpacity onPress={() => setActiveMenu('careers')} className="items-center gap-1">
+          <StyledView className={`w-14 h-14 rounded-2xl items-center justify-center border border-white/10 ${activeMenu === 'careers' ? 'bg-indigo-600' : 'bg-gray-800'}`}>
+            <FontAwesome5 name="briefcase" size={20} color="white" />
+          </StyledView>
+          <StyledText className="text-[10px] text-gray-400 font-bold uppercase">Careers</StyledText>
         </StyledTouchableOpacity>
 
       </StyledView>
 
-      {/* --- MENUS (HALF-SCREEN SHEETS) --- */}
+      {/* --- MODALS (Exclude 'advisor' as it's now handled inline) --- */}
       <Modal
-        visible={!!activeMenu && !selectedJob}
+        visible={!!activeMenu && !selectedJob && activeMenu !== 'advisor'}
         transparent={true}
         animationType="slide"
         onRequestClose={() => setActiveMenu(null)}
       >
         <StyledView className="flex-1 justify-end">
-          <StyledTouchableOpacity
-            className="absolute inset-0 bg-black/50"
-            activeOpacity={1}
-            onPress={() => setActiveMenu(null)}
-          />
-          <StyledView className="h-[70%] bg-gray-900 rounded-t-3xl border-t border-white/10 overflow-hidden">
-            <BlurView intensity={50} className="absolute inset-0" />
+          <StyledTouchableOpacity className="absolute inset-0 bg-black/50" activeOpacity={1} onPress={() => setActiveMenu(null)} />
+          <StyledView className="h-full bg-gray-900 rounded-t-3xl border-t border-white/10 overflow-hidden">
 
-            {/* Menu Header */}
+            {/* Header */}
             <StyledView className="flex-row justify-between items-center p-6 border-b border-white/10 bg-white/5">
-              <StyledView className="flex-row items-center gap-2">
-                {activeMenu === 'jobs' && <FontAwesome5 name="briefcase" size={18} color="white" />}
-                {activeMenu === 'investments' && <FontAwesome5 name="shopping-bag" size={18} color="white" />}
-                <StyledText className="text-lg font-bold text-white uppercase tracking-widest">
-                  {activeMenu === 'jobs' ? 'Job Board' : 'Real Estate'}
-                </StyledText>
-              </StyledView>
+              <StyledText className="text-xl font-bold text-white uppercase tracking-widest">
+                {activeMenu === 'university' && 'University'}
+                {activeMenu === 'invest' && 'Market & Assets'}
+                {activeMenu === 'careers' && 'Career Portal'}
+              </StyledText>
               <StyledTouchableOpacity onPress={() => setActiveMenu(null)} className="p-2 bg-white/10 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </StyledTouchableOpacity>
             </StyledView>
 
-            {/* Menu Content */}
             <ScrollView className="flex-1 p-4" contentContainerStyle={{ paddingBottom: 40 }}>
 
-              {/* JOBS LIST */}
-              {activeMenu === 'jobs' && JOBS.map(job => {
+
+
+              {/* --- UNIVERSITY --- */}
+              {activeMenu === 'university' && EDUCATION.map(course => {
+                const isEnrolled = degrees.includes(course.name);
+                return (
+                  <StyledView key={course.id} className="bg-white/5 rounded-xl p-4 mb-4 border border-white/5 flex-row gap-4">
+                    <StyledImage source={course.image} className="w-16 h-16 rounded-lg bg-black/20" />
+                    <StyledView className="flex-1">
+                      <StyledText className="text-white font-bold text-lg">{course.name}</StyledText>
+                      <StyledText className="text-gray-400 text-xs mb-2">{course.description}</StyledText>
+                      <StyledView className="flex-row justify-between items-center">
+                        <StyledText className="text-yellow-500 font-bold">₹{course.cost.toLocaleString()}</StyledText>
+                        <StyledTouchableOpacity
+                          onPress={() => handleEnroll(course)}
+                          disabled={isEnrolled}
+                          className={`px-4 py-2 rounded ${isEnrolled ? 'bg-gray-600' : 'bg-indigo-600'}`}
+                        >
+                          <StyledText className="text-white text-xs font-bold">{isEnrolled ? 'ENROLLED' : 'ENROLL'}</StyledText>
+                        </StyledTouchableOpacity>
+                      </StyledView>
+                    </StyledView>
+                  </StyledView>
+                );
+              })}
+
+              {/* --- INVEST (Drill-Down Navigation) --- */}
+              {activeMenu === 'invest' && (
+                <StyledView>
+                  {!investCategory ? (
+                    // Category Selection View
+                    <StyledView>
+                      <StyledText className="text-gray-400 text-sm mb-4">Select a category to explore</StyledText>
+
+                      {/* Stocks Category Card */}
+                      <StyledTouchableOpacity onPress={() => setInvestCategory('stocks')} className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
+                        <StyledView className="flex-row items-center gap-4 z-10">
+                          <StyledImage source={require('./assets/jobs/CEO.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" />
+                          <StyledView>
+                            <StyledText className="text-white font-bold text-lg">Stocks</StyledText>
+                            <StyledText className="text-blue-400 text-xs">{STOCKS.length} stocks available</StyledText>
+                          </StyledView>
+                        </StyledView>
+                        <FontAwesome5 name="chevron-right" size={20} color="#60A5FA" />
+                      </StyledTouchableOpacity>
+
+                      {/* Houses Category Card */}
+                      <StyledTouchableOpacity onPress={() => setInvestCategory('houses')} className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
+                        <StyledView className="flex-row items-center gap-4 z-10">
+                          <StyledImage source={require('./assets/properties/villa_for_family_of_4-5.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" />
+                          <StyledView>
+                            <StyledText className="text-white font-bold text-lg">Buy Houses</StyledText>
+                            <StyledText className="text-green-400 text-xs">{RESIDENTIAL_PROPERTIES.length} residential properties</StyledText>
+                          </StyledView>
+                        </StyledView>
+                        <FontAwesome5 name="chevron-right" size={20} color="#4ADE80" />
+                      </StyledTouchableOpacity>
+
+                      {/* Commercial Category Card */}
+                      <StyledTouchableOpacity onPress={() => setInvestCategory('commercial')} className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
+                        <StyledView className="flex-row items-center gap-4 z-10">
+                          <StyledImage source={require('./assets/properties/commercial_lot.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" />
+                          <StyledView>
+                            <StyledText className="text-white font-bold text-lg">Investment Properties</StyledText>
+                            <StyledText className="text-indigo-400 text-xs">{COMMERCIAL_PROPERTIES.length} commercial properties</StyledText>
+                          </StyledView>
+                        </StyledView>
+                        <FontAwesome5 name="chevron-right" size={20} color="#818CF8" />
+                      </StyledTouchableOpacity>
+                    </StyledView>
+                  ) : (
+                    // Category Detail View
+                    <StyledView>
+                      {/* Back Button */}
+                      <StyledTouchableOpacity onPress={() => setInvestCategory(null)} className="flex-row items-center gap-2 mb-4 py-2">
+                        <FontAwesome5 name="chevron-left" size={16} color="#9CA3AF" />
+                        <StyledText className="text-gray-400 text-sm">Back to categories</StyledText>
+                      </StyledTouchableOpacity>
+
+                      {/* STOCKS */}
+                      {investCategory === 'stocks' && (
+                        <StyledView>
+                          <StyledText className="text-xl font-bold text-white mb-4 uppercase tracking-wider">📈 Stocks</StyledText>
+                          {STOCKS.map(stock => {
+                            const currentPrice = marketPrices[stock.id] || stock.price;
+                            const held = portfolio[stock.id] || 0;
+                            return (
+                              <StyledView key={stock.id} className="bg-white/5 rounded-xl p-4 mb-3 border border-white/5 flex-row items-center justify-between">
+                                <StyledView className="flex-1">
+                                  <StyledText className="text-white font-bold text-lg">{stock.ticker}</StyledText>
+                                  <StyledText className="text-gray-400 text-xs">{stock.name}</StyledText>
+                                  <StyledText className="text-blue-400 font-bold mt-1">₹{currentPrice.toFixed(2)}</StyledText>
+                                </StyledView>
+                                <StyledView className="items-end">
+                                  <StyledText className="text-white/60 text-xs mb-2">Held: {held}</StyledText>
+                                  <StyledView className="flex-row gap-2">
+                                    <StyledTouchableOpacity onPress={() => handleTrade(stock, 1, 'SELL')} className="bg-red-500/20 px-3 py-1 rounded border border-red-500/50">
+                                      <StyledText className="text-red-400 font-bold">-1</StyledText>
+                                    </StyledTouchableOpacity>
+                                    <StyledTouchableOpacity onPress={() => handleTrade(stock, 1, 'BUY')} className="bg-green-500/20 px-3 py-1 rounded border border-green-500/50">
+                                      <StyledText className="text-green-400 font-bold">+1</StyledText>
+                                    </StyledTouchableOpacity>
+                                  </StyledView>
+                                </StyledView>
+                              </StyledView>
+                            );
+                          })}
+                        </StyledView>
+                      )}
+
+                      {/* HOUSES */}
+                      {investCategory === 'houses' && (
+                        <StyledView>
+                          <StyledText className="text-xl font-bold text-white mb-2 uppercase tracking-wider">🏠 Buy Houses</StyledText>
+                          <StyledText className="text-gray-400 text-sm mb-4">Live in or rent out for income</StyledText>
+                          {RESIDENTIAL_PROPERTIES.map(prop => {
+                            const isOwned = properties.includes(prop.id);
+                            return (
+                              <StyledView key={prop.id} className="bg-white/5 rounded-xl mb-4 border border-white/5 overflow-hidden">
+                                <StyledImage source={prop.image} className="w-full h-32" resizeMode="cover" />
+                                <StyledView className="p-3">
+                                  <StyledText className="text-white font-bold text-lg">{prop.name}</StyledText>
+                                  <StyledText className="text-yellow-500 font-bold mb-2">₹{prop.price.toLocaleString()}</StyledText>
+                                  <StyledText className="text-green-400 text-xs mb-1">Rental Income: ₹{prop.rental_income.toLocaleString()}/mo</StyledText>
+                                  <StyledText className="text-gray-400 text-xs mb-2">Maintenance: ₹{prop.maintenance.toLocaleString()}/mo</StyledText>
+                                  <StyledTouchableOpacity
+                                    onPress={() => handleBuyProperty(prop)}
+                                    disabled={isOwned}
+                                    className={`mt-2 py-2 rounded items-center ${isOwned ? 'bg-gray-700' : 'bg-green-600'}`}
+                                  >
+                                    <StyledText className="text-white font-bold text-xs">{isOwned ? 'OWNED' : 'BUY PROPERTY'}</StyledText>
+                                  </StyledTouchableOpacity>
+                                </StyledView>
+                              </StyledView>
+                            );
+                          })}
+                        </StyledView>
+                      )}
+
+                      {/* COMMERCIAL */}
+                      {investCategory === 'commercial' && (
+                        <StyledView>
+                          <StyledText className="text-xl font-bold text-white mb-2 uppercase tracking-wider">🏢 Investment Properties</StyledText>
+                          <StyledText className="text-gray-400 text-sm mb-4">Commercial real estate always rented to businesses</StyledText>
+                          {COMMERCIAL_PROPERTIES.map(prop => {
+                            const isOwned = properties.includes(prop.id);
+                            return (
+                              <StyledView key={prop.id} className="bg-white/5 rounded-xl mb-4 border border-white/5 overflow-hidden">
+                                <StyledImage source={prop.image} className="w-full h-32" resizeMode="cover" />
+                                <StyledView className="p-3">
+                                  <StyledText className="text-white font-bold text-lg">{prop.name}</StyledText>
+                                  <StyledText className="text-yellow-500 font-bold mb-2">₹{prop.price.toLocaleString()}</StyledText>
+                                  <StyledText className="text-green-400 text-xs mb-1">Business Lease: ₹{prop.rental_income.toLocaleString()}/mo</StyledText>
+                                  <StyledText className="text-gray-400 text-xs mb-2">Maintenance: ₹{prop.maintenance.toLocaleString()}/mo</StyledText>
+                                  <StyledTouchableOpacity
+                                    onPress={() => handleBuyProperty(prop)}
+                                    disabled={isOwned}
+                                    className={`mt-2 py-2 rounded items-center ${isOwned ? 'bg-gray-700' : 'bg-indigo-600'}`}
+                                  >
+                                    <StyledText className="text-white font-bold text-xs">{isOwned ? 'OWNED' : 'BUY COMMERCIAL'}</StyledText>
+                                  </StyledTouchableOpacity>
+                                </StyledView>
+                              </StyledView>
+                            );
+                          })}
+                        </StyledView>
+                      )}
+                    </StyledView>
+                  )}
+                </StyledView>
+              )}
+
+              {/* --- CAREERS (New Job Board) --- */}
+              {activeMenu === 'careers' && JOBS.map(job => {
                 const reqStatus = checkJobRequirements(job);
                 const isLocked = !reqStatus.allowed;
-
                 return (
                   <StyledTouchableOpacity
                     key={job.id}
-                    onPress={() => {
-                      console.log('Selected Job:', job.name);
-                      setSelectedJob(job);
-                    }}
+                    onPress={() => setSelectedJob(job)}
                     activeOpacity={0.7}
                     className={`p-4 mb-3 rounded-xl border flex-row items-center gap-4 ${isLocked ? 'bg-gray-800/80 border-gray-700' : 'bg-white/10 border-white/10'}`}
                   >
@@ -196,38 +426,12 @@ const GameLayout = () => {
                 );
               })}
 
-              {/* INVESTMENTS LIST (Shop) */}
-              {activeMenu === 'investments' && INVESTMENTS.map(inv => (
-                <StyledView key={inv.id} className="bg-white/5 rounded-xl border border-white/5 mb-4 overflow-hidden">
-                  <StyledView className="h-40 w-full relative">
-                    <StyledImage source={inv.image} className="w-full h-full" resizeMode="cover" />
-                    <StyledView className="absolute bottom-3 left-4 bg-black/50 px-2 py-1 rounded">
-                      <StyledText className="font-bold text-white text-lg">{inv.name}</StyledText>
-                      <StyledText className="text-xs text-gray-300">
-                        {inv.type === 'housing' ? 'Housing' : inv.type === 'education' ? 'Education' : 'Business'}
-                      </StyledText>
-                    </StyledView>
-                  </StyledView>
-                  <StyledView className="p-4 flex-row justify-between items-center bg-white/5">
-                    <StyledView>
-                      <StyledText className="text-xl font-bold text-yellow-500">₹{inv.cost.toLocaleString()}</StyledText>
-                      <StyledText className="text-xs text-gray-400">{inv.type === 'education' ? 'One-time Cost' : `Maint: ₹${inv.maintenance.toLocaleString()}/mo`}</StyledText>
-                    </StyledView>
-                    <StyledTouchableOpacity
-                      onPress={() => buyInvestment(inv)}
-                      className="bg-green-600 px-6 py-2 rounded-lg elevation-5"
-                    >
-                      <StyledText className="text-white text-sm font-bold uppercase tracking-wider">Buy</StyledText>
-                    </StyledTouchableOpacity>
-                  </StyledView>
-                </StyledView>
-              ))}
             </ScrollView>
           </StyledView>
         </StyledView>
       </Modal>
 
-      {/* --- DETAILED JOB VIEW MODAL --- */}
+      {/* --- JOB DETAIL MODAL (Unchanged Logic, just ensuring it overlays everything) --- */}
       <Modal
         visible={!!selectedJob}
         transparent={true}

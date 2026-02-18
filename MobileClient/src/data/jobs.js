@@ -1,17 +1,6 @@
 export const JOBS = [
     // --- TIER 1: GIGS & FREELANCE (Entry Level) ---
     {
-        id: 'maid',
-        name: 'Maid/Babysitter',
-        salary: 12000,
-        type: 'Tier 1: Gig',
-        image: require('../../assets/jobs/maidbabysitter.png'),
-        office_image: require('../../assets/jobs/maidbabysitter.png'),
-        req_net_worth: 0,
-        req_degrees: [],
-        description: 'Reliable, immediate cash flow. Hard physical work with low leverage.'
-    },
-    {
         id: 'backup_singer',
         name: 'Backup Singer',
         salary: 15000, // Per gig avg
@@ -194,8 +183,8 @@ export const JOBS = [
         name: 'Software Engineer',
         salary: 120000,
         type: 'Tier 2: Tech',
-        image: require('../../assets/jobs/software engindeer.png'),
-        office_image: require('../../assets/jobs/software engindeer.png'),
+        image: require('../../assets/jobs/SDE.png'),
+        office_image: require('../../assets/jobs/SDE.png'),
         req_net_worth: 0,
         req_degrees: ['Computer Science Degree'],
         description: 'High demand, high salary. The standard safe path to building wealth.'
@@ -216,8 +205,8 @@ export const JOBS = [
         name: 'Microbiologist',
         salary: 85000,
         type: 'Tier 2: Science',
-        image: require('../../assets/jobs/microbiolgist.png'),
-        office_image: require('../../assets/jobs/microbiolgist.png'),
+        image: require('../../assets/jobs/microbiologist.png'),
+        office_image: require('../../assets/jobs/microbiologist.png'),
         req_net_worth: 0,
         req_degrees: ['Science PhD'],
         description: 'Lab-based research work. Consistent salary, low volatility, requires high intellect.'
@@ -249,8 +238,8 @@ export const JOBS = [
         name: 'Interior Designer',
         salary: 75000, // + Commission
         type: 'Tier 2: Design',
-        image: require('../../assets/jobs/indterior designer.png'),
-        office_image: require('../../assets/jobs/indterior designer.png'),
+        image: require('../../assets/jobs/interior designer.png'),
+        office_image: require('../../assets/jobs/interior designer.png'),
         req_net_worth: 0,
         req_degrees: ['Design Diploma'],
         description: 'High fees for high-end clients. Reputation is everything.'
@@ -288,17 +277,7 @@ export const JOBS = [
         req_degrees: [],
         description: 'The ultimate safety net. Low growth, but zero risk of being fired. Pension benefits.'
     },
-    {
-        id: 'school_teacher',
-        name: 'Middle School Teacher',
-        salary: 45000,
-        type: 'Tier 2: Edu',
-        image: require('../../assets/jobs/middle school teacher.png'),
-        office_image: require('../../assets/jobs/middle school teacher.png'),
-        req_net_worth: 0,
-        req_degrees: [],
-        description: 'Stable but capped income. Long holidays, but emotionally draining.'
-    },
+    // Education tier - teacher job removed (missing image)
     {
         id: 'chef',
         name: 'Chef (High End)',
@@ -315,8 +294,8 @@ export const JOBS = [
         name: 'Commercial Photographer',
         salary: 80000,
         type: 'Tier 2: Creative',
-        image: require('../../assets/jobs/Commercial Photographe.png'), // Typo in filename
-        office_image: require('../../assets/jobs/Commercial Photographe.png'),
+        image: require('../../assets/jobs/Commercial Photographer.png'),
+        office_image: require('../../assets/jobs/Commercial Photographer.png'),
         req_net_worth: 200000, // Gear
         req_degrees: [], // Portfolio based?
         description: 'Corporate clients pay well for consistency. Gear is expensive.'
@@ -394,8 +373,8 @@ export const JOBS = [
         name: 'Juice Shop Owner',
         salary: 45000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/juice shop.png'),
-        office_image: require('../../assets/jobs/juice shop.png'),
+        image: require('../../assets/jobs/juice bar.png'),
+        office_image: require('../../assets/jobs/juice bar.png'),
         req_net_worth: 200000,
         req_degrees: [],
         description: 'Seasonal spikes. High profit on liquids and ice, low cost of goods.'
@@ -528,8 +507,8 @@ export const JOBS = [
         name: 'Winery Owner',
         salary: 500000, // Massive delayed
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/wineary.png'), // Typo in filename
-        office_image: require('../../assets/jobs/wineary.png'),
+        image: require('../../assets/jobs/winery.png'),
+        office_image: require('../../assets/jobs/winery.png'),
         req_net_worth: 50000000, // 5 Cr
         req_degrees: [],
         description: 'Long-term play. Takes years to mature, but vintage wine sells for massive profit.'
