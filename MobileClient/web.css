@@ -1,0 +1,36 @@
+/* Fix for React Native Web root height and phone-like frame */
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    background-color: #1a1a1a;
+    /* Dark background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#root {
+    height: 100%;
+    width: 100%;
+    max-width: 430px;
+    /* iPhone 14 Pro Max width */
+    max-height: 932px;
+    /* iPhone 14 Pro Max height */
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    border-radius: 40px;
+    /* Phone corners */
+    overflow: hidden;
+    border: 8px solid #333;
+    /* Phone bezel simulation */
+}
+
+/* Ensure react-native-web view fills specific height if needed */
+[data-testid="root"] {
+    flex: 1;
+}

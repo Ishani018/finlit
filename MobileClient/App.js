@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Modal, StatusBar, Platform, Dimensions, TextInput } from 'react-native';
+import ResponsiveModal from './src/components/ResponsiveModal';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider, useGame } from './src/context/GameContext';
+import './imports';
 import { JOBS } from './src/data/jobs';
 import { EDUCATION } from './src/data/education';
 import { STOCKS } from './src/data/stocks';
@@ -9,9 +11,10 @@ import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from './src/data/realEs
 
 // Combine both arrays for display
 const REAL_ESTATE = [...RESIDENTIAL_PROPERTIES, ...COMMERCIAL_PROPERTIES];
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { styled } from 'nativewind';
+import { useBackgroundMusic } from './src/hooks/useBackgroundMusic';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -31,6 +34,8 @@ const GameLayout = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [investCategory, setInvestCategory] = useState(null); // null, 'stocks', 'houses', 'commercial'
   const [viewMode, setViewMode] = useState('home'); // 'home' or 'work'
+
+  useBackgroundMusic(isPlaying);
 
   console.log('Active Menu:', activeMenu);
 
@@ -251,7 +256,7 @@ const GameLayout = () => {
         </StyledView>
 
         {/* --- MODALS (Exclude 'advisor' as it's now handled inline) --- */}
-        <Modal
+        <ResponsiveModal
           visible={!!activeMenu && !selectedJob && activeMenu !== 'advisor'}
           transparent={true}
           animationType="slide"
@@ -282,7 +287,7 @@ const GameLayout = () => {
                   const isEnrolled = degrees.includes(course.name);
                   return (
                     <StyledView key={course.id} className="bg-white/5 rounded-xl p-4 mb-4 border border-white/5 flex-row gap-4">
-                      <StyledImage source={course.image} className="w-16 h-16 rounded-lg bg-black/20" />
+                      <StyledImage source={course.image} className="w-16 h-16 rounded-lg bg-black/20" style={{ width: 64, height: 64 }} />
                       <StyledView className="flex-1">
                         <StyledText className="text-white font-bold text-lg">{course.name}</StyledText>
                         <StyledText className="text-gray-400 text-xs mb-2">{course.description}</StyledText>
@@ -312,7 +317,7 @@ const GameLayout = () => {
                         {/* Stocks Category Card */}
                         <StyledTouchableOpacity onPress={() => setInvestCategory('stocks')} className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
                           <StyledView className="flex-row items-center gap-4 z-10">
-                            <StyledImage source={require('./assets/jobs/CEO.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" />
+                            <StyledImage source={require('./assets/jobs/CEO.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" style={{ width: 64, height: 64 }} />
                             <StyledView>
                               <StyledText className="text-white font-bold text-lg">Stocks</StyledText>
                               <StyledText className="text-blue-400 text-xs">{STOCKS.length} stocks available</StyledText>
@@ -324,7 +329,7 @@ const GameLayout = () => {
                         {/* Houses Category Card */}
                         <StyledTouchableOpacity onPress={() => setInvestCategory('houses')} className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
                           <StyledView className="flex-row items-center gap-4 z-10">
-                            <StyledImage source={require('./assets/properties/villa_for_family_of_4-5.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" />
+                            <StyledImage source={require('./assets/properties/villa_for_family_of_4-5.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" style={{ width: 64, height: 64 }} />
                             <StyledView>
                               <StyledText className="text-white font-bold text-lg">Buy Houses</StyledText>
                               <StyledText className="text-green-400 text-xs">{RESIDENTIAL_PROPERTIES.length} residential properties</StyledText>
@@ -336,7 +341,7 @@ const GameLayout = () => {
                         {/* Commercial Category Card */}
                         <StyledTouchableOpacity onPress={() => setInvestCategory('commercial')} className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
                           <StyledView className="flex-row items-center gap-4 z-10">
-                            <StyledImage source={require('./assets/properties/commercial_lot.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" />
+                            <StyledImage source={require('./assets/properties/commercial_lot.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" style={{ width: 64, height: 64 }} />
                             <StyledView>
                               <StyledText className="text-white font-bold text-lg">Investment Properties</StyledText>
                               <StyledText className="text-indigo-400 text-xs">{COMMERCIAL_PROPERTIES.length} commercial properties</StyledText>
@@ -394,7 +399,7 @@ const GameLayout = () => {
                               const isOwned = properties.includes(prop.id);
                               return (
                                 <StyledView key={prop.id} className="bg-white/5 rounded-xl mb-4 border border-white/5 overflow-hidden">
-                                  <StyledImage source={prop.image} className="w-full h-32" resizeMode="cover" />
+                                  <StyledImage source={prop.image} className="w-full h-32" resizeMode="cover" style={{ width: '100%', height: 128 }} />
                                   <StyledView className="p-3">
                                     <StyledText className="text-white font-bold text-lg">{prop.name}</StyledText>
                                     <StyledText className="text-yellow-500 font-bold mb-2">₹{prop.price.toLocaleString()}</StyledText>
@@ -423,7 +428,7 @@ const GameLayout = () => {
                               const isOwned = properties.includes(prop.id);
                               return (
                                 <StyledView key={prop.id} className="bg-white/5 rounded-xl mb-4 border border-white/5 overflow-hidden">
-                                  <StyledImage source={prop.image} className="w-full h-32" resizeMode="cover" />
+                                  <StyledImage source={prop.image} className="w-full h-32" resizeMode="cover" style={{ width: '100%', height: 128 }} />
                                   <StyledView className="p-3">
                                     <StyledText className="text-white font-bold text-lg">{prop.name}</StyledText>
                                     <StyledText className="text-yellow-500 font-bold mb-2">₹{prop.price.toLocaleString()}</StyledText>
@@ -458,7 +463,7 @@ const GameLayout = () => {
                       activeOpacity={0.7}
                       className={`p-4 mb-3 rounded-xl border flex-row items-center gap-4 ${isLocked ? 'bg-gray-800/80 border-gray-700' : 'bg-white/10 border-white/10'}`}
                     >
-                      <StyledImage source={job.image} className={`w-12 h-12 rounded-lg bg-black/50 ${isLocked ? 'opacity-50' : ''}`} />
+                      <StyledImage source={job.image} className={`w-12 h-12 rounded-lg bg-black/50 ${isLocked ? 'opacity-50' : ''}`} style={{ width: 48, height: 48 }} />
                       <StyledView className="flex-1">
                         <StyledView className="flex-row items-center gap-2">
                           <StyledText className={`font-bold text-base ${isLocked ? 'text-gray-400' : 'text-white'}`}>{job.name}</StyledText>
@@ -481,10 +486,10 @@ const GameLayout = () => {
               </ScrollView>
             </StyledView>
           </StyledView>
-        </Modal>
+        </ResponsiveModal>
 
         {/* --- JOB DETAIL MODAL (Unchanged Logic, just ensuring it overlays everything) --- */}
-        <Modal
+        <ResponsiveModal
           visible={!!selectedJob}
           transparent={true}
           animationType="slide"
@@ -493,7 +498,7 @@ const GameLayout = () => {
           <StyledView className="flex-1 justify-end bg-black">
             {/* Header Image */}
             <StyledView className="h-64 w-full relative">
-              <StyledImage source={selectedJob?.office_image || selectedJob?.image} className="w-full h-full" resizeMode="cover" />
+              <StyledImage source={selectedJob?.office_image || selectedJob?.image} className="w-full h-full" resizeMode="contain" style={{ width: '100%', height: '100%', backgroundColor: '#000' }} />
               <StyledTouchableOpacity
                 onPress={() => setSelectedJob(null)}
                 className="absolute top-12 right-4 bg-black/50 p-2 rounded-full"
@@ -548,7 +553,7 @@ const GameLayout = () => {
               </StyledTouchableOpacity>
             </StyledView>
           </StyledView>
-        </Modal>
+        </ResponsiveModal>
 
       </StyledView>
     </SafeAreaView>
