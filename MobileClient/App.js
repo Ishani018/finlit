@@ -15,6 +15,7 @@ import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { styled } from 'nativewind';
 import { useBackgroundMusic } from './src/hooks/useBackgroundMusic';
+import SpriteSelectionScreen from './src/components/SpriteSelectionScreen';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -27,17 +28,23 @@ const GameLayout = () => {
     balance, turn, nextMonth, netWorth,
     currentJob, currentHousing, isPlaying, setIsPlaying,
     degrees, portfolio, properties, marketPrices,
-    enrollInCourse, tradeStock, buyProperty, applyForJob, checkJobRequirements, getCAAdvice
+    enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice,
+    playerSprite, playerName
   } = useGame();
 
   const [activeMenu, setActiveMenu] = useState(null); // 'university', 'invest', 'advisor', 'careers'
   const [selectedJob, setSelectedJob] = useState(null);
-  const [investCategory, setInvestCategory] = useState(null); // null, 'stocks', 'houses', 'commercial'
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [investCategory, setInvestCategory] = useState(null); // null, 'stocks', 'houses', 'commercial', 'assets'
   const [viewMode, setViewMode] = useState('home'); // 'home' or 'work'
 
   useBackgroundMusic(isPlaying);
 
   console.log('Active Menu:', activeMenu);
+
+  if (!playerSprite) {
+    return <SpriteSelectionScreen />;
+  }
 
   if (!currentHousing || balance === undefined) {
     return (
@@ -60,7 +67,19 @@ const GameLayout = () => {
 
   const handleBuyProperty = (prop) => {
     const res = buyProperty(prop);
+    if (res.success) {
+      setSelectedProperty(null); // Close modal on success
+    }
     alert(res.msg);
+  };
+
+  const handleMoveIn = (propId) => {
+    const res = moveIn(propId);
+    alert(res.msg);
+    if (res.success) {
+      setViewMode('home');
+      setActiveMenu(null);
+    }
   };
 
   const handleApply = (job) => {
@@ -83,8 +102,9 @@ const GameLayout = () => {
           <StyledView className="z-20 bg-black border-b border-white/10 px-4 pt-2 pb-3">
             {/* Row 1: Date + Balance + Net Worth */}
             <StyledView className="flex-row items-center justify-between mb-2">
-              <StyledView className="bg-white/5 rounded-lg px-3 py-1 border border-white/10">
-                <StyledText className="text-[10px] text-gray-400 uppercase font-bold">📅 {turn.month}/{turn.year}</StyledText>
+              <StyledView className="bg-white/5 rounded-lg px-3 py-1 border border-white/10 flex-row items-center gap-2">
+                <StyledText className="text-[12px] text-white font-bold">{playerName}</StyledText>
+                <StyledText className="text-[10px] text-gray-400 uppercase font-bold pr-2 border-r border-white/20">📅 {turn.month}/{turn.year}</StyledText>
               </StyledView>
               <StyledView className="items-center">
                 <StyledText className="text-[9px] text-gray-500 uppercase">Balance</StyledText>
@@ -339,15 +359,29 @@ const GameLayout = () => {
                         </StyledTouchableOpacity>
 
                         {/* Commercial Category Card */}
-                        <StyledTouchableOpacity onPress={() => setInvestCategory('commercial')} className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
+                        <StyledTouchableOpacity onPress={() => setInvestCategory('commercial')} className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
                           <StyledView className="flex-row items-center gap-4 z-10">
                             <StyledImage source={require('./assets/properties/commercial_lot.png')} className="w-16 h-16 rounded-lg" resizeMode="cover" style={{ width: 64, height: 64 }} />
                             <StyledView>
-                              <StyledText className="text-white font-bold text-lg">Investment Properties</StyledText>
-                              <StyledText className="text-indigo-400 text-xs">{COMMERCIAL_PROPERTIES.length} commercial properties</StyledText>
+                              <StyledText className="text-white font-bold text-lg">Commercial Real Estate</StyledText>
+                              <StyledText className="text-purple-400 text-xs">{COMMERCIAL_PROPERTIES.length} commercial properties</StyledText>
                             </StyledView>
                           </StyledView>
-                          <FontAwesome5 name="chevron-right" size={20} color="#818CF8" />
+                          <FontAwesome5 name="chevron-right" size={20} color="#C084FC" />
+                        </StyledTouchableOpacity>
+
+                        {/* My Assets Category Card */}
+                        <StyledTouchableOpacity onPress={() => setInvestCategory('assets')} className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-4 flex-row items-center justify-between overflow-hidden relative">
+                          <StyledView className="flex-row items-center gap-4 z-10">
+                            <StyledView className="w-16 h-16 rounded-lg bg-yellow-900/50 items-center justify-center">
+                              <FontAwesome5 name="wallet" size={24} color="#FBBF24" />
+                            </StyledView>
+                            <StyledView>
+                              <StyledText className="text-white font-bold text-lg">My Assets</StyledText>
+                              <StyledText className="text-yellow-400 text-xs">Manage your portfolio</StyledText>
+                            </StyledView>
+                          </StyledView>
+                          <FontAwesome5 name="chevron-right" size={20} color="#FBBF24" />
                         </StyledTouchableOpacity>
                       </StyledView>
                     ) : (
@@ -403,14 +437,11 @@ const GameLayout = () => {
                                   <StyledView className="p-3">
                                     <StyledText className="text-white font-bold text-lg">{prop.name}</StyledText>
                                     <StyledText className="text-yellow-500 font-bold mb-2">₹{prop.price.toLocaleString()}</StyledText>
-                                    <StyledText className="text-green-400 text-xs mb-1">Rental Income: ₹{prop.rental_income.toLocaleString()}/mo</StyledText>
-                                    <StyledText className="text-gray-400 text-xs mb-2">Maintenance: ₹{prop.maintenance.toLocaleString()}/mo</StyledText>
                                     <StyledTouchableOpacity
-                                      onPress={() => handleBuyProperty(prop)}
-                                      disabled={isOwned}
-                                      className={`mt-2 py-2 rounded items-center ${isOwned ? 'bg-gray-700' : 'bg-green-600'}`}
+                                      onPress={() => setSelectedProperty(prop)}
+                                      className="mt-2 py-2 rounded items-center bg-indigo-600"
                                     >
-                                      <StyledText className="text-white font-bold text-xs">{isOwned ? 'OWNED' : 'BUY PROPERTY'}</StyledText>
+                                      <StyledText className="text-white font-bold text-xs uppercase tracking-wider">Visit Property</StyledText>
                                     </StyledTouchableOpacity>
                                   </StyledView>
                                 </StyledView>
@@ -435,16 +466,67 @@ const GameLayout = () => {
                                     <StyledText className="text-green-400 text-xs mb-1">Business Lease: ₹{prop.rental_income.toLocaleString()}/mo</StyledText>
                                     <StyledText className="text-gray-400 text-xs mb-2">Maintenance: ₹{prop.maintenance.toLocaleString()}/mo</StyledText>
                                     <StyledTouchableOpacity
-                                      onPress={() => handleBuyProperty(prop)}
-                                      disabled={isOwned}
-                                      className={`mt-2 py-2 rounded items-center ${isOwned ? 'bg-gray-700' : 'bg-indigo-600'}`}
+                                      onPress={() => setSelectedProperty(prop)}
+                                      className="mt-2 py-2 rounded items-center bg-indigo-600"
                                     >
-                                      <StyledText className="text-white font-bold text-xs">{isOwned ? 'OWNED' : 'BUY COMMERCIAL'}</StyledText>
+                                      <StyledText className="text-white font-bold text-xs uppercase tracking-wider">Visit Property</StyledText>
                                     </StyledTouchableOpacity>
                                   </StyledView>
                                 </StyledView>
                               );
                             })}
+                          </StyledView>
+                        )}
+
+                        {/* MY ASSETS */}
+                        {investCategory === 'assets' && (
+                          <StyledView>
+                            <StyledText className="text-xl font-bold text-white mb-2 uppercase tracking-wider">💼 My Portfolio</StyledText>
+                            <StyledText className="text-gray-400 text-sm mb-6">Manage all your owned assets and properties</StyledText>
+
+                            <StyledText className="text-white font-bold text-lg mb-3">Real Estate</StyledText>
+                            {properties.length === 0 ? (
+                              <StyledText className="text-gray-500 italic mb-6">You don't own any properties yet.</StyledText>
+                            ) : (
+                              properties.map(propId => {
+                                const prop = REAL_ESTATE.find(p => p.id === propId);
+                                if (!prop) return null;
+                                const isCurrentHome = currentHousing?.id === prop.id;
+
+                                return (
+                                  <StyledView key={prop.id} className="bg-white/5 rounded-xl mb-4 border border-white/10 overflow-hidden flex-row">
+                                    <StyledImage source={prop.image} className="w-24 h-full" resizeMode="cover" />
+                                    <StyledView className="p-3 flex-1">
+                                      <StyledText className="text-white font-bold text-base bg-black/50">{prop.name}</StyledText>
+                                      <StyledText className="text-gray-400 text-[10px] uppercase mb-1">{prop.type}</StyledText>
+
+                                      {prop.type === 'residential' && (
+                                        <StyledView className="mt-2">
+                                          {isCurrentHome ? (
+                                            <StyledView className="bg-green-500/20 py-1 px-2 rounded border border-green-500/30 self-start">
+                                              <StyledText className="text-green-400 text-[10px] font-bold uppercase">Primary Home</StyledText>
+                                            </StyledView>
+                                          ) : (
+                                            <StyledTouchableOpacity
+                                              onPress={() => handleMoveIn(prop.id)}
+                                              className="bg-indigo-600/80 py-1 px-3 rounded border border-indigo-500 self-start mt-1"
+                                            >
+                                              <StyledText className="text-white text-[10px] font-bold uppercase tracking-wider">Move In</StyledText>
+                                            </StyledTouchableOpacity>
+                                          )}
+                                        </StyledView>
+                                      )}
+
+                                      {prop.type === 'commercial' && (
+                                        <StyledView className="bg-blue-500/20 py-1 px-2 rounded border border-blue-500/30 self-start mt-2">
+                                          <StyledText className="text-blue-400 text-[10px] font-bold uppercase">Generating Income</StyledText>
+                                        </StyledView>
+                                      )}
+                                    </StyledView>
+                                  </StyledView>
+                                );
+                              })
+                            )}
                           </StyledView>
                         )}
                       </StyledView>
@@ -549,6 +631,66 @@ const GameLayout = () => {
               >
                 <StyledText className={`font-bold text-lg uppercase tracking-widest ${selectedJob && checkJobRequirements(selectedJob).allowed ? 'text-white' : 'text-gray-500'}`}>
                   {selectedJob && checkJobRequirements(selectedJob).allowed ? 'Apply Now' : 'Locked'}
+                </StyledText>
+              </StyledTouchableOpacity>
+            </StyledView>
+          </StyledView>
+        </ResponsiveModal>
+
+        <ResponsiveModal
+          visible={!!selectedProperty}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setSelectedProperty(null)}
+        >
+          <StyledView className="flex-1 justify-end bg-black">
+            {/* Header Image */}
+            <StyledView className="h-64 w-full relative">
+              <StyledImage source={selectedProperty?.image} className="w-full h-full" resizeMode="cover" style={{ width: '100%', height: '100%', backgroundColor: '#000' }} />
+              <StyledTouchableOpacity
+                onPress={() => setSelectedProperty(null)}
+                className="absolute top-12 right-4 bg-black/50 p-2 rounded-full z-10"
+              >
+                <Ionicons name="close" size={24} color="white" />
+              </StyledTouchableOpacity>
+            </StyledView>
+
+            {/* Content */}
+            <StyledView className="flex-1 p-6 bg-gray-900 rounded-t-3xl -mt-6">
+              <StyledText className="text-3xl font-bold text-white mb-1">{selectedProperty?.name}</StyledText>
+              <StyledText className="text-green-400 text-sm font-bold uppercase tracking-wider mb-6">{selectedProperty?.type} Property</StyledText>
+
+              {/* Price Tag */}
+              <StyledView className="bg-white/5 p-4 rounded-xl border border-white/5 mb-6 items-center">
+                <StyledText className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Purchase Price</StyledText>
+                <StyledText className="text-3xl font-bold text-white">₹{selectedProperty?.price?.toLocaleString()}</StyledText>
+              </StyledView>
+
+              {/* Monthly Stats */}
+              <StyledView className="flex-row gap-4 mb-8">
+                <StyledView className="flex-1 bg-green-500/10 p-4 rounded-xl border border-green-500/20 items-center">
+                  <StyledText className="text-[10px] text-green-400 uppercase tracking-widest font-bold mb-2">Est. Income</StyledText>
+                  <StyledText className="text-lg font-bold text-green-400">+₹{selectedProperty?.rental_income?.toLocaleString()}/mo</StyledText>
+                </StyledView>
+                <StyledView className="flex-1 bg-red-500/10 p-4 rounded-xl border border-red-500/20 items-center">
+                  <StyledText className="text-[10px] text-red-400 uppercase tracking-widest font-bold mb-2">Maintenance</StyledText>
+                  <StyledText className="text-lg font-bold text-red-400">-₹{selectedProperty?.maintenance?.toLocaleString()}/mo</StyledText>
+                </StyledView>
+              </StyledView>
+
+              <ScrollView className="flex-1 mb-6">
+                <StyledText className="text-gray-300 leading-relaxed text-sm">
+                  {selectedProperty?.description || `Beautiful ${selectedProperty?.type} property offering great investment returns and a solid foundation for your financial portfolio. Consider the monthly maintenance costs against the potential rental income.`}
+                </StyledText>
+              </ScrollView>
+
+              <StyledTouchableOpacity
+                onPress={() => handleBuyProperty(selectedProperty)}
+                disabled={properties.includes(selectedProperty?.id) || balance < selectedProperty?.price}
+                className={`w-full py-4 rounded-xl items-center ${properties.includes(selectedProperty?.id) ? 'bg-gray-700' : balance < selectedProperty?.price ? 'bg-gray-800 border border-gray-600' : 'bg-green-600'}`}
+              >
+                <StyledText className={`font-bold text-lg uppercase tracking-widest ${properties.includes(selectedProperty?.id) ? 'text-gray-500' : balance < selectedProperty?.price ? 'text-gray-500' : 'text-white'}`}>
+                  {properties.includes(selectedProperty?.id) ? 'Already Owned' : balance < selectedProperty?.price ? 'Insufficient Funds' : 'Buy Property'}
                 </StyledText>
               </StyledTouchableOpacity>
             </StyledView>

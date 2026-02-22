@@ -30,6 +30,8 @@ export const GameProvider = ({ children }) => {
     const [currentJob, setCurrentJob] = useState(null); // Unemployed
     const [isPlaying, setIsPlaying] = useState(false);
     const [dependents, setDependents] = useState([]);
+    const [playerSprite, setPlayerSprite] = useState(null);
+    const [playerName, setPlayerName] = useState("");
 
     // New Data Structures
     const [degrees, setDegrees] = useState([]); // Array of strings (names)
@@ -149,14 +151,6 @@ export const GameProvider = ({ children }) => {
         setBalance(prev => prev - property.price);
         setProperties(prev => [...prev, property.id]);
 
-        // If it's a home to live in, move in immediately (simplification)
-        if (property.type === 'owned') {
-            setCurrentHousing({
-                ...property,
-                rent: 0 // No rent if owned
-            });
-        }
-
         setHistory(prev => [...prev, {
             date: `${turn.month}/${turn.year}`,
             description: `Purchased Property: ${property.name}`,
@@ -164,6 +158,21 @@ export const GameProvider = ({ children }) => {
             type: 'expense'
         }]);
         return { success: true, msg: 'Property purchased!' };
+    };
+
+    const moveIn = (propertyId) => {
+        if (!properties.includes(propertyId)) return { success: false, msg: 'You do not own this property.' };
+
+        const property = REAL_ESTATE.find(p => p.id === propertyId);
+        if (!property) return { success: false, msg: 'Property not found.' };
+        if (property.type !== 'residential') return { success: false, msg: 'You can only live in residential properties.' };
+
+        setCurrentHousing({
+            ...property,
+            rent: 0 // No rent if owned
+        });
+
+        return { success: true, msg: `Moved into ${property.name}!` };
     };
 
     const checkJobRequirements = (job) => {
@@ -346,9 +355,10 @@ export const GameProvider = ({ children }) => {
 
     const value = {
         balance, netWorth, turn, history, isPlaying, setIsPlaying,
-        currentJob, currentHousing, dependents,
+        currentJob, currentHousing, dependents, playerSprite, setPlayerSprite,
+        playerName, setPlayerName,
         degrees, portfolio, properties, marketPrices,
-        enrollInCourse, tradeStock, buyProperty, applyForJob, checkJobRequirements, getCAAdvice,
+        enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice,
         nextMonth
     };
 
