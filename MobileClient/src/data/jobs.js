@@ -554,7 +554,7 @@ export const JOBS = [
         image: require('../../assets/jobs/law firm.png'),
         office_image: require('../../assets/jobs/law firm.png'),
         req_net_worth: 5000000, // Buy in
-        req_degrees: ['Law Degree (Implicit)'],
+        req_degrees: ['Law Degree'],
         description: 'You own the partners. They bill hours, you take the profit share.'
     },
     {

@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback, use
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { JOBS } from '../data/jobs';
 import { EDUCATION } from '../data/education';
-import { STOCKS } from '../data/stocks';
+import { STOCKS, STOCK_SECTORS, NEWS_SECTOR_MAP } from '../data/stocks';
 import { MUTUAL_FUNDS } from '../data/mutualFunds';
 import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from '../data/realEstate';
 import { INSURANCE_PLANS } from '../data/insurance';
@@ -12,8 +12,21 @@ import { CRISIS_EVENTS, CRISIS_WEIGHTS } from '../data/crisisEvents';
 import { LIFE_DECISIONS, BUDGET_EVENTS } from '../data/lifeDecisions';
 import { ACHIEVEMENTS, NET_WORTH_MILESTONES } from '../data/achievements';
 import { GROCERY_ITEMS, MONTHLY_HEALTH_DRAIN, SICK_LEAVE_THRESHOLD, CRITICAL_HEALTH_THRESHOLD } from '../data/groceries';
+import { FAMILY_DEMANDS } from '../data/familyDemands';
+import { GOLD_ASSETS, GOLD_PRICE_PER_GRAM_BASE } from '../data/gold';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 const REAL_ESTATE = [...RESIDENTIAL_PROPERTIES, ...COMMERCIAL_PROPERTIES];
+
+const getApiBase = () => {
+    if (Platform.OS === 'web') return 'http://localhost:8000/api';
+    const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.hostUri;
+    if (hostUri) return `http://${hostUri.split(':')[0]}:8000/api`;
+    if (Platform.OS === 'android') return 'http://10.0.2.2:8000/api';
+    return 'http://192.168.1.18:8000/api';
+};
+const API_BASE = getApiBase();
 
 const GameContext = createContext();
 
@@ -108,6 +121,14 @@ export const GameProvider = ({ children }) => {
     const [nps, setNps] = useState({ balance: 0, equityPct: 60 });
     const [fixedDeposits, setFixedDeposits] = useState([]);
 
+    // --- GOLD ---
+    // goldHoldings: { digital_gold: { grams, avgBuyPrice, buyMonth }, sgb: { grams, avgBuyPrice, buyMonth, interestAccrued }, gold_jewellery: { grams, avgBuyPrice, buyMonth } }
+    const [goldHoldings, setGoldHoldings] = useState({});
+    const [goldPrice, setGoldPrice] = useState(GOLD_PRICE_PER_GRAM_BASE); // ₹ per gram, 24k
+
+    // --- CREDIT CARD ---
+    const [creditCard, setCreditCard] = useState(null); // null = not active | { limit, balance, dueMonth, apr, totalSpent }
+
     // --- DEPENDENTS ---
     const [dependents, setDependents] = useState([]);
     const [loans, setLoans] = useState([]);
@@ -118,6 +139,8 @@ export const GameProvider = ({ children }) => {
     const [stockNews, setStockNews] = useState([]);
     const [lastCrisisEvent, setLastCrisisEvent] = useState(null);
     const [eventInbox, setEventInbox] = useState([]);
+    const [pendingFamilyDemand, setPendingFamilyDemand] = useState(null);
+    const [demandCooldowns, setDemandCooldowns] = useState({});
     const [lastMonthTax, setLastMonthTax] = useState(0);
     const [lastMonthEMI, setLastMonthEMI] = useState(0);
     const [netWorthHistory, setNetWorthHistory] = useState([]);
@@ -145,7 +168,7 @@ export const GameProvider = ({ children }) => {
     const [sickLeaveMonths, setSickLeaveMonths] = useState(0); // consecutive months of sick leave
 
     // Daily turn budget — resets at midnight, persisted in AsyncStorage
-    const DAILY_TURN_LIMIT = 6;
+    const DAILY_TURN_LIMIT = 10;
     const [dailyTurns, setDailyTurns] = useState({ date: '', count: 0 });
     const dailyTurnsRef = useRef({ date: '', count: 0 });
 
@@ -197,6 +220,7 @@ export const GameProvider = ({ children }) => {
             marketPrices, degrees, totalMonthsPlayed, turn, gameOver,
             activeEnrollment, mfPortfolio, mfNavs, sipPlans, ppf, nps,
             marketCycle, priceHistory, fixedDeposits,
+            goldHoldings, goldPrice, creditCard,
             happiness, isRetired, achievements, firedDecisions,
             crisisCount, highHappinessMonths, monthlyExpenses, lastNetWorthMilestone,
             history, eventInbox, netWorthHistory, lastMonthFlow,
@@ -236,6 +260,9 @@ export const GameProvider = ({ children }) => {
                 ppf: stateRef.current.ppf,
                 nps: stateRef.current.nps,
                 fixedDeposits: stateRef.current.fixedDeposits,
+                goldHoldings: stateRef.current.goldHoldings,
+                goldPrice: stateRef.current.goldPrice,
+                creditCard: stateRef.current.creditCard,
                 dependents: stateRef.current.dependents,
                 loans: stateRef.current.loans,
                 activeInsurance: stateRef.current.activeInsurance,
@@ -301,6 +328,9 @@ export const GameProvider = ({ children }) => {
             if (s.ppf) setPpf(s.ppf);
             if (s.nps) setNps(s.nps);
             if (s.fixedDeposits) setFixedDeposits(s.fixedDeposits);
+            if (s.goldHoldings) setGoldHoldings(s.goldHoldings);
+            if (s.goldPrice) setGoldPrice(s.goldPrice);
+            if (s.creditCard !== undefined) setCreditCard(s.creditCard);
             if (s.dependents) setDependents(s.dependents);
             if (s.loans) setLoans(s.loans);
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
@@ -421,20 +451,40 @@ export const GameProvider = ({ children }) => {
     // CALCULATORS
     // =========================================================================
 
+    const PRESCHOOL_TIER_EXTRA = { home: 0, playschool: 2000, montessori: 8000 };
+    const SCHOOL_TIER_EXTRA    = { government: 0, private: 5000, international: 15000 };
+
     const getDependentCosts = () => {
         let cost = 0;
         for (const dep of dependents) {
             if (dep.type === 'spouse') cost += 5000;
             else if (dep.type === 'child') {
                 const childAge = dep.childAgeMonths || 0;
-                if (childAge < 60) cost += 8000;
-                else if (childAge < 216) cost += 12000;
-                else if (childAge < 252) cost += 25000;
+                if (childAge < 12) {
+                    cost += 8000; // infant
+                } else if (childAge < 60) {
+                    cost += 8000;
+                    cost += PRESCHOOL_TIER_EXTRA[dep.preschoolTier || 'home'] || 0;
+                } else if (childAge < 216) {
+                    cost += 12000;
+                    cost += SCHOOL_TIER_EXTRA[dep.schoolTier || 'government'] || 0;
+                } else if (childAge < 252) cost += 25000;
             } else if (dep.type === 'parent') {
                 cost += 15000;
+                if (dep.caretaker) cost += 8000;
             }
         }
         return cost;
+    };
+
+    const setChildSchoolTier = (depId, tier) => {
+        if (!['government', 'private', 'international'].includes(tier)) return;
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, schoolTier: tier } : d));
+    };
+
+    const setChildPreschoolTier = (depId, tier) => {
+        if (!['home', 'playschool', 'montessori'].includes(tier)) return;
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, preschoolTier: tier } : d));
     };
 
     const getSpouseIncome = () => {
@@ -739,6 +789,102 @@ export const GameProvider = ({ children }) => {
         return { success: true, msg: `₹${payout.toLocaleString()} credited${penalty > 0 ? ' (1% early break penalty applied)' : ' — fully matured!'}` };
     };
 
+    // --- GOLD ---
+    const getGoldValue = () => {
+        let total = 0;
+        Object.entries(goldHoldings).forEach(([assetId, holding]) => {
+            if (!holding || holding.grams <= 0) return;
+            const asset = GOLD_ASSETS.find(a => a.id === assetId);
+            if (!asset) return;
+            const purity = asset.purity || 1;
+            total += Math.round(holding.grams * goldPrice * purity);
+        });
+        return total;
+    };
+
+    const buyGold = (assetId, grams) => {
+        const asset = GOLD_ASSETS.find(a => a.id === assetId);
+        if (!asset) return { success: false, msg: 'Invalid gold type.' };
+        if (grams < asset.minGrams) return { success: false, msg: `Minimum buy: ${asset.minGrams}g` };
+        const purity = asset.purity || 1;
+        const basePrice = grams * goldPrice * purity;
+        const makingFee = Math.round(basePrice * (asset.makingCharges || 0));
+        const totalCost = Math.round(basePrice + makingFee);
+        if (balance < totalCost) return { success: false, msg: 'Insufficient funds.' };
+        setBalance(prev => prev - totalCost);
+        setGoldHoldings(prev => {
+            const existing = prev[assetId] || { grams: 0, avgBuyPrice: 0, buyMonth: totalMonthsPlayed, interestAccrued: 0 };
+            const totalGrams = existing.grams + grams;
+            const newAvg = ((existing.avgBuyPrice * existing.grams) + (totalCost / grams * grams)) / totalGrams;
+            return { ...prev, [assetId]: { ...existing, grams: totalGrams, avgBuyPrice: Math.round(newAvg) } };
+        });
+        const makingNote = makingFee > 0 ? ` (incl. ₹${makingFee.toLocaleString()} making charges)` : '';
+        addHistory(`Bought ${grams}g ${asset.name}${makingNote}`, -totalCost, 'expense');
+        return { success: true, msg: `${grams}g ${asset.name} purchased for ₹${totalCost.toLocaleString()}${makingNote}` };
+    };
+
+    const sellGold = (assetId, grams) => {
+        const asset = GOLD_ASSETS.find(a => a.id === assetId);
+        const holding = goldHoldings[assetId];
+        if (!asset || !holding || holding.grams <= 0) return { success: false, msg: 'No gold holding to sell.' };
+        if (grams > holding.grams) return { success: false, msg: `You only have ${holding.grams.toFixed(2)}g.` };
+        const purity = asset.purity || 1;
+        let salePrice = Math.round(grams * goldPrice * purity);
+        // Jewellery: jeweller buyback at 20% discount
+        if (asset.type === 'jewellery') salePrice = Math.round(salePrice * 0.80);
+        // SGB: can only sell after 5 years (60 months)
+        if (asset.type === 'bond' && (totalMonthsPlayed - (holding.buyMonth || 0)) < 60) {
+            return { success: false, msg: 'SGBs lock in for 5 years. You can exit from month 60 onwards.' };
+        }
+        setBalance(prev => prev + salePrice);
+        setGoldHoldings(prev => {
+            const newGrams = holding.grams - grams;
+            if (newGrams <= 0) {
+                const { [assetId]: _, ...rest } = prev;
+                return rest;
+            }
+            return { ...prev, [assetId]: { ...holding, grams: newGrams } };
+        });
+        addHistory(`Sold ${grams}g ${asset.name}`, salePrice, 'income');
+        return { success: true, msg: `Sold ${grams}g for ₹${salePrice.toLocaleString()}` };
+    };
+
+    // --- CREDIT CARD ---
+    const openCreditCard = () => {
+        if (creditCard) return { success: false, msg: 'Already have a credit card.' };
+        if (creditScore < 650) return { success: false, msg: `Credit score too low (${creditScore}). Need 650+.` };
+        const limit = creditScore >= 750 ? 150000 : creditScore >= 700 ? 100000 : 50000;
+        setCreditCard({ limit, balance: 0, dueMonth: totalMonthsPlayed + 1, apr: 0.36, totalSpent: 0 });
+        addHistory('Credit card activated', 0, 'info');
+        return { success: true, msg: `Credit card activated! Limit: ₹${limit.toLocaleString()}. Pay your bill by next month to avoid 36% APR interest.` };
+    };
+
+    const chargeToCard = (amount, label) => {
+        if (!creditCard) return { success: false, msg: 'No credit card.' };
+        if (creditCard.balance + amount > creditCard.limit) return { success: false, msg: `Over credit limit (₹${creditCard.limit.toLocaleString()}).` };
+        setCreditCard(prev => ({ ...prev, balance: prev.balance + amount, totalSpent: prev.totalSpent + amount }));
+        addHistory(`[Card] ${label}`, 0, 'info');
+        return { success: true };
+    };
+
+    const payCreditCardBill = (amount) => {
+        if (!creditCard) return { success: false, msg: 'No credit card.' };
+        if (balance < amount) return { success: false, msg: 'Insufficient funds.' };
+        const payment = Math.min(amount, creditCard.balance);
+        setBalance(prev => prev - payment);
+        setCreditCard(prev => ({ ...prev, balance: Math.max(0, prev.balance - payment), dueMonth: totalMonthsPlayed + 1 }));
+        if (payment > 0) setCreditScore(prev => Math.min(900, prev + 5));
+        addHistory(`Credit card payment`, -payment, 'expense');
+        return { success: true, msg: `₹${payment.toLocaleString()} paid. ${creditCard.balance - payment > 0 ? `Remaining: ₹${(creditCard.balance - payment).toLocaleString()}` : 'Bill fully cleared!'}` };
+    };
+
+    const closeCreditCard = () => {
+        if (!creditCard) return { success: false, msg: 'No credit card.' };
+        if (creditCard.balance > 0) return { success: false, msg: `Clear your outstanding balance of ₹${creditCard.balance.toLocaleString()} first.` };
+        setCreditCard(null);
+        return { success: true, msg: 'Credit card closed.' };
+    };
+
     // --- REAL ESTATE ---
     const buyProperty = (property) => {
         if (properties.includes(property.id)) return { success: false, msg: 'Already owned.' };
@@ -946,7 +1092,7 @@ export const GameProvider = ({ children }) => {
     // DEPENDENTS
     // =========================================================================
 
-    const marry = () => {
+    const marry = (spouseName, spouseSprite) => {
         if (dependents.some(d => d.type === 'spouse')) return { success: false, msg: 'Already married.' };
         const weddingCost = 500000;
         if (balance < weddingCost) return { success: false, msg: `Need ₹${weddingCost.toLocaleString()} for wedding expenses.` };
@@ -954,26 +1100,28 @@ export const GameProvider = ({ children }) => {
         const isWorking = Math.random() > 0.5;
         const spouseIncome = isWorking ? (20000 + Math.floor(Math.random() * 20000)) : 0;
         setDependents(prev => [...prev, {
-            id: `spouse_${Date.now()}`, type: 'spouse', name: 'Spouse',
+            id: `spouse_${Date.now()}`, type: 'spouse',
+            name: spouseName || 'Spouse',
+            spouseSprite: spouseSprite || 'bride',
             monthAdded: totalMonthsPlayed, isWorking, income: spouseIncome,
         }]);
         addHistory(`Got Married! ${isWorking ? `Spouse earns ₹${spouseIncome.toLocaleString()}/mo` : 'Spouse is homemaker'}`, -weddingCost, 'expense');
         return { success: true, msg: `Congratulations! ${isWorking ? `Spouse earns ₹${spouseIncome.toLocaleString()}/mo` : ''}` };
     };
 
-    const haveChild = () => {
+    const haveChild = (customName) => {
         if (!dependents.some(d => d.type === 'spouse')) return { success: false, msg: 'Must be married first.' };
         const childCount = dependents.filter(d => d.type === 'child').length;
         if (childCount >= 3) return { success: false, msg: 'Maximum 3 children.' };
         const gender = Math.random() < 0.5 ? 'female' : 'male';
         const childNames = { female: ['Priya', 'Ananya', 'Kavya'], male: ['Arjun', 'Rohan', 'Dev'] };
-        const name = childNames[gender][childCount] || `Child ${childCount + 1}`;
+        const name = (customName && customName.trim()) ? customName.trim() : (childNames[gender][childCount] || `Child ${childCount + 1}`);
         setDependents(prev => [...prev, {
             id: `child_${Date.now()}`, type: 'child',
             name, gender, monthAdded: totalMonthsPlayed, childAgeMonths: 0, health: 80,
         }]);
         addHistory(`New ${gender === 'female' ? 'daughter' : 'son'} born!`, 0, 'info');
-        return { success: true, msg: `Congratulations on your new ${gender === 'female' ? 'daughter' : 'son'}!` };
+        return { success: true, name, msg: `Congratulations on your new ${gender === 'female' ? 'daughter' : 'son'}!` };
     };
 
     const feedDependent = (dependentId, healthAmount) => {
@@ -982,11 +1130,412 @@ export const GameProvider = ({ children }) => {
         ));
     };
 
+    const PARENT_SETUP_COST = 25000;
+    const addParent = (parentType) => {
+        const existing = dependents.filter(d => d.type === 'parent');
+        if (existing.length >= 2) return { success: false, msg: 'Both parents are already living with you.' };
+        if (existing.some(d => d.parentType === parentType))
+            return { success: false, msg: `${parentType === 'mother' ? 'Mother' : 'Father'} is already with you.` };
+        if (balance < PARENT_SETUP_COST)
+            return { success: false, msg: `Need ₹${PARENT_SETUP_COST.toLocaleString()} for moving and home setup.` };
+        const name = parentType === 'mother' ? 'Mother' : 'Father';
+        setBalance(prev => prev - PARENT_SETUP_COST);
+        setDependents(prev => [...prev, {
+            id: `parent_${Date.now()}`, type: 'parent', parentType,
+            name, monthAdded: totalMonthsPlayed, health: 70,
+        }]);
+        addHistory(`${name} moved in — setup costs`, -PARENT_SETUP_COST, 'expense');
+        return { success: true, msg: `${name} is now living with you. ₹15,000/mo care cost added.` };
+    };
+
     // =========================================================================
     // TUTORIALS & PROGRESSIVE UNLOCKS
     // =========================================================================
 
     const markTutorialSeen = (key) => setSeenTutorials(prev => new Set([...prev, key]));
+
+    const resolveFamilyDemand = (accepted) => {
+        if (!pendingFamilyDemand) return;
+        const { demand, dep } = pendingFamilyDemand;
+        if (accepted) {
+            if (balance < demand.cost) { setPendingFamilyDemand(null); return; }
+            setBalance(prev => prev - demand.cost);
+            if (demand.accept.happinessBoost) setHappiness(prev => Math.min(100, prev + demand.accept.happinessBoost));
+            if (dep && (demand.accept.depHealthBoost || demand.accept.depHappinessBoost)) {
+                setDependents(prev => prev.map(d => d.id === dep.id ? {
+                    ...d,
+                    health: demand.accept.depHealthBoost ? Math.min(100, (d.health ?? 80) + demand.accept.depHealthBoost) : d.health,
+                } : d));
+            }
+            addHistory(demand.getTitle(dep), -demand.cost, 'expense');
+        } else {
+            if (demand.decline.happinessPenalty) setHappiness(prev => Math.max(0, prev + demand.decline.happinessPenalty));
+            if (dep && demand.decline.depHealthPenalty) {
+                setDependents(prev => prev.map(d => d.id === dep.id ? {
+                    ...d,
+                    health: Math.max(0, (d.health ?? 80) + demand.decline.depHealthPenalty),
+                } : d));
+            }
+        }
+        setDemandCooldowns(prev => ({ ...prev, [demand.id]: totalMonthsPlayed }));
+        setPendingFamilyDemand(null);
+    };
+
+    const GIFT_CHILD_COST = 2000;
+    const giftChild = (depId) => {
+        if (balance < GIFT_CHILD_COST) return { success: false, msg: `Need ₹${GIFT_CHILD_COST.toLocaleString()} to buy a gift.` };
+        setBalance(prev => prev - GIFT_CHILD_COST);
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, health: Math.min(100, (d.health ?? 80) + 15) } : d));
+        setHappiness(prev => Math.min(100, prev + 3));
+        addHistory('Gift for child', -GIFT_CHILD_COST, 'expense');
+        return { success: true, msg: 'Your child is delighted! +15 HP' };
+    };
+
+    const MEDICINE_COST = 5000;
+    const buyMedicine = (depId) => {
+        if (balance < MEDICINE_COST) return { success: false, msg: `Need ₹${MEDICINE_COST.toLocaleString()} for medicine.` };
+        setBalance(prev => prev - MEDICINE_COST);
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, health: Math.min(100, (d.health ?? 70) + 20) } : d));
+        addHistory('Medicine for parent', -MEDICINE_COST, 'expense');
+        return { success: true, msg: 'Medicine purchased. +20 HP' };
+    };
+
+    const CARETAKER_MONTHLY = 8000;
+    const toggleCaretaker = (depId) => {
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, caretaker: !d.caretaker } : d));
+    };
+
+    const planVacation = () => {
+        const familySize = 1 + dependents.length;
+        const cost = familySize * 5000;
+        if (balance < cost) return { success: false, msg: `Need ₹${cost.toLocaleString()} for the vacation (₹5,000 × ${familySize} people).` };
+        setBalance(prev => prev - cost);
+        setHappiness(prev => Math.min(100, prev + 15));
+        addHistory(`Family vacation (${familySize} people)`, -cost, 'expense');
+        return { success: true, msg: `Great memories made! +15 happiness. Cost: ₹${cost.toLocaleString()}` };
+    };
+
+    const buyPharmacyItem = (item, recipientId) => {
+        if (balance < item.price) return { success: false, msg: 'Not enough balance.' };
+        setBalance(prev => prev - item.price);
+        if (recipientId === 'self') {
+            setHealth(prev => Math.min(100, prev + item.healthRestore));
+        } else {
+            setDependents(prev => prev.map(d => d.id === recipientId
+                ? { ...d, health: Math.min(100, (d.health ?? 80) + item.healthRestore) }
+                : d
+            ));
+        }
+        addHistory(`${item.name}`, -item.price, 'expense');
+        return { success: true, msg: `+${item.healthRestore} HP!` };
+    };
+
+    const buyClothesItem = (item) => {
+        if (balance < item.price) return { success: false, msg: 'Not enough balance.' };
+        setBalance(prev => prev - item.price);
+        if (item.happinessBoost) setHappiness(prev => Math.min(100, prev + item.happinessBoost));
+        if (item.for === 'child' && item.healthBoost > 0) {
+            const child = dependents.find(d => d.type === 'child');
+            if (child) setDependents(prev => prev.map(d => d.id === child.id
+                ? { ...d, health: Math.min(100, (d.health ?? 80) + item.healthBoost) }
+                : d
+            ));
+        }
+        addHistory(`${item.name}`, -item.price, 'expense');
+        return { success: true, msg: `Bought ${item.name}! +${item.happinessBoost} happiness` };
+    };
+
+    // ── ITR SELF-FILING WIZARD ────────────────────────────────────────────────
+    const [itrSelfFiling, setItrSelfFiling] = useState(null);
+    // null = not active
+    // { year, step: 'form_select'|'gather_docs'|'compute'|'everify', formSelected, docsCollected[], computation, wrongForm }
+
+    const getRequiredITRDocs = () => {
+        const docs = [];
+        if (currentJob) {
+            docs.push({
+                id: 'form16', name: 'Form 16', source: 'HR department / employer email (by June 15)',
+                section: 'Salary & TDS — Sec 192',
+                desc: 'Part A: TDS deducted and deposited with the government, verified against Form 26AS. Part B: Salary breakup — basic, HRA, LTA, perquisites, employer PF. Every salaried employer must issue Form 16 by June 15. If yours is delayed, demand it — it\'s legally required.',
+                icon: 'briefcase',
+            });
+        }
+        docs.push({
+            id: 'form26as', name: 'Form 26AS / AIS', source: 'incometax.gov.in → e-File → Income Tax Returns → View Form 26AS',
+            section: 'Tax Credit & Annual Information',
+            desc: 'The master tax record. Part A: all TDS deducted by employer, banks, demat. Part B: TCS. Part C: advance tax paid. The AIS (Annual Information Statement) is the upgraded version — shows property transactions, dividend, interest, securities purchases, mutual fund redemptions, foreign remittances, GST data. CRITICAL: every figure in your ITR must match AIS/26AS or you\'ll get a notice.',
+            icon: 'landmark',
+        });
+        if (fixedDeposits.length > 0) {
+            docs.push({
+                id: 'form16a', name: 'Form 16A — Bank TDS Certificate', source: 'Bank net banking → Requests → Form 16A / TDS Certificate',
+                section: 'Other Income — Sec 194A',
+                desc: 'Banks deduct 10% TDS if your FD interest exceeds ₹40,000/year (₹50,000 for senior citizens). Form 16A proves this TDS. You must declare the FULL FD interest as income — not just the amount after TDS. The TDS is then claimed as credit. Missing this is a common reason for IT notices.',
+                icon: 'university',
+            });
+        }
+        const hasStocks = Object.keys(portfolio).some(k => (portfolio[k]?.qty || 0) > 0);
+        const hasMFs = Object.keys(mfPortfolio).some(k => (mfPortfolio[k]?.units || 0) > 0);
+        if (hasStocks || hasMFs) {
+            docs.push({
+                id: 'capital_gains', name: 'Capital Gains Statement', source: 'Zerodha: Console → Tax P&L / CAMS/MFCentral for mutual funds',
+                section: 'Capital Gains — Sec 111A, 112A',
+                desc: 'Equity STCG (held < 12 months): taxed @15% flat under Sec 111A. Equity LTCG (held ≥ 12 months): first ₹1 lakh per year is EXEMPT, above that taxed @10% under Sec 112A — no indexation. Debt MF gains (post Apr 2023): taxed at your slab rate. Brokers and AMCs provide a P&L / gains report; get it for the full financial year (Apr–Mar).',
+                icon: 'chart-line',
+            });
+        }
+        const homeLoans = loans.filter(l => l.loanTypeId === 'home_loan');
+        if (homeLoans.length > 0) {
+            docs.push({
+                id: 'home_loan_cert', name: 'Home Loan Interest Certificate', source: 'Bank / housing finance company portal → Loan Account → Interest Certificate',
+                section: 'Sec 24(b) & 80C',
+                desc: 'Shows interest paid and principal repaid during the financial year. Interest deductible up to ₹2,00,000/year under Sec 24(b) for self-occupied property (UNLIMITED if property is rented out). Principal repaid qualifies under Sec 80C (within the ₹1.5L combined cap). Pre-construction interest: deductible in 5 equal instalments from the year construction completes.',
+                icon: 'home',
+            });
+        }
+        if ((ppf.contributionsThisYear || 0) > 0 || (nps.contributionsThisYear || 0) > 0) {
+            docs.push({
+                id: 'sec80c_proof', name: '80C / 80CCD Investment Proof', source: 'PPF: bank passbook/statement. NPS: CAS statement from nps.nsdl.com or Protean',
+                section: 'Sec 80C (max ₹1.5L) + Sec 80CCD(1B) (extra ₹50K for NPS)',
+                desc: 'PPF contributions (max ₹1.5L/year) save up to ₹46,800 tax at the 30% bracket under 80C. NPS gets an ADDITIONAL ₹50,000 deduction under Sec 80CCD(1B) — completely separate from the 80C limit. Combined, these two instruments alone can save ₹62,400 in tax per year. Both are also exempt at maturity (EEE and exempt-exempt respectively).',
+                icon: 'piggy-bank',
+            });
+        }
+        const lifeIns = activeInsurance.some(i => INSURANCE_PLANS.find(p => p.id === i.planId)?.type === 'life');
+        const healthIns = activeInsurance.some(i => INSURANCE_PLANS.find(p => p.id === i.planId)?.type === 'health');
+        if (lifeIns || healthIns) {
+            docs.push({
+                id: 'insurance_receipts', name: 'Insurance Premium Receipts', source: 'Insurer app / LIC branch / email receipts',
+                section: 'Sec 80C (life) & Sec 80D (health)',
+                desc: 'Life insurance premium: deductible under 80C within the ₹1.5L cap. Term insurance is the most cost-efficient. Health insurance: 80D allows ₹25,000 for self/spouse/children; additional ₹25,000 for parents (₹50,000 if parents are 60+). The health insurance deduction is over and above 80C — completely separate.',
+                icon: 'shield-alt',
+            });
+        }
+        if (properties.length > 0) {
+            docs.push({
+                id: 'property_tax', name: 'Municipal Property Tax Receipt', source: 'Municipal corporation portal / physical receipt from registrar',
+                section: 'House Property Income — Sec 22–27',
+                desc: 'If property is rented: declare full rental income, then deduct municipal taxes paid + standard 30% deduction (for repairs, maintenance — no bills needed) + home loan interest. Net rental income is added to total income and taxed. If self-occupied with loan: only interest deduction (up to ₹2L) — no standard deduction, no municipal tax deduction.',
+                icon: 'city',
+            });
+        }
+        return docs;
+    };
+
+    const getITRForms = () => {
+        const hasStocks = Object.keys(portfolio).some(k => (portfolio[k]?.qty || 0) > 0);
+        const hasMFs = Object.keys(mfPortfolio).some(k => (mfPortfolio[k]?.units || 0) > 0);
+        const hasCapGains = hasStocks || hasMFs;
+        const multiProperty = properties.length > 1;
+        const annualSalary = currentJob ? currentJob.salary * 12 : 0;
+        const aboveFiftyLakh = annualSalary > 5000000;
+        return [
+            {
+                id: 'ITR-1', name: 'ITR-1', tag: 'SALARIED',
+                forWhom: 'Salary + one house property + interest income. Income below ₹50 lakh.',
+                why: 'Sahaj (meaning "simple") is the most common form for salaried Indians. Pre-filled by the IT portal using employer TDS data. Cannot use this if you have capital gains, more than one property, or income above ₹50L.',
+                correct: currentJob != null && !hasCapGains && !multiProperty && !aboveFiftyLakh,
+                color: '#4ade80',
+            },
+            {
+                id: 'ITR-2', name: 'ITR-2', tag: 'INVESTORS',
+                forWhom: 'Salaried + capital gains (stocks, MFs, property) or multiple properties. Any income level.',
+                why: 'Required if you have sold any equity shares, mutual funds, or property during the year — even if at a loss. Also needed for foreign income, director in a company, or lottery winnings. More complex than ITR-1 but mandatory for investors.',
+                correct: currentJob != null && (hasCapGains || multiProperty || aboveFiftyLakh),
+                color: '#60a5fa',
+            },
+            {
+                id: 'ITR-3', name: 'ITR-3', tag: 'BUSINESS',
+                forWhom: 'Business or professional income: freelancers, consultants, proprietors, partners in firms.',
+                why: 'For those earning from business or profession. Requires maintaining books of accounts. Also covers salary income — if you have both salary and business income, ITR-3 is the one. NOT applicable for salaried employees without any business income.',
+                correct: false,
+                color: '#fbbf24',
+            },
+            {
+                id: 'ITR-4', name: 'ITR-4', tag: 'PRESUMPTIVE',
+                forWhom: 'Small businesses/professionals under presumptive taxation (Sec 44AD/44ADA). Income below ₹50L.',
+                why: 'Presumptive taxation lets small businesses declare 8% of turnover (or 50% of gross receipts for professionals) as income without detailed accounts. Simpler but NOT for salaried individuals. Choosing this when you\'re salaried is a common — and expensive — mistake.',
+                correct: false,
+                color: '#f87171',
+            },
+        ];
+    };
+
+    const startSelfFiling = () => {
+        const year = turn?.year || 2024;
+        if (itrFiled?.[year]) return;
+        // Don't reset if already in progress for the same year
+        if (itrSelfFiling && itrSelfFiling.year === year) return;
+        setItrSelfFiling({ year, step: 'form_select', formSelected: null, docsCollected: [], computation: null, wrongForm: false });
+    };
+
+    const selectITRForm = (formId) => {
+        const forms = getITRForms();
+        const form = forms.find(f => f.id === formId);
+        if (!form) return;
+        setItrSelfFiling(prev => ({
+            ...prev,
+            step: 'gather_docs',
+            formSelected: form,
+            wrongForm: !form.correct,
+        }));
+    };
+
+    const collectITRDoc = async (docId) => {
+        if (!canAdvanceTurn()) return { success: false, msg: 'No daily actions left. Come back tomorrow.' };
+        await consumeTurn();
+        setItrSelfFiling(prev => ({
+            ...prev,
+            docsCollected: prev.docsCollected.includes(docId) ? prev.docsCollected : [...prev.docsCollected, docId],
+        }));
+        return { success: true };
+    };
+
+    const computeITRTaxFull = () => {
+        const annualSalary = currentJob ? currentJob.salary * 12 : 0;
+        const standardDeduction = Math.min(annualSalary, 50000);
+        const netSalary = annualSalary - standardDeduction;
+
+        const fdInterestTotal = fixedDeposits.reduce((sum, fd) => {
+            const monthsActive = fd.totalMonths - fd.monthsLeft;
+            const fraction = Math.min(monthsActive, 12) / 12;
+            return sum + Math.round(fd.principal * fd.rate * fraction);
+        }, 0);
+        const savingsInterest = Math.round(balance * 0.035);
+        const savingsInterestTaxable = Math.max(0, savingsInterest - 10000); // 80TTA exempts up to ₹10K
+
+        let rentalIncomeGross = 0;
+        properties.forEach(id => {
+            const prop = REAL_ESTATE.find(p => p.id === id);
+            if (prop?.rental_income) rentalIncomeGross += prop.rental_income * 12;
+        });
+        const rentalMunicipalDeduction = Math.round(rentalIncomeGross * 0.3);
+        const netRentalIncome = rentalIncomeGross - rentalMunicipalDeduction;
+
+        const grossTotalIncome = netSalary + fdInterestTotal + savingsInterestTaxable + netRentalIncome;
+
+        // 80C deductions
+        const ppf80C = Math.min(ppf.contributionsThisYear || 0, 150000);
+        const lifeInsPremAnnual = activeInsurance.reduce((sum, i) => {
+            const plan = INSURANCE_PLANS.find(p => p.id === i.planId);
+            return plan?.type === 'life' ? sum + plan.premium * 12 : sum;
+        }, 0);
+        const homeLoansAll = loans.filter(l => l.loanTypeId === 'home_loan');
+        const homeLoanPrincipalAnnual = homeLoansAll.reduce((sum, l) => {
+            const principal = Math.max(0, l.emi - l.remainingPrincipal * l.monthlyRate);
+            return sum + Math.round(principal * 12);
+        }, 0);
+        const sec80C = Math.min(ppf80C + lifeInsPremAnnual + homeLoanPrincipalAnnual, 150000);
+
+        const sec80CCD = Math.min(nps.contributionsThisYear || 0, 50000);
+
+        const healthInsPremAnnual = activeInsurance.reduce((sum, i) => {
+            const plan = INSURANCE_PLANS.find(p => p.id === i.planId);
+            return plan?.type === 'health' ? sum + plan.premium * 12 : sum;
+        }, 0);
+        const sec80D = Math.min(healthInsPremAnnual, 25000);
+
+        const homeLoanInterestAnnual = homeLoansAll.reduce((sum, l) => {
+            return sum + Math.round(l.remainingPrincipal * l.monthlyRate * 12);
+        }, 0);
+        const sec24b = Math.min(homeLoanInterestAnnual, 200000);
+
+        const totalDeductions = sec80C + sec80CCD + sec80D + sec24b;
+        const taxableIncome = Math.max(0, grossTotalIncome - totalDeductions);
+
+        const incomeTax = calculateIncomeTax(taxableIncome);
+        const cess = Math.round(incomeTax * 0.04);
+        const totalTaxLiability = incomeTax + cess;
+
+        // TDS credits
+        const salaryFraction = grossTotalIncome > 0 ? netSalary / grossTotalIncome : 1;
+        const estimatedSalaryTDS = Math.round(incomeTax * 0.96 * salaryFraction);
+        const bankTDS = fdInterestTotal > 40000 ? Math.round(fdInterestTotal * 0.10) : 0;
+        const totalTDS = estimatedSalaryTDS + bankTDS;
+
+        const netPayable = totalTaxLiability - totalTDS;
+
+        const computation = {
+            annualSalary, standardDeduction, netSalary,
+            fdInterestTotal, savingsInterest, savingsInterestTaxable,
+            rentalIncomeGross, rentalMunicipalDeduction, netRentalIncome,
+            grossTotalIncome,
+            ppf80C, lifeInsPremAnnual, homeLoanPrincipalAnnual, sec80C,
+            sec80CCD,
+            healthInsPremAnnual, sec80D,
+            homeLoanInterestAnnual, sec24b,
+            totalDeductions, taxableIncome,
+            incomeTax, cess, totalTaxLiability,
+            estimatedSalaryTDS, bankTDS, totalTDS,
+            netPayable,
+        };
+        setItrSelfFiling(prev => ({ ...prev, step: 'everify', computation }));
+        return computation;
+    };
+
+    const ITR_SELF_FILING_FEE = 499; // portal convenience fee (like actual Cleartax/IndiaFilings charge)
+    const submitITR = () => {
+        if (!itrSelfFiling) return;
+        const { year, computation, wrongForm } = itrSelfFiling;
+
+        // Filing fee — even self-filing costs time + portal fee
+        if (balance < ITR_SELF_FILING_FEE) {
+            return { success: false, msg: `Need ₹${ITR_SELF_FILING_FEE} portal convenience fee to submit.` };
+        }
+        setBalance(prev => prev - ITR_SELF_FILING_FEE);
+        addHistory(`ITR Portal Filing Fee`, -ITR_SELF_FILING_FEE, 'expense');
+
+        // Self-assessment tax if owed
+        if (computation?.netPayable > 0) {
+            if (balance - ITR_SELF_FILING_FEE < computation.netPayable) {
+                return { success: false, msg: `Need ₹${computation.netPayable.toLocaleString()} for self-assessment tax (Challan 280).` };
+            }
+            setBalance(prev => prev - computation.netPayable);
+            addHistory(`Self-Assessment Tax — Challan 280 (FY ${year - 1}-${String(year).slice(2)})`, -computation.netPayable, 'expense');
+        } else if (computation?.netPayable < 0) {
+            // Refund takes time — delayed 1 month in real life, instant here for simplicity
+            const refund = Math.abs(computation.netPayable);
+            setBalance(prev => prev + refund);
+            addHistory(`ITR Refund — FY ${year - 1}-${String(year).slice(2)} (Sec 244A interest included)`, refund, 'income');
+        }
+
+        // Wrong form: higher notice risk + ₹5,000 penalty deducted immediately
+        if (wrongForm) {
+            const noticePenalty = 5000;
+            setBalance(prev => prev - noticePenalty);
+            addHistory(`IT Notice — incorrect ITR form filed (Sec 139(9) defective return)`, -noticePenalty, 'expense');
+            setHappiness(prev => Math.max(0, prev - 10));
+        }
+
+        setItrFiled(prev => ({ ...prev, [year]: wrongForm ? 'self_wrong_form' : 'self' }));
+        setItrSelfFiling(null);
+        return { success: true, refund: (computation?.netPayable || 0) < 0 ? Math.abs(computation.netPayable) : 0, wrongForm };
+    };
+
+    const UPSKILL_COST = 50000;
+    const UPSKILL_MONTHS = 6;
+    const upskillSpouse = () => {
+        const spouse = dependents.find(d => d.type === 'spouse');
+        if (!spouse) return { success: false, msg: 'Not married.' };
+        if (spouse.isWorking) return { success: false, msg: 'Spouse is already working.' };
+        if (spouse.upskilling) return { success: false, msg: 'Spouse is already enrolled in a course.' };
+        if (balance < UPSKILL_COST) return { success: false, msg: `Need ₹${UPSKILL_COST.toLocaleString()} for the course.` };
+        setBalance(prev => prev - UPSKILL_COST);
+        setDependents(prev => prev.map(d =>
+            d.type === 'spouse' ? { ...d, upskilling: true, upskillingMonthsLeft: UPSKILL_MONTHS } : d
+        ));
+        addHistory('Spouse enrolled in upskilling course', -UPSKILL_COST, 'expense');
+        return { success: true, msg: `Spouse enrolled! They will start earning in ${UPSKILL_MONTHS} months.` };
+    };
+
+    const DIVORCE_PENALTY = 200000;
+    const divorce = () => {
+        setDependents(prev => prev.filter(d => d.type !== 'spouse'));
+        setBalance(prev => Math.max(0, prev - DIVORCE_PENALTY));
+        setHappiness(prev => Math.max(0, prev - 30));
+        addHistory('Divorce settlement', -DIVORCE_PENALTY, 'expense');
+        return { success: true };
+    };
 
     const CA_MONTHLY_FEE = 2000;
     const subscribeCA = () => {
@@ -1009,14 +1558,14 @@ export const GameProvider = ({ children }) => {
     // Locked products show a padlock in the UI with the unlock requirement.
     const getProductUnlocks = () => ({
         fd:          { unlocked: true },
-        ppf:         { unlocked: playerAge >= 20, requirement: 'Age 20+' },
+        ppf:         { unlocked: true },
         insurance:   { unlocked: true },
         loans:       { unlocked: true },
-        mf:          { unlocked: playerAge >= 22, requirement: 'Age 22+ — start after your first job' },
-        sip:         { unlocked: playerAge >= 22, requirement: 'Age 22+ — start after your first job' },
-        stocks:      { unlocked: playerAge >= 22, requirement: 'Age 22+ — needs a basic income first' },
-        nps:         { unlocked: playerAge >= 25, requirement: 'Age 25+ — plan for retirement early' },
-        realestate:  { unlocked: playerAge >= 24 && netWorth >= 200000, requirement: 'Age 24+ with ₹2L net worth' },
+        mf:          { unlocked: true },
+        sip:         { unlocked: true },
+        stocks:      { unlocked: true },
+        nps:         { unlocked: playerAge >= 20, requirement: 'Age 20+ — NPS is a long-term retirement plan' },
+        realestate:  { unlocked: netWorth >= 200000, requirement: 'Need ₹2L net worth to buy property' },
     });
 
     // =========================================================================
@@ -1348,9 +1897,8 @@ export const GameProvider = ({ children }) => {
                 msg = 'CA hired for ₹3,000. ITR filed with optimised deductions.';
             } else { msg = 'Not enough balance to hire a CA.'; }
         } else if (eff.type === 'itr_self') {
-            const year = stateRef.current.turn?.year || 0;
-            setItrFiled(prev => ({ ...prev, [year]: 'self' }));
-            msg = 'ITR filed by yourself. Basic deductions applied.';
+            startSelfFiling();
+            msg = 'Opening ITR filing wizard. Go to Bank → CA tab to complete your filing.';
         } else if (eff.type === 'itr_skip') {
             const year = stateRef.current.turn?.year || 0;
             if (balance >= 5000) setBalance(prev => prev - 5000);
@@ -1569,6 +2117,109 @@ export const GameProvider = ({ children }) => {
         else if (score < 500000000) rank = 'Ultra Rich';
         else rank = 'Business Tycoon';
         return { score, rank, passiveIncome, educatedChildren, retirementCorpus: ppf.balance + nps.balance };
+    };
+
+    // =========================================================================
+    // FINANCIAL TIPS
+    // =========================================================================
+    const getFinancialTips = () => {
+        const tips = [];
+        const salary = currentJob?.salary || 0;
+        const annualIncome = salary * 12;
+        const ppfContrib = ppf.contributionsThisYear || 0;
+        const npsContrib = nps.contributionsThisYear || 0;
+        const hasHealthIns = activeInsurance.some(i => INSURANCE_PLANS.find(p => p.id === i.planId)?.type === 'health');
+        const hasLifeIns = activeInsurance.some(i => INSURANCE_PLANS.find(p => p.id === i.planId)?.type === 'life');
+        const stockCount = Object.values(portfolio).filter(h => h?.qty > 0).length;
+        const mfCount = Object.values(mfPortfolio).filter(h => h?.units > 0).length;
+        const goldGrams = Object.values(goldHoldings).reduce((s, h) => s + (h?.grams || 0), 0);
+        const totalEMI = getTotalEMI();
+        const totalDebt = loans.reduce((s, l) => s + l.remainingPrincipal, 0);
+
+        if (annualIncome > 500000 && ppfContrib < 150000)
+            tips.push({ icon: 'piggy-bank', color: '#4ade80', title: 'Maximise 80C (PPF)', body: `You can still invest ₹${(150000 - ppfContrib).toLocaleString()} more in PPF this year. At your tax slab, that saves up to ₹46,800 in taxes.` });
+
+        if (annualIncome > 500000 && npsContrib < 50000)
+            tips.push({ icon: 'umbrella', color: '#818cf8', title: '80CCD — Extra ₹50k Deduction', body: 'NPS gives you an additional ₹50,000 tax deduction beyond the 80C limit. This is separate — invest now to claim both.' });
+
+        if (!hasHealthIns && dependents.length > 0)
+            tips.push({ icon: 'shield-alt', color: '#f87171', title: 'No Health Insurance!', body: `You have ${dependents.length} dependents but zero health cover. One hospitalisation can wipe ₹3–10L. A family floater costs ₹1,500–2,500/mo.` });
+
+        if (!hasLifeIns && dependents.some(d => d.type === 'spouse' || d.type === 'child'))
+            tips.push({ icon: 'heart', color: '#ec4899', title: 'Get Term Life Insurance', body: 'You have dependents but no life insurance. A ₹1 crore term cover costs ₹700–1,200/mo. The cheapest protection your family can have.' });
+
+        if (salary > 0 && totalEMI > salary * 0.5)
+            tips.push({ icon: 'exclamation-triangle', color: '#f87171', title: 'EMI Stress — Danger Zone', body: `Your EMIs (₹${totalEMI.toLocaleString()}) eat ${Math.round(totalEMI / salary * 100)}% of income. Above 50% is the debt trap — prepay the highest-rate loan first.` });
+
+        if (creditScore < 700 && loans.length > 0)
+            tips.push({ icon: 'chart-line', color: '#fb923c', title: 'Low CIBIL Costs You Money', body: `Your score (${creditScore}) adds 1.5–2% to every loan rate. Pay EMIs on time for 6+ months to cross 700 — saves thousands in interest.` });
+
+        if (stockCount === 0 && mfCount === 0 && goldGrams === 0 && salary > 20000)
+            tips.push({ icon: 'chart-bar', color: '#60a5fa', title: 'Start Investing Now', body: 'You hold no market assets. Inflation silently erodes cash savings. Even ₹1,000/month in a Nifty 50 index fund historically grows 12–14% p.a.' });
+
+        if (goldGrams === 0 && salary > 30000)
+            tips.push({ icon: 'coins', color: '#fbbf24', title: 'No Gold in Portfolio', body: 'Gold is counter-cyclical — it rises when stocks fall. Consider 5–10% of your portfolio in Sovereign Gold Bonds: 2.5% annual interest + capital gains tax-free at maturity.' });
+
+        if (sipPlans.length === 0 && (stockCount > 0 || mfCount > 0))
+            tips.push({ icon: 'sync', color: '#34d399', title: 'Set Up SIPs', body: 'Lump-sum investing requires market timing. SIPs average out the cost over time (rupee-cost averaging). Set up a monthly SIP and forget it.' });
+
+        const totalAssets = balance + getStockValue() + getMFValue() + getRealEstateValue() + ppf.balance + nps.balance + getGoldValue();
+        if (totalDebt > 0 && totalDebt > totalAssets * 0.5)
+            tips.push({ icon: 'balance-scale', color: '#f87171', title: 'Debt > 50% of Net Assets', body: 'Your loans exceed half your total assets. Focus on reducing debt before expanding investments — guaranteed debt reduction beats uncertain investment returns.' });
+
+        if (playerAge >= 45 && (ppf.balance + nps.balance) < 2000000)
+            tips.push({ icon: 'clock', color: '#fb923c', title: 'Retirement Corpus Too Low', body: `At age ${playerAge}, your PPF+NPS corpus is ₹${(ppf.balance + nps.balance).toLocaleString()}. You need ₹1–2 Cr to retire comfortably. Maximise contributions now.` });
+
+        return tips.slice(0, 4); // Show top 4 most relevant
+    };
+
+    // =========================================================================
+    // REAL MARKET SEED
+    // =========================================================================
+    // Called once on game start to initialise prices from live NSE data via backend.
+    const fetchRealSeedPrices = async () => {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(`${API_BASE}/market/seed-prices`, { signal: controller.signal });
+            clearTimeout(timer);
+            if (!res.ok) return;
+            const json = await res.json();
+            const realPrices = json?.data || {};
+            if (Object.keys(realPrices).length === 0) return;
+            setMarketPrices(prev => {
+                const next = { ...prev };
+                STOCKS.forEach(s => {
+                    if (realPrices[s.ticker] !== undefined) {
+                        next[s.id] = realPrices[s.ticker];
+                    }
+                });
+                return next;
+            });
+        } catch (_) {
+            // Backend unavailable — simulation continues from default prices
+        }
+    };
+
+    // Seed real prices once when the game starts (marketPrices is empty on first run)
+    useEffect(() => {
+        if (Object.keys(marketPrices).length === 0) {
+            fetchRealSeedPrices();
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // =========================================================================
+    // RETIREMENT BUCKETS
+    // =========================================================================
+    const [retirementBuckets, setRetirementBuckets] = useState(null);
+    // null = not set | { bucket1: ₹ (1yr expenses in FD), bucket2: ₹ (5yr in bonds/PPF), bucket3: ₹ (equity/growth) }
+
+    const setupRetirementBuckets = (bucket1Amt, bucket2Amt, bucket3Amt) => {
+        const total = bucket1Amt + bucket2Amt + bucket3Amt;
+        const corpus = ppf.balance + nps.balance + balance;
+        if (total > corpus) return { success: false, msg: 'Bucket total exceeds available corpus.' };
+        setRetirementBuckets({ bucket1: bucket1Amt, bucket2: bucket2Amt, bucket3: bucket3Amt, setupMonth: totalMonthsPlayed });
+        return { success: true, msg: 'Retirement buckets configured. Bucket 1 covers your near-term expenses; Bucket 3 stays invested for long-term growth.' };
     };
 
     const retireEarly = () => {
@@ -1871,7 +2522,7 @@ export const GameProvider = ({ children }) => {
         }
 
         // ITR filing deadline — every July (month 7), fired once per game year
-        if (turn.month === 7 && !pendingDecision) {
+        if (turn.month === 7 && !pendingDecision && totalMonthsPlayed >= 6) {
             const gameYear = turn.year;
             if (!itrFiled[gameYear] && (currentJob || netWorth > 250000)) {
                 setPendingDecision({
@@ -1879,7 +2530,7 @@ export const GameProvider = ({ children }) => {
                     name: 'ITR Filing Deadline',
                     emoji: '📄',
                     category: 'dilemma',
-                    message: `July 31st — your Income Tax Return for FY ${gameYear - 1}-${String(gameYear).slice(2)} is due.\n\n${caSubscribed ? 'Your CA has prepared your return with optimised deductions. File now to stay compliant.' : "You don't have a CA. File yourself (basic deductions) or hire one for ₹3,000. Skipping costs ₹5,000 in late fees."}`,
+                    message: `July 31st — your Income Tax Return for FY ${gameYear - 1}-${String(gameYear).slice(2)} is due.\n\n${caSubscribed ? 'Your CA has prepared your return with optimised deductions. File now to stay compliant.' : "You don't have a CA. Self-file step-by-step (collect documents, pick the right form, compute your tax) or hire a CA for ₹3,000 one-time. Skipping costs ₹5,000 in late fees."}`,
                     choices: caSubscribed
                         ? [
                             { label: 'File with CA', color: '#4ade80', effect: { type: 'itr_ca' } },
@@ -1896,7 +2547,7 @@ export const GameProvider = ({ children }) => {
         }
 
         // Budget Day — every February (month 2), fire a budget choice event
-        if (turn.month === 2 && !pendingDecision) {
+        if (turn.month === 2 && !pendingDecision && totalMonthsPlayed >= 2) {
             const yearIndex = Math.floor(totalMonthsPlayed / 12);
             const budgetEvent = BUDGET_EVENTS[yearIndex % BUDGET_EVENTS.length];
             setPendingDecision({ ...budgetEvent, isBudget: true });
@@ -1939,6 +2590,25 @@ export const GameProvider = ({ children }) => {
 
         // Track high-happiness streak
         if (newHappiness > 80) setHighHappinessMonths(prev => prev + 1);
+
+        // ── LOW PANTRY WARNING ─────────────────────────────────────────────────
+        const totalPantryQty = (stateRef.current.pantry || []).reduce((s, p) => s + (p.qty || 0), 0);
+        if (totalPantryQty <= 2 && totalPantryQty >= 0) {
+            const pantryEntry = {
+                id: `low_pantry_${totalMonthsPlayed}`, name: '🥘 Stock Up On Food!',
+                message: totalPantryQty === 0
+                    ? 'Your pantry is completely empty. Your health will drain faster without food. Buy groceries from the Shop.'
+                    : `Only ${totalPantryQty} item${totalPantryQty === 1 ? '' : 's'} left in the pantry. Stock up from the Shop to keep health topped up.`,
+                category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+            };
+            setEventInbox(prev => {
+                // Don't spam — only add if last pantry warning was >3 months ago
+                const lastWarn = prev.find(e => e.id?.startsWith('low_pantry_'));
+                const lastWarnMonth = lastWarn ? parseInt(lastWarn.id.replace('low_pantry_', '')) : -99;
+                if (totalMonthsPlayed - lastWarnMonth < 3) return prev;
+                return [pantryEntry, ...prev].slice(0, 50);
+            });
+        }
 
         // ── HEALTH DRAIN & SICK LEAVE ──────────────────────────────────────────
         const currentHealth = stateRef.current.health ?? 80;
@@ -2047,13 +2717,77 @@ export const GameProvider = ({ children }) => {
         setDependents(prev => prev.map(d => {
             if (d.type === 'child') {
                 const newHealth = Math.max(0, (d.health ?? 80) - 7);
-                return { ...d, childAgeMonths: (d.childAgeMonths || 0) + CHILD_AGING_RATE, health: newHealth };
+                const prevAge = d.childAgeMonths || 0;
+                const newAge = prevAge + CHILD_AGING_RATE;
+                // Child turns 18 (216 child-months) — fire career outcome event
+                if (prevAge < 216 && newAge >= 216 && !d.careerOutcome) {
+                    const nw = stateRef.current.balance || 0;
+                    const tier = d.schoolTier || 'government';
+                    const preTier = d.preschoolTier || 'home';
+                    // Education tiers boost effective networth for career outcomes
+                    const tierBoost    = tier === 'international' ? 5000000 : tier === 'private' ? 1500000 : 0;
+                    const preTierBoost = preTier === 'montessori' ? 1000000 : preTier === 'playschool' ? 300000 : 0;
+                    const effectiveNw = nw + tierBoost + preTierBoost;
+                    let outcome, careerName, careerIncome;
+                    if (effectiveNw > 10000000) { outcome = 'elite'; careerName = 'IIT/IIM Graduate'; careerIncome = 150000; }
+                    else if (effectiveNw > 3000000) { outcome = 'professional'; careerName = 'Professional (Engineer/Doctor)'; careerIncome = 80000; }
+                    else if (effectiveNw > 800000) { outcome = 'graduate'; careerName = 'College Graduate'; careerIncome = 35000; }
+                    else { outcome = 'vocational'; careerName = 'Skilled Trades'; careerIncome = 20000; }
+                    const childEntry = {
+                        id: `child_adult_${d.id}`, name: `${d.name} Turns 18!`,
+                        message: `${d.name} has grown up! Based on the opportunities you provided, they pursued ${careerName} and will earn ₹${careerIncome.toLocaleString()}/mo. They'll be independent from next month — no more child expenses.`,
+                        category: 'positive', impact: 0, month: totalMonthsPlayed, read: false,
+                    };
+                    setEventInbox(prev => [childEntry, ...prev].slice(0, 50));
+                    setLastCrisisEvent(childEntry);
+                    setIsPlaying(false);
+                    return { ...d, childAgeMonths: newAge, health: newHealth, careerOutcome: outcome, careerName, careerIncome };
+                }
+                return { ...d, childAgeMonths: newAge, health: newHealth };
             }
             if (d.type === 'parent') {
-                return { ...d, health: Math.max(0, (d.health ?? 70) - 10) };
+                const decay = d.caretaker ? 4 : 10;
+                return { ...d, health: Math.max(0, (d.health ?? 70) - decay) };
+            }
+            if (d.type === 'spouse' && d.upskilling) {
+                const left = (d.upskillingMonthsLeft || 1) - 1;
+                if (left <= 0) {
+                    const newIncome = 25000 + Math.floor(Math.random() * 20000);
+                    return { ...d, upskilling: false, upskillingMonthsLeft: 0, isWorking: true, income: newIncome };
+                }
+                return { ...d, upskillingMonthsLeft: left };
+            }
+            // Spouse career progression — salary raise every 36 months
+            if (d.type === 'spouse' && d.isWorking && !d.upskilling) {
+                const monthsSinceRaise = totalMonthsPlayed - (d.lastRaiseMonth ?? d.monthAdded ?? 0);
+                if (monthsSinceRaise >= 36) {
+                    const raiseRate = 0.04 + Math.random() * 0.06; // 4–10%
+                    const newIncome = Math.round((d.income || 0) * (1 + raiseRate));
+                    const raiseEntry = {
+                        id: `spouse_raise_${totalMonthsPlayed}`, name: `${d.name} Got a Raise!`,
+                        message: `${d.name}'s career is growing — ${Math.round(raiseRate * 100)}% salary increase. New income: ₹${newIncome.toLocaleString()}/mo.`,
+                        category: 'positive', impact: (newIncome - (d.income || 0)) * 12, month: totalMonthsPlayed, read: false,
+                    };
+                    setEventInbox(prev => [raiseEntry, ...prev].slice(0, 50));
+                    return { ...d, income: newIncome, lastRaiseMonth: totalMonthsPlayed };
+                }
             }
             return d;
         }));
+
+        // Family demand events — random every 2-4 months
+        if (!pendingFamilyDemand && dependents.length > 0 && Math.random() < 0.35) {
+            const state = { dependents, balance, totalMonthsPlayed };
+            const eligible = FAMILY_DEMANDS.filter(d => {
+                const lastFired = demandCooldowns[d.id] || 0;
+                return totalMonthsPlayed - lastFired >= d.cooldown && d.condition(state);
+            });
+            if (eligible.length > 0) {
+                const demand = eligible[Math.floor(Math.random() * eligible.length)];
+                const dep = dependents.find(d => d.type === demand.character);
+                setPendingFamilyDemand({ demand, dep });
+            }
+        }
 
         // Reset PPF yearly contributions counter every 12 months
         if (totalMonthsPlayed % 12 === 11) {
@@ -2083,6 +2817,49 @@ export const GameProvider = ({ children }) => {
             return { ...fd, currentValue: Math.round(fd.currentValue * (1 + monthlyRate)), monthsLeft: fd.monthsLeft - 1 };
         }));
 
+        // Gold price fluctuation (avg ~8% p.a., 2% monthly volatility, market-cycle influenced)
+        setGoldPrice(prev => {
+            const trendPerMonth = 0.08 / 12; // 8% annual trend
+            const volatility = 0.02;
+            const randomChange = (Math.random() * volatility * 2) - volatility;
+            // Gold is counter-cyclical: rises in bear markets
+            const cycleEffect = marketCycle.phase === 'bear' ? 0.005 : marketCycle.phase === 'bull' ? -0.002 : 0;
+            return Math.round(prev * (1 + trendPerMonth + randomChange + cycleEffect));
+        });
+
+        // SGB interest (2.5% p.a. on original issue price, paid semi-annually)
+        if (totalMonthsPlayed > 0 && totalMonthsPlayed % 6 === 0) {
+            const sgbHolding = goldHoldings['sgb'];
+            if (sgbHolding && sgbHolding.grams > 0) {
+                const issuePrice = sgbHolding.avgBuyPrice || goldPrice;
+                const semiAnnualInterest = Math.round(sgbHolding.grams * issuePrice * 0.025 / 2);
+                if (semiAnnualInterest > 0) {
+                    setBalance(prev => prev + semiAnnualInterest);
+                    setGoldHoldings(prev => ({ ...prev, sgb: { ...prev.sgb, interestAccrued: (prev.sgb?.interestAccrued || 0) + semiAnnualInterest } }));
+                    addHistory(`SGB interest (2.5% p.a.)`, semiAnnualInterest, 'income');
+                }
+            }
+        }
+
+        // Credit card monthly reconciliation
+        if (creditCard && creditCard.balance > 0) {
+            const monthsOverdue = totalMonthsPlayed - creditCard.dueMonth;
+            if (monthsOverdue >= 0) {
+                // Interest at 3% per month (36% APR)
+                const monthlyInterest = Math.round(creditCard.balance * (creditCard.apr / 12));
+                setCreditCard(prev => ({ ...prev, balance: prev.balance + monthlyInterest, dueMonth: totalMonthsPlayed + 1 }));
+                setCreditScore(prev => Math.max(300, prev - 15));
+                const cardEntry = {
+                    id: `card_interest_${totalMonthsPlayed}`, name: 'Credit Card Interest',
+                    message: `Unpaid credit card bill of ₹${creditCard.balance.toLocaleString()} accrued ₹${monthlyInterest.toLocaleString()} in interest (36% APR). Pay immediately to stop the spiral. CIBIL score dropped.`,
+                    category: 'crisis', impact: -monthlyInterest, month: totalMonthsPlayed, read: false,
+                };
+                setEventInbox(prev => [cardEntry, ...prev].slice(0, 50));
+                setLastCrisisEvent(cardEntry);
+                setIsPlaying(false);
+            }
+        }
+
         // Market Cycle update
         setMarketCycle(prev => {
             const newMonthsLeft = prev.monthsLeft - 1;
@@ -2097,15 +2874,30 @@ export const GameProvider = ({ children }) => {
             return { ...prev, monthsLeft: newMonthsLeft };
         });
 
-        // Fluctuate Stock Prices (with market cycle influence)
+        // Fluctuate Stock Prices — sector-correlated Gaussian walk with mean reversion
         const cycleEffect = marketCycle.phase === 'bull' ? 0.008 : marketCycle.phase === 'bear' ? -0.007 : 0;
+        // One sector shock per sector per month (stocks within a sector move together)
+        const sectorShocks = {};
+        Object.keys(STOCK_SECTORS).forEach(sec => {
+            sectorShocks[sec] = (Math.random() * 0.04) - 0.02; // ±2% sector swing
+        });
         setMarketPrices(prevPrices => {
             const newPrices = {};
             STOCKS.forEach(stock => {
                 const currentPrice = prevPrices[stock.id] || stock.price;
-                const volatility = stock.volatility || 0.05;
-                const randomChange = (Math.random() * volatility * 2) - volatility;
-                let price = currentPrice * (1 + randomChange + cycleEffect);
+                const vol = (stock.volatility || 0.05) * 0.5; // monthly vol ≈ annual/sqrt(12) but scaled
+                // Box-Muller Gaussian
+                const u1 = Math.max(1e-10, Math.random()), u2 = Math.random();
+                const gauss = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+                const stockNoise = gauss * vol;
+                // Sector correlation (60% weight on sector, 40% idiosyncratic)
+                const sectorBias = (sectorShocks[stock.sector] || 0) * 0.6;
+                // Mild mean reversion — pull back if price drifts >3x or <0.2x of base
+                const basePrice = stock.price;
+                const ratio = currentPrice / basePrice;
+                const reversion = ratio > 3 ? -0.015 : ratio < 0.2 ? 0.015 : 0;
+                const totalChange = cycleEffect + sectorBias + stockNoise * 0.4 + reversion;
+                let price = currentPrice * (1 + totalChange);
                 if (price < 1) price = 1;
                 newPrices[stock.id] = price;
             });
@@ -2229,30 +3021,91 @@ export const GameProvider = ({ children }) => {
         });
         setTotalMonthsPlayed(prev => prev + 1);
 
-        // Stock news (15% chance, with market cycle awareness)
-        if (Math.random() < 0.15) {
+        // Stock news (18% chance) — fires news event and directly shocks affected stocks
+        if (Math.random() < 0.18) {
             const newsTemplates = [
-                { headline: 'RBI holds repo rate at 6.5% — markets steady', sector: 'FINANCE', trend: 0.02 },
-                { headline: 'Nifty hits all-time high on strong FII inflows', sector: 'MARKET', trend: 0.04 },
-                { headline: 'TCS, Infosys report strong Q2 earnings', sector: 'IT', trend: 0.05 },
-                { headline: 'Crude oil spikes — inflation concerns resurface', sector: 'ENERGY', trend: -0.03 },
-                { headline: 'FII selling continues — Nifty under pressure', sector: 'MARKET', trend: -0.04 },
-                { headline: 'Gold at record high on global uncertainty', sector: 'COMMODITY', trend: 0.04 },
-                { headline: 'RBI cuts rates by 25bps — rally in bond markets', sector: 'FINANCE', trend: 0.03 },
-                { headline: 'Zomato turns profitable — stock jumps 8%', sector: 'TECH', trend: 0.07 },
-                { headline: 'Adani group stocks volatile on short-seller report', sector: 'ENERGY', trend: -0.08 },
-                { headline: 'SEBI tightens F&O rules — retail investors cautious', sector: 'MARKET', trend: -0.02 },
-                { headline: 'Budget 2025: ₹1L LTCG exemption increased to ₹1.5L', sector: 'MARKET', trend: 0.03 },
-                { headline: 'Banking NPAs at decade low — sector re-rates', sector: 'BANKING', trend: 0.05 },
-                { headline: 'SIP inflows cross ₹25,000 crore for 6th straight month', sector: 'MARKET', trend: 0.02 },
-                { headline: 'Crypto regulation bill passed — BTC ETF rally', sector: 'CRYPTO', trend: 0.10 },
-                { headline: 'Small-cap index corrects 12% — buy or panic?', sector: 'MARKET', trend: -0.06 },
-                { headline: 'IRCTC launches new premium train service — stock +5%', sector: 'PSU', trend: 0.05 },
-                { headline: 'Monsoon deficit — agri outlook weak, FMCG hit', sector: 'FMCG', trend: -0.03 },
-                { headline: 'Reliance Jio IPO plans confirmed — Reliance surges', sector: 'ENERGY', trend: 0.06 },
+                // RBI / Macro
+                { headline: 'RBI holds repo rate at 6.5% — markets cheer steady stance', sector: 'Banking', trend: 0.025 },
+                { headline: 'RBI cuts repo rate 25bps — banking and NBFC stocks rally', sector: 'Banking', trend: 0.04 },
+                { headline: 'RBI raises rates to curb inflation — rate-sensitives fall', sector: 'Banking', trend: -0.035 },
+                { headline: 'India CPI eases to 4.1% — Nifty gains on rate-cut hopes', sector: 'MARKET', trend: 0.025 },
+                { headline: 'Rupee hits record low vs USD — IT export earnings boost', sector: 'IT', trend: 0.03 },
+                { headline: 'Rupee strengthens — IT sector margin pressure rises', sector: 'IT', trend: -0.02 },
+                // IT
+                { headline: 'TCS, Infosys report strong Q2 on AI deal wins', sector: 'IT', trend: 0.05 },
+                { headline: 'US recession fears — IT outsourcing spend under pressure', sector: 'IT', trend: -0.04 },
+                { headline: 'Wipro wins ₹5,000 Cr multi-year cloud deal', sector: 'IT', trend: 0.06 },
+                { headline: 'HCL Tech raises FY26 revenue guidance on strong order book', sector: 'IT', trend: 0.04 },
+                // Banking
+                { headline: 'Banking NPAs at decade low — sector re-rates sharply higher', sector: 'Banking', trend: 0.05 },
+                { headline: 'HDFC Bank Q3 PAT up 18% — analyst upgrades flow in', sector: 'Banking', trend: 0.04 },
+                { headline: 'SBI reports record profit on improved asset quality', sector: 'Banking', trend: 0.05 },
+                { headline: 'SEBI tightens F&O rules — retail traders pull back', sector: 'MARKET', trend: -0.015 },
+                { headline: 'Bajaj Finance surpasses 90M customer milestone', sector: 'NBFC', trend: 0.05 },
+                { headline: 'Credit card defaults rising — NBFC stocks under pressure', sector: 'NBFC', trend: -0.04 },
+                // Energy / Infra
+                { headline: 'Crude oil spikes to $95 — inflation concerns surface', sector: 'MARKET', trend: -0.025 },
+                { headline: 'Reliance Jio announces 5G rollout in 400 cities', sector: 'Energy', trend: 0.06 },
+                { headline: 'Govt ₹10L Cr infra push — L&T bags massive contracts', sector: 'Infra', trend: 0.07 },
+                { headline: 'Adani short-seller report resurfaces — stocks plunge', sector: 'Energy', trend: -0.09 },
+                { headline: 'Solar tariff policy change boosts Adani Green, Tata Power', sector: 'Energy', trend: 0.05 },
+                // Auto
+                { headline: 'EV sales cross 2L units — Tata Motors leads the charge', sector: 'Auto', trend: 0.07 },
+                { headline: 'Maruti Suzuki records highest-ever monthly bookings', sector: 'Auto', trend: 0.05 },
+                { headline: 'Semiconductor shortage disrupts auto production schedules', sector: 'Auto', trend: -0.04 },
+                // Pharma / FMCG
+                { headline: 'Sun Pharma gets US FDA nod for blockbuster oncology drug', sector: 'Pharma', trend: 0.08 },
+                { headline: 'ITC Hotels demerger complete — value unlocking rally', sector: 'FMCG', trend: 0.06 },
+                { headline: 'Good monsoon forecast lifts FMCG rural demand outlook', sector: 'FMCG', trend: 0.04 },
+                { headline: 'HUL faces margin pressure from palm oil price surge', sector: 'FMCG', trend: -0.03 },
+                // Consumer
+                { headline: 'DMart Q4 revenue up 22% on festive and quick-commerce surge', sector: 'Consumer', trend: 0.05 },
+                { headline: 'Titan Tanishq jewellery posts record quarterly sales', sector: 'Consumer', trend: 0.05 },
+                { headline: 'Indian Hotels Taj expands to 250 properties globally', sector: 'Consumer', trend: 0.04 },
+                // Telecom
+                { headline: 'Airtel 5G subscriber base crosses 100M milestone', sector: 'Telecom', trend: 0.06 },
+                { headline: 'Jio-Airtel spectrum auction drives up capex concerns', sector: 'Telecom', trend: -0.03 },
+                // Macro / Index
+                { headline: 'FII inflows surge ₹30,000 Cr — Nifty hits all-time high', sector: 'MARKET', trend: 0.04 },
+                { headline: 'FII selling hits ₹25,000 Cr — markets bleed red across board', sector: 'MARKET', trend: -0.05 },
+                { headline: 'Union Budget: LTCG exemption raised, infra spending doubled', sector: 'MARKET', trend: 0.04 },
+                { headline: 'India GDP grows 7.8% — global investors rush to Indian equities', sector: 'MARKET', trend: 0.05 },
+                { headline: 'SIP inflows cross ₹25,000 Cr for 6th consecutive month', sector: 'MARKET', trend: 0.02 },
+                { headline: 'Small-cap index corrects 15% — mass panic or golden opportunity?', sector: 'MARKET', trend: -0.07 },
+                // Tech / High-risk
+                { headline: 'Zomato turns cash-flow positive — stock jumps 11%', sector: 'Tech', trend: 0.10 },
+                { headline: 'Swiggy rapid commerce beats Blinkit in monthly orders', sector: 'Tech', trend: 0.07 },
+                { headline: 'Paytm loses payment gateway licence — stock crashes', sector: 'Tech', trend: -0.12 },
+                // Commodity
+                { headline: 'Gold at ₹82,000/10g record high — safe-haven demand spikes', sector: 'Commodity', trend: 0.05 },
+                { headline: 'Global risk-off drives Gold BeES ETF inflows to 3-year high', sector: 'Commodity', trend: 0.04 },
+                { headline: 'Vedanta announces ₹20/share special dividend', sector: 'Mining', trend: 0.08 },
+                // Crypto
+                { headline: 'Crypto regulation bill passed — BTC ETF investors cheer', sector: 'Crypto', trend: 0.12 },
+                { headline: 'CBDT clarifies 30% flat tax on crypto — BTCETF volumes drop', sector: 'Crypto', trend: -0.08 },
+                // IRCTC / PSU
+                { headline: 'IRCTC launches Vande Bharat premium ticketing — stock +5%', sector: 'PSU', trend: 0.05 },
             ];
             const news = newsTemplates[Math.floor(Math.random() * newsTemplates.length)];
-            setStockNews(prev => [{ ...news, date: `${turn.month}/${turn.year}` }, ...prev].slice(0, 20));
+            setStockNews(prev => [{ ...news, date: `${turn.month}/${turn.year}` }, ...prev].slice(0, 25));
+
+            // Apply news shock directly to affected stock prices
+            const affectedSector = NEWS_SECTOR_MAP[news.sector] || news.sector;
+            const affectedIds = affectedSector ? (STOCK_SECTORS[affectedSector] || []) : null;
+            setMarketPrices(prev => {
+                const next = { ...prev };
+                if (affectedIds) {
+                    affectedIds.forEach(id => {
+                        if (next[id]) next[id] = Math.max(1, next[id] * (1 + news.trend * 0.5));
+                    });
+                } else {
+                    // Market-wide: smaller shock to all stocks
+                    STOCKS.forEach(s => {
+                        if (next[s.id]) next[s.id] = Math.max(1, next[s.id] * (1 + news.trend * 0.15));
+                    });
+                }
+                return next;
+            });
         }
 
         // Check achievements after every tick
@@ -2310,6 +3163,21 @@ export const GameProvider = ({ children }) => {
         ppf, nps, contributePPF, contributeNPS,
         fixedDeposits, createFD, breakFD,
 
+        // Gold
+        goldHoldings, goldPrice, goldAssets: GOLD_ASSETS, buyGold, sellGold, getGoldValue,
+
+        // Credit card
+        creditCard, openCreditCard, chargeToCard, payCreditCardBill, closeCreditCard,
+
+        // Financial tips
+        getFinancialTips,
+
+        // Retirement buckets
+        retirementBuckets, setupRetirementBuckets,
+
+        // Real market seeding
+        fetchRealSeedPrices,
+
         // Market
         marketCycle,
 
@@ -2321,7 +3189,12 @@ export const GameProvider = ({ children }) => {
         activeInsurance, buyInsurance, cancelInsurance,
 
         // Dependents
-        dependents, marry, haveChild, feedDependent, getDependentCosts, getSpouseIncome,
+        dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
+        upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
+        buyPharmacyItem, buyClothesItem, setChildSchoolTier, setChildPreschoolTier,
+        itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
+        selectITRForm, collectITRDoc, computeITRTaxFull, submitITR,
+        pendingFamilyDemand, resolveFamilyDemand,
 
         // Crisis
         lastCrisisEvent, activeEffects, setLastCrisisEvent,

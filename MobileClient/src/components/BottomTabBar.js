@@ -23,7 +23,7 @@ const TABS = [
 
 const ALT_TABS = [
     { key: 'home',    label: 'HOME',    color: '#38b2ac' },
-    { key: 'grocery', label: 'GROCERY', color: '#4ade80', isGrocery: true },
+    { key: 'grocery', label: 'SHOP', color: '#4ade80', isGrocery: true },
     { key: 'money',   label: 'MONEY',   color: '#4ade80' },
     { key: 'family',  label: 'FAMILY',  color: '#ec4899' },
     { key: 'goals',   label: 'GOALS',   color: '#fbbf24', isGoals: true },
@@ -34,8 +34,9 @@ const CIRC = 2 * Math.PI * R;
 
 function TurnsRing({ turnsLeft, dailyLimit }) {
     const fraction = dailyLimit > 0 ? turnsLeft / dailyLimit : 0;
-    const dash = fraction * CIRC;
-    const ringColor = turnsLeft <= 1 ? '#f87171' : '#fbbf24';
+    const isFull = fraction >= 1;
+    const dash = isFull ? CIRC : fraction * CIRC;
+    const ringColor = turnsLeft <= 1 ? '#f87171' : turnsLeft <= 3 ? '#fb923c' : '#fbbf24';
     return (
         <Svg width={64} height={64} style={{ position: 'absolute' }}>
             <Circle cx={32} cy={32} r={R} stroke="#1a2040" strokeWidth={3} fill="none" />
@@ -46,7 +47,7 @@ function TurnsRing({ turnsLeft, dailyLimit }) {
                 fill="none"
                 strokeDasharray={`${dash} ${CIRC}`}
                 strokeDashoffset={CIRC / 4}
-                strokeLinecap="round"
+                strokeLinecap={isFull ? 'butt' : 'round'}
             />
         </Svg>
     );
@@ -142,8 +143,8 @@ export default function BottomTabBar({
                             <Animated.View style={{ transform: [{ scale: btnScale }], alignItems: 'center', justifyContent: 'center', position: 'relative', marginBottom: 2 }}>
                                 {!out && <TurnsRing turnsLeft={turnsLeft} dailyLimit={dailyLimit} />}
                                 <TouchableOpacity
-                                    onPress={out ? undefined : handleNextMonth}
-                                    activeOpacity={out ? 1 : 0.8}
+                                    onPress={out ? onNextMonth : handleNextMonth}
+                                    activeOpacity={out ? 0.6 : 0.8}
                                     style={{ alignItems: 'center', justifyContent: 'center', opacity: out ? 0.3 : 1 }}
                                 >
                                     <Image source={COIN_IMG} style={{ width: 52, height: 52 }} resizeMode="contain" />

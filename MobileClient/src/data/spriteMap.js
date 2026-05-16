@@ -38,6 +38,19 @@ export const SPRITE_MAP = {
     'young_soms_1_mid':    require('../../assets/sprites/soms 25-30.png'),
     'young_soms_1_older':  require('../../assets/sprites/soms middleage.png'),
     'young_soms_1_senior': require('../../assets/sprites/soms 50plus.png'),
+
+    // Age variants — sia
+    'young_sia_1_mid':    require('../../assets/sprites/sia 25-30.png'),
+    'young_sia_1_older':  require('../../assets/sprites/sia middleage.png'),
+    'young_sia_1_senior': require('../../assets/sprites/sia 50plus.png'),
+
+    // Age variants — soni
+    'young_soni_1_mid':    require('../../assets/sprites/soni 25-30.png'),
+    'young_soni_1_older':  require('../../assets/sprites/soni middleage.png'),
+    'young_soni_1_senior': require('../../assets/sprites/soni 50plus.png'),
+
+    // Age variants — sara (50+ only)
+    'young_sara_1_senior': require('../../assets/sprites/sara 50plus.png'),
 };
 
 // Age brackets → variant suffix

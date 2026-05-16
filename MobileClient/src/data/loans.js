@@ -54,7 +54,18 @@ export const LOAN_TYPES = [
         min_income: 0,
         min_credit_score: 600,
         description: 'Borrow against property you already own. Lower rate than personal loan.'
-    }
+    },
+    {
+        id: 'marriage_loan',
+        name: 'Marriage Loan',
+        type: 'unsecured',
+        max_amount: 2500000, // 25L
+        base_interest: 11, // 11% p.a.
+        max_tenure: 60, // 5 years
+        min_income: 25000,
+        min_credit_score: 620,
+        description: 'Special wedding finance package. Covers venue, catering, jewellery, and honeymoon. Banks offer lower rates than personal loans during wedding season.'
+    },
 ];
 
 // EMI formula: P × r × (1+r)^n / ((1+r)^n - 1)

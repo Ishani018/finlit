@@ -48,8 +48,8 @@ function ShopCard({ item, balance, onBuy }) {
     const img = ITEM_IMAGES[item.id];
     return (
         <View style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
-            <View style={{ width: '100%', aspectRatio: 1, backgroundColor: C.card }}>
-                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
+            <View style={{ width: '100%', aspectRatio: 0.78, backgroundColor: C.card }}>
+                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="contain" />}
                 <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: catColor + 'cc', paddingHorizontal: 5, paddingVertical: 1 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#000', letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
                 </View>
@@ -81,8 +81,8 @@ function PantryCard({ entry, onConsume }) {
     const img = ITEM_IMAGES[item.id];
     return (
         <View style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
-            <View style={{ width: '100%', aspectRatio: 1, backgroundColor: C.card }}>
-                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
+            <View style={{ width: '100%', aspectRatio: 0.78, backgroundColor: C.card }}>
+                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="contain" />}
                 <View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(4,6,14,0.9)', borderWidth: 1, borderColor: catColor, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: catColor }}>x{entry.qty}</Text>
                 </View>
@@ -140,6 +140,7 @@ export default function GroceryScreen({ onClose }) {
     };
 
     const pantryItems = pantry.filter(p => p.qty > 0);
+    const totalPantryQty = pantryItems.reduce((s, p) => s + p.qty, 0);
     const hpColor = health >= 60 ? C.sage : health >= 30 ? C.gold : C.red;
     const hpPct = Math.max(0, Math.min(100, health));
 
@@ -184,6 +185,14 @@ export default function GroceryScreen({ onClose }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, margin: PAD, marginBottom: 0, backgroundColor: '#0d0c05', borderWidth: 1, borderColor: '#78350f', padding: 10 }}>
                     <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.gold, flex: 1 }}>LOW HEALTH — Risk of sick leave.</Text>
+                </View>
+            )}
+            {totalPantryQty <= 3 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, margin: PAD, marginBottom: 0, backgroundColor: '#080d15', borderWidth: 1, borderColor: '#1e3a5f', padding: 10 }}>
+                    <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#60a5fa', flex: 1 }}>
+                        {totalPantryQty === 0 ? 'PANTRY EMPTY — Stock up now to avoid health drain.' : `LOW STOCK — Only ${totalPantryQty} item${totalPantryQty === 1 ? '' : 's'} left. Stock up soon.`}
+                    </Text>
                 </View>
             )}
 

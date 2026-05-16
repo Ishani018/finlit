@@ -1,0 +1,442 @@
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { useGame } from '../context/GameContext';
+import { GROCERY_ITEMS, CATEGORY_COLORS } from '../data/groceries';
+import { PHARMACY_ITEMS, CLOTHES_ITEMS, SHOP_CATEGORY_COLORS } from '../data/shopItems';
+
+const PAD = 14;
+const GAP = 8;
+
+const C = {
+    bg:      '#06080f',
+    panel:   '#0d1020',
+    card:    '#070a16',
+    border:  '#1a2040',
+    blue:    '#3b82f6',
+    sage:    '#4ade80',
+    red:     '#f87171',
+    gold:    '#fbbf24',
+    pink:    '#ec4899',
+    cream:   '#c8d4f0',
+    dim:     '#445070',
+    dark:    '#2a3560',
+};
+
+const KIRANA_IMG   = require('../../assets/jobs/kirana store.png');
+const PHARMACY_IMG = require('../../assets/jobs/chemist drugstore.png');
+const CLOTHES_IMG  = require('../../assets/jobs/coaching centre.png');
+
+const ITEM_IMAGES = {
+    dal_chawal:       require('../../assets/groceries/dal chawal.png'),
+    bread_eggs:       require('../../assets/groceries/bread and eggs.png'),
+    instant_noodles:  require('../../assets/groceries/cup noodles.png'),
+    fresh_veggies:    require('../../assets/groceries/veggies.png'),
+    fruits:           require('../../assets/groceries/fruits.png'),
+    organic_meal_kit: require('../../assets/groceries/healthy meal box.png'),
+    protein_pack:     require('../../assets/groceries/paneer tofu.png'),
+    snack_box:        require('../../assets/groceries/chips snacks box.png'),
+    chai:             require('../../assets/groceries/chai.png'),
+    milk:             require('../../assets/groceries/milk.png'),
+    paratha:          require('../../assets/groceries/paratha.png'),
+    rajma_rice:       require('../../assets/groceries/rajma rice.png'),
+    thaali:           require('../../assets/groceries/thaali.png'),
+    smoothie:         require('../../assets/groceries/smoothis.png'),
+    mithai_box:       require('../../assets/groceries/mithai box.png'),
+};
+
+// ── Header ────────────────────────────────────────────────────────────────────
+function ScreenHeader({ title, subtitle, onBack, onClose }) {
+    return (
+        <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                {onBack && (
+                    <TouchableOpacity onPress={onBack} style={{ width: 30, height: 30, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center', marginRight: 4 }}>
+                        <FontAwesome5 name="chevron-left" size={11} color={C.dim} />
+                    </TouchableOpacity>
+                )}
+                <View>
+                    {subtitle && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 4 }}>{subtitle}</Text>}
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>{title}</Text>
+                </View>
+            </View>
+            {onClose && (
+                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                    <FontAwesome5 name="times" size={14} color={C.dim} />
+                </TouchableOpacity>
+            )}
+        </View>
+    );
+}
+
+// ── Landing category card ─────────────────────────────────────────────────────
+function CategoryCard({ title, subtitle, color, img, onPress }) {
+    return (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.85}
+            style={{ borderWidth: 1, borderColor: color + '50', backgroundColor: C.panel, overflow: 'hidden', marginBottom: GAP }}>
+            <View style={{ height: 130, position: 'relative' }}>
+                <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, backgroundColor: color }} />
+                <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: color, letterSpacing: 4 }}>{subtitle}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 30 }}>{title}</Text>
+                </View>
+                <View style={{ position: 'absolute', top: 16, right: 16 }}>
+                    <FontAwesome5 name="chevron-right" size={14} color={color + '80'} />
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+// ── Grocery section (inline) ──────────────────────────────────────────────────
+function GrocerySection({ onBack, onClose }) {
+    const { balance, health, pantry, buyGrocery, consumeFood } = useGame();
+    const [tab, setTab] = useState('shop');
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, ok) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 2200); };
+
+    const handleBuy = (item) => {
+        const r = buyGrocery(item.id);
+        showToast(r.success ? `${item.name} added to pantry` : r.msg, r.success);
+    };
+    const handleConsume = (itemId) => {
+        const item = GROCERY_ITEMS.find(g => g.id === itemId);
+        const r = consumeFood(itemId);
+        showToast(r.success ? `+${item?.healthRestore || 0} HP` : r.msg, r.success);
+    };
+
+    const pantryItems = (pantry || []).filter(p => p.qty > 0);
+
+    return (
+        <View style={{ flex: 1 }}>
+            <ScreenHeader title="Kirana Store" subtitle="GROCERY" onBack={onBack} onClose={onClose} />
+
+            {/* Tabs */}
+            <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: C.border, backgroundColor: C.panel }}>
+                {[['shop', 'SHOP'], ['pantry', 'PANTRY']].map(([key, label]) => (
+                    <TouchableOpacity key={key} onPress={() => setTab(key)}
+                        style={{ flex: 1, paddingVertical: 10, alignItems: 'center', borderBottomWidth: 2, borderColor: tab === key ? C.gold : 'transparent' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: tab === key ? C.gold : C.dim, letterSpacing: 2 }}>{label}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
+                {tab === 'shop' ? (
+                    <>
+                        {Array.from({ length: Math.ceil(GROCERY_ITEMS.length / 2) }).map((_, row) => (
+                            <View key={row} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+                                {GROCERY_ITEMS.slice(row * 2, row * 2 + 2).map(item => {
+                                    const catColor = CATEGORY_COLORS[item.category] || C.dim;
+                                    const canAfford = balance >= item.price;
+                                    const img = ITEM_IMAGES[item.id];
+                                    return (
+                                        <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+                                            <View style={{ height: 90, position: 'relative' }}>
+                                                {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: catColor + '15' }} />}
+                                                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
+                                                <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: catColor, paddingHorizontal: 5, paddingVertical: 1 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
+                                                </View>
+                                            </View>
+                                            <View style={{ padding: 8 }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
+                                                <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
+                                                    {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}😊</Text>}
+                                                </View>
+                                                <TouchableOpacity onPress={() => handleBuy(item)} disabled={!canAfford}
+                                                    style={{ marginTop: 6, borderWidth: 1, borderColor: canAfford ? C.gold + '60' : C.border, backgroundColor: canAfford ? C.gold + '12' : C.card, paddingVertical: 5, alignItems: 'center' }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: canAfford ? C.gold : C.dark }}>₹{item.price.toLocaleString()}</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        ))}
+                    </>
+                ) : (
+                    pantryItems.length === 0 ? (
+                        <View style={{ padding: 30, alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, textAlign: 'center', lineHeight: 24 }}>Pantry is empty.{'\n'}Buy items from the shop.</Text>
+                        </View>
+                    ) : (
+                        pantryItems.map(entry => {
+                            const item = GROCERY_ITEMS.find(g => g.id === entry.itemId);
+                            if (!item) return null;
+                            const img = ITEM_IMAGES[item.id];
+                            return (
+                                <View key={entry.itemId} style={{ flexDirection: 'row', borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, marginBottom: GAP, overflow: 'hidden' }}>
+                                    <View style={{ width: 70, height: 70, position: 'relative' }}>
+                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.card }} />}
+                                        <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: C.gold, paddingHorizontal: 5, paddingVertical: 1 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000' }}>×{entry.qty}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ flex: 1, padding: 10, justifyContent: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream }}>{item.name}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore} HP</Text>
+                                    </View>
+                                    <TouchableOpacity onPress={() => handleConsume(entry.itemId)}
+                                        style={{ width: 60, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderColor: C.border, backgroundColor: C.card }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.gold }}>EAT</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            );
+                        })
+                    )
+                )}
+            </ScrollView>
+
+            {toast && (
+                <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
+
+const MEDICINE_IMAGES = {
+    paracetamol:  require('../../assets/medicine/paracetemol.png'),
+    cough_syrup:  require('../../assets/medicine/cough syrup.png'),
+    antacid:      require('../../assets/medicine/antacid.png'),
+    vitamin_c:    require('../../assets/medicine/ChatGPT Image May 16, 2026, 05_22_51 PM.png'),
+    multivitamin: require('../../assets/medicine/mulivitamins.png'),
+    first_aid:    require('../../assets/medicine/first aid.png'),
+    antibiotics:  require('../../assets/medicine/antibiotic.png'),
+    bp_medicine:  require('../../assets/medicine/blood pressure.png'),
+    ayurvedic:    require('../../assets/medicine/chyawanprash.png'),
+    calcium:      require('../../assets/medicine/ChatGPT Image May 16, 2026, 05_34_49 PM.png'),
+};
+
+// ── Pharmacy section ──────────────────────────────────────────────────────────
+function PharmacySection({ onBack, onClose }) {
+    const { balance, dependents, buyPharmacyItem } = useGame();
+    const [toast, setToast] = useState(null);
+    const [pickingFor, setPickingFor] = useState(null); // item being assigned
+
+    const showToast = (msg, ok) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 2200); };
+
+    const canAfford = (item) => balance >= item.price;
+
+    const handleBuy = (item) => {
+        if (!canAfford(item)) { showToast('Not enough balance', false); return; }
+        // If dependents, ask who to give it to — for now give to self (player)
+        setPickingFor(item);
+    };
+
+    return (
+        <View style={{ flex: 1 }}>
+            <ScreenHeader title="Pharmacy" subtitle="HEALTH & MEDICINE" onBack={onBack} onClose={onClose} />
+            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
+                {Array.from({ length: Math.ceil(PHARMACY_ITEMS.length / 2) }).map((_, row) => (
+                    <View key={row} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+                        {PHARMACY_ITEMS.slice(row * 2, row * 2 + 2).map(item => {
+                            const affordable = canAfford(item);
+                            const img = MEDICINE_IMAGES[item.id];
+                            return (
+                                <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+                                    <View style={{ height: 90, position: 'relative' }}>
+                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.sage + '15' }} />}
+                                        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
+                                        <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: C.sage, paddingHorizontal: 5, paddingVertical: 1 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>PHARMACY</Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ padding: 8 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
+                                        <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
+                                        </View>
+                                        <TouchableOpacity onPress={() => handleBuy(item)} disabled={!affordable}
+                                            style={{ marginTop: 6, borderWidth: 1, borderColor: affordable ? C.sage + '60' : C.border, backgroundColor: affordable ? C.sage + '12' : C.card, paddingVertical: 5, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: affordable ? C.sage : C.dark }}>₹{item.price.toLocaleString()}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            );
+                        })}
+                    </View>
+                ))}
+            </ScrollView>
+
+            {/* Who to give medicine to */}
+            {pickingFor && (
+                <RecipientPicker
+                    item={pickingFor}
+                    dependents={dependents}
+                    balance={balance}
+                    buyPharmacyItem={buyPharmacyItem}
+                    onPick={() => {
+                        showToast(`${pickingFor.name} given — +${pickingFor.healthRestore} HP`, true);
+                        setPickingFor(null);
+                    }}
+                    onClose={() => setPickingFor(null)}
+                />
+            )}
+
+            {toast && (
+                <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
+
+// ── Recipient picker for pharmacy ─────────────────────────────────────────────
+function RecipientPicker({ item, dependents, balance, buyPharmacyItem, onPick, onClose }) {
+    const members = [
+        { id: 'self', name: 'Yourself', type: 'self' },
+        ...dependents.filter(d => d.type === 'child' || d.type === 'parent' || d.type === 'spouse'),
+    ];
+
+    const handlePick = (member) => {
+        const r = buyPharmacyItem(item, member.id);
+        if (!r.success) { onClose(); return; }
+        onPick(member.id);
+    };
+
+    return (
+        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.95)', zIndex: 50, justifyContent: 'flex-end' }}>
+            <View style={{ backgroundColor: C.panel, borderTopWidth: 1, borderColor: C.border, padding: PAD }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, marginBottom: 4 }}>Who gets the {item.name}?</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, marginBottom: 14 }}>₹{item.price} · +{item.healthRestore} HP</Text>
+                {members.map(m => (
+                    <TouchableOpacity key={m.id} onPress={() => handlePick(m)}
+                        style={{ borderWidth: 1, borderColor: C.sage + '50', backgroundColor: C.sage + '0a', padding: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.cream }}>{m.name}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.sage }}>+{item.healthRestore} HP</Text>
+                    </TouchableOpacity>
+                ))}
+                <TouchableOpacity onPress={onClose} style={{ borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center', marginTop: 4 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>CANCEL</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
+
+// ── Clothes & Toys section ────────────────────────────────────────────────────
+function ClothesSection({ onBack, onClose }) {
+    const { balance, buyClothesItem } = useGame();
+    const [tab, setTab] = useState('KIDS');
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, ok) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 2200); };
+
+    const filtered = CLOTHES_ITEMS.filter(i => i.tag === tab);
+
+    const handleBuy = (item) => {
+        const r = buyClothesItem(item);
+        showToast(r.msg, r.success);
+    };
+
+    return (
+        <View style={{ flex: 1 }}>
+            <ScreenHeader title="Clothes & Toys" subtitle="SHOPPING" onBack={onBack} onClose={onClose} />
+            <View style={{ flexDirection: 'row', gap: GAP, padding: PAD, paddingBottom: 0 }}>
+                {[
+                    { key: 'KIDS', label: "Kids' Section", sub: 'TOYS & UNIFORMS', color: SHOP_CATEGORY_COLORS.KIDS },
+                    { key: 'ADULT', label: 'Adults', sub: 'FASHION & WEAR', color: SHOP_CATEGORY_COLORS.ADULT },
+                ].map(cat => {
+                    const active = tab === cat.key;
+                    return (
+                        <TouchableOpacity key={cat.key} onPress={() => setTab(cat.key)} activeOpacity={0.8}
+                            style={{ flex: 1, borderWidth: 1, borderColor: active ? cat.color : C.border, backgroundColor: active ? cat.color + '14' : C.panel, padding: 12 }}>
+                            <View style={{ height: 3, backgroundColor: active ? cat.color : C.border, marginBottom: 8 }} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: active ? cat.color : C.dim, letterSpacing: 3 }}>{cat.sub}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: active ? cat.color : C.dim, lineHeight: 22 }}>{cat.label}</Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
+                {Array.from({ length: Math.ceil(filtered.length / 2) }).map((_, row) => (
+                    <View key={row} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+                        {filtered.slice(row * 2, row * 2 + 2).map(item => {
+                            const color = SHOP_CATEGORY_COLORS[item.tag];
+                            const affordable = balance >= item.price;
+                            return (
+                                <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: affordable ? color + '40' : C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+                                    <View style={{ height: 6, backgroundColor: color + (affordable ? 'cc' : '30') }} />
+                                    <View style={{ padding: 12 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream, lineHeight: 19 }}>{item.name}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginTop: 2, marginBottom: 8 }}>{item.desc}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: color, marginBottom: 8 }}>+{item.happinessBoost} 😊{item.healthBoost > 0 ? `  +${item.healthBoost} HP` : ''}</Text>
+                                        <TouchableOpacity onPress={() => handleBuy(item)} disabled={!affordable}
+                                            style={{ borderWidth: 1, borderColor: affordable ? color + '60' : C.border, backgroundColor: affordable ? color + '12' : C.card, paddingVertical: 6, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: affordable ? color : C.dark }}>₹{item.price.toLocaleString()}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            );
+                        })}
+                    </View>
+                ))}
+            </ScrollView>
+            {toast && (
+                <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
+
+// ── Main ShopScreen ───────────────────────────────────────────────────────────
+export default function ShopScreen({ onClose }) {
+    const [section, setSection] = useState(null);
+    const { balance, health } = useGame();
+
+    if (section === 'grocery')  return <GrocerySection  onBack={() => setSection(null)} onClose={onClose} />;
+    if (section === 'pharmacy') return <PharmacySection onBack={() => setSection(null)} onClose={onClose} />;
+    if (section === 'clothes')  return <ClothesSection  onBack={() => setSection(null)} onClose={onClose} />;
+
+    return (
+        <View style={{ flex: 1, backgroundColor: C.bg }}>
+            <ScreenHeader title="Shop" subtitle="MARKETPLACE" onClose={onClose} />
+
+            {/* Balance + health strip */}
+            <View style={{ flexDirection: 'row', gap: GAP, padding: PAD, paddingBottom: 0 }}>
+                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>BALANCE</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.gold }}>₹{balance.toLocaleString()}</Text>
+                </View>
+                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>YOUR HEALTH</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: health >= 60 ? C.sage : health >= 30 ? C.gold : C.red }}>{Math.round(health)}/100</Text>
+                </View>
+            </View>
+
+            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
+                <CategoryCard
+                    title="Kirana Store"
+                    subtitle="GROCERY & PANTRY"
+                    color={C.gold}
+                    img={KIRANA_IMG}
+                    onPress={() => setSection('grocery')}
+                />
+                <CategoryCard
+                    title="Pharmacy"
+                    subtitle="HEALTH & MEDICINE"
+                    color={C.sage}
+                    img={PHARMACY_IMG}
+                    onPress={() => setSection('pharmacy')}
+                />
+                <CategoryCard
+                    title="Clothes & Toys"
+                    subtitle="FASHION & FUN"
+                    color={C.pink}
+                    img={CLOTHES_IMG}
+                    onPress={() => setSection('clothes')}
+                />
+            </ScrollView>
+        </View>
+    );
+}

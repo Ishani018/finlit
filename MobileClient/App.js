@@ -22,13 +22,15 @@ import CareersScreen from './src/screens/CareersScreen';
 import EducationScreen from './src/screens/EducationScreen';
 import InsuranceScreen from './src/screens/InsuranceScreen';
 import BankScreen from './src/screens/BankScreen';
-import GroceryScreen from './src/screens/GroceryScreen';
+import ShopScreen from './src/screens/ShopScreen';
 import GoalsScreen from './src/screens/GoalsScreen';
 import ChoiceDialog from './src/components/ChoiceDialog';
 import FinancialTip, { FINANCIAL_TIPS } from './src/components/FinancialTip';
 import PixelDialog from './src/components/PixelDialog';
 import BottomTabBar from './src/components/BottomTabBar';
 import MonthSummaryCard from './src/components/MonthSummaryCard';
+import DailyLimitScreen from './src/components/DailyLimitScreen';
+import CrisisSimulator from './src/components/CrisisSimulator';
 import CRTOverlay from './src/components/CRTOverlay';
 import Vignette from './src/components/Vignette';
 import { getSpriteImage } from './src/data/spriteMap';
@@ -340,6 +342,8 @@ const GameLayout = ({ onHardReset }) => {
     turnsLeftToday, DAILY_TURN_LIMIT,
     health, sickLeaveMonths,
     getTotalEMI,
+    pendingFamilyDemand, resolveFamilyDemand,
+    pantry,
   } = useGame();
 
   const [activeMenu, setActiveMenu] = useState(null);
@@ -351,7 +355,12 @@ const GameLayout = ({ onHardReset }) => {
   const [careerSubTab, setCareerSubTab] = useState(null); // null = landing | jobs | study
   const [moneySubTab, setMoneySubTab] = useState(null);
   const [showGrocery, setShowGrocery] = useState(false);
+  const [showPantryBanner, setShowPantryBanner] = useState(false);
+  const pantryBannerTimerRef = useRef(null);
   const [showGoals, setShowGoals] = useState(false);
+  const [showDailyLimit, setShowDailyLimit] = useState(false);
+  const [showCrisisSimulator, setShowCrisisSimulator] = useState(false);
+  const monthsPlayedTodayRef = useRef(0);
   const [showHealthReport, setShowHealthReport] = useState(false);
   const [showHappinessReport, setShowHappinessReport] = useState(false);
   const [currentTip, setCurrentTip] = useState(null);
@@ -363,6 +372,20 @@ const GameLayout = ({ onHardReset }) => {
   const [viewMode, setViewMode] = useState('home');
   useEffect(() => { AsyncStorage.getItem('finlit_view_mode').then(v => { if (v) setViewMode(v); }); }, []);
   const switchViewMode = (v) => { setViewMode(v); AsyncStorage.setItem('finlit_view_mode', v); };
+
+  // Low pantry banner — show when ≤3 items, auto-dismiss after 20s
+  useEffect(() => {
+    const totalQty = (pantry || []).reduce((s, p) => s + (p.qty || 0), 0);
+    if (totalQty <= 3 && health >= 30) {
+      setShowPantryBanner(true);
+      clearTimeout(pantryBannerTimerRef.current);
+      pantryBannerTimerRef.current = setTimeout(() => setShowPantryBanner(false), 20000);
+    } else {
+      setShowPantryBanner(false);
+      clearTimeout(pantryBannerTimerRef.current);
+    }
+    return () => clearTimeout(pantryBannerTimerRef.current);
+  }, [pantry, health]);
 
   // Floating money indicator — auto-clears after animation so tab switches never replay it
   const [activeFlow, setActiveFlow] = useState(null);
@@ -380,6 +403,7 @@ const GameLayout = ({ onHardReset }) => {
   const [selectedStock, setSelectedStock] = useState(null);
   const [tradeQty, setTradeQty] = useState('1');
   const [tradeTab, setTradeTab] = useState('BUY');
+  const [stocksView, setStocksView] = useState('list'); // 'list' | 'news'
 
   // MF state
   const [selectedMF, setSelectedMF] = useState(null);
@@ -484,6 +508,21 @@ const GameLayout = ({ onHardReset }) => {
       'OK'
     );
   }, [lastCrisisEvent]);
+
+  // Family demand events — show YES/NO dialog
+  useEffect(() => {
+    if (!pendingFamilyDemand) return;
+    const { demand, dep } = pendingFamilyDemand;
+    showDialog(
+      demand.getTitle(dep),
+      demand.getMessage(dep),
+      'warning',
+      () => { closeDialog(); resolveFamilyDemand(true); },
+      demand.confirmText || 'YES',
+      demand.declineText || 'NOT NOW',
+      () => { closeDialog(); resolveFamilyDemand(false); }
+    );
+  }, [pendingFamilyDemand]);
 
   useBackgroundMusic(isPlaying);
 
@@ -945,6 +984,29 @@ const GameLayout = ({ onHardReset }) => {
             </TouchableOpacity>
           )}
 
+          {/* Low pantry warning banner — auto-dismisses after 20s */}
+          {activeMenu !== 'advisor' && showPantryBanner && (() => {
+            const totalQty = (pantry || []).reduce((s, p) => s + (p.qty || 0), 0);
+            return (
+              <TouchableOpacity
+                onPress={() => { setShowPantryBanner(false); setShowGrocery(true); }}
+                activeOpacity={0.85}
+                style={{ position: 'absolute', bottom: 46, left: 10, right: 10, zIndex: 20, backgroundColor: 'rgba(8,13,25,0.97)', borderWidth: 1, borderColor: '#1e3a5f', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, gap: 10 }}
+              >
+                <Image source={require('./assets/ui_comp/groceryshop.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', letterSpacing: 1 }}>
+                    {totalQty === 0 ? 'PANTRY EMPTY — Stock up now!' : `LOW STOCK — ${totalQty} item${totalQty === 1 ? '' : 's'} left`}
+                  </Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>
+                    Tap to buy groceries • dismisses in 20s
+                  </Text>
+                </View>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa' }}>SHOP ▶</Text>
+              </TouchableOpacity>
+            );
+          })()}
+
           {/* Floating Money Indicator */}
           {activeMenu !== 'advisor' && activeFlow && (
             <FloatingMoneyIndicator flow={activeFlow} />
@@ -1316,8 +1378,22 @@ const GameLayout = ({ onHardReset }) => {
                         {/* ===== STOCKS ===== */}
                         {investCategory === 'stocks' && !selectedStock && (
                           <StyledView>
+                            {/* Tab bar: STOCKS | MARKET NEWS */}
+                            <View style={{ flexDirection: 'row', marginBottom: 12, borderWidth: 1, borderColor: '#1a2040' }}>
+                              {[['list', 'STOCKS'], ['news', `MARKET NEWS${stockNews.length > 0 ? ` (${stockNews.length})` : ''}`]].map(([key, label]) => (
+                                <TouchableOpacity key={key} onPress={() => setStocksView(key)}
+                                  style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: stocksView === key ? '#070a16' : '#0d1020', borderRightWidth: key === 'list' ? 1 : 0, borderColor: '#1a2040', position: 'relative' }}>
+                                  {stocksView === key && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: '#3b82f6' }} />}
+                                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: stocksView === key ? '#60a5fa' : '#2a3560', letterSpacing: 1 }}>{label}</Text>
+                                </TouchableOpacity>
+                              ))}
+                            </View>
+
+                            {/* Market cycle indicator */}
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                              <StyledText className="text-xl font-bold text-white uppercase tracking-wider">Indian Stocks</StyledText>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', letterSpacing: 2 }}>
+                                {stocksView === 'list' ? 'INDIAN STOCKS' : 'MARKET NEWS FEED'}
+                              </Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: marketCycle.phase === 'bull' ? '#4ade80' : marketCycle.phase === 'bear' ? '#f87171' : '#fbbf24' }} />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070' }}>
@@ -1325,7 +1401,57 @@ const GameLayout = ({ onHardReset }) => {
                                 </Text>
                               </View>
                             </View>
-                            {Array.from({ length: Math.ceil(STOCKS.length / 2) }).map((_, rowIdx) => (
+
+                            {/* ── NEWS FEED ── */}
+                            {stocksView === 'news' && (() => {
+                              const SECTOR_COLORS = {
+                                'IT': '#60a5fa', 'Banking': '#818cf8', 'NBFC': '#a78bfa',
+                                'Energy': '#fb923c', 'Infra': '#fbbf24', 'Auto': '#f59e0b',
+                                'Pharma': '#4ade80', 'FMCG': '#86efac', 'Consumer': '#34d399',
+                                'Telecom': '#22d3ee', 'PSU': '#94a3b8', 'Commodity': '#fde68a',
+                                'Mining': '#a16207', 'Tech': '#e879f9', 'Crypto': '#f43f5e',
+                                'MARKET': '#c8d4f0', 'FINANCE': '#818cf8', 'ENERGY': '#fb923c',
+                              };
+                              if (stockNews.length === 0) {
+                                return (
+                                  <View style={{ alignItems: 'center', paddingVertical: 40, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#2a3560', textAlign: 'center' }}>
+                                      No news yet.{'\n'}Advance a few months to see market events.
+                                    </Text>
+                                  </View>
+                                );
+                              }
+                              return stockNews.map((item, idx) => {
+                                const isPositive = (item.trend || 0) >= 0;
+                                const secColor = SECTOR_COLORS[item.sector] || '#c8d4f0';
+                                const trendPct = item.trend ? `${isPositive ? '+' : ''}${(item.trend * 100).toFixed(0)}%` : null;
+                                const advice = isPositive
+                                  ? 'Sectors: consider adding positions'
+                                  : 'Sectors: review exposure, possible dip';
+                                return (
+                                  <View key={idx} style={{ borderWidth: 1, borderColor: isPositive ? '#4ade8030' : '#f8717130', backgroundColor: isPositive ? '#050f0a' : '#0f0508', marginBottom: 8, padding: 12 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                      <View style={{ backgroundColor: secColor + '22', borderWidth: 1, borderColor: secColor + '55', paddingHorizontal: 6, paddingVertical: 1 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: secColor, letterSpacing: 1 }}>{(item.sector || 'MARKET').toUpperCase()}</Text>
+                                      </View>
+                                      {trendPct && (
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: isPositive ? '#4ade80' : '#f87171' }}>
+                                          {isPositive ? '▲' : '▼'} {trendPct}
+                                        </Text>
+                                      )}
+                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', marginLeft: 'auto' }}>{item.date}</Text>
+                                    </View>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#e2e8f0', lineHeight: 20, marginBottom: 6 }}>{item.headline}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: isPositive ? '#4ade8088' : '#f8717188' }}>
+                                      {isPositive ? '↑' : '↓'} {advice}
+                                    </Text>
+                                  </View>
+                                );
+                              });
+                            })()}
+
+                            {/* ── STOCK GRID ── */}
+                            {stocksView === 'list' && Array.from({ length: Math.ceil(STOCKS.length / 2) }).map((_, rowIdx) => (
                               <View key={rowIdx} style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                                 {STOCKS.slice(rowIdx * 2, rowIdx * 2 + 2).map(stock => {
                                   const currentPrice = marketPrices[stock.id] || stock.price;
@@ -1973,7 +2099,7 @@ const GameLayout = ({ onHardReset }) => {
         {/* ── GROCERY OVERLAY ── */}
         {showGrocery && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
-            <GroceryScreen onClose={() => setShowGrocery(false)} />
+            <ShopScreen onClose={() => setShowGrocery(false)} />
           </View>
         )}
 
@@ -1984,9 +2110,39 @@ const GameLayout = ({ onHardReset }) => {
           </View>
         )}
 
+        {/* ── DAILY LIMIT OVERLAY — shown when 6 turns exhausted ── */}
+        <DailyLimitScreen
+          visible={showDailyLimit}
+          turnsUsed={DAILY_TURN_LIMIT - turnsLeftToday()}
+          dailyLimit={DAILY_TURN_LIMIT}
+          monthsPlayedToday={monthsPlayedTodayRef.current}
+          onDismiss={() => setShowDailyLimit(false)}
+          onCrisisSimulator={() => { setShowDailyLimit(false); setShowCrisisSimulator(true); }}
+        />
+
+        {/* ── CRISIS SIMULATOR — accessible from daily limit screen ── */}
+        <CrisisSimulator
+          visible={showCrisisSimulator}
+          gameState={{
+            balance, netWorth,
+            currentJob,
+            loans,
+            activeInsurance,
+            portfolio, marketPrices,
+            mfPortfolio, mfNavs,
+            properties,
+            dependents,
+            sipPlans,
+          }}
+          onClose={() => setShowCrisisSimulator(false)}
+        />
+
+        <View style={{ zIndex: 500 }}>
         <BottomTabBar
           activeTab={activeTab}
           onTabPress={(tab) => {
+            setShowGrocery(false);
+            setShowGoals(false);
             setActiveTab(tab);
             if (tab !== 'money') { setInvestCategory(null); setMoneySubTab(null); }
           }}
@@ -1994,8 +2150,15 @@ const GameLayout = ({ onHardReset }) => {
           onGoals={() => setShowGoals(true)}
           onNextMonth={() => {
             const left = turnsLeftToday();
-            if (left <= 0) return;
+            if (left <= 0) {
+              setShowDailyLimit(true);
+              return;
+            }
+            monthsPlayedTodayRef.current += 1;
             nextMonth();
+            if (left - 1 <= 0) {
+              setTimeout(() => setShowDailyLimit(true), 600);
+            }
           }}
           turnsLeft={turnsLeftToday()}
           dailyLimit={DAILY_TURN_LIMIT}
@@ -2006,6 +2169,7 @@ const GameLayout = ({ onHardReset }) => {
             family: (health < 30 || (activeInsurance.length === 0 && dependents.length > 0)) ? true : null,
           }}
         />
+        </View>
 
         {/* --- JOB DETAIL MODAL (Unchanged Logic, just ensuring it overlays everything) --- */}
         <ResponsiveModal
@@ -2343,7 +2507,7 @@ const GameLayout = ({ onHardReset }) => {
               const housingEffect   = Math.round((qualityScore - 5) * 0.25 * 10) / 10;
               const totalLoan       = loans?.reduce((s, l) => s + (l.remaining || 0), 0) || 0;
               const debtEffect      = Math.round(-(totalLoan / 10000000) * 0.4 * 10) / 10;
-              const familyEffect    = Math.min(dependents?.length * 0.3, 1.2);
+              const familyEffect    = Math.round(Math.min((dependents?.length || 0) * 0.3, 1.2) * 10) / 10;
               const jobEffect       = currentJob ? 0.15 : -0.4;
               const netFlow         = (currentJob?.salary || 0) - (currentHousing?.maintenance || 0);
               const financeEffect   = netFlow < 0 ? -0.5 : 0.1;
@@ -2354,7 +2518,7 @@ const GameLayout = ({ onHardReset }) => {
                   <View style={{ paddingVertical: 8, borderBottomWidth: 1, borderColor: '#1a2040' }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070' }}>{label}</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: c }}>{value > 0 ? '+' : ''}{value}/mo</Text>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: c }}>{value > 0 ? '+' : ''}{Math.round(value * 10) / 10}/mo</Text>
                     </View>
                     {tip && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#1e2840', lineHeight: 14, marginTop: 2 }}>{tip}</Text>}
                   </View>

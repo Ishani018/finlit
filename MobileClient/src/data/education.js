@@ -79,5 +79,16 @@ export const EDUCATION = [
         req_degrees: [],
         image: require('../../assets/jobs/microbiologist.png'),
         description: '4-year research degree. Low tuition (stipend-funded) but takes years.'
+    },
+    {
+        id: 'edu_law',
+        name: 'Law Degree',
+        type: 'degree',
+        duration: 60,         // 5 years LLB
+        monthly_tuition: 70000,
+        total_cost: 4200000,
+        req_degrees: [],
+        image: require('../../assets/jobs/law firm.png'),
+        description: '5-year LLB. Gruelling but opens the door to Law Firm Partner — one of the highest-earning careers in the game.'
     }
 ];
