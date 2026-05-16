@@ -9,8 +9,6 @@ export const SPRITE_MAP = {
     'young_soni_1':    require('../../assets/sprites/young soni 1.png'),
     'young_priya_1':   require('../../assets/sprites/young priya 1.png'),
     'young_rahul_1':   require('../../assets/sprites/young rahul 1.png'),
-    'young_riya_1':    require('../../assets/sprites/young riya 1.png'),
-    'young_karthik_1': require('../../assets/sprites/young karthik 1.png'),
     'young_sara_1':    require('../../assets/sprites/young sara 1.png'),
     'young_kav_1':     require('../../assets/sprites/young kav 1.png'),
 
@@ -48,6 +46,11 @@ export const SPRITE_MAP = {
     'young_soni_1_mid':    require('../../assets/sprites/soni 25-30.png'),
     'young_soni_1_older':  require('../../assets/sprites/soni middleage.png'),
     'young_soni_1_senior': require('../../assets/sprites/soni 50plus.png'),
+
+    // Age variants — rahul
+    'young_rahul_1_mid':    require('../../assets/sprites/rahul 25-30.png'),
+    'young_rahul_1_older':  require('../../assets/sprites/rahul middleage.png'),
+    'young_rahul_1_senior': require('../../assets/sprites/rahul 50plus.png'),
 
     // Age variants — sara (50+ only)
     'young_sara_1_senior': require('../../assets/sprites/sara 50plus.png'),

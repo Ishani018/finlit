@@ -27,9 +27,7 @@ const SPRITES = [
     { id: 'young_rahul_1',   image: require('../../assets/sprites/young rahul 1.png') },
     { id: 'young_priya_1',   image: require('../../assets/sprites/young priya 1.png') },
     { id: 'young_kav_1',     image: require('../../assets/sprites/young kav 1.png') },
-    { id: 'young_karthik_1', image: require('../../assets/sprites/young karthik 1.png') },
     { id: 'young_sara_1',    image: require('../../assets/sprites/young sara 1.png') },
-    { id: 'young_riya_1',    image: require('../../assets/sprites/young riya 1.png') },
 ];
 
 // ─── Character traits — each affects gameplay ─────────────────────────────────
@@ -37,8 +35,6 @@ const TRAITS = {
     young_pia_1:     { name: 'INVESTOR',   color: '#10b981', bg: '#052318', effect: '+8% mutual fund returns',    desc: 'Money makes money.' },
     young_raj_1:     { name: 'HUSTLER',    color: '#f59e0b', bg: '#1a0e00', effect: 'Salary grows 12% faster',   desc: 'Never stops grinding.' },
     young_priya_1:   { name: 'SCHOLAR',    color: '#818cf8', bg: '#0d0e28', effect: 'Education costs -25%',       desc: 'Knowledge is wealth.' },
-    young_karthik_1: { name: 'NEGOTIATOR', color: '#3b82f6', bg: '#071428', effect: 'Loan interest -1.5%',        desc: 'Always gets a deal.' },
-    young_riya_1:    { name: 'FRUGAL',     color: '#22c55e', bg: '#061a0a', effect: 'Living costs -10%',          desc: 'Spends smart, saves more.' },
     young_rahul_1:   { name: 'RISK TAKER', color: '#ef4444', bg: '#1a0505', effect: 'Stock gains x1.2',           desc: 'Go big or go home.' },
     young_sara_1:    { name: 'LUCKY',      color: '#a855f7', bg: '#120820', effect: 'Crisis chance -25%',         desc: 'Fortune favours the bold.' },
     young_sia_1:     { name: 'LANDLORD',   color: '#f97316', bg: '#1a0800', effect: 'Rental income +15%',         desc: 'Real estate royalty.' },
@@ -165,8 +161,6 @@ const TRAIT_AGE_FLAVOUR = {
     young_pia_1:     ['Just learning to save',      'First SIP running',        'Compounding at full force', 'Wealth quietly multiplying'],
     young_raj_1:     ['Side hustles everywhere',    'Promotions accelerating',  'Peak earning years',        'Legacy income established'],
     young_priya_1:   ['Studying constantly',        'Certs paying off',         'Expert-level knowledge',    'Teaching what she mastered'],
-    young_karthik_1: ['Negotiating first salary',   'Getting better deals',     'Nobody says no twice',      'Rates others can\'t touch'],
-    young_riya_1:    ['Cutting every corner',       'Savings habit locked in',  'Zero lifestyle inflation',  'Outlasts every market crash'],
     young_rahul_1:   ['All-in on speculative bets', 'Bigger swings, bigger wins','Portfolio dwarfs peers',   'Legendary risk appetite'],
     young_sara_1:    ['Lucky breaks early on',      'Dodging crises somehow',   'Charmed financial life',    'Fortune still favouring her'],
     young_sia_1:     ['Renting out first room',     'Property #2 acquired',     'Rental empire growing',     'Passive income like salary'],
@@ -512,8 +506,6 @@ const STARTER_JOBS = {
     young_pia_1:     'home_baker',
     young_raj_1:     'code_debugger',
     young_priya_1:   'music_teacher',
-    young_karthik_1: 'game_tester',
-    young_riya_1:    'voice_artist',
     young_rahul_1:   'streamer',
     young_sara_1:    'dance_teacher',
     young_sia_1:     'photographer',
