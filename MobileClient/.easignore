@@ -2,3 +2,10 @@ android/
 ios/
 node_modules/
 .expo/
+dist/
+web-build/
+temp_file_list.txt
+new_assets.txt
+assets - Shortcut.lnk
+start_tunnel.ps1
+start_lan.ps1
