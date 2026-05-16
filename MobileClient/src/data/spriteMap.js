@@ -1,0 +1,60 @@
+// Maps sprite IDs to require() images so they can be resolved anywhere
+// Age-variant sprites: keyed as `${id}_${ageKey}`
+export const SPRITE_MAP = {
+    // Young variants (ages 18–24)
+    'young_pia_1':     require('../../assets/sprites/young pia 1.png'),
+    'young_raj_1':     require('../../assets/sprites/young raj 1.png'),
+    'young_soms_1':    require('../../assets/sprites/young soms 1.png'),
+    'young_sia_1':     require('../../assets/sprites/young sia 1.png'),
+    'young_soni_1':    require('../../assets/sprites/young soni 1.png'),
+    'young_priya_1':   require('../../assets/sprites/young priya 1.png'),
+    'young_rahul_1':   require('../../assets/sprites/young rahul 1.png'),
+    'young_riya_1':    require('../../assets/sprites/young riya 1.png'),
+    'young_karthik_1': require('../../assets/sprites/young karthik 1.png'),
+    'young_sara_1':    require('../../assets/sprites/young sara 1.png'),
+    'young_kav_1':     require('../../assets/sprites/young kav 1.png'),
+
+    // Age variants — pia
+    'young_pia_1_mid':    require('../../assets/sprites/pia 25-30.png'),
+    'young_pia_1_older':  require('../../assets/sprites/pia middleage.png'),
+    'young_pia_1_senior': require('../../assets/sprites/pia 50plus.png'),
+
+    // Age variants — raj
+    'young_raj_1_mid':    require('../../assets/sprites/raj 25-30.png'),
+    'young_raj_1_older':  require('../../assets/sprites/raj middleage.png'),
+    'young_raj_1_senior': require('../../assets/sprites/raj 50plus.png'),
+
+    // Age variants — priya
+    'young_priya_1_mid':    require('../../assets/sprites/priya 25-30.png'),
+    'young_priya_1_older':  require('../../assets/sprites/priya middleage.png'),
+    'young_priya_1_senior': require('../../assets/sprites/priya 50plus.png'),
+
+    // Age variants — kav
+    'young_kav_1_mid':    require('../../assets/sprites/kav 25-30.png'),
+    'young_kav_1_older':  require('../../assets/sprites/kav middleage.png'),
+    'young_kav_1_senior': require('../../assets/sprites/kav 50plus.png'),
+
+    // Age variants — soms
+    'young_soms_1_mid':    require('../../assets/sprites/soms 25-30.png'),
+    'young_soms_1_older':  require('../../assets/sprites/soms middleage.png'),
+    'young_soms_1_senior': require('../../assets/sprites/soms 50plus.png'),
+};
+
+// Age brackets → variant suffix
+// young: 18–24 (base sprite, no suffix)
+// mid:   25–30
+// older: 31–49
+// senior: 50+
+const AGE_SUFFIX = (age) => {
+    if (age >= 50) return '_senior';
+    if (age >= 31) return '_older';
+    if (age >= 25) return '_mid';
+    return '';
+};
+
+export const getSpriteImage = (id, age = 18) => {
+    if (!id) return null;
+    const suffix = AGE_SUFFIX(age);
+    // Try age-specific variant first, fall back to base
+    return SPRITE_MAP[id + suffix] || SPRITE_MAP[id] || null;
+};

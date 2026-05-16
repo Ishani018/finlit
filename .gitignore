@@ -36,11 +36,15 @@ ios/Pods/
 dist/
 web-build/
 
-# Images
-*.png
+# Images / Assets — do not commit binary assets
+MobileClient/assets/
 *.jpg
 *.jpeg
 *.gif
 *.webp
-images/
-# Exception: Keep logos/icons if needed, but user asked to ignore images
+
+# Local / generated
+.claude/
+Backend/finlit.db
+ASSETS_TO_GENERATE.md
+MobileClient/isplaying_check.txt

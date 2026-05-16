@@ -215,7 +215,7 @@ const GameLayout = () => {
               <div className="space-y-3">
                 {/* Net Worth Check */}
                 <div className={`p-3 rounded-lg border flex justify-between items-center ${netWorth >= selectedJob.req_net_worth ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
-                  <span className="text-sm font-bold">Net Worth > ₹{selectedJob.req_net_worth.toLocaleString()}</span>
+                  <span className="text-sm font-bold">Net Worth &gt; ₹{selectedJob.req_net_worth.toLocaleString()}</span>
                   {netWorth >= selectedJob.req_net_worth ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
                 </div>
                 {/* Degrees Check */}
