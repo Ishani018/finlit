@@ -1,9 +1,5 @@
 # FinLit: The Ultimate Financial Literacy RPG
 
-<p align="center">
-  <img src="docs/uncle_fin.png" width="80" />
-</p>
-
 Welcome to **FinLit**, an engaging, immersive mobile RPG built with React Native that gamifies personal finance! In FinLit, you take control of a simulated life, making critical decisions about your career, investments, real estate, and lifestyle. Navigate through unpredictable life events, manage your happiness and health, and build your net worth to achieve early retirement!
 
 ---
@@ -45,6 +41,10 @@ Get married, have children, and manage your dependents. Your character beautiful
 
 ### 👴 Meet Uncle Fin!
 Your personal financial advisor! Uncle Fin will guide you through the complex world of finance, giving you contextual tips at the end of every month to help you optimize your tax strategy and investment portfolio.
+
+<p align="center">
+  <img src="docs/uncle_fin.png" width="80" />
+</p>
 
 ---
 
