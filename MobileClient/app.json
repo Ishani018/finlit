@@ -33,7 +33,16 @@
     },
     "plugins": [
       "expo-font",
-      "expo-av"
+      "expo-av",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "networkSecurityConfig": "./network_security_config.xml"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

@@ -23,10 +23,10 @@ const TABS = [
 
 const ALT_TABS = [
     { key: 'home',    label: 'HOME',    color: '#38b2ac' },
-    { key: 'grocery', label: 'SHOP', color: '#4ade80', isGrocery: true },
+    { key: 'career',  label: 'CAREER',  color: '#fbbf24' },
     { key: 'money',   label: 'MONEY',   color: '#4ade80' },
     { key: 'family',  label: 'FAMILY',  color: '#ec4899' },
-    { key: 'goals',   label: 'GOALS',   color: '#fbbf24', isGoals: true },
+    { key: 'goals',   label: 'GOALS',   color: '#fbbf24',  isGoals: true },
 ];
 
 const R = 28;
@@ -59,6 +59,8 @@ export default function BottomTabBar({
     turnsLeft, dailyLimit,
     onGrocery,
     onGoals,
+    showGrocery,
+    showGoals,
     badges = {},
 }) {
     const btnScale  = useRef(new Animated.Value(1)).current;
@@ -115,12 +117,17 @@ export default function BottomTabBar({
     if (activeTab !== 'home') {
         return (
             <View style={{ flexDirection: 'row', backgroundColor: '#070910', height: 68, alignItems: 'stretch' }}>
-                {ALT_TABS.map(tab => renderTab(
-                    tab,
-                    tab.key === activeTab,
-                    tab.isGrocery ? onGrocery : tab.isGoals ? onGoals : () => onTabPress(tab.key),
-                    tab.isGrocery ? badges.grocery : badges[tab.key],
-                ))}
+                {ALT_TABS.map(tab => {
+                    const isGoalsActive = showGoals;
+                    const isActive = tab.isGoals ? isGoalsActive : (!isGoalsActive && tab.key === activeTab);
+                    const onPress = tab.isGoals ? onGoals : () => onTabPress(tab.key);
+                    return renderTab(
+                        tab,
+                        isActive,
+                        onPress,
+                        badges[tab.key],
+                    );
+                })}
             </View>
         );
     }
@@ -129,28 +136,24 @@ export default function BottomTabBar({
         <View style={{ flexDirection: 'row', backgroundColor: '#070910', height: 72, alignItems: 'stretch' }}>
             {TABS.map(tab => {
                 if (tab.isCenter) {
-                    const out = turnsLeft <= 0;
                     return (
                         <View key="next" style={{ flex: 1.3, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4, position: 'relative' }}>
-                            {!out && (
-                                <Animated.View pointerEvents="none" style={{
-                                    position: 'absolute', width: 52, height: 52, borderRadius: 26,
-                                    borderWidth: 2, borderColor: '#fbbf24',
-                                    transform: [{ scale: rippleScale }], opacity: rippleOpacity,
-                                    bottom: 18,
-                                }} />
-                            )}
+                            <Animated.View pointerEvents="none" style={{
+                                position: 'absolute', width: 52, height: 52, borderRadius: 26,
+                                borderWidth: 2, borderColor: '#fbbf24',
+                                transform: [{ scale: rippleScale }], opacity: rippleOpacity,
+                                bottom: 18,
+                            }} />
                             <Animated.View style={{ transform: [{ scale: btnScale }], alignItems: 'center', justifyContent: 'center', position: 'relative', marginBottom: 2 }}>
-                                {!out && <TurnsRing turnsLeft={turnsLeft} dailyLimit={dailyLimit} />}
                                 <TouchableOpacity
-                                    onPress={out ? onNextMonth : handleNextMonth}
-                                    activeOpacity={out ? 0.6 : 0.8}
-                                    style={{ alignItems: 'center', justifyContent: 'center', opacity: out ? 0.3 : 1 }}
+                                    onPress={handleNextMonth}
+                                    activeOpacity={0.8}
+                                    style={{ alignItems: 'center', justifyContent: 'center' }}
                                 >
                                     <Image source={COIN_IMG} style={{ width: 52, height: 52 }} resizeMode="contain" />
                                 </TouchableOpacity>
                             </Animated.View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: out ? '#1a2040' : '#60a5fa', letterSpacing: 2, lineHeight: 13 }}>NEXT MONTH</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#60a5fa', letterSpacing: 2, lineHeight: 13 }}>NEXT MONTH</Text>
                         </View>
                     );
                 }

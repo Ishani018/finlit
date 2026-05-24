@@ -31,7 +31,10 @@ async function playTrack(index, onFinished) {
         );
         _sound = sound;
         sound.setOnPlaybackStatusUpdate((status) => {
-            if (status.didJustFinish) onFinished();
+            if (status.didJustFinish) {
+                // 1.5s gap between tracks so it doesn't feel abrupt
+                setTimeout(() => onFinished(), 1500);
+            }
         });
     } catch (e) {
         console.warn('Music error:', e);

@@ -3136,6 +3136,32 @@ export const GameProvider = ({ children }) => {
     // CONTEXT VALUE
     // =========================================================================
 
+    const getCurrentObjective = useCallback(() => {
+        if (totalMonthsPlayed === 0) {
+            const hasJob = !!currentJob;
+            const hasFood = (pantry || []).length > 0;
+            return {
+                title: 'Getting Started',
+                desc: 'Complete these before advancing time.',
+                steps: [
+                    { id: 'job', label: 'Find a Job', icon: require('../../assets/ui_comp/career.png'), done: hasJob, action: { tab: 'career' } },
+                    { id: 'food', label: 'Buy Groceries', icon: require('../../assets/ui_comp/groceryshop.png'), done: hasFood, action: { tab: 'home', subTab: 'shop' } },
+                    { id: 'next', label: 'Advance to Next Month', icon: require('../../assets/ui_comp/nextbutton.png'), done: false, action: { isAdvanceTime: true } }
+                ]
+            };
+        }
+        if (totalMonthsPlayed === 1 && balance < 10000) {
+            return {
+                title: 'Emergency Fund',
+                desc: 'Keep some cash for emergencies.',
+                steps: [
+                    { id: 'save', label: 'Save ₹10,000 in Bank', icon: require('../../assets/ui_comp/saveandearn.png'), done: balance >= 10000, action: { tab: 'money', subTab: 'bank' } }
+                ]
+            };
+        }
+        return null;
+    }, [totalMonthsPlayed, currentJob, pantry, balance]);
+
     const value = {
         // Core
         balance, netWorth, turn, history, isPlaying, setIsPlaying,
@@ -3229,6 +3255,7 @@ export const GameProvider = ({ children }) => {
 
         // Tutorials & progressive unlocks
         seenTutorials, markTutorialSeen, getProductUnlocks,
+        getCurrentObjective,
 
         // CA subscription
         caSubscribed, caSubscribedMonth, subscribeCA, cancelCA, itrFiled,

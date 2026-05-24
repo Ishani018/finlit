@@ -92,20 +92,24 @@ function CategoryCard({ title, subtitle, color, img, onPress }) {
 
 // ── Grocery section (inline) ──────────────────────────────────────────────────
 function GrocerySection({ onBack, onClose }) {
-    const { balance, health, pantry, buyGrocery, consumeFood } = useGame();
+    const { balance, health, happiness, pantry, buyGrocery, consumeFood } = useGame();
     const [tab, setTab] = useState('shop');
     const [toast, setToast] = useState(null);
 
-    const showToast = (msg, ok) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 2200); };
+    const showToast = (msg, ok, extra) => { setToast({ msg, ok, extra }); setTimeout(() => setToast(null), 2500); };
 
     const handleBuy = (item) => {
         const r = buyGrocery(item.id);
-        showToast(r.success ? `${item.name} added to pantry` : r.msg, r.success);
+        if (r.success) {
+            showToast(`${item.name} added to pantry`, true, `Balance: ₹${(balance - item.price).toLocaleString()}`);
+        } else {
+            showToast(r.msg, false);
+        }
     };
     const handleConsume = (itemId) => {
         const item = GROCERY_ITEMS.find(g => g.id === itemId);
         const r = consumeFood(itemId);
-        showToast(r.success ? `+${item?.healthRestore || 0} HP` : r.msg, r.success);
+        showToast(r.success ? `+${item?.healthRestore || 0} HP restored` : r.msg, r.success);
     };
 
     const pantryItems = (pantry || []).filter(p => p.qty > 0);
@@ -195,6 +199,7 @@ function GrocerySection({ onBack, onClose }) {
             {toast && (
                 <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
+                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: toast.ok ? '#2a7050' : '#aa4040', textAlign: 'center', marginTop: 2 }}>{toast.extra}</Text>}
                 </View>
             )}
         </View>
@@ -214,6 +219,18 @@ const MEDICINE_IMAGES = {
     calcium:      require('../../assets/medicine/ChatGPT Image May 16, 2026, 05_34_49 PM.png'),
 };
 
+const CLOTHES_IMAGES = {
+    school_bag:     require('../../assets/clothing and others/schoolbag.png'),
+    school_uniform: require('../../assets/clothing and others/school uniform.png'),
+    kids_books:     require('../../assets/clothing and others/storybooks.png'),
+    casual_wear:    require('../../assets/clothing and others/daily casual wear.png'),
+    ethnic_set:     require('../../assets/clothing and others/ethnic wear.png'),
+    formal_suit:    require('../../assets/clothing and others/suit.png'),
+    party_outfit:   require('../../assets/clothing and others/fancy party wear.png'),
+    sneakers:       require('../../assets/clothing and others/shoes.png'),
+    jewellery:      require('../../assets/clothing and others/jewellery.png'),
+};
+
 // ── Pharmacy section ──────────────────────────────────────────────────────────
 function PharmacySection({ onBack, onClose }) {
     const { balance, dependents, buyPharmacyItem } = useGame();
@@ -226,8 +243,13 @@ function PharmacySection({ onBack, onClose }) {
 
     const handleBuy = (item) => {
         if (!canAfford(item)) { showToast('Not enough balance', false); return; }
-        // If dependents, ask who to give it to — for now give to self (player)
-        setPickingFor(item);
+        // Only ask "who gets it?" if there are dependents — otherwise buy for self immediately
+        if (dependents.length === 0) {
+            const r = buyPharmacyItem(item, 'self');
+            showToast(r.success ? `${item.name} — +${item.healthRestore} HP` : r.msg, r.success);
+        } else {
+            setPickingFor(item);
+        }
     };
 
     return (
@@ -334,7 +356,11 @@ function ClothesSection({ onBack, onClose }) {
 
     const handleBuy = (item) => {
         const r = buyClothesItem(item);
-        showToast(r.msg, r.success);
+        if (r.success) {
+            showToast(`${item.name} bought  •  +${item.happinessBoost} 😊${item.healthBoost > 0 ? `  +${item.healthBoost} HP` : ''}`, true, `Balance: ₹${(balance - item.price).toLocaleString()}`);
+        } else {
+            showToast(r.msg, false);
+        }
     };
 
     return (
@@ -362,9 +388,19 @@ function ClothesSection({ onBack, onClose }) {
                         {filtered.slice(row * 2, row * 2 + 2).map(item => {
                             const color = SHOP_CATEGORY_COLORS[item.tag];
                             const affordable = balance >= item.price;
+                            const img = CLOTHES_IMAGES[item.id];
                             return (
                                 <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: affordable ? color + '40' : C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
                                     <View style={{ height: 6, backgroundColor: color + (affordable ? 'cc' : '30') }} />
+                                    <View style={{ width: '100%', aspectRatio: 1, backgroundColor: C.card, position: 'relative' }}>
+                                        {img ? (
+                                            <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                        ) : (
+                                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                                <FontAwesome5 name="shopping-bag" size={24} color={C.dim} />
+                                            </View>
+                                        )}
+                                    </View>
                                     <View style={{ padding: 12 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream, lineHeight: 19 }}>{item.name}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginTop: 2, marginBottom: 8 }}>{item.desc}</Text>
@@ -383,6 +419,7 @@ function ClothesSection({ onBack, onClose }) {
             {toast && (
                 <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
+                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: toast.ok ? '#2a7050' : '#aa4040', textAlign: 'center', marginTop: 2 }}>{toast.extra}</Text>}
                 </View>
             )}
         </View>
@@ -392,7 +429,7 @@ function ClothesSection({ onBack, onClose }) {
 // ── Main ShopScreen ───────────────────────────────────────────────────────────
 export default function ShopScreen({ onClose }) {
     const [section, setSection] = useState(null);
-    const { balance, health } = useGame();
+    const { balance, health, happiness } = useGame();
 
     if (section === 'grocery')  return <GrocerySection  onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'pharmacy') return <PharmacySection onBack={() => setSection(null)} onClose={onClose} />;
@@ -402,15 +439,19 @@ export default function ShopScreen({ onClose }) {
         <View style={{ flex: 1, backgroundColor: C.bg }}>
             <ScreenHeader title="Shop" subtitle="MARKETPLACE" onClose={onClose} />
 
-            {/* Balance + health strip */}
+            {/* Balance + health + happiness strip */}
             <View style={{ flexDirection: 'row', gap: GAP, padding: PAD, paddingBottom: 0 }}>
-                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>BALANCE</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.gold }}>₹{balance.toLocaleString()}</Text>
+                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 10, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: C.dark, letterSpacing: 2 }}>BALANCE</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold }}>₹{balance >= 100000 ? (balance/100000).toFixed(1)+'L' : balance.toLocaleString()}</Text>
                 </View>
-                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>YOUR HEALTH</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: health >= 60 ? C.sage : health >= 30 ? C.gold : C.red }}>{Math.round(health)}/100</Text>
+                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 10, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: C.dark, letterSpacing: 2 }}>HEALTH</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: health >= 60 ? C.sage : health >= 30 ? C.gold : C.red }}>{Math.round(health)}/100</Text>
+                </View>
+                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 10, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: C.dark, letterSpacing: 2 }}>HAPPINESS</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: happiness >= 70 ? C.sage : happiness >= 40 ? C.gold : C.red }}>{Math.round(happiness)}/100</Text>
                 </View>
             </View>
 

@@ -182,66 +182,70 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     </TouchableOpacity>
 
                     {/* BORROW card */}
-                    <TouchableOpacity onPress={() => setTab('borrow')} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden' }}>
-                        <View style={{ height: 150, backgroundColor: '#1a0d0d', flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#f87171', letterSpacing: 4, marginBottom: 2 }}>LOANS & CREDIT</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>BORROW</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Personal · Home · Business</Text>
-                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2 }}>OPEN ▶</Text>
+                    {totalMonthsPlayed >= 3 && (
+                        <TouchableOpacity onPress={() => setTab('borrow')} activeOpacity={0.85}
+                            style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden' }}>
+                            <View style={{ height: 150, backgroundColor: '#1a0d0d', flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
+                                <View style={{ flex: 1, padding: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#f87171', letterSpacing: 4, marginBottom: 2 }}>LOANS & CREDIT</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>BORROW</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Personal · Home · Business</Text>
+                                    <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2 }}>OPEN ▶</Text>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                        {/* Stats strip */}
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ACTIVE LOANS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: loans.length > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{loans.length}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{loans.length === 0 ? 'debt free' : 'outstanding'}</Text>
+                            {/* Stats strip */}
+                            <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
+                                <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ACTIVE LOANS</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: loans.length > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{loans.length}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{loans.length === 0 ? 'debt free' : 'outstanding'}</Text>
+                                </View>
+                                <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>EMI / MO</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'NONE'}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>monthly</Text>
+                                </View>
                             </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>EMI / MO</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'NONE'}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>monthly</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    )}
 
                     {/* CA RETAINER card */}
-                    <TouchableOpacity onPress={() => setTab('ca')} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                        <View style={{ height: 190, backgroundColor: '#0d0d1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={require('../../assets/CA_Office.png')} style={{ width: 170, height: 170 }} resizeMode="contain" />
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 4, marginBottom: 2 }}>TAX & COMPLIANCE</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>TAXES & ITR</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Self-File · Hire CA · Deductions</Text>
-                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#a78bfa', letterSpacing: 2 }}>OPEN ▶</Text>
+                    {totalMonthsPlayed >= 10 && (
+                        <TouchableOpacity onPress={() => setTab('ca')} activeOpacity={0.85}
+                            style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
+                            <View style={{ height: 190, backgroundColor: '#0d0d1a', flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={require('../../assets/CA_Office.png')} style={{ width: 170, height: 170 }} resizeMode="contain" />
+                                <View style={{ flex: 1, padding: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 4, marginBottom: 2 }}>TAX & COMPLIANCE</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>TAXES & ITR</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Self-File · Hire CA · Deductions</Text>
+                                    <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#a78bfa', letterSpacing: 2 }}>OPEN ▶</Text>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>STATUS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: caSubscribed ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{caSubscribed ? 'ACTIVE' : 'INACTIVE'}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>₹2,000/mo</Text>
+                            <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
+                                <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>STATUS</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: caSubscribed ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{caSubscribed ? 'ACTIVE' : 'INACTIVE'}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>₹2,000/mo</Text>
+                                </View>
+                                <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ITR</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: itrFiled?.[turn?.year] ? '#4ade80' : '#fbbf24', lineHeight: 20, marginTop: 2 }}>
+                                        {itrFiled?.[turn?.year] ? 'FILED' : 'PENDING'}
+                                    </Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>this year</Text>
+                                </View>
                             </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ITR</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: itrFiled?.[turn?.year] ? '#4ade80' : '#fbbf24', lineHeight: 20, marginTop: 2 }}>
-                                    {itrFiled?.[turn?.year] ? 'FILED' : 'PENDING'}
-                                </Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>this year</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    )}
 
                     {/* RETIREMENT BUCKETS card — only visible when retired or corpus > 50L */}
-                    {(isRetired || (ppf?.balance + nps?.balance) > 5000000) && (
+                    {(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) && (
                         <TouchableOpacity onPress={() => setTab('retire')} activeOpacity={0.85}
                             style={{ borderWidth: 1, borderColor: '#818cf840', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
                             <View style={{ height: 120, backgroundColor: '#0d0a1a', flexDirection: 'row', alignItems: 'center' }}>
@@ -294,8 +298,8 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     <TouchableOpacity onPress={() => setTab('card')} activeOpacity={0.85}
                         style={{ borderWidth: 1, borderColor: creditCard ? '#60a5fa40' : '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
                         <View style={{ height: 130, backgroundColor: '#000d1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 110, height: 110, alignItems: 'center', justifyContent: 'center' }}>
-                                <FontAwesome5 name="credit-card" size={52} color="#60a5fa" />
+                            <View style={{ width: 110, height: 110, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                <Image source={require('../../assets/ui_comp/credit card.png')} style={{ width: 160, height: 160, marginLeft: -20 }} resizeMode="contain" />
                             </View>
                             <View style={{ flex: 1, padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 4, marginBottom: 2 }}>BUY NOW, PAY LATER</Text>
@@ -324,7 +328,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     {tips.length > 0 && (
                         <View style={{ marginTop: 16, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16' }}>
                             <View style={{ padding: 12, borderBottomWidth: 1, borderColor: '#1a2040', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                <FontAwesome5 name="lightbulb" size={14} color="#fbbf24" />
+                                <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 18, height: 18 }} resizeMode="contain" />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#fbbf24', letterSpacing: 3 }}>ADVISOR TIPS</Text>
                             </View>
                             {tips.map((tip, i) => (
@@ -497,7 +501,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
 
                         {fds.length === 0 && (
                             <View style={{ alignItems: 'center', padding: 30}}>
-                                <FontAwesome5 name="lock" size={32} color="#1a2040" />
+                                <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 32, height: 32, tintColor: '#1a2040' }} resizeMode="contain" />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#2a3560', marginTop: 12, textAlign: 'center' }}>No active FDs{'\n'}Lock in your savings above</Text>
                             </View>
                         )}
@@ -1153,7 +1157,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
                     {!creditCard ? (
                         <View style={{ borderWidth: 1, borderColor: '#60a5fa40', backgroundColor: '#070a16', padding: 20, alignItems: 'center' }}>
-                            <FontAwesome5 name="credit-card" size={48} color="#60a5fa" style={{ marginBottom: 14 }} />
+                            <Image source={require('../../assets/ui_comp/credit card.png')} style={{ width: '100%', height: 200, marginBottom: 16 }} resizeMode="contain" />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', marginBottom: 8 }}>Apply for a Credit Card</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', textAlign: 'center', lineHeight: 20, marginBottom: 16 }}>
                                 Pay for purchases this month, settle the bill next month — interest-free. Miss the due date and you pay 36% APR. Your credit score determines your limit.
@@ -1180,6 +1184,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         </View>
                     ) : (
                         <View style={{ gap: 12 }}>
+                            <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                                <Image source={require('../../assets/ui_comp/credit card.png')} style={{ width: '100%', height: 230 }} resizeMode="contain" />
+                            </View>
                             <View style={{ borderWidth: 1, borderColor: '#60a5fa40', backgroundColor: '#070a16', padding: 14 }}>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>CREDIT LIMIT</Text>

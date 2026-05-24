@@ -1,87 +1,91 @@
-# Financial Literacy Simulation Game
+# FinLit: The Ultimate Financial Literacy RPG
 
-A cross-platform (Web & Mobile) simulation game designed to teach financial concepts through immersive role-playing. Players navigate a career, manage expenses, and build wealth through real estate and business investments.
+![FinLit Banner](MobileClient/assets/ui_comp/uncle_fin.png)
 
-## 🚀 Key Features
-
-### Core Mechanics
-- **Real-Time Simulation**: Time progresses automatically (1 Month ≈ 3 Seconds).
-- **Economic Engine**: Live balance updates, monthly expenses (Rent, Food), and salary credits.
-- **Career Progression**:
-  - Start as a **Student** (Net Worth: ₹0).
-  - Unlock jobs like **Cafe Worker**, **Mechanic**, **Software Engineer**, and **Manager**.
-  - **Requirements System**: Jobs are locked behind Net Worth & Education milestones.
-- **Investment Portfolio**:
-  - **Real Estate**: Buy properties to upgrade your lifestyle (Hostel -> Apartment -> Villa).
-  - **Businesses**: Invest in Food Trucks, Stocks, and Commercial Spaces for passive income.
-
-### Clients
-- **Web Client**: Immersive desktop experience with split-screen "Stage" (Visuals) and "Dashboard" (Controls).
-- **Mobile Client**: Native iOS/Android app with gesture-based controls, half-screen sheets, and haptic feedback.
+Welcome to **FinLit**, an engaging, immersive mobile RPG built with React Native that gamifies personal finance! In FinLit, you take control of a simulated life, making critical decisions about your career, investments, real estate, and lifestyle. Navigate through unpredictable life events, manage your happiness and health, and build your net worth to achieve early retirement!
 
 ---
 
-## 🛠️ Project Structure
+## 🌟 Key Features
 
-```
-finlit/
-├── WebClient/          # React + Vite (Desktop Browser)
-│   ├── src/data/       # Shared Game Data (Jobs, Investments)
-│   └── src/context/    # Game Logic (Time, Balance, State)
-│
-├── MobileClient/       # React Native + Expo (iOS/Android)
-│   ├── App.js          # Native UI Entry Point
-│   ├── start_tunnel.ps1 # Helper script for Network Tunneling
-│   └── assets/         # Optimized assets for mobile
-│
-└── Backend/            # Python FastAPI (Future Multiplayer Logic)
-```
+### 💼 Dynamic Career System
+Start from the bottom and climb the corporate ladder! Apply for jobs, earn promotions, and increase your salary. Be careful though, your energy and health are tied to your work performance!
+![Career](MobileClient/assets/ui_comp/career.png)
+
+### 📈 Deep Investment Engine
+Put your money to work! The game features a fully realized stock market, mutual funds with SIPs (Systematic Investment Plans), Fixed Deposits, and even physical Gold investments. Watch out for market cycles (bull and bear markets) that dynamically affect your portfolio!
+![Investments](MobileClient/assets/ui_comp/investicon.png)
+
+### 🏠 Real Estate & Mortgages
+Buy and rent properties. Take out home loans, manage EMIs, and build equity. Properties appreciate over time based on the economic cycle, allowing you to flip houses or build a rental empire.
+![Real Estate](MobileClient/assets/ui_comp/home.png)
+
+### 💳 Credit & Debt Management
+Build your credit score! Take out personal, education, and business loans. Use credit cards wisely—pay your bills on time to boost your score, but beware of the high interest rates if you carry a balance!
+![Credit](MobileClient/assets/ui_comp/credit%20card.png)
+
+### 👨‍👩‍👧 Family & Life Events
+Get married, have children, and manage your dependents. Life is unpredictable—expect medical emergencies, market crashes, and surprise expenses. Protect your family by purchasing health and life insurance!
+![Family](MobileClient/assets/ui_comp/familyicon.png)
+
+### 🏆 Achievements & Milestones
+Unlock various achievements as you hit financial milestones. Reach a net worth of ₹1 Crore, become debt-free, or successfully retire early!
+![Achievements](MobileClient/assets/ui_comp/achivements.png)
+
+### 👴 Meet Uncle Fin!
+Your personal financial advisor! Uncle Fin will guide you through the complex world of finance, giving you contextual tips at the end of every month to help you optimize your tax strategy and investment portfolio.
+![Uncle Fin](MobileClient/assets/ui_comp/uncle_fin.png)
 
 ---
 
-## 📱 How to Run (Mobile)
+## 🚀 Getting Started
 
-We use **Expo** to run the mobile app on your physical device.
+The project is entirely focused on the **MobileClient** (React Native / Expo).
 
-**Prerequisites:**
-- Install **Node.js**.
-- Install **Expo Go** app on your phone (Play Store / App Store).
+### Prerequisites
+- Node.js (v18+)
+- Expo CLI
+- Expo Go app on your iOS/Android device (or Android Studio / Xcode for emulators)
 
-**Running the App:**
-1. Open Terminal in `MobileClient`:
-   ```powershell
+### Installation
+
+1. Navigate to the MobileClient directory:
+   ```bash
    cd MobileClient
    ```
-2. **Launch the Tunnel Script** (Recommended for most networks):
-   ```powershell
-   .\start_tunnel.ps1
-   ```
-   *(This automatically handles authentication and firewalls)*.
 
-3. **Scan the QR Code** with your phone's camera or Expo Go app.
-
----
-
-## 💻 How to Run (Web)
-
-1. Open Terminal in `WebClient`:
-   ```powershell
-   cd WebClient
+2. Install dependencies:
+   ```bash
    npm install
-   npm run dev
    ```
-2. Open the localhost URL (usually `http://localhost:5173`) in your browser.
+
+3. Start the Metro Bundler:
+   ```bash
+   npx expo start
+   ```
+
+4. Scan the QR code with the Expo Go app on your phone, or press `a` to run on an Android emulator, or `i` for iOS simulator.
 
 ---
 
-## 🎨 Tech Stack
+## 🎮 How to Play
 
-- **Frontend (Web)**: React, TailwindCSS, Lucide Icons.
-- **Frontend (Mobile)**: React Native, Expo, NativeWind v2 (Styled Components), Reanimated.
-- **State Management**: React Context API (GameContext).
-- **Assets**: Custom generated visuals for Rooms, Offices, and Job Icons.
+1. **Month 1:** You arrive in the city with a small amount of cash. Your first goal is to **Find a Job** and **Buy Groceries**. 
+2. **Advance Time:** The game progresses month by month. Click the gold **Next Month** coin to advance time and receive your paycheck.
+3. **Survive:** Manage your Food (Pantry) and Health. If you don't eat, your health drops. If your health drops too low, you'll be forced to take unpaid sick leave!
+4. **Thrive:** Once your basic needs are met, start investing. Open an FD, start a Mutual Fund SIP, or save up for a downpayment on an apartment.
+5. **Retire:** Build up enough passive income and investments in your Retirement Buckets to quit your job and win the game!
 
-## 📝 Recent Updates
-- **Mobile Migration**: Successfully ported game logic to React Native.
-- **Asset Fixes**: Resolved all missing image paths for Offices and Properties.
-- **Networking**: Implemented `ngrok` tunneling for seamless local development.
+---
+
+## 🛠️ Technology Stack
+- **Framework:** React Native & Expo
+- **Styling:** TailwindCSS (NativeWind) & custom styling
+- **State Management:** React Context API (`GameContext.js`)
+- **Routing:** Conditional rendering based layout architecture
+
+## ⚠️ Note on Assets
+The heavy image assets for this game are kept locally and are intentionally excluded from the repository.
+
+---
+*Happy Investing! Build your wealth, manage your risks, and achieve financial freedom.*

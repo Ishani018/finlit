@@ -158,13 +158,15 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                         </View>
                     )}
 
-                    {/* Tip */}
+                    {/* Uncle Fin's Tip */}
                     {tip && (
-                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16', padding: 10, marginBottom: 16, flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
-                            <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 16, height: 16, marginTop: 1 }} resizeMode="contain" />
+                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d111a', padding: 10, marginBottom: 16, flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: '#3b82f6' }}>
+                                <Image source={require('../../assets/ui_comp/uncle_fin.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                            </View>
                             <View style={{ flex: 1 }}>
-                                {tip.title && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#fbbf24', lineHeight: 15, marginBottom: 2 }}>{tip.title}</Text>}
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#556080', lineHeight: 15 }}>{tip.stat || tip.body || ''}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#93c5fd', letterSpacing: 1, marginBottom: 2 }}>UNCLE FIN SAYS:</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#c8d4f0', lineHeight: 16 }}>{tip.stat || tip.body || tip.title}</Text>
                             </View>
                         </View>
                     )}

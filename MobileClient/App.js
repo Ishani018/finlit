@@ -337,7 +337,7 @@ const GameLayout = ({ onHardReset }) => {
     achievements,
     majorCrisisFlash,
     retireEarly,
-    seenTutorials, markTutorialSeen, getProductUnlocks,
+    seenTutorials, markTutorialSeen, getProductUnlocks, getCurrentObjective,
     saveLoaded, deleteSave,
     turnsLeftToday, DAILY_TURN_LIMIT,
     health, sickLeaveMonths,
@@ -355,6 +355,8 @@ const GameLayout = ({ onHardReset }) => {
   const [careerSubTab, setCareerSubTab] = useState(null); // null = landing | jobs | study
   const [moneySubTab, setMoneySubTab] = useState(null);
   const [showGrocery, setShowGrocery] = useState(false);
+  const [happinessToast, setHappinessToast] = useState(null);
+  const happinessToastTimerRef = useRef(null);
   const [showPantryBanner, setShowPantryBanner] = useState(false);
   const pantryBannerTimerRef = useRef(null);
   const [showGoals, setShowGoals] = useState(false);
@@ -693,9 +695,21 @@ const GameLayout = ({ onHardReset }) => {
   };
 
   const handleApply = (job) => {
-    const result = applyForJob(job);
-    if (result.allowed) { setSelectedJob(null); setActiveMenu(null); }
-    else showDialog('Locked', `Cannot apply: ${result.reason}`, 'error');
+    const check = checkJobRequirements(job);
+    if (!check.allowed) { showDialog('Locked', `Cannot apply: ${check.reason}`, 'error'); return; }
+    // Show offer dialog before setting the job — feels like a real hire
+    showDialog(
+      '🎉 JOB OFFER!',
+      `Congratulations! ${job.name} wants to hire you.\n\nSalary: ₹${job.salary.toLocaleString()}/mo\n\nAccept the offer?`,
+      'success',
+      () => {
+        const result = applyForJob(job);
+        if (result.allowed) { setSelectedJob(null); setActiveMenu(null); closeDialog(); }
+      },
+      'ACCEPT OFFER',
+      'DECLINE',
+      closeDialog
+    );
   };
 
   const handleContributePPF = () => {
@@ -829,7 +843,13 @@ const GameLayout = ({ onHardReset }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <View>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 22 }}>{playerName || 'Player'}  ·  Age {playerAge}</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#445070', lineHeight: 18 }}>{currentJob?.name || 'Unemployed'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#445070', lineHeight: 18 }}>{currentJob?.name || 'Unemployed'}</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 16 }}>{'·'}</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 16 }}>
+                    {(() => { const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${months[(turn.month - 1) % 12]} ${turn.year}`; })()}
+                  </Text>
+                </View>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={{ alignItems: 'flex-end' }}>
@@ -879,6 +899,54 @@ const GameLayout = ({ onHardReset }) => {
           </View>
         )}
 
+        {/* ===== OBJECTIVE BANNER ===== */}
+        {(() => {
+          const obj = typeof getCurrentObjective === 'function' ? getCurrentObjective() : null;
+          if (!obj) return null;
+          return (
+            <View style={{ backgroundColor: '#1d4ed8', padding: 12, borderBottomWidth: 1, borderColor: '#3b82f6' }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#93c5fd', letterSpacing: 2 }}>CURRENT OBJECTIVES</Text>
+              </View>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#ffffff' }}>{obj.title}</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#bfdbfe', marginBottom: 10 }}>{obj.desc}</Text>
+              
+              {obj.steps && obj.steps.map(step => (
+                <TouchableOpacity 
+                  key={step.id} 
+                  onPress={() => {
+                    if (step.action?.isAdvanceTime) {
+                      monthsPlayedTodayRef.current += 1;
+                      nextMonth();
+                      return;
+                    }
+                    if (step.action?.tab) setActiveTab(step.action.tab);
+                    if (step.action?.subTab === 'shop') setShowGrocery(true);
+                    if (step.action?.subTab && step.action.tab === 'money') setMoneySubTab(step.action.subTab);
+                  }} 
+                  activeOpacity={0.8}
+                  style={{ 
+                    flexDirection: 'row', alignItems: 'center', gap: 10, 
+                    backgroundColor: step.done ? '#1e3a8a80' : '#2563eb', 
+                    padding: 8, borderWidth: 1, borderColor: step.done ? '#1e3a8a' : '#60a5fa', 
+                    marginBottom: 6, opacity: step.done ? 0.6 : 1
+                  }}
+                >
+                  <Image source={step.icon} style={{ width: 24, height: 24, opacity: step.done ? 0.5 : 1 }} resizeMode="contain" />
+                  <Text style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 16, color: step.done ? '#93c5fd' : '#ffffff', textDecorationLine: step.done ? 'line-through' : 'none' }}>
+                    {step.label}
+                  </Text>
+                  {step.done ? (
+                    <FontAwesome5 name="check" size={14} color="#4ade80" />
+                  ) : (
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#bfdbfe' }}>GO ▶</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          );
+        })()}
+
         {/* ===== CONTENT AREA (switches by tab) ===== */}
         <View style={{ flex: 1, overflow: 'hidden' }}>
 
@@ -905,7 +973,7 @@ const GameLayout = ({ onHardReset }) => {
           {/* Player sprite — peeking from bottom-right, tap to open Life screen */}
           {activeMenu !== 'advisor' && spriteImage && (
             <TouchableOpacity
-              onPress={() => { setActiveTab('family'); setFamilySubTab(null); }}
+              onPress={() => { setActiveTab('family'); }}
               activeOpacity={0.8}
               style={{ position: 'absolute', bottom: -182, right: -18, zIndex: 10 }}
             >
@@ -1344,11 +1412,8 @@ const GameLayout = ({ onHardReset }) => {
                                     <View style={{ height: 90, backgroundColor: '#0a0d1a' }}>
                                       <Image source={cat.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                                       {!lock.unlocked && (
-                                        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.5)' }} />
-                                      )}
-                                      {!lock.unlocked && (
-                                        <View style={{ position: 'absolute', top: 6, right: 6 }}>
-                                          <FontAwesome5 name="lock" size={12} color="#445070" />
+                                        <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: '#000', borderWidth: 1, borderColor: '#1a2040', padding: 4, borderRadius: 12 }}>
+                                          <Image source={require('./assets/ui_comp/lock.png')} style={{ width: 12, height: 12, tintColor: '#445070' }} resizeMode="contain" />
                                         </View>
                                       )}
                                     </View>
@@ -2091,7 +2156,7 @@ const GameLayout = ({ onHardReset }) => {
 
         {/* FAMILY TAB */}
         {activeTab === 'family' && (
-          <FamilyScreen onClose={() => setActiveTab('home')} />
+          <FamilyScreen onClose={() => setActiveTab('home')} onGoToBank={() => { setActiveTab('money'); setMoneySubTab('bank'); }} />
         )}
 
         </View>
@@ -2106,7 +2171,7 @@ const GameLayout = ({ onHardReset }) => {
         {/* ── GOALS OVERLAY — accessible from navbar on all non-home tabs ── */}
         {showGoals && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
-            <GoalsScreen onClose={() => setShowGoals(false)} />
+            <GoalsScreen onClose={() => setShowGoals(false)} onShop={() => { setShowGoals(false); setShowGrocery(true); }} />
           </View>
         )}
 
@@ -2144,21 +2209,15 @@ const GameLayout = ({ onHardReset }) => {
             setShowGrocery(false);
             setShowGoals(false);
             setActiveTab(tab);
-            if (tab !== 'money') { setInvestCategory(null); setMoneySubTab(null); }
+            if (tab !== 'money') { setInvestCategory(null); setMoneySubTab(null); setSelectedMF(null); }
           }}
-          onGrocery={() => setShowGrocery(true)}
-          onGoals={() => setShowGoals(true)}
+          onGrocery={() => { setShowGoals(false); setShowGrocery(true); }}
+          onGoals={() => { setShowGrocery(false); setShowGoals(true); }}
+          showGrocery={showGrocery}
+          showGoals={showGoals}
           onNextMonth={() => {
-            const left = turnsLeftToday();
-            if (left <= 0) {
-              setShowDailyLimit(true);
-              return;
-            }
             monthsPlayedTodayRef.current += 1;
             nextMonth();
-            if (left - 1 <= 0) {
-              setTimeout(() => setShowDailyLimit(true), 600);
-            }
           }}
           turnsLeft={turnsLeftToday()}
           dailyLimit={DAILY_TURN_LIMIT}

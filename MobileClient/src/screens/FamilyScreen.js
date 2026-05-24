@@ -498,7 +498,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.sage, letterSpacing: 1 }}>PLAN FAMILY VACATION</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹5,000/person · +15 happiness · {1 + (dependents?.length || 0)} people</Text>
                             </View>
-                            <FontAwesome5 name="plane" size={16} color={C.sage + '70'} />
+                            <Image source={require('../../assets/ui_comp/vacation.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                         </TouchableOpacity>
 
                         {/* Divorce */}
@@ -513,7 +513,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, letterSpacing: 1 }}>FILE FOR DIVORCE</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹2,00,000 settlement · -30 happiness</Text>
                             </View>
-                            <FontAwesome5 name="heart-broken" size={16} color={C.red + '70'} />
+                            <Image source={require('../../assets/ui_comp/divorce.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                         </TouchableOpacity>
                     </>
                 )}
@@ -836,7 +836,7 @@ function MarriagePickModal({ onPick, onClose }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function FamilyScreen({ onClose }) {
+export default function FamilyScreen({ onClose, onGoToBank }) {
     const {
         playerName, playerAge, playerSprite, balance, creditScore, happiness, currentJob,
         dependents, marry, haveChild, feedDependent, addParent,
@@ -1131,7 +1131,11 @@ export default function FamilyScreen({ onClose }) {
 
                             <View style={{ flexDirection: 'row', gap: 10 }}>
                                 <TouchableOpacity
-                                    onPress={() => { setShowLoanAdvisory(false); onClose(); }}
+                                    onPress={() => { 
+                                        setShowLoanAdvisory(false); 
+                                        if (onGoToBank) onGoToBank();
+                                        else onClose(); 
+                                    }}
                                     activeOpacity={0.8}
                                     style={{ flex: 1, borderWidth: 1, borderColor: '#4ade80', backgroundColor: '#050f0a', paddingVertical: 12, alignItems: 'center' }}
                                 >
