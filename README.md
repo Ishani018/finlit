@@ -37,8 +37,10 @@ Put your money to work in the stock market or manage your debt carefully! Use cr
 Get married, have children, and manage your dependents. Your character beautifully ages over the years from their youth into retirement! Life is unpredictable—expect medical emergencies, market crashes, and surprise expenses. Protect your family by purchasing health and life insurance!
 
 <p align="center">
-  <img src="docs/young%20raj%201.png" width="280" style="margin-right: 15px;" />
-  <img src="docs/raj%20middleage.png" width="280" />
+  <img src="docs/young%20pia%201.png" height="220" style="margin-right: 15px;" />
+  <img src="docs/pia%20middleage.png" height="220" style="margin-right: 15px;" />
+  <img src="docs/young%20raj%201.png" height="220" style="margin-right: 15px;" />
+  <img src="docs/raj%20middleage.png" height="220" />
 </p>
 
 ### 👴 Meet Uncle Fin!
