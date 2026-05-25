@@ -348,6 +348,7 @@ const GameLayout = ({ onHardReset }) => {
     pendingFamilyDemand, resolveFamilyDemand,
     pendingCreditCardOffer, setPendingCreditCardOffer,
     pantry,
+    legacySummary, isLegacyMode,
   } = useGame();
 
   const [activeMenu, setActiveMenu] = useState(null);
