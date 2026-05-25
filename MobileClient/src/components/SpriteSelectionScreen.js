@@ -65,13 +65,16 @@ function EntryScreen({ onStart }) {
             ])
         ).start();
 
-        scrollX.setValue(0);
-        Animated.loop(
+        const startScroll = () => {
+            scrollX.setValue(0);
             Animated.timing(scrollX, {
                 toValue: -PARADE_W, duration: 22000,
                 easing: Easing.linear, useNativeDriver: true,
-            })
-        ).start();
+            }).start(({ finished }) => {
+                if (finished) startScroll();
+            });
+        };
+        startScroll();
 
     }, []);
 
@@ -531,7 +534,7 @@ const STARTER_JOBS = {
 
 export default function SpriteSelectionScreen({ childMode = false, childName = '' }) {
     const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob, startNextGeneration } = useGame();
-    const [step, setStep]           = useState(0);
+    const [step, setStep]           = useState(childMode ? 1 : 0);
     const [selectedIdx, setSelectedIdx] = useState(0);
     const soundRef = useRef(null);
 

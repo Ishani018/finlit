@@ -200,12 +200,7 @@ export default function GoalsScreen({ onClose, onShop }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>Goals & Achievements</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    {onShop && (
-                        <TouchableOpacity onPress={onShop} style={{ borderWidth: 1, borderColor: '#4ade8050', backgroundColor: '#0a1e12', paddingHorizontal: 10, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            <FontAwesome5 name="shopping-bag" size={11} color="#4ade80" />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80', letterSpacing: 1 }}>SHOP</Text>
-                        </TouchableOpacity>
-                    )}
+
                     <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="times" size={14} color="#445070" />
                     </TouchableOpacity>
