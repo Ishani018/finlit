@@ -70,6 +70,7 @@ export const GameProvider = ({ children }) => {
     const [totalMonthsPlayed, setTotalMonthsPlayed] = useState(0);
     const [history, setHistory] = useState([]);
     const [currentJob, setCurrentJob] = useState(null);
+    const [pendingApplications, setPendingApplications] = useState([]);
     const [isPlaying, setIsPlaying] = useState(false);
     const [gameSpeed, setGameSpeed] = useState(1);
     const [playerSprite, setPlayerSprite] = useState(null);
@@ -128,6 +129,7 @@ export const GameProvider = ({ children }) => {
 
     // --- CREDIT CARD ---
     const [creditCard, setCreditCard] = useState(null); // null = not active | { limit, balance, dueMonth, apr, totalSpent }
+    const [activeCreditCards, setActiveCreditCards] = useState([]); // e.g. ['standard', 'premium', 'minor']
 
     // --- DEPENDENTS ---
     const [dependents, setDependents] = useState([]);
@@ -140,6 +142,7 @@ export const GameProvider = ({ children }) => {
     const [lastCrisisEvent, setLastCrisisEvent] = useState(null);
     const [eventInbox, setEventInbox] = useState([]);
     const [pendingFamilyDemand, setPendingFamilyDemand] = useState(null);
+    const [pendingCreditCardOffer, setPendingCreditCardOffer] = useState(false);
     const [demandCooldowns, setDemandCooldowns] = useState({});
     const [lastMonthTax, setLastMonthTax] = useState(0);
     const [lastMonthEMI, setLastMonthEMI] = useState(0);
@@ -147,6 +150,7 @@ export const GameProvider = ({ children }) => {
     const [lastMonthFlow, setLastMonthFlow] = useState(null);
     const [monthlyRecap, setMonthlyRecap] = useState(null);
     const [pendingJobOffer, setPendingJobOffer] = useState(null);
+    const [pendingJobInterview, setPendingJobInterview] = useState(null);
     const [lastHappiness, setLastHappiness] = useState(50);
     const [pendingDecision, setPendingDecision] = useState(null);
     const [firedDecisions, setFiredDecisions] = useState([]);
@@ -168,7 +172,7 @@ export const GameProvider = ({ children }) => {
     const [sickLeaveMonths, setSickLeaveMonths] = useState(0); // consecutive months of sick leave
 
     // Daily turn budget — resets at midnight, persisted in AsyncStorage
-    const DAILY_TURN_LIMIT = 10;
+    const DAILY_TURN_LIMIT = 30;
     const [dailyTurns, setDailyTurns] = useState({ date: '', count: 0 });
     const dailyTurnsRef = useRef({ date: '', count: 0 });
 
@@ -187,12 +191,7 @@ export const GameProvider = ({ children }) => {
 
     const todayStr = () => new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
 
-    const canAdvanceTurn = () => {
-        const today = todayStr();
-        const { date, count } = dailyTurnsRef.current;
-        if (date !== today) return true; // new day — reset
-        return count < DAILY_TURN_LIMIT;
-    };
+    const canAdvanceTurn = () => true;
 
     const consumeTurn = async () => {
         const today = todayStr();
@@ -215,12 +214,12 @@ export const GameProvider = ({ children }) => {
     const stateRef = useRef({});
     useEffect(() => {
         stateRef.current = {
-            balance, currentJob, currentHousing, properties, portfolio,
+            balance, currentJob, pendingApplications, pendingDecision, pendingJobInterview, currentHousing, properties, portfolio,
             dependents, loans, activeInsurance, creditScore, activeEffects,
             marketPrices, degrees, totalMonthsPlayed, turn, gameOver,
             activeEnrollment, mfPortfolio, mfNavs, sipPlans, ppf, nps,
             marketCycle, priceHistory, fixedDeposits,
-            goldHoldings, goldPrice, creditCard,
+            goldHoldings, goldPrice, creditCard, activeCreditCards,
             happiness, isRetired, achievements, firedDecisions,
             crisisCount, highHappinessMonths, monthlyExpenses, lastNetWorthMilestone,
             history, eventInbox, netWorthHistory, lastMonthFlow,
@@ -245,6 +244,9 @@ export const GameProvider = ({ children }) => {
                 totalMonthsPlayed: stateRef.current.totalMonthsPlayed,
                 history: stateRef.current.history?.slice(-50) || [],
                 currentJob: stateRef.current.currentJob,
+                pendingApplications: stateRef.current.pendingApplications,
+                pendingDecision: stateRef.current.pendingDecision,
+                pendingJobInterview: stateRef.current.pendingJobInterview,
                 currentHousingId: stateRef.current.currentHousing?.id || 'hostel',
                 playerSprite, playerName, playerBirthday,
                 degrees: stateRef.current.degrees,
@@ -263,6 +265,7 @@ export const GameProvider = ({ children }) => {
                 goldHoldings: stateRef.current.goldHoldings,
                 goldPrice: stateRef.current.goldPrice,
                 creditCard: stateRef.current.creditCard,
+                activeCreditCards: stateRef.current.activeCreditCards,
                 dependents: stateRef.current.dependents,
                 loans: stateRef.current.loans,
                 activeInsurance: stateRef.current.activeInsurance,
@@ -312,6 +315,18 @@ export const GameProvider = ({ children }) => {
             if (s.totalMonthsPlayed !== undefined) setTotalMonthsPlayed(s.totalMonthsPlayed);
             if (s.history) setHistory(s.history);
             if (s.currentJob !== undefined) setCurrentJob(s.currentJob);
+            if (s.pendingApplications !== undefined) setPendingApplications(s.pendingApplications);
+            if (s.pendingDecision !== undefined) {
+                // Auto-fix: if pendingDecision has a salary but no choices, it was incorrectly saved as a job interview
+                if (s.pendingDecision && s.pendingDecision.salary && !s.pendingDecision.choices) {
+                    setPendingJobInterview(s.pendingDecision);
+                    setPendingDecision(null);
+                } else {
+                    setPendingDecision(s.pendingDecision);
+                }
+            }
+            if (s.pendingJobInterview !== undefined) setPendingJobInterview(s.pendingJobInterview);
+            if (s.isPlaying !== undefined) setIsPlaying(s.isPlaying);
             if (s.playerSprite) setPlayerSprite(s.playerSprite);
             if (s.playerName) setPlayerName(s.playerName);
             if (s.playerBirthday) setPlayerBirthday(s.playerBirthday);
@@ -331,6 +346,7 @@ export const GameProvider = ({ children }) => {
             if (s.goldHoldings) setGoldHoldings(s.goldHoldings);
             if (s.goldPrice) setGoldPrice(s.goldPrice);
             if (s.creditCard !== undefined) setCreditCard(s.creditCard);
+            if (s.activeCreditCards) setActiveCreditCards(s.activeCreditCards);
             if (s.dependents) setDependents(s.dependents);
             if (s.loans) setLoans(s.loans);
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
@@ -384,7 +400,9 @@ export const GameProvider = ({ children }) => {
     // Load on mount
     const [saveLoaded, setSaveLoaded] = useState(false);
     useEffect(() => {
-        loadGame().then(() => setSaveLoaded(true));
+        loadGame().then(() => {
+            setTimeout(() => setSaveLoaded(true), 2000);
+        });
     }, []);
 
     // Auto-save whenever totalMonthsPlayed increments (after all state settles)
@@ -850,13 +868,35 @@ export const GameProvider = ({ children }) => {
     };
 
     // --- CREDIT CARD ---
-    const openCreditCard = () => {
-        if (creditCard) return { success: false, msg: 'Already have a credit card.' };
-        if (creditScore < 650) return { success: false, msg: `Credit score too low (${creditScore}). Need 650+.` };
-        const limit = creditScore >= 750 ? 150000 : creditScore >= 700 ? 100000 : 50000;
-        setCreditCard({ limit, balance: 0, dueMonth: totalMonthsPlayed + 1, apr: 0.36, totalSpent: 0 });
-        addHistory('Credit card activated', 0, 'info');
-        return { success: true, msg: `Credit card activated! Limit: ₹${limit.toLocaleString()}. Pay your bill by next month to avoid 36% APR interest.` };
+    const openCreditCard = (type = 'standard') => {
+        if (activeCreditCards.includes(type)) return { success: false, msg: 'Already have this card.' };
+        
+        let additionalLimit = 0;
+        
+        if (type === 'standard') {
+            if (creditScore < 600) return { success: false, msg: `Credit score too low (${creditScore}). Need 600+.` };
+            additionalLimit = creditScore >= 750 ? 150000 : creditScore >= 700 ? 100000 : 50000;
+        } else if (type === 'premium') {
+            if (creditScore < 750) return { success: false, msg: `Credit score too low (${creditScore}). Need 750+.` };
+            if (netWorth < 1000000 && (!currentJob || currentJob.salary < 100000)) return { success: false, msg: 'Need ₹10L Net Worth OR ₹1L/mo salary.' };
+            if (balance < 5000) return { success: false, msg: 'Need ₹5,000 for annual fee.' };
+            setBalance(prev => prev - 5000); // Annual fee deducted upfront
+            additionalLimit = 300000;
+        } else if (type === 'minor') {
+            if (dependents.length === 0) return { success: false, msg: 'You need a child to issue a supplementary card.' };
+            additionalLimit = 10000; // Small limit for minor
+        }
+
+        setActiveCreditCards(prev => [...prev, type]);
+        
+        if (!creditCard) {
+            setCreditCard({ limit: additionalLimit, balance: 0, dueMonth: totalMonthsPlayed + 1, apr: 0.36, totalSpent: 0 });
+        } else {
+            setCreditCard(prev => ({ ...prev, limit: prev.limit + additionalLimit }));
+        }
+        
+        addHistory(`${type.toUpperCase()} Credit Card activated`, 0, 'info');
+        return { success: true, msg: `${type.toUpperCase()} Credit Card activated! Added ₹${additionalLimit.toLocaleString()} to limit.` };
     };
 
     const chargeToCard = (amount, label) => {
@@ -969,10 +1009,69 @@ export const GameProvider = ({ children }) => {
     const applyForJob = (job) => {
         const check = checkJobRequirements(job);
         if (!check.allowed) return check;
-        setCurrentJob(job);
-        addHistory(`Started Job: ${job.name}`, 0, 'info');
-        return { allowed: true };
+
+        if (job.type.startsWith('Tier 1')) {
+            setCurrentJob(job);
+            addHistory(`Started Gig: ${job.name}`, 0, 'info');
+            return { allowed: true, msg: 'Hired instantly!' };
+        }
+
+        if (pendingApplications.some(a => a.id === job.id)) {
+            return { allowed: false, reason: 'Application already pending.' };
+        }
+
+        setPendingApplications(prev => [...prev, { ...job, appliedMonth: totalMonthsPlayed }]);
+        addHistory(`Applied for: ${job.name}`, 0, 'info');
+        return { allowed: true, msg: 'Application submitted! Check back next month.' };
     };
+
+    // ─── JOB INTERVIEW RESOLUTION ────────────────────────────────────────────
+    const resolveInterview = useCallback((choice, job) => {
+        setPendingJobInterview(null);
+        
+        let success = false;
+        const roll = Math.random();
+        success = roll <= choice.successChance;
+        
+        if (choice.healthModifier !== 0) {
+            setHealth(prev => Math.max(0, Math.min(100, prev + choice.healthModifier)));
+        }
+        if (choice.happinessModifier !== 0) {
+            setHappiness(prev => Math.max(0, Math.min(100, prev + choice.happinessModifier)));
+        }
+
+        if (success) {
+            const finalSalary = Math.round(job.salary * choice.salaryMultiplier);
+            const finalJob = { ...job, salary: finalSalary };
+            setCurrentJob(finalJob);
+            const successEvent = {
+                id: `job_acc_${Date.now()}`,
+                name: '🎉 Interview Passed!',
+                message: `${choice.successMsg}\n\nYou start your new role as ${job.name} making ₹${finalSalary.toLocaleString()}/mo.`,
+                category: 'positive',
+                impact: 0,
+                month: totalMonthsPlayed,
+                read: false
+            };
+            setEventInbox(prev => [successEvent, ...prev].slice(0, 50));
+            setLastCrisisEvent(successEvent);
+            addHistory(`Hired: ${job.name} at ₹${finalSalary.toLocaleString()}`, 0, 'info');
+        } else {
+            const failEvent = {
+                id: `job_rej_int_${Date.now()}`,
+                name: '❌ Interview Failed',
+                message: `${choice.failMsg}\n\nYour application for ${job.name} has been rejected. You can try applying again next month.`,
+                category: 'negative',
+                impact: 0,
+                month: totalMonthsPlayed,
+                read: false
+            };
+            setEventInbox(prev => [failEvent, ...prev].slice(0, 50));
+            setLastCrisisEvent(failEvent);
+            addHistory(`Rejected: ${job.name}`, 0, 'info');
+        }
+        // Do NOT setIsPlaying(true) here — player manually advances months
+    }, [totalMonthsPlayed]);
 
     // =========================================================================
     // LOAN SYSTEM
@@ -2407,6 +2506,32 @@ export const GameProvider = ({ children }) => {
         }
         // ── END RETIREMENT PHASE ───────────────────────────────────────────────
 
+        // ── JOB APPLICATION EVALUATION ─────────────────────────────────────────
+        if (pendingApplications.length > 0) {
+            const currentApp = pendingApplications[0];
+            const baseChance = 0.60;
+            const roll = Math.random();
+            
+            if (roll <= baseChance) {
+                setPendingJobInterview(currentApp);
+                setIsPlaying(false);
+            } else {
+                const rejEvent = {
+                    id: `job_rej_${Date.now()}`,
+                    name: '📋 Application Update',
+                    message: `Unfortunately, ${currentApp.name} decided to move forward with other candidates.\n\nYour application has been rejected. You are free to re-apply or try other positions.`,
+                    category: 'negative',
+                    impact: 0,
+                    month: totalMonthsPlayed + 1,
+                    read: false
+                };
+                setEventInbox(prev => [rejEvent, ...prev].slice(0, 50));
+                setLastCrisisEvent(rejEvent);
+                setIsPlaying(false);
+            }
+            setPendingApplications(prev => prev.slice(1));
+        }
+
         const salary = currentJob ? currentJob.salary : 0;
         const salaryCutEffect = activeEffects.find(e => e.type === 'salary_cut');
         const effectiveSalary = salaryCutEffect ? Math.round(salary * (1 - salaryCutEffect.pct)) : salary;
@@ -2552,6 +2677,70 @@ export const GameProvider = ({ children }) => {
             const budgetEvent = BUDGET_EVENTS[yearIndex % BUDGET_EVENTS.length];
             setPendingDecision({ ...budgetEvent, isBudget: true });
             setIsPlaying(false);
+        }
+
+        // ── BIRTHDAY MECHANICS ──
+        let bdayMonth = null;
+        if (stateRef.current.playerBirthday && stateRef.current.playerBirthday.includes('/')) {
+            bdayMonth = parseInt(stateRef.current.playerBirthday.split('/')[1], 10);
+        }
+
+        if (bdayMonth && turn.month === bdayMonth && !pendingDecision && totalMonthsPlayed > 0) {
+            const currentAge = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
+            
+            // Family Gift (if happiness > 60 and has dependents)
+            if (happiness > 60 && dependents.length > 0 && Math.random() < 0.5) {
+                const gift = 2000 + Math.floor(Math.random() * 3000);
+                setBalance(prev => prev + gift);
+                setEventInbox(prev => [{
+                    id: `bday_gift_${totalMonthsPlayed}`, name: '🎁 Birthday Gift',
+                    message: `Your family threw you a small surprise and gifted you ₹${gift.toLocaleString()}!`,
+                    category: 'positive', impact: gift, month: totalMonthsPlayed, read: false,
+                }, ...prev].slice(0, 50));
+            }
+
+            // Milestone Checks
+            if (currentAge === 30 && (netWorth < 500000 && !currentHousing.id.includes('own'))) {
+                setLastCrisisEvent({
+                    id: `midlife_30_${totalMonthsPlayed}`, name: 'Mid-Life Review: Age 30',
+                    message: `You turned 30. You don't own a home and your net worth is below ₹5L. You feel behind your peers. (-20 Happiness)`,
+                    category: 'crisis', impact: 0,
+                });
+                setHappiness(prev => Math.max(0, prev - 20));
+                setIsPlaying(false);
+            } else if (currentAge === 40 && health < 50) {
+                setLastCrisisEvent({
+                    id: `midlife_40_${totalMonthsPlayed}`, name: 'Mid-Life Review: Age 40',
+                    message: `You turned 40 but your health is poor (${Math.round(health)}/100). You've developed chronic back pain. (-15 Max Health)`,
+                    category: 'crisis', impact: 0,
+                });
+                setHealth(prev => Math.max(0, prev - 15));
+                setIsPlaying(false);
+            } else if (currentAge === 50 && (ppf.balance + nps.balance) < 1000000) {
+                setLastCrisisEvent({
+                    id: `midlife_50_${totalMonthsPlayed}`, name: 'Mid-Life Review: Age 50',
+                    message: `You turned 50. Your retirement corpus (PPF+NPS) is only ₹${(ppf.balance + nps.balance).toLocaleString()}. You have 8 years left to build a nest egg! (-25 Happiness)`,
+                    category: 'crisis', impact: 0,
+                });
+                setHappiness(prev => Math.max(0, prev - 25));
+                setIsPlaying(false);
+            } else if (!pendingDecision) {
+                // Regular Birthday Party (Forced)
+                setPendingDecision({
+                    id: `bday_party_${totalMonthsPlayed}`,
+                    name: `Happy ${currentAge}th Birthday!`,
+                    emoji: '🎂',
+                    category: 'dilemma',
+                    message: `It's your birthday! How do you want to celebrate?`,
+                    choices: [
+                        { label: 'Quiet Dinner (₹2,000) [+5😊]', color: '#60a5fa', effect: { type: 'cash_spend', amount: 2000, happiness: 5 } },
+                        { label: 'House Party (₹8,000) [+15😊]', color: '#4ade80', effect: { type: 'cash_spend', amount: 8000, happiness: 15 } },
+                        { label: 'Lavish Bash (₹25,000) [+30😊]', color: '#f87171', effect: { type: 'cash_spend', amount: 25000, happiness: 30 } },
+                        ...(balance < 2000 ? [{ label: 'Broke Birthday (₹0) [-10😊]', color: '#445070', effect: { type: 'cash_spend', amount: 0, happiness: -10 } }] : [])
+                    ],
+                });
+                setIsPlaying(false);
+            }
         }
 
         // Career advancement offer — every 24–36 months with a job, 35% chance
@@ -2787,6 +2976,11 @@ export const GameProvider = ({ children }) => {
                 const dep = dependents.find(d => d.type === demand.character);
                 setPendingFamilyDemand({ demand, dep });
             }
+        }
+
+        // Credit Card popup offer
+        if (!activeCreditCards.includes('standard') && !activeCreditCards.includes('premium') && creditScore >= 650 && Math.random() < 0.10) {
+            setPendingCreditCardOffer(true);
         }
 
         // Reset PPF yearly contributions counter every 12 months
@@ -3166,7 +3360,7 @@ export const GameProvider = ({ children }) => {
         // Core
         balance, netWorth, turn, history, isPlaying, setIsPlaying,
         gameSpeed, setGameSpeed,
-        currentJob, currentHousing, playerSprite, setPlayerSprite,
+        currentJob, pendingApplications, pendingJobInterview, setPendingJobInterview, resolveInterview, currentHousing, playerSprite, setPlayerSprite,
         playerName, setPlayerName,
         playerBirthday, setPlayerBirthday,
         degrees, portfolio, properties, marketPrices, priceHistory,
@@ -3193,7 +3387,7 @@ export const GameProvider = ({ children }) => {
         goldHoldings, goldPrice, goldAssets: GOLD_ASSETS, buyGold, sellGold, getGoldValue,
 
         // Credit card
-        creditCard, openCreditCard, chargeToCard, payCreditCardBill, closeCreditCard,
+        creditCard, activeCreditCards, openCreditCard, chargeToCard, payCreditCardBill, closeCreditCard,
 
         // Financial tips
         getFinancialTips,

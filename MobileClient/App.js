@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Pressable, Image, ScrollView, StatusBar, Dimensions, TextInput, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, Image, ScrollView, StatusBar, Dimensions, TextInput, Animated, Modal } from 'react-native';
 import ResponsiveModal from './src/components/ResponsiveModal';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider, useGame } from './src/context/GameContext';
@@ -33,6 +33,8 @@ import DailyLimitScreen from './src/components/DailyLimitScreen';
 import CrisisSimulator from './src/components/CrisisSimulator';
 import CRTOverlay from './src/components/CRTOverlay';
 import Vignette from './src/components/Vignette';
+import InterviewModal from './src/components/InterviewModal';
+import LoadingScreen from './src/components/LoadingScreen';
 import { getSpriteImage } from './src/data/spriteMap';
 import { useFonts, VT323_400Regular } from '@expo-google-fonts/vt323';
 import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
@@ -343,6 +345,7 @@ const GameLayout = ({ onHardReset }) => {
     health, sickLeaveMonths,
     getTotalEMI,
     pendingFamilyDemand, resolveFamilyDemand,
+    pendingCreditCardOffer, setPendingCreditCardOffer,
     pantry,
   } = useGame();
 
@@ -530,11 +533,7 @@ const GameLayout = ({ onHardReset }) => {
 
   // Waiting for AsyncStorage load
   if (!saveLoaded) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#06080f', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#2a3560', letterSpacing: 4 }}>LOADING SAVE...</Text>
-      </View>
-    );
+    return <LoadingScreen text="LOADING SAVE..." />;
   }
 
   // No save found (or new game requested) — show sprite selection
@@ -697,17 +696,16 @@ const GameLayout = ({ onHardReset }) => {
   const handleApply = (job) => {
     const check = checkJobRequirements(job);
     if (!check.allowed) { showDialog('Locked', `Cannot apply: ${check.reason}`, 'error'); return; }
-    // Show offer dialog before setting the job — feels like a real hire
     showDialog(
-      '🎉 JOB OFFER!',
-      `Congratulations! ${job.name} wants to hire you.\n\nSalary: ₹${job.salary.toLocaleString()}/mo\n\nAccept the offer?`,
-      'success',
+      'SUBMIT APPLICATION',
+      `Apply for ${job.name}?\n\nBase Salary: ₹${job.salary.toLocaleString()}/mo\n\nYour application will be reviewed over the coming months. If shortlisted, you will be invited for an interview.`,
+      'info',
       () => {
         const result = applyForJob(job);
         if (result.allowed) { setSelectedJob(null); setActiveMenu(null); closeDialog(); }
       },
-      'ACCEPT OFFER',
-      'DECLINE',
+      'SUBMIT',
+      'CANCEL',
       closeDialog
     );
   };
@@ -1328,36 +1326,39 @@ const GameLayout = ({ onHardReset }) => {
                   </View>
                 </TouchableOpacity>
 
-                {/* BANK + INSURE — side by side, full-bleed image style */}
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <TouchableOpacity onPress={() => setMoneySubTab('bank')} activeOpacity={0.85}
-                    style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', overflow: 'hidden' }}>
-                    <View style={{ height: 160, position: 'relative' }}>
-                      <Image source={require('./assets/bank.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                      <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
-                      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: '#38b2ac' }} />
-                      <View style={{ position: 'absolute', bottom: 10, left: 10, right: 10 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#38b2ac', letterSpacing: 3, marginBottom: 1 }}>BANKING</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#ffffff', lineHeight: 24 }}>BANK</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#c8d4f0' }}>FD · Loans · CA · ITR</Text>
-                      </View>
+                {/* BANK card */}
+                <TouchableOpacity onPress={() => setMoneySubTab('bank')} activeOpacity={0.85}
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
+                  <View style={{ height: 140, position: 'relative' }}>
+                    <Image source={require('./assets/bank.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
+                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, padding: 16, justifyContent: 'flex-end' }}>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#38b2ac', letterSpacing: 4 }}>BANKING & LOANS</Text>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>BANK</Text>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>FD · Loans · CA · ITR</Text>
                     </View>
-                  </TouchableOpacity>
+                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#38b2ac60', paddingHorizontal: 12, paddingVertical: 4 }}>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#38b2ac', letterSpacing: 2 }}>OPEN ▶</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
 
-                  <TouchableOpacity onPress={() => setMoneySubTab('insure')} activeOpacity={0.85}
-                    style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', overflow: 'hidden' }}>
-                    <View style={{ height: 160, position: 'relative' }}>
-                      <Image source={require('./assets/jobs/chemist drugstore.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                      <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
-                      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: '#22c55e' }} />
-                      <View style={{ position: 'absolute', bottom: 10, left: 10, right: 10 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#22c55e', letterSpacing: 3, marginBottom: 1 }}>PROTECTION</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#ffffff', lineHeight: 24 }}>INSURE</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#c8d4f0' }}>Health · Life · Property</Text>
-                      </View>
+                {/* INSURE card */}
+                <TouchableOpacity onPress={() => setMoneySubTab('insure')} activeOpacity={0.85}
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
+                  <View style={{ height: 140, position: 'relative' }}>
+                    <Image source={require('./assets/jobs/chemist drugstore.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
+                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, padding: 16, justifyContent: 'flex-end' }}>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#22c55e', letterSpacing: 4 }}>PROTECTION</Text>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>INSURE</Text>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Health · Life · Property</Text>
                     </View>
-                  </TouchableOpacity>
-                </View>
+                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#22c55e60', paddingHorizontal: 12, paddingVertical: 4 }}>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#22c55e', letterSpacing: 2 }}>OPEN ▶</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </ScrollView>
             )}
             {moneySubTab === 'invest' && (
@@ -2175,6 +2176,9 @@ const GameLayout = ({ onHardReset }) => {
           </View>
         )}
 
+        {/* ── INTERVIEW MODAL ── */}
+        <InterviewModal />
+
         {/* ── DAILY LIMIT OVERLAY — shown when 6 turns exhausted ── */}
         <DailyLimitScreen
           visible={showDailyLimit}
@@ -2375,9 +2379,12 @@ const GameLayout = ({ onHardReset }) => {
           <View style={{ width: '100%', maxWidth: 360, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16' }}>
 
             {/* Header */}
-            <View style={{ backgroundColor: '#0d1020', borderBottomWidth: 1, borderColor: '#1a2040', padding: 16 }}>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>LIFE SIMULATION</Text>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 32 }}>FINLIT</Text>
+            <View style={{ backgroundColor: '#0d1020', borderBottomWidth: 1, borderColor: '#1a2040', padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>LIFE SIMULATION</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 32 }}>FINLIT</Text>
+              </View>
+              <Image source={require('./assets/ui_comp/saveandearn.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />
             </View>
 
             <View style={{ padding: 16 }}>
@@ -2750,6 +2757,33 @@ const GameLayout = ({ onHardReset }) => {
           </View>
         </View>
       </ResponsiveModal>
+      {/* ── Credit Card Offer Dialog ── */}
+      <ResponsiveModal visible={pendingCreditCardOffer} transparent animationType="fade" onRequestClose={() => setPendingCreditCardOffer(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: '#070a16', borderWidth: 1, borderColor: '#60a5fa', overflow: 'hidden' }}>
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Image source={require('./assets/ui_comp/credit card.png')} style={{ width: 120, height: 120, marginBottom: 16 }} resizeMode="contain" />
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#60a5fa', marginBottom: 8, textAlign: 'center' }}>PRE-APPROVED CREDIT CARD OFFER!</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', textAlign: 'center', marginBottom: 16 }}>
+                Your excellent credit score has unlocked a new credit card offer. Build credit, enjoy interest-free days, and get lifestyle perks.
+              </Text>
+              
+              <TouchableOpacity onPress={() => {
+                setPendingCreditCardOffer(false);
+                setActiveTab('money');
+                setMoneySubTab('card');
+              }} style={{ width: '100%', backgroundColor: '#60a5fa', padding: 14, alignItems: 'center', marginBottom: 12 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#04060e', letterSpacing: 1 }}>SEE OFFER & APPLY →</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity onPress={() => setPendingCreditCardOffer(false)} style={{ width: '100%', borderWidth: 1, borderColor: '#1a2040', padding: 14, alignItems: 'center' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>NOT NOW</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </ResponsiveModal>
+
     </SafeAreaView>
   );
 };

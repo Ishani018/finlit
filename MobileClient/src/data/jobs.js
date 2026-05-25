@@ -392,7 +392,7 @@ export const JOBS = [
     },
     {
         id: 'kirana_store',
-        name: 'Kirana Store Owner',
+        name: 'Grocery Store Owner',
         salary: 30000,
         type: 'Tier 3: Biz',
         image: require('../../assets/jobs/kirana store.png'),

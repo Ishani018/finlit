@@ -42,8 +42,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
         itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
         selectITRForm, collectITRDoc, computeITRTaxFull, submitITR,
         goldHoldings, goldPrice, buyGold, sellGold, getGoldValue,
-        creditCard, openCreditCard, payCreditCardBill, closeCreditCard,
+        creditCard, activeCreditCards, openCreditCard, payCreditCardBill, closeCreditCard,
         getFinancialTips,
+        dependents,
         retirementBuckets, setupRetirementBuckets, isRetired,
         ppf, nps,
     } = useGame();
@@ -66,6 +67,36 @@ export default function BankScreen({ onClose, onShowDialog }) {
 
     // Credit card state
     const [cardPayInput, setCardPayInput] = useState('');
+
+    const CREDIT_CARDS_DATA = [
+        {
+            id: 'standard',
+            name: 'Standard Credit Card',
+            image: require('../../assets/ui_comp/credit card.png'),
+            desc: 'Pay for purchases this month, settle the bill next month — interest-free. Miss the due date and you pay 36% APR.',
+            criteriaText: 'Need credit score ≥ 600',
+            isEligible: creditScore >= 600,
+            perk: 'Basic cash flow management.'
+        },
+        {
+            id: 'premium',
+            name: 'Premium Reserve Card',
+            image: require('../../assets/ui_comp/premium credit card.png'),
+            desc: 'Exclusive lifestyle perks, airport lounge access, and a massive credit limit. Annual fee of ₹5,000.',
+            criteriaText: 'Need score 750+ AND (Net Worth ₹10L OR Salary ₹1L/mo)',
+            isEligible: creditScore >= 750 && (netWorth >= 1000000 || (currentJob && currentJob.salary >= 100000)),
+            perk: 'Passively boosts happiness.'
+        },
+        {
+            id: 'minor',
+            name: 'Supplementary Minor Card',
+            image: require('../../assets/ui_comp/supplementary minor account credit card.png'),
+            desc: "Build your child's credit history early, giving a massive boost to their college prospects and reducing tuition loans later.",
+            criteriaText: 'Must have at least one child (dependent)',
+            isEligible: dependents.length > 0,
+            perk: 'Unlocks better education loan rates for your child.'
+        }
+    ];
 
     // Retirement bucket state
     const [b1Input, setB1Input] = useState('');
@@ -182,94 +213,138 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     </TouchableOpacity>
 
                     {/* BORROW card */}
-                    {totalMonthsPlayed >= 3 && (
-                        <TouchableOpacity onPress={() => setTab('borrow')} activeOpacity={0.85}
-                            style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden' }}>
-                            <View style={{ height: 150, backgroundColor: '#1a0d0d', flexDirection: 'row', alignItems: 'center' }}>
-                                <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
-                                <View style={{ flex: 1, padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#f87171', letterSpacing: 4, marginBottom: 2 }}>LOANS & CREDIT</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>BORROW</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Personal · Home · Business</Text>
-                                    <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2 }}>OPEN ▶</Text>
-                                    </View>
+                    <TouchableOpacity onPress={() => {
+                            if (totalMonthsPlayed < 3) {
+                                onShowDialog('Locked', 'Borrowing unlocks in Month 3. Build some history first!', 'error');
+                                return;
+                            }
+                            setTab('borrow');
+                        }} activeOpacity={0.85}
+                        style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', opacity: totalMonthsPlayed < 3 ? 0.5 : 1 }}>
+                        <View style={{ height: 150, backgroundColor: '#1a0d0d', flexDirection: 'row', alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
+                            <View style={{ flex: 1, padding: 14 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#f87171', letterSpacing: 4, marginBottom: 2 }}>LOANS & CREDIT</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>BORROW</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Personal · Home · Business</Text>
+                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2 }}>{totalMonthsPlayed < 3 ? 'LOCKED 🔒' : 'OPEN ▶'}</Text>
                                 </View>
                             </View>
-                            {/* Stats strip */}
-                            <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                                <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ACTIVE LOANS</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: loans.length > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{loans.length}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{loans.length === 0 ? 'debt free' : 'outstanding'}</Text>
-                                </View>
-                                <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>EMI / MO</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'NONE'}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>monthly</Text>
-                                </View>
+                        </View>
+                        {/* Stats strip */}
+                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
+                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ACTIVE LOANS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: loans.length > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{loans.length}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{loans.length === 0 ? 'debt free' : 'outstanding'}</Text>
                             </View>
-                        </TouchableOpacity>
-                    )}
+                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>EMI / MO</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'NONE'}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>monthly</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
 
                     {/* CA RETAINER card */}
-                    {totalMonthsPlayed >= 10 && (
-                        <TouchableOpacity onPress={() => setTab('ca')} activeOpacity={0.85}
-                            style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                            <View style={{ height: 190, backgroundColor: '#0d0d1a', flexDirection: 'row', alignItems: 'center' }}>
-                                <Image source={require('../../assets/CA_Office.png')} style={{ width: 170, height: 170 }} resizeMode="contain" />
-                                <View style={{ flex: 1, padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 4, marginBottom: 2 }}>TAX & COMPLIANCE</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>TAXES & ITR</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Self-File · Hire CA · Deductions</Text>
-                                    <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#a78bfa', letterSpacing: 2 }}>OPEN ▶</Text>
-                                    </View>
+                    <TouchableOpacity onPress={() => {
+                            if (totalMonthsPlayed < 10) {
+                                onShowDialog('Locked', 'CA Services unlock in Month 10. Start managing your own taxes first.', 'error');
+                                return;
+                            }
+                            setTab('ca');
+                        }} activeOpacity={0.85}
+                        style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12, opacity: totalMonthsPlayed < 10 ? 0.5 : 1 }}>
+                        <View style={{ height: 190, backgroundColor: '#0d0d1a', flexDirection: 'row', alignItems: 'center' }}>
+                            <Image source={require('../../assets/CA_Office.png')} style={{ width: 170, height: 170 }} resizeMode="contain" />
+                            <View style={{ flex: 1, padding: 14 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 4, marginBottom: 2 }}>TAX & COMPLIANCE</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>TAXES & ITR</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Self-File · Hire CA · Deductions</Text>
+                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#a78bfa', letterSpacing: 2 }}>{totalMonthsPlayed < 10 ? 'LOCKED 🔒' : 'OPEN ▶'}</Text>
                                 </View>
                             </View>
-                            <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                                <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>STATUS</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: caSubscribed ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{caSubscribed ? 'ACTIVE' : 'INACTIVE'}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>₹2,000/mo</Text>
-                                </View>
-                                <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ITR</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: itrFiled?.[turn?.year] ? '#4ade80' : '#fbbf24', lineHeight: 20, marginTop: 2 }}>
-                                        {itrFiled?.[turn?.year] ? 'FILED' : 'PENDING'}
-                                    </Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>this year</Text>
-                                </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
+                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>STATUS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: caSubscribed ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{caSubscribed ? 'ACTIVE' : 'INACTIVE'}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>₹2,000/mo</Text>
                             </View>
-                        </TouchableOpacity>
-                    )}
+                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ITR</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: itrFiled?.[turn?.year] ? '#4ade80' : '#fbbf24', lineHeight: 20, marginTop: 2 }}>
+                                    {itrFiled?.[turn?.year] ? 'FILED' : 'PENDING'}
+                                </Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>this year</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
 
-                    {/* RETIREMENT BUCKETS card — only visible when retired or corpus > 50L */}
-                    {(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) && (
-                        <TouchableOpacity onPress={() => setTab('retire')} activeOpacity={0.85}
-                            style={{ borderWidth: 1, borderColor: '#818cf840', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                            <View style={{ height: 120, backgroundColor: '#0d0a1a', flexDirection: 'row', alignItems: 'center' }}>
-                                <View style={{ width: 110, height: 110, alignItems: 'center', justifyContent: 'center' }}>
-                                    <FontAwesome5 name="layer-group" size={48} color="#818cf8" />
-                                </View>
-                                <View style={{ flex: 1, padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#818cf8', letterSpacing: 4, marginBottom: 2 }}>RETIREMENT PLANNING</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ffffff', lineHeight: 26 }}>BUCKETS</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Now · Soon · Later</Text>
-                                    <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#818cf840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#818cf8', letterSpacing: 2 }}>{retirementBuckets ? 'ACTIVE ✓' : 'SET UP ▶'}</Text>
-                                    </View>
+                    {/* CREDIT CARD card */}
+                    <TouchableOpacity onPress={() => setTab('card')} activeOpacity={0.85}
+                        style={{ borderWidth: 1, borderColor: (activeCreditCards?.length > 0 || creditCard) ? '#60a5fa40' : '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
+                        <View style={{ height: 150, backgroundColor: '#000d1a', flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center' }}>
+                                <Image source={require('../../assets/ui_comp/cards landing page icon.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
+                            </View>
+                            <View style={{ flex: 1, padding: 14, paddingLeft: 0 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 4, marginBottom: 2 }}>BUY NOW, PAY LATER</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>CREDIT CARD</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Build credit, get perks</Text>
+                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#60a5fa40', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#60a5fa', letterSpacing: 2 }}>OPEN ▶</Text>
                                 </View>
                             </View>
-                        </TouchableOpacity>
-                    )}
+                        </View>
+                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#60a5fa20' }}>
+                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#60a5fa20' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>CARDS HELD</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: (activeCreditCards?.length > 0 || creditCard) ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{(activeCreditCards || (creditCard ? ['standard'] : [])).length}</Text>
+                            </View>
+                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>OUTSTANDING</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: (creditCard?.balance > 0) ? '#f87171' : '#4ade80', lineHeight: 20, marginTop: 2 }}>
+                                    {creditCard?.balance ? `₹${creditCard.balance.toLocaleString()}` : '—'}
+                                </Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+                    {/* RETIREMENT BUCKETS card */}
+                    <TouchableOpacity onPress={() => {
+                            if (!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000)) {
+                                onShowDialog('Locked', 'Retirement Planning unlocks at Month 6, or if you reach ₹50,000 net worth.', 'error');
+                                return;
+                            }
+                            setTab('retire');
+                        }} activeOpacity={0.85}
+                        style={{ borderWidth: 1, borderColor: '#818cf840', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12, opacity: !(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) ? 0.5 : 1 }}>
+                        <View style={{ height: 150, backgroundColor: '#0d0a1a', flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', overflow: 'hidden' }}>
+                                <Image source={require('../../assets/ui_comp/retirement_buckets.png')} style={{ width: 150, height: 150 }} resizeMode="contain" />
+                            </View>
+                            <View style={{ flex: 1, padding: 14 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#818cf8', letterSpacing: 4, marginBottom: 2 }}>RETIREMENT PLANNING</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ffffff', lineHeight: 26 }}>BUCKETS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Now · Soon · Later</Text>
+                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#818cf840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#818cf8', letterSpacing: 2 }}>
+                                        {!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) ? 'LOCKED 🔒' : (retirementBuckets ? 'ACTIVE ✓' : 'SET UP ▶')}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
 
                     {/* GOLD card */}
                     <TouchableOpacity onPress={() => setTab('gold')} activeOpacity={0.85}
                         style={{ borderWidth: 1, borderColor: '#fbbf2440', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                        <View style={{ height: 130, backgroundColor: '#150f00', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 110, height: 110, alignItems: 'center', justifyContent: 'center' }}>
-                                <FontAwesome5 name="coins" size={52} color="#fbbf24" />
+                        <View style={{ height: 150, backgroundColor: '#150f00', flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', overflow: 'hidden' }}>
+                                <Image source={require('../../assets/ui_comp/gold_vault.png')} style={{ width: 150, height: 150 }} resizeMode="contain" />
                             </View>
                             <View style={{ flex: 1, padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 4, marginBottom: 2 }}>SAFE HAVEN ASSET</Text>
@@ -289,36 +364,6 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>HOLDINGS</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: totalGoldValue > 0 ? '#fbbf24' : '#445070', lineHeight: 22 }}>
                                     {totalGoldValue > 0 ? `₹${(totalGoldValue / 1000).toFixed(0)}k` : 'NONE'}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* CREDIT CARD card */}
-                    <TouchableOpacity onPress={() => setTab('card')} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: creditCard ? '#60a5fa40' : '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                        <View style={{ height: 130, backgroundColor: '#000d1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 110, height: 110, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                <Image source={require('../../assets/ui_comp/credit card.png')} style={{ width: 160, height: 160, marginLeft: -20 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 4, marginBottom: 2 }}>BUY NOW, PAY LATER</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>CREDIT CARD</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>36% APR if you miss the bill</Text>
-                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#60a5fa40', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#60a5fa', letterSpacing: 2 }}>OPEN ▶</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#60a5fa20' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#60a5fa20' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>STATUS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: creditCard ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{creditCard ? 'ACTIVE' : 'NONE'}</Text>
-                            </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>OUTSTANDING</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: creditCard?.balance > 0 ? '#f87171' : '#4ade80', lineHeight: 20, marginTop: 2 }}>
-                                    {creditCard ? `₹${creditCard.balance.toLocaleString()}` : '—'}
                                 </Text>
                             </View>
                         </View>
@@ -1075,7 +1120,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 18, marginBottom: 8 }}>{selectedGoldAsset.description}</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#818cf8' }}>Tax: {selectedGoldAsset.taxNote}</Text>
                             {selectedGoldAsset.makingCharges > 0 && (
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#f87171', marginTop: 4 }}>Making charges: {selectedGoldAsset.makingCharges * 100}% (non-recoverable on resale)</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#f87171', marginTop: 4 }}>Making charges: {Math.round(selectedGoldAsset.makingCharges * 100)}% (non-recoverable on resale)</Text>
                             )}
                             {selectedGoldAsset.type === 'bond' && (
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4ade80', marginTop: 4 }}>+ 2.5% annual interest (paid every 6 months)</Text>
@@ -1154,87 +1199,70 @@ export default function BankScreen({ onClose, onShowDialog }) {
 
             {/* ── CREDIT CARD ── */}
             {tab === 'card' && (
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
-                    {!creditCard ? (
-                        <View style={{ borderWidth: 1, borderColor: '#60a5fa40', backgroundColor: '#070a16', padding: 20, alignItems: 'center' }}>
-                            <Image source={require('../../assets/ui_comp/credit card.png')} style={{ width: '100%', height: 200, marginBottom: 16 }} resizeMode="contain" />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', marginBottom: 8 }}>Apply for a Credit Card</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', textAlign: 'center', lineHeight: 20, marginBottom: 16 }}>
-                                Pay for purchases this month, settle the bill next month — interest-free. Miss the due date and you pay 36% APR. Your credit score determines your limit.
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40, gap: 16 }}>
+                    {/* Sticky Dashboard if they have any card */}
+                    {activeCreditCards?.length > 0 && creditCard && (
+                        <View style={{ borderWidth: 1, borderColor: creditCard.balance > 0 ? '#f87171' : '#60a5fa', backgroundColor: '#070a16', padding: 14 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>TOTAL CREDIT LIMIT</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#60a5fa' }}>₹{creditCard.limit?.toLocaleString()}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>TOTAL OUTSTANDING</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: creditCard.balance > 0 ? '#f87171' : '#4ade80' }}>₹{creditCard.balance?.toLocaleString()}</Text>
+                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>
+                                {creditCard.balance > 0 ? 'Pay before next month to avoid 3%/mo interest' : 'No outstanding bill'}
                             </Text>
-                            <View style={{ width: '100%', backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', padding: 12, marginBottom: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2, marginBottom: 6 }}>YOUR CREDIT SCORE</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: creditBand.color }}>{creditScore} — {creditBand.label}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginTop: 4 }}>
-                                    Eligible limit: ₹{creditScore >= 750 ? '1,50,000' : creditScore >= 700 ? '1,00,000' : creditScore >= 650 ? '50,000' : 'Not eligible (need 650+)'}
-                                </Text>
-                            </View>
-                            {creditScore >= 650 ? (
-                                <TouchableOpacity onPress={() => {
-                                    const r = openCreditCard();
-                                    onShowDialog(r.success ? 'Card Approved!' : 'Failed', r.msg, r.success ? 'success' : 'error');
-                                }} style={{ width: '100%', borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#60a5fa15', padding: 14, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#60a5fa', letterSpacing: 2 }}>APPLY NOW →</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <View style={{ width: '100%', borderWidth: 1, borderColor: '#1a2040', padding: 14, alignItems: 'center', opacity: 0.5 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>Need credit score ≥ 650</Text>
+                            {creditCard.balance > 0 && (
+                                <View style={{ marginTop: 10, gap: 8 }}>
+                                    <TextInput value={cardPayInput} onChangeText={setCardPayInput} keyboardType="number-pad"
+                                        style={{ backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 18, padding: 10 }}
+                                        placeholder={`max ₹${creditCard.balance?.toLocaleString()}`} placeholderTextColor="#2a3560" />
+                                    <TouchableOpacity onPress={() => {
+                                        const amt = parseInt(cardPayInput) || creditCard.balance;
+                                        const r = payCreditCardBill(amt);
+                                        onShowDialog(r.success ? 'Paid!' : 'Failed', r.msg, r.success ? 'success' : 'error');
+                                        if (r.success) setCardPayInput('');
+                                    }} style={{ borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#60a5fa15', padding: 12, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#60a5fa', letterSpacing: 2 }}>PAY FULL (₹{creditCard.balance?.toLocaleString()}) →</Text>
+                                    </TouchableOpacity>
                                 </View>
-                            )}
-                        </View>
-                    ) : (
-                        <View style={{ gap: 12 }}>
-                            <View style={{ alignItems: 'center', marginBottom: 16 }}>
-                                <Image source={require('../../assets/ui_comp/credit card.png')} style={{ width: '100%', height: 230 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ borderWidth: 1, borderColor: '#60a5fa40', backgroundColor: '#070a16', padding: 14 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>CREDIT LIMIT</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#60a5fa' }}>₹{creditCard.limit?.toLocaleString()}</Text>
-                                </View>
-                            </View>
-                            <View style={{ borderWidth: 1, borderColor: creditCard.balance > 0 ? '#f87171' : '#1a2040', backgroundColor: '#070a16', padding: 14 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>OUTSTANDING</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: creditCard.balance > 0 ? '#f87171' : '#4ade80' }}>₹{creditCard.balance?.toLocaleString()}</Text>
-                                </View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>
-                                    {creditCard.balance > 0 ? 'Pay before next month to avoid 3%/mo interest' : 'No outstanding bill'}
-                                </Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560', marginTop: 4 }}>
-                                    Utilisation: {creditCard.limit > 0 ? Math.round(creditCard.balance / creditCard.limit * 100) : 0}%
-                                </Text>
-                                {creditCard.balance > 0 && (
-                                    <View style={{ marginTop: 10, gap: 8 }}>
-                                        <TextInput value={cardPayInput} onChangeText={setCardPayInput} keyboardType="number-pad"
-                                            style={{ backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 18, padding: 10 }}
-                                            placeholder={`max ₹${creditCard.balance?.toLocaleString()}`} placeholderTextColor="#2a3560" />
-                                        <TouchableOpacity onPress={() => {
-                                            const amt = parseInt(cardPayInput) || creditCard.balance;
-                                            const r = payCreditCardBill(amt);
-                                            onShowDialog(r.success ? 'Paid!' : 'Failed', r.msg, r.success ? 'success' : 'error');
-                                            if (r.success) setCardPayInput('');
-                                        }} style={{ borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#60a5fa15', padding: 12, alignItems: 'center' }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#60a5fa', letterSpacing: 2 }}>PAY FULL (₹{creditCard.balance?.toLocaleString()}) →</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                            </View>
-                            <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16', padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginBottom: 6 }}>
-                                    Keep utilisation below 30% (currently {creditCard.limit > 0 ? Math.round(creditCard.balance / creditCard.limit * 100) : 0}%) for best CIBIL impact.
-                                </Text>
-                            </View>
-                            {creditCard.balance === 0 && (
-                                <TouchableOpacity onPress={() => {
-                                    const r = closeCreditCard();
-                                    onShowDialog(r.success ? 'Card Closed' : 'Failed', r.msg, r.success ? 'success' : 'error');
-                                }} style={{ borderWidth: 1, borderColor: '#f87171', backgroundColor: '#f8717108', padding: 14, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', letterSpacing: 2 }}>CLOSE CARD</Text>
-                                </TouchableOpacity>
                             )}
                         </View>
                     )}
+
+                    {CREDIT_CARDS_DATA.map(card => {
+                        const isOwned = activeCreditCards?.includes(card.id) || (card.id === 'standard' && creditCard && !activeCreditCards?.length);
+                        return (
+                            <View key={card.id} style={{ borderWidth: 1, borderColor: isOwned ? '#4ade8050' : '#1a2040', backgroundColor: '#070a16', padding: 20 }}>
+                                <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                                    <Image source={card.image} style={{ width: '100%', height: 180 }} resizeMode="contain" />
+                                </View>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: isOwned ? '#4ade80' : '#c8d4f0', marginBottom: 4 }}>{card.name}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#60a5fa', marginBottom: 8, fontStyle: 'italic' }}>Perk: {card.perk}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 20, marginBottom: 16 }}>{card.desc}</Text>
+                                
+                                {isOwned ? (
+                                    <View style={{ width: '100%', borderWidth: 1, borderColor: '#4ade80', backgroundColor: '#4ade8015', padding: 14, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80', letterSpacing: 2 }}>CARD ACTIVE ✓</Text>
+                                    </View>
+                                ) : card.isEligible ? (
+                                    <TouchableOpacity onPress={() => {
+                                        const r = openCreditCard(card.id);
+                                        onShowDialog(r.success ? 'Card Approved!' : 'Failed', r.msg, r.success ? 'success' : 'error');
+                                    }} style={{ width: '100%', borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#60a5fa15', padding: 14, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#60a5fa', letterSpacing: 2 }}>APPLY NOW →</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <View style={{ width: '100%', borderWidth: 1, borderColor: '#1a2040', padding: 14, alignItems: 'center', opacity: 0.5 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', textAlign: 'center' }}>Not Eligible</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', textAlign: 'center', marginTop: 4 }}>{card.criteriaText}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    })}
                 </ScrollView>
             )}
 

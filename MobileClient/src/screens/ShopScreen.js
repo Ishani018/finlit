@@ -116,7 +116,7 @@ function GrocerySection({ onBack, onClose }) {
 
     return (
         <View style={{ flex: 1 }}>
-            <ScreenHeader title="Kirana Store" subtitle="GROCERY" onBack={onBack} onClose={onClose} />
+            <ScreenHeader title="Grocery Store" subtitle="GROCERY" onBack={onBack} onClose={onClose} />
 
             {/* Tabs */}
             <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: C.border, backgroundColor: C.panel }}>
@@ -223,6 +223,8 @@ const CLOTHES_IMAGES = {
     school_bag:     require('../../assets/clothing and others/schoolbag.png'),
     school_uniform: require('../../assets/clothing and others/school uniform.png'),
     kids_books:     require('../../assets/clothing and others/storybooks.png'),
+    sports_kit:     require('../../assets/clothing and others/sports kit.png'),
+    video_game:     require('../../assets/clothing and others/video game.png'),
     casual_wear:    require('../../assets/clothing and others/daily casual wear.png'),
     ethnic_set:     require('../../assets/clothing and others/ethnic wear.png'),
     formal_suit:    require('../../assets/clothing and others/suit.png'),
@@ -457,7 +459,7 @@ export default function ShopScreen({ onClose }) {
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
                 <CategoryCard
-                    title="Kirana Store"
+                    title="Grocery Store"
                     subtitle="GROCERY & PANTRY"
                     color={C.gold}
                     img={KIRANA_IMG}

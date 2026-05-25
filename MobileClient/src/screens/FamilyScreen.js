@@ -738,7 +738,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                                 <SectionLabel label="FEED FROM PANTRY" />
                                 {pantryItems.length === 0 ? (
                                     <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 22, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.dim, textAlign: 'center', lineHeight: 22 }}>Pantry is empty.{'\n'}Buy food from the Kirana Store first.</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.dim, textAlign: 'center', lineHeight: 22 }}>Pantry is empty.{'\n'}Buy food from the Grocery Store first.</Text>
                                     </View>
                                 ) : (
                                     pantryItems.map(entry => {

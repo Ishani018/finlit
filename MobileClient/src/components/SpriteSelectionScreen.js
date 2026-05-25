@@ -65,14 +65,13 @@ function EntryScreen({ onStart }) {
             ])
         ).start();
 
-        const runScroll = () => {
-            scrollX.setValue(-PARADE_W);
+        scrollX.setValue(-PARADE_W);
+        Animated.loop(
             Animated.timing(scrollX, {
                 toValue: -2 * PARADE_W, duration: 22000,
                 easing: Easing.linear, useNativeDriver: true,
-            }).start(({ finished }) => { if (finished) runScroll(); });
-        };
-        runScroll();
+            })
+        ).start();
 
     }, []);
 
@@ -92,9 +91,12 @@ function EntryScreen({ onStart }) {
             </View>
 
             <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#151e34', letterSpacing: 8, marginBottom: 2 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#151e34', letterSpacing: 8, marginBottom: 16 }}>
                     ▓▓▒▒░░ PRESENTS ░░▒▒▓▓
                 </Text>
+                
+                <Image source={require('../../assets/icon.png')} style={{ width: 100, height: 100, marginBottom: 16, borderRadius: 20 }} resizeMode="contain" />
+
                 <View style={{ alignItems: 'center', height: 88 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#0b1228', letterSpacing: 6, position: 'absolute', top: 5, left: 5, lineHeight: 82 }}>FINLIT</Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#172860', letterSpacing: 6, position: 'absolute', top: 2, left: 2, lineHeight: 82 }}>FINLIT</Text>
@@ -400,14 +402,23 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
     const [nameInput, setNameInput] = useState('');
     const [bdayInput, setBdayInput] = useState('');
     const [nameError, setNameError] = useState('');
+    const [bdayError, setBdayError] = useState('');
 
     const selected = SPRITES[selectedIdx];
     const heroH    = SH * 0.42;
 
     const handleStart = () => {
-        const trimmed = nameInput.trim();
-        if (trimmed.length < 2) { setNameError('Name must be at least 2 characters.'); return; }
-        onConfirm(trimmed, bdayInput.trim() || null);
+        const trimmedName = nameInput.trim();
+        if (trimmedName.length < 2) { setNameError('Name must be at least 2 characters.'); return; }
+        
+        const trimmedBday = bdayInput.trim();
+        const bdayRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+        if (!bdayRegex.test(trimmedBday)) {
+            setBdayError('Enter a valid birthday in DD/MM/YYYY format.');
+            return;
+        }
+
+        onConfirm(trimmedName, trimmedBday);
     };
 
     return (
@@ -463,20 +474,24 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                 {/* DOB input */}
                 <TextInput
                     value={bdayInput}
-                    onChangeText={setBdayInput}
-                    placeholder="Birthday  DD/MM/YYYY  (optional)"
+                    onChangeText={t => { setBdayInput(t); setBdayError(''); }}
+                    placeholder="Birthday  DD/MM/YYYY  (required)"
                     placeholderTextColor="#111828"
                     style={{
                         fontFamily: 'VT323_400Regular', fontSize: 20, color: '#2a3a5a',
                         paddingVertical: 10, paddingHorizontal: 14,
-                        borderWidth: 1, borderColor: '#0d1228',
+                        borderWidth: 1, borderColor: bdayError ? '#f87171' : '#0d1228',
                         backgroundColor: '#030407',
-                        marginBottom: 26,
+                        marginBottom: 4,
                     }}
                     underlineColorAndroid="transparent"
                     keyboardType="numbers-and-punctuation"
                     maxLength={10}
                 />
+                {bdayError
+                    ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', marginBottom: 12, lineHeight: 16 }}>{bdayError}</Text>
+                    : <View style={{ height: 26 }} />
+                }
 
                 {/* Buttons — neutral palette, no trait colour */}
                 <View style={{ flexDirection: 'row', gap: 10, alignItems: 'stretch' }}>

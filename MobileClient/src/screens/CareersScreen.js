@@ -63,9 +63,9 @@ function TierCard({ tier, unlocked, count, onPress }) {
     );
 }
 
-function JobCard({ job, tier, isCurrent, isOffer, isLocked, onPress }) {
+function JobCard({ job, tier, isCurrent, isOffer, isLocked, isPending, onPress }) {
     const salaryPct = Math.min(job.salary / MAX_SALARY, 1);
-    const borderColor = isCurrent ? C.blue : isOffer ? '#22c55e' : C.border;
+    const borderColor = isCurrent ? C.blue : isOffer ? '#22c55e' : isPending ? '#ca8a04' : C.border;
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -90,6 +90,11 @@ function JobCard({ job, tier, isCurrent, isOffer, isLocked, onPress }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4ade80', letterSpacing: 1 }}>OFFER</Text>
                     </View>
                 )}
+                {isPending && !isCurrent && (
+                    <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: '#422006', borderWidth: 1, borderColor: '#ca8a04', paddingHorizontal: 5, paddingVertical: 1 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#facc15', letterSpacing: 1 }}>PENDING</Text>
+                    </View>
+                )}
             </View>
             <View style={{ padding: 8, backgroundColor: C.panel }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isLocked ? C.dark : C.cream, lineHeight: 16 }} numberOfLines={1}>{job.name}</Text>
@@ -103,7 +108,7 @@ function JobCard({ job, tier, isCurrent, isOffer, isLocked, onPress }) {
 }
 
 export default function CareersScreen({ onClose, onApply }) {
-    const { currentJob, checkJobRequirements, netWorth, pendingJobOffer, degrees } = useGame();
+    const { currentJob, checkJobRequirements, netWorth, pendingJobOffer, degrees, pendingApplications = [] } = useGame();
     const [selectedTier, setSelectedTier] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
 
@@ -203,6 +208,10 @@ export default function CareersScreen({ onClose, onApply }) {
                             <FontAwesome5 name="lock" size={14} color="#f87171" />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171', letterSpacing: 1 }}>{req.reason}</Text>
                         </View>
+                    ) : pendingApplications.some(a => a.id === selectedJob.id) ? (
+                        <View style={{ padding: 14, borderWidth: 1, borderColor: '#ca8a04', backgroundColor: '#422006', alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#facc15', letterSpacing: 2 }}>APPLICATION PENDING</Text>
+                        </View>
                     ) : (
                         <TouchableOpacity
                             onPress={() => { onApply(selectedJob); setSelectedJob(null); }}
@@ -242,6 +251,7 @@ export default function CareersScreen({ onClose, onApply }) {
                                     isCurrent={currentJob?.id === job.id}
                                     isOffer={pendingJobOffer?.id === job.id}
                                     isLocked={!req.allowed}
+                                    isPending={pendingApplications.some(a => a.id === job.id)}
                                     onPress={() => setSelectedJob(job)}
                                 />
                             );
@@ -288,6 +298,23 @@ export default function CareersScreen({ onClose, onApply }) {
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#22c55e', letterSpacing: 1, flex: 1 }}>NEW OFFER — {pendingJobOffer.name} @ ₹{pendingJobOffer.salary.toLocaleString()}/mo</Text>
                             </View>
                         )}
+                    </View>
+                )}
+
+                {pendingApplications.length > 0 && (
+                    <View style={{ marginBottom: 20, borderWidth: 1, borderColor: '#ca8a04', backgroundColor: '#422006', padding: 10 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#facc15', letterSpacing: 2, marginBottom: 6 }}>PENDING APPLICATIONS</Text>
+                        <View style={{ gap: 4 }}>
+                            {pendingApplications.map((app, i) => (
+                                <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)', padding: 8 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fef08a' }}>{app.name}</Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#ca8a04' }}>IN REVIEW</Text>
+                                        <FontAwesome5 name="clock" size={10} color="#ca8a04" />
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
                     </View>
                 )}
 
