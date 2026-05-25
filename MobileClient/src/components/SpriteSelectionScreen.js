@@ -65,10 +65,10 @@ function EntryScreen({ onStart }) {
             ])
         ).start();
 
-        scrollX.setValue(-PARADE_W);
+        scrollX.setValue(0);
         Animated.loop(
             Animated.timing(scrollX, {
-                toValue: -2 * PARADE_W, duration: 22000,
+                toValue: -PARADE_W, duration: 22000,
                 easing: Easing.linear, useNativeDriver: true,
             })
         ).start();
@@ -307,7 +307,7 @@ function CharacterDetailView({ sprite, trait, onBack, onSelect }) {
 }
 
 // ─── Step 1: Browse characters ────────────────────────────────────────────────
-function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext }) {
+function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, childName }) {
     const [detailIdx, setDetailIdx] = useState(null);
 
     if (detailIdx !== null) {
@@ -330,10 +330,10 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext }) {
             {/* Header */}
             <View style={{ alignItems: 'center', paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderColor: '#0a0f1e' }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1a2440', letterSpacing: 5 }}>FINLIT  v1.0</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', letterSpacing: 2, lineHeight: 32 }}>
-                    CHOOSE YOUR CLASS
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 2, lineHeight: 28, textAlign: 'center', paddingHorizontal: 20 }}>
+                    {childMode ? `PICK A SPRITE TO REPRESENT ${childName ? childName.toUpperCase() : 'YOUR CHILD'}` : 'CHOOSE YOUR CLASS'}
                 </Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#2a3a5a', letterSpacing: 1, marginTop: 1 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#2a3a5a', letterSpacing: 1, marginTop: 4 }}>
                     Tap a character to see their full profile
                 </Text>
             </View>
@@ -529,8 +529,8 @@ const STARTER_JOBS = {
     young_kav_1:     'yoga_teacher',
 };
 
-export default function SpriteSelectionScreen() {
-    const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob } = useGame();
+export default function SpriteSelectionScreen({ childMode = false, childName = '' }) {
+    const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob, startNextGeneration } = useGame();
     const [step, setStep]           = useState(0);
     const [selectedIdx, setSelectedIdx] = useState(0);
     const soundRef = useRef(null);
@@ -553,6 +553,12 @@ export default function SpriteSelectionScreen() {
 
     const handleConfirm = (name, bday) => {
         if (soundRef.current) soundRef.current.stopAsync();
+        
+        if (childMode) {
+            startNextGeneration(selectedIdx);
+            return;
+        }
+
         const spriteId = SPRITES[selectedIdx].id;
         setPlayerName(name);
         setPlayerSprite(spriteId);
@@ -572,6 +578,8 @@ export default function SpriteSelectionScreen() {
                     selectedIdx={selectedIdx}
                     setSelectedIdx={setSelectedIdx}
                     onNext={() => setStep(2)}
+                    childMode={childMode}
+                    childName={childName}
                 />
             )}
             {step === 2 && (

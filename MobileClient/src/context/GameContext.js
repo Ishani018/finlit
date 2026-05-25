@@ -85,6 +85,12 @@ export const GameProvider = ({ children }) => {
     const [corpusDrawdown, setCorpusDrawdown] = useState(0);
     const [bucketListDone, setBucketListDone] = useState([]);
     const [happiness, setHappiness] = useState(50); // 0–100; the other dimension of a good life
+    
+    // Legacy / Dynasty Mode States
+    const [generation, setGeneration] = useState(1);
+    const [childSavings, setChildSavings] = useState({}); // { [dependentId]: balance }
+    const [legacySummary, setLegacySummary] = useState(null);
+    const [isLegacyMode, setIsLegacyMode] = useState(false);
 
     // Education & Portfolio
     const [degrees, setDegrees] = useState([]);
@@ -225,6 +231,7 @@ export const GameProvider = ({ children }) => {
             history, eventInbox, netWorthHistory, lastMonthFlow,
             caSubscribed, caSubscribedMonth, itrFiled,
             health, pantry, sickLeaveMonths,
+            generation, childSavings, legacySummary, isLegacyMode,
             playerAge: STARTING_AGE + Math.floor(totalMonthsPlayed / 12),
             netWorth: balance + Object.keys(portfolio).reduce((t, id) => t + (portfolio[id]?.qty || 0) * (marketPrices[id] || 0), 0),
         };
@@ -294,6 +301,10 @@ export const GameProvider = ({ children }) => {
                 health: stateRef.current.health,
                 pantry: stateRef.current.pantry,
                 sickLeaveMonths: stateRef.current.sickLeaveMonths,
+                generation: stateRef.current.generation,
+                childSavings: stateRef.current.childSavings,
+                legacySummary: stateRef.current.legacySummary,
+                isLegacyMode: stateRef.current.isLegacyMode,
                 ...extraState,
             };
             await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
@@ -375,6 +386,10 @@ export const GameProvider = ({ children }) => {
             if (s.health !== undefined) setHealth(s.health);
             if (s.pantry) setPantry(s.pantry);
             if (s.sickLeaveMonths !== undefined) setSickLeaveMonths(s.sickLeaveMonths);
+            if (s.generation !== undefined) setGeneration(s.generation);
+            if (s.childSavings) setChildSavings(s.childSavings);
+            if (s.legacySummary) setLegacySummary(s.legacySummary);
+            if (s.isLegacyMode !== undefined) setIsLegacyMode(s.isLegacyMode);
 
             // Reconstruct currentHousing from id (avoids serializing require() image)
             if (s.currentHousingId) {
@@ -1284,10 +1299,22 @@ export const GameProvider = ({ children }) => {
     const giftChild = (depId) => {
         if (balance < GIFT_CHILD_COST) return { success: false, msg: `Need ₹${GIFT_CHILD_COST.toLocaleString()} to buy a gift.` };
         setBalance(prev => prev - GIFT_CHILD_COST);
-        setDependents(prev => prev.map(d => d.id === depId ? { ...d, health: Math.min(100, (d.health ?? 80) + 15) } : d));
-        setHappiness(prev => Math.min(100, prev + 3));
-        addHistory('Gift for child', -GIFT_CHILD_COST, 'expense');
-        return { success: true, msg: 'Your child is delighted! +15 HP' };
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, health: Math.min(100, (d.health ?? 80) + 5) } : d));
+        setHappiness(prev => Math.min(100, prev + 2));
+        addHistory('Bought gift for child', -GIFT_CHILD_COST, 'expense');
+        return { success: true, msg: 'Child is very happy! Health and your happiness increased.' };
+    };
+
+    const transferToChildSavings = (childId, amount) => {
+        if (balance < amount) return { success: false, msg: `Insufficient funds.` };
+        setBalance(prev => prev - amount);
+        setChildSavings(prev => ({
+            ...prev,
+            [childId]: (prev[childId] || 0) + amount
+        }));
+        const child = dependents.find(d => d.id === childId);
+        addHistory(`Transferred to ${child?.name || 'Child'}'s savings`, -amount, 'investment');
+        return { success: true, msg: `Successfully saved ₹${amount.toLocaleString()} for ${child?.name || 'child'}.` };
     };
 
     const MEDICINE_COST = 5000;
@@ -2218,6 +2245,79 @@ export const GameProvider = ({ children }) => {
         return { score, rank, passiveIncome, educatedChildren, retirementCorpus: ppf.balance + nps.balance };
     };
 
+    const startNextGeneration = (newSpriteIdx) => {
+        if (!legacySummary) return;
+        const newSpriteId = SPRITES[newSpriteIdx].id;
+        
+        // Check eldest child education & credit score buff
+        let startsWithDegree = null;
+        let startsWithGoodCredit = false;
+        if (legacySummary.eldestChild) {
+            if (legacySummary.eldestChild.schoolTier === 'Top Tier') {
+                startsWithDegree = { id: 'business_admin', name: 'Business Administration', cost: 1000000, duration: 36 };
+            }
+            // Check if Gen 1 had supplementary cards
+            startsWithGoodCredit = activeCreditCards.some(cc => CREDIT_CARDS.find(c => c.id === cc.cardId)?.isMinor);
+        }
+
+        // Full Reset of State (except generation logic)
+        setTotalMonthsPlayed(0);
+        setHistory([]);
+        setCurrentJob(null);
+        setPendingApplications([]);
+        setDegrees(startsWithDegree ? [startsWithDegree] : []);
+        setPortfolio({});
+        setProperties([]);
+        setPropertyBuyMonths({});
+        setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
+        setDependents([]);
+        setLoans([]);
+        setActiveInsurance([]);
+        setCreditScore(startsWithGoodCredit ? 750 : 300);
+        setActiveEffects([]);
+        setActiveEnrollment(null);
+        setEventInbox([]);
+        setFiredDecisions([]);
+        setAchievements([]);
+        setCrisisCount(0);
+        setHighHappinessMonths(0);
+        setNetWorthHistory([]);
+        setHappiness(50);
+        setMonthlyExpenses(20000);
+        setIsRetired(false);
+        setPensionIncome(0);
+        setCorpusDrawdown(0);
+        setBucketListDone([]);
+        setLastMonthTax(0);
+        setLastMonthEMI(0);
+        setCaSubscribed(false);
+        setCaSubscribedMonth(null);
+        setItrFiled({});
+        setHealth(80);
+        setPantry({ staples: 0, veggies: 0, snacks: 0 });
+        setSickLeaveMonths(0);
+        setMfPortfolio({});
+        setSipPlans({});
+        setPpf({ balance: 0, contributionsThisYear: 0 });
+        setNps({ balance: 0, contributionsThisYear: 0 });
+        setFixedDeposits([]);
+        setGoldHoldings({});
+        setGoldBalance(0);
+        setCreditCard(null);
+        setActiveCreditCards([]);
+        setMarketCycle({ phase: 'neutral', age: 0 });
+        
+        // Start next generation
+        setPlayerSprite(newSpriteId);
+        setGeneration(prev => prev + 1);
+        setBalance(legacySummary.startingGenBalance);
+        
+        setGameOver(false);
+        setLegacySummary(null);
+        setIsPlaying(true); // Auto start
+        addHistory(`Started Generation ${generation + 1}!`, 0, 'info');
+    };
+
     // =========================================================================
     // FINANCIAL TIPS
     // =========================================================================
@@ -2403,9 +2503,50 @@ export const GameProvider = ({ children }) => {
         consumeTurn();
 
         // True end of life — legacy screen
-        if (totalMonthsPlayed >= GAME_END_MONTH) {
+        if (totalMonthsPlayed >= GAME_END_MONTH && !gameOver) {
             const score = calculateFinalScore();
             setFinalScore(score);
+            
+            // --- Legacy Generation Splitting ---
+            const currentNetWorth = balance + getStockValue() + getMFValue() + getGoldValue() + getPropertyTotalValue() + ppf.balance + nps.balance;
+            const totalLoanAmount = loans.reduce((sum, loan) => sum + loan.principal, 0);
+            const totalChildSavingsAmt = Object.values(childSavings).reduce((sum, amt) => sum + amt, 0);
+            
+            // Calculate Estate Taxes
+            let estateTaxRate = 0.20; // 20% default
+            if (caSubscribed) estateTaxRate = 0.05; // 5% if CA retained
+            
+            const netAssets = currentNetWorth - totalLoanAmount - totalChildSavingsAmt;
+            const estateTaxAmount = Math.max(0, netAssets * estateTaxRate);
+            const inheritancePool = Math.max(0, netAssets - estateTaxAmount);
+            
+            const children = dependents.filter(d => d.type === 'child');
+            const numChildren = Math.max(1, children.length); // If 0, pretend adopted heir
+            
+            const generalInheritance = Math.floor(inheritancePool / numChildren);
+            
+            // The user will play as the eldest child (or heir)
+            let eldestChild = null;
+            if (children.length > 0) {
+                eldestChild = [...children].sort((a, b) => b.childAgeMonths - a.childAgeMonths)[0];
+            }
+            
+            const eldestSavings = eldestChild && childSavings[eldestChild.id] ? childSavings[eldestChild.id] : 0;
+            const startingGenBalance = eldestSavings + generalInheritance;
+            
+            setLegacySummary({
+                age: playerAge,
+                netWorth: currentNetWorth - totalLoanAmount,
+                estateTaxRate: estateTaxRate * 100,
+                estateTaxAmount,
+                totalChildSavings: totalChildSavingsAmt,
+                numChildren: children.length,
+                generalInheritance,
+                eldestSavings,
+                startingGenBalance,
+                eldestChild
+            });
+
             setGameOver(true);
             setIsPlaying(false);
             return;
@@ -3412,6 +3553,7 @@ export const GameProvider = ({ children }) => {
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
         buyPharmacyItem, buyClothesItem, setChildSchoolTier, setChildPreschoolTier,
+        transferToChildSavings,
         itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
         selectITRForm, collectITRDoc, computeITRTaxFull, submitITR,
         pendingFamilyDemand, resolveFamilyDemand,
@@ -3425,12 +3567,16 @@ export const GameProvider = ({ children }) => {
         getInsurancePremiums, getTotalEMI, getMonthlyTax,
 
         // Endgame
-        calculateFinalScore,
+        calculateFinalScore, startNextGeneration,
         RETIREMENT_MONTH,
         GAME_END_MONTH,
 
         // Retirement phase
         isRetired, pensionIncome, corpusDrawdown, bucketListDone,
+
+        // Legacy / Dynasty Mode
+        generation, childSavings, legacySummary, isLegacyMode,
+        setGeneration, setChildSavings, setLegacySummary, setIsLegacyMode,
 
         // Career
         pendingJobOffer, setPendingJobOffer,

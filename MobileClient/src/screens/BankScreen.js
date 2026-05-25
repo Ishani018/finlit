@@ -44,7 +44,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
         goldHoldings, goldPrice, buyGold, sellGold, getGoldValue,
         creditCard, activeCreditCards, openCreditCard, payCreditCardBill, closeCreditCard,
         getFinancialTips,
-        dependents,
+        dependents, childSavings, transferToChildSavings,
         retirementBuckets, setupRetirementBuckets, isRetired,
         ppf, nps,
     } = useGame();
@@ -174,7 +174,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     </TouchableOpacity>
                     <View style={{ width: 1, height: 14, backgroundColor: '#1a2040' }} />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0', letterSpacing: 2 }}>
-                        {tab === 'save' ? 'SAVE & EARN' : tab === 'ca' ? 'TAXES & ITR' : tab === 'gold' ? 'GOLD' : tab === 'card' ? 'CREDIT CARD' : tab === 'retire' ? 'RETIREMENT BUCKETS' : applyingLoanId ? (LOAN_TYPE_META[applyingLoanId]?.name || 'LOAN') : 'BORROW'}
+                        {tab === 'save' ? 'SAVE & EARN' : tab === 'ca' ? 'TAXES & ITR' : tab === 'gold' ? 'GOLD' : tab === 'card' ? 'CREDIT CARD' : tab === 'retire' ? 'RETIREMENT BUCKETS' : tab === 'childSavings' ? 'CHILD SAVINGS' : applyingLoanId ? (LOAN_TYPE_META[applyingLoanId]?.name || 'LOAN') : 'BORROW'}
                     </Text>
                 </View>
             )}
@@ -339,6 +339,32 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         </View>
                     </TouchableOpacity>
 
+                    {/* CHILD SAVINGS card */}
+                    <TouchableOpacity onPress={() => {
+                            if (!dependents.some(d => d.type === 'child')) {
+                                onShowDialog('Locked', 'You must have a child first before opening a child savings account.', 'error');
+                                return;
+                            }
+                            setTab('childSavings');
+                        }} activeOpacity={0.85}
+                        style={{ borderWidth: 1, borderColor: '#ec489940', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12, opacity: !dependents.some(d => d.type === 'child') ? 0.5 : 1 }}>
+                        <View style={{ height: 150, backgroundColor: '#1a0a1a', flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', overflow: 'hidden' }}>
+                                <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 150, height: 150 }} resizeMode="contain" />
+                            </View>
+                            <View style={{ flex: 1, padding: 14 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#ec4899', letterSpacing: 4, marginBottom: 2 }}>NEXT GENERATION</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ffffff', lineHeight: 26 }}>CHILD SAVINGS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Build their future</Text>
+                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#ec489940', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#ec4899', letterSpacing: 2 }}>
+                                        {!dependents.some(d => d.type === 'child') ? 'LOCKED 🔒' : 'MANAGE ▶'}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
                     {/* GOLD card */}
                     <TouchableOpacity onPress={() => setTab('gold')} activeOpacity={0.85}
                         style={{ borderWidth: 1, borderColor: '#fbbf2440', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
@@ -392,7 +418,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                 </ScrollView>
             )}
 
-            {tab && tab !== 'gold' && tab !== 'card' && tab !== 'retire' && <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
+            {tab && tab !== 'gold' && tab !== 'card' && tab !== 'retire' && tab !== 'childSavings' && <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
 
                 {/* ── SAVE & EARN (FD + CA) ── */}
                 {tab === 'save' && (
@@ -1636,6 +1662,102 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                                     {wrongForm ? 'SUBMIT ANYWAY (RISKY) →' : 'SEND AADHAAR OTP & SUBMIT →'}
                                 </Text>
                             </TouchableOpacity>
+                        </View>
+                    );
+                })()}
+
+                {tab === 'childSavings' && (() => {
+                    const children = dependents.filter(d => d.type === 'child');
+                    const [selectedChild, setSelectedChild] = useState(children[0]?.id || null);
+                    const [saveAmount, setSaveAmount] = useState('10000');
+                    
+                    if (children.length === 0) return null;
+
+                    return (
+                        <View style={{ gap: 14 }}>
+                            <View style={{ borderWidth: 1, borderColor: '#ec489940', backgroundColor: '#0a0d1a', padding: 16, alignItems: 'center' }}>
+                                <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 80, height: 80, marginBottom: 10 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ec4899', letterSpacing: 2 }}>CHILD SAVINGS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0', textAlign: 'center', marginTop: 4, lineHeight: 20 }}>
+                                    Build wealth for your children. They will start with this money when they take over your legacy.
+                                </Text>
+                            </View>
+
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', letterSpacing: 2, marginTop: 10 }}>SELECT CHILD</Text>
+                            <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+                                {children.map(child => (
+                                    <TouchableOpacity 
+                                        key={child.id}
+                                        onPress={() => setSelectedChild(child.id)}
+                                        style={{ 
+                                            borderWidth: 1, 
+                                            borderColor: selectedChild === child.id ? '#ec4899' : '#1a2040', 
+                                            backgroundColor: selectedChild === child.id ? '#ec489920' : '#0a0d1a', 
+                                            padding: 12, 
+                                            borderRadius: 4,
+                                            flex: 1,
+                                            minWidth: '30%',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: selectedChild === child.id ? '#ec4899' : '#c8d4f0' }}>{child.name.toUpperCase()}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', marginTop: 2 }}>Age: {Math.floor(child.childAgeMonths / 12)}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {selectedChild && (() => {
+                                const activeChild = children.find(c => c.id === selectedChild);
+                                const balance = childSavings?.[selectedChild] || 0;
+                                return (
+                                    <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', padding: 16, marginTop: 10 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', letterSpacing: 2 }}>{activeChild.name.toUpperCase()}'S BALANCE</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 36, color: '#fbbf24', marginTop: 4 }}>₹{balance.toLocaleString()}</Text>
+                                        
+                                        <View style={{ height: 1, backgroundColor: '#1a2040', marginVertical: 16 }} />
+                                        
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', letterSpacing: 2, marginBottom: 8 }}>DEPOSIT FUNDS</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0' }}>₹</Text>
+                                            <TextInput
+                                                value={saveAmount}
+                                                onChangeText={setSaveAmount}
+                                                keyboardType="number-pad"
+                                                style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 24, color: '#fff', backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1a2040', paddingHorizontal: 12, paddingVertical: 8 }}
+                                                placeholderTextColor="#445070"
+                                            />
+                                        </View>
+
+                                        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+                                            {[5000, 10000, 50000].map(amt => (
+                                                <TouchableOpacity 
+                                                    key={amt} 
+                                                    onPress={() => setSaveAmount(amt.toString())}
+                                                    style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#111827', padding: 8, alignItems: 'center' }}
+                                                >
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#9ca3af' }}>+{amt/1000}k</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+
+                                        <TouchableOpacity 
+                                            onPress={() => {
+                                                const amt = parseInt(saveAmount, 10);
+                                                if (isNaN(amt) || amt <= 0) {
+                                                    showToast('Enter a valid amount', false);
+                                                    return;
+                                                }
+                                                const res = transferToChildSavings(selectedChild, amt);
+                                                showToast(res.msg, res.success);
+                                                if (res.success) setSaveAmount('');
+                                            }}
+                                            style={{ backgroundColor: '#ec4899', padding: 14, alignItems: 'center' }}
+                                        >
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#000', letterSpacing: 2 }}>TRANSFER MONEY</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                );
+                            })()}
                         </View>
                     );
                 })()}

@@ -16,6 +16,7 @@ import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { styled } from 'nativewind';
 import { useBackgroundMusic } from './src/hooks/useBackgroundMusic';
 import SpriteSelectionScreen from './src/components/SpriteSelectionScreen';
+import LegacyScreen from './src/components/LegacyScreen';
 import FamilyScreen from './src/screens/FamilyScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import CareersScreen from './src/screens/CareersScreen';
@@ -536,9 +537,13 @@ const GameLayout = ({ onHardReset }) => {
     return <LoadingScreen text="LOADING SAVE..." />;
   }
 
+  if (gameOver && legacySummary) {
+    return <LegacyScreen />;
+  }
+
   // No save found (or new game requested) — show sprite selection
   if (!playerSprite) {
-    return <SpriteSelectionScreen />;
+    return <SpriteSelectionScreen childMode={isLegacyMode} childName={legacySummary?.eldestChild?.name} />;
   }
 
   // Settings overlay
