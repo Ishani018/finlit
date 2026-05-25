@@ -49,11 +49,15 @@ export default function BankScreen({ onClose, onShowDialog }) {
         ppf, nps,
     } = useGame();
 
-    const [tab, setTab] = useState(null); // null=landing | save | borrow | ca | gold | card | retire
+    const [tab, setTab] = useState(null); // null=landing | save | borrow | ca | gold | card | retire | childSavings
     const [fdAmount, setFdAmount] = useState('50000');
     const [selectedFDOption, setSelectedFDOption] = useState(FD_OPTIONS[2]);
     const [selectedLoanId, setSelectedLoanId] = useState(null);
     const [prepayInput, setPrepayInput] = useState('');
+
+    // Child savings state
+    const [selectedChild, setSelectedChild] = useState(null);
+    const [childSaveAmount, setChildSaveAmount] = useState('10000');
 
     // Loan application state
     const [applyingLoanId, setApplyingLoanId] = useState(null);
@@ -1668,10 +1672,14 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
 
                 {tab === 'childSavings' && (() => {
                     const children = dependents.filter(d => d.type === 'child');
-                    const [selectedChild, setSelectedChild] = useState(children[0]?.id || null);
-                    const [saveAmount, setSaveAmount] = useState('10000');
                     
                     if (children.length === 0) return null;
+                    if (!selectedChild && children.length > 0) {
+                        // Normally shouldn't update state during render, but this is a fallback.
+                        // Ideally handled in the onPress when opening the tab, but it's safe here.
+                    }
+
+                    const activeChildId = selectedChild || children[0].id;
 
                     return (
                         <View style={{ gap: 14 }}>
@@ -1706,12 +1714,12 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                                 ))}
                             </View>
 
-                            {selectedChild && (() => {
-                                const activeChild = children.find(c => c.id === selectedChild);
-                                const balance = childSavings?.[selectedChild] || 0;
+                            {activeChildId && (() => {
+                                const activeChild = children.find(c => c.id === activeChildId);
+                                const balance = childSavings?.[activeChildId] || 0;
                                 return (
                                     <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', padding: 16, marginTop: 10 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', letterSpacing: 2 }}>{activeChild.name.toUpperCase()}'S BALANCE</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', letterSpacing: 2 }}>{activeChild ? activeChild.name.toUpperCase() : 'CHILD'}'S BALANCE</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 36, color: '#fbbf24', marginTop: 4 }}>₹{balance.toLocaleString()}</Text>
                                         
                                         <View style={{ height: 1, backgroundColor: '#1a2040', marginVertical: 16 }} />
@@ -1720,8 +1728,8 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0' }}>₹</Text>
                                             <TextInput
-                                                value={saveAmount}
-                                                onChangeText={setSaveAmount}
+                                                value={childSaveAmount}
+                                                onChangeText={setChildSaveAmount}
                                                 keyboardType="number-pad"
                                                 style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 24, color: '#fff', backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1a2040', paddingHorizontal: 12, paddingVertical: 8 }}
                                                 placeholderTextColor="#445070"
@@ -1732,7 +1740,7 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                                             {[5000, 10000, 50000].map(amt => (
                                                 <TouchableOpacity 
                                                     key={amt} 
-                                                    onPress={() => setSaveAmount(amt.toString())}
+                                                    onPress={() => setChildSaveAmount(amt.toString())}
                                                     style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#111827', padding: 8, alignItems: 'center' }}
                                                 >
                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#9ca3af' }}>+{amt/1000}k</Text>
@@ -1742,14 +1750,14 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
 
                                         <TouchableOpacity 
                                             onPress={() => {
-                                                const amt = parseInt(saveAmount, 10);
+                                                const amt = parseInt(childSaveAmount, 10);
                                                 if (isNaN(amt) || amt <= 0) {
                                                     showToast('Enter a valid amount', false);
                                                     return;
                                                 }
-                                                const res = transferToChildSavings(selectedChild, amt);
+                                                const res = transferToChildSavings(activeChildId, amt);
                                                 showToast(res.msg, res.success);
-                                                if (res.success) setSaveAmount('');
+                                                if (res.success) setChildSaveAmount('');
                                             }}
                                             style={{ backgroundColor: '#ec4899', padding: 14, alignItems: 'center' }}
                                         >
