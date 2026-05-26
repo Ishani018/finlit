@@ -105,8 +105,8 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
 
                         <View style={{ flexDirection: 'row', gap: 20 }}>
                             <View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>MONTHLY COST</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#f87171' }}>-₹{(currentHousing.maintenance || 0).toLocaleString()}/mo</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>{!properties.includes(currentHousing.id) ? 'MONTHLY RENT' : 'MAINTENANCE'}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#f87171' }}>-₹{(!properties.includes(currentHousing.id) ? (currentHousing.rental_income || currentHousing.maintenance || 0) : (currentHousing.maintenance || 0)).toLocaleString()}/mo</Text>
                             </View>
                             <View>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>WELLBEING</Text>
@@ -256,6 +256,19 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
 
                                                     <View style={{ marginTop: 8, gap: 5 }}>
                                                         <TouchableOpacity
+                                                            onPress={() => handleMoveIn(prop)}
+                                                            style={{
+                                                                paddingVertical: 7, alignItems: 'center',
+                                                                backgroundColor: '#0a1a10',
+                                                                borderWidth: 1, borderColor: '#22c55e',
+                                                            }}
+                                                        >
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80', letterSpacing: 1 }}>
+                                                                RENT: ₹{prop.rental_income?.toLocaleString()}/mo
+                                                            </Text>
+                                                        </TouchableOpacity>
+
+                                                        <TouchableOpacity
                                                             onPress={() => canAfford && onBuyProperty(prop, true)}
                                                             disabled={!canAfford}
                                                             style={{
@@ -265,7 +278,7 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
                                                             }}
                                                         >
                                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: canAfford ? '#60a5fa' : C.dark, letterSpacing: 1 }}>
-                                                                {canAfford ? 'BUY + LIVE IN ▶' : 'NEED MORE FUNDS'}
+                                                                {canAfford ? 'BUY + LIVE IN ▶' : `BUY: ₹${prop.price >= 10000000 ? `${(prop.price / 10000000).toFixed(1)}Cr` : `${(prop.price / 100000).toFixed(0)}L`}`}
                                                             </Text>
                                                         </TouchableOpacity>
 

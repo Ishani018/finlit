@@ -59,7 +59,7 @@ export const CRISIS_EVENTS = [
         cost: 60000,
         getMessage: (state) => {
             const spouse = pickDependent(state.dependents, 'spouse');
-            return spouse ? `Your ${spouse.name} has dengue. Hospital stay + treatment costs pile up.` : 'Your spouse is seriously ill.';
+            return spouse ? `${spouse.name} has dengue. Hospital stay + treatment costs pile up.` : 'Your spouse is seriously ill.';
         },
         condition: (state) => state.dependents.some(d => d.type === 'spouse'),
         mitigated_by: 'health',
@@ -159,7 +159,7 @@ export const CRISIS_EVENTS = [
             const spouse = pickDependent(state.dependents, 'spouse');
             return spouse ? `${spouse.name} got laid off. Family income drops until they find work.` : 'Your spouse lost their job.';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'spouse' && d.isWorking),
+        condition: (state) => state.dependents.some(d => d.type === 'spouse' && d.isWorking) && !(state.activeEffects || []).some(e => e.type === 'spouse_income_loss'),
     },
 
     // ============ PROPERTY ============

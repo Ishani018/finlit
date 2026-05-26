@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
     View, Text, TouchableOpacity, Image, TextInput, ScrollView,
-    Animated, Easing, Dimensions, KeyboardAvoidingView, Platform,
+    Animated, Dimensions, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { useGame } from '../context/GameContext';
@@ -44,18 +44,10 @@ const TRAITS = {
 };
 
 
-// ─── Carousel constants ───────────────────────────────────────────────────────
-const CHAR_W = 58;
-const CHAR_H = 110;
-const CHAR_GAP = 22;
-const CHAR_STEP = CHAR_W + CHAR_GAP;
-const PARADE_W = SPRITES.length * CHAR_STEP;
-const PARADE_SPRITES = [...SPRITES, ...SPRITES, ...SPRITES];
-
 // ─── Entry / Splash ──────────────────────────────────────────────────────────
-function EntryScreen({ onStart }) {
-    const blink   = useRef(new Animated.Value(1)).current;
-    const scrollX = useRef(new Animated.Value(-PARADE_W)).current;
+function EntryScreen({ onStart, hasSave, onResume }) {
+    const blink = useRef(new Animated.Value(1)).current;
+    const pulse = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
         Animated.loop(
@@ -65,23 +57,16 @@ function EntryScreen({ onStart }) {
             ])
         ).start();
 
-        const startScroll = () => {
-            scrollX.setValue(0);
-            Animated.timing(scrollX, {
-                toValue: -PARADE_W, duration: 22000,
-                easing: Easing.linear, useNativeDriver: true,
-            }).start(({ finished }) => {
-                if (finished) startScroll();
-            });
-        };
-        startScroll();
-
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulse, { toValue: 1.05, duration: 1200, useNativeDriver: true }),
+                Animated.timing(pulse, { toValue: 1, duration: 1200, useNativeDriver: true }),
+            ])
+        ).start();
     }, []);
 
     return (
-        <TouchableOpacity
-            activeOpacity={1}
-            onPress={onStart}
+        <View
             style={{ flex: 1, backgroundColor: '#06080f', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 36 }}
         >
             <View style={{ alignItems: 'center' }}>
@@ -97,8 +82,10 @@ function EntryScreen({ onStart }) {
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#151e34', letterSpacing: 8, marginBottom: 16 }}>
                     ▓▓▒▒░░ PRESENTS ░░▒▒▓▓
                 </Text>
-                
-                <Image source={require('../../assets/icon.png')} style={{ width: 100, height: 100, marginBottom: 16, borderRadius: 20 }} resizeMode="contain" />
+
+                <Animated.View style={{ transform: [{ scale: pulse }], marginBottom: 16 }}>
+                    <Image source={require('../../assets/icon.png')} style={{ width: 140, height: 140, borderRadius: 26 }} resizeMode="contain" />
+                </Animated.View>
 
                 <View style={{ alignItems: 'center', height: 88 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#0b1228', letterSpacing: 6, position: 'absolute', top: 5, left: 5, lineHeight: 82 }}>FINLIT</Text>
@@ -111,24 +98,6 @@ function EntryScreen({ onStart }) {
                 </Text>
             </View>
 
-            {/* Character parade */}
-            <View style={{ width: SW, height: CHAR_H + 26, overflow: 'hidden', paddingTop: 14 }}>
-                <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 48, zIndex: 2,
-                    shadowColor: '#06080f', shadowOffset: { width: 24, height: 0 }, shadowOpacity: 1, shadowRadius: 24 }} />
-                <View pointerEvents="none" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 48, zIndex: 2,
-                    shadowColor: '#06080f', shadowOffset: { width: -24, height: 0 }, shadowOpacity: 1, shadowRadius: 24 }} />
-                <Animated.View style={{ flexDirection: 'row', alignItems: 'flex-end', transform: [{ translateX: scrollX }], paddingBottom: 4 }}>
-                    {PARADE_SPRITES.map((sprite, idx) => (
-                        <Image
-                            key={`${sprite.id}_${idx}`}
-                            source={sprite.image}
-                            style={{ width: CHAR_W, height: CHAR_H, marginRight: CHAR_GAP }}
-                            resizeMode="contain"
-                        />
-                    ))}
-                </Animated.View>
-            </View>
-
             <View style={{ alignItems: 'center' }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#1a2840', letterSpacing: 2 }}>
                     INVEST  •  EARN  •  RETIRE RICH
@@ -138,18 +107,33 @@ function EntryScreen({ onStart }) {
                 </Text>
             </View>
 
-            <Animated.View style={{ opacity: blink, alignItems: 'center' }}>
-                <View style={{ borderWidth: 1, borderColor: '#1a2a50', paddingHorizontal: 28, paddingVertical: 10, position: 'relative' }}>
-                    <Corners color="#1e3060" size={5} />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#60a5fa', letterSpacing: 4 }}>
-                        TAP TO BEGIN
-                    </Text>
-                </View>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#111828', marginTop: 6, letterSpacing: 2 }}>
+            <View style={{ width: '100%', alignItems: 'center', paddingHorizontal: 40 }}>
+                {hasSave ? (
+                    <View style={{ width: '100%' }}>
+                        <TouchableOpacity onPress={onResume} style={{ borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#1a2a50', paddingVertical: 14, alignItems: 'center', marginBottom: 12, position: 'relative' }}>
+                            <Corners color="#60a5fa" size={5} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 4 }}>CONTINUE GAME</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={onStart} style={{ borderWidth: 1, borderColor: '#1a2a50', backgroundColor: '#0a0f1e', paddingVertical: 12, alignItems: 'center', position: 'relative' }}>
+                            <Corners color="#1e3060" size={5} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#445070', letterSpacing: 4 }}>NEW GAME</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <Animated.View style={{ opacity: blink, width: '100%' }}>
+                        <TouchableOpacity onPress={onStart} style={{ borderWidth: 1, borderColor: '#1a2a50', paddingVertical: 12, alignItems: 'center', position: 'relative' }}>
+                            <Corners color="#1e3060" size={5} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#60a5fa', letterSpacing: 4 }}>
+                                TAP TO BEGIN
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                )}
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#111828', marginTop: 12, letterSpacing: 2 }}>
                     © FINLIT 2024  •  Educational Game
                 </Text>
-            </Animated.View>
-        </TouchableOpacity>
+            </View>
+        </View>
     );
 }
 
@@ -175,7 +159,7 @@ const TRAIT_AGE_FLAVOUR = {
 };
 
 // ─── Character detail page ────────────────────────────────────────────────────
-function CharacterDetailView({ sprite, trait, onBack, onSelect }) {
+function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
     const flavour = TRAIT_AGE_FLAVOUR[sprite.id] || [];
     const heroH   = SH * 0.40;
 
@@ -223,19 +207,21 @@ function CharacterDetailView({ sprite, trait, onBack, onSelect }) {
                 contentContainerStyle={{ paddingBottom: 28 }}
             >
                 {/* Trait strip */}
-                <View style={{ paddingHorizontal: PAD, paddingTop: 12, paddingBottom: 12, borderBottomWidth: 1, borderColor: '#0d1228' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: trait.color, letterSpacing: 2, lineHeight: 30 }}>{trait.name}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3860', lineHeight: 17 }}>"{trait.desc}"</Text>
-                        <View style={{ width: 3, height: 3, backgroundColor: '#1a2440' }} />
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: trait.color + 'cc', lineHeight: 17 }}>{trait.effect}</Text>
+                {!childMode && (
+                    <View style={{ paddingHorizontal: PAD, paddingTop: 12, paddingBottom: 12, borderBottomWidth: 1, borderColor: '#0d1228' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: trait.color, letterSpacing: 2, lineHeight: 30 }}>{trait.name}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3860', lineHeight: 17 }}>"{trait.desc}"</Text>
+                            <View style={{ width: 3, height: 3, backgroundColor: '#1a2440' }} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: trait.color + 'cc', lineHeight: 17 }}>{trait.effect}</Text>
+                        </View>
                     </View>
-                </View>
+                )}
 
                 {/* Life path label */}
                 <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 6, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <View style={{ flex: 1, height: 1, backgroundColor: '#0d1228' }} />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1e2840', letterSpacing: 5 }}>YOUR LIFE PATH</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1e2840', letterSpacing: 5 }}>{childMode ? 'GROWTH STAGES' : 'YOUR LIFE PATH'}</Text>
                     <View style={{ flex: 1, height: 1, backgroundColor: '#0d1228' }} />
                 </View>
 
@@ -299,7 +285,7 @@ function CharacterDetailView({ sprite, trait, onBack, onSelect }) {
                         }}>
                             <Corners color={trait.color + '40'} size={7} />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: trait.color, letterSpacing: 3, lineHeight: 26 }}>
-                                CHOOSE  {trait.name}  ▶
+                                CHOOSE  {childMode ? 'THIS LOOK' : trait.name}  ▶
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -319,6 +305,7 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
             <CharacterDetailView
                 sprite={sprite}
                 trait={TRAITS[sprite.id]}
+                childMode={childMode}
                 onBack={() => setDetailIdx(null)}
                 onSelect={() => { setSelectedIdx(detailIdx); onNext(); }}
             />
@@ -377,11 +364,13 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                                     <View style={{ height: 1, backgroundColor: isSel ? t.color : '#0d1228', opacity: isSel ? 0.4 : 1 }} />
                                     <View style={{ flex: 1, paddingHorizontal: 8, paddingTop: 6, justifyContent: 'center' }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: isSel ? t.color : '#4a5580', letterSpacing: 1, lineHeight: 20 }}>
-                                            {t.name}
+                                            {childMode ? 'SELECT' : t.name}
                                         </Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: isSel ? '#a0b0d0' : '#222a40', lineHeight: 16, marginTop: 1 }}>
-                                            {t.effect}
-                                        </Text>
+                                        {!childMode && (
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: isSel ? '#a0b0d0' : '#222a40', lineHeight: 16, marginTop: 1 }}>
+                                                {t.effect}
+                                            </Text>
+                                        )}
                                     </View>
                                 </TouchableOpacity>
                             );
@@ -532,8 +521,8 @@ const STARTER_JOBS = {
     young_kav_1:     'yoga_teacher',
 };
 
-export default function SpriteSelectionScreen({ childMode = false, childName = '' }) {
-    const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob, startNextGeneration } = useGame();
+export default function SpriteSelectionScreen({ childMode = false, childName = '', hasSave = false, onResume, onStart }) {
+    const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob, startNextGeneration, resetGame } = useGame();
     const [step, setStep]           = useState(childMode ? 1 : 0);
     const [selectedIdx, setSelectedIdx] = useState(0);
     const soundRef = useRef(null);
@@ -559,6 +548,7 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
         
         if (childMode) {
             startNextGeneration(selectedIdx);
+            if (onStart) onStart();
             return;
         }
 
@@ -571,11 +561,12 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
             const job = JOBS.find(j => j.id === starterJobId);
             if (job) applyForJob(job);
         }
+        if (onStart) onStart();
     };
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#06080f' }}>
-            {step === 0 && <EntryScreen onStart={() => setStep(1)} />}
+            {step === 0 && <EntryScreen onStart={() => { if (!childMode) resetGame(); setStep(1); }} hasSave={hasSave} onResume={onResume} />}
             {step === 1 && (
                 <PickSpriteScreen
                     selectedIdx={selectedIdx}

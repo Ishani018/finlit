@@ -13,7 +13,6 @@ function NetWorthBar({ history }) {
     const min = Math.min(...vals);
     const max = Math.max(...vals);
     const range = max - min || 1;
-    const barW = Math.floor((SW - 56) / vals.length) - 2;
     const isUp = vals[vals.length - 1] >= vals[0];
     const barColor = isUp ? '#4ade80' : '#f87171';
     return (
@@ -23,7 +22,7 @@ function NetWorthBar({ history }) {
                 const isLast = i === vals.length - 1;
                 return (
                     <View key={i} style={{
-                        width: barW, height: h,
+                        flex: 1, height: h,
                         backgroundColor: isLast ? barColor : barColor + '55',
                         borderTopWidth: 1,
                         borderTopColor: isLast ? barColor : barColor + '80',

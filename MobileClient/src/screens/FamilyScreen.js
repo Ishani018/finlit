@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, TextInput } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useGame } from '../context/GameContext';
@@ -204,9 +204,32 @@ function AddChildCard({ onPress }) {
             </View>
             <View style={{ padding: 10 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.blue + 'aa' }}>Have a Child</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark, marginTop: 3 }}>₹8k/mo</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark, marginTop: 3 }}>9 Months Wait</Text>
             </View>
         </TouchableOpacity>
+    );
+}
+
+// ── Expecting child card ────────────────────────────────────────────────────────────
+function ExpectingChildCard({ data }) {
+    const babyImg = data.gender === 'female' ? DEP_IMAGES.baby_daughter : DEP_IMAGES.baby_son;
+    return (
+        <View
+            style={{ flex: 1, borderWidth: 1, borderColor: C.pink + '50', backgroundColor: C.panel, overflow: 'hidden' }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', backgroundColor: C.pink + '08' }}>
+                <Image source={babyImg} style={{ width: '80%', height: '80%', opacity: 0.4 }} resizeMode="contain" />
+                <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: C.pink, paddingHorizontal: 7, paddingVertical: 2 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000', letterSpacing: 1 }}>EXPECTING</Text>
+                </View>
+                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.85)', paddingVertical: 5, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.cream, letterSpacing: 1 }}>{data.remaining} MONTHS LEFT</Text>
+                </View>
+            </View>
+            <View style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.pink + 'cc' }}>{data.name || 'Baby'} (9mo)</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>Needs 1 extra capacity!</Text>
+            </View>
+        </View>
     );
 }
 
@@ -420,10 +443,10 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                         <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: spouseColor + '25', padding: 14, marginBottom: GAP }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, letterSpacing: 2 }}>HAPPINESS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: spouseColor }}>+10 / mo</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: hpColor(dep.happiness || 70) }}>{Math.round(dep.happiness || 70)}/100</Text>
                             </View>
                             <View style={{ height: 6, backgroundColor: C.bg }}>
-                                <View style={{ height: '100%', width: '80%', backgroundColor: spouseColor + '99' }} />
+                                <View style={{ height: '100%', width: `${Math.round(dep.happiness || 70)}%`, backgroundColor: hpColor(dep.happiness || 70) }} />
                             </View>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 8 }}>
                                 {dep.upskilling
@@ -774,6 +797,9 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
     );
 }
 
+const INDIAN_MALE_NAMES = ['Aarav', 'Vihaan', 'Aditya', 'Rohan', 'Arjun', 'Sai', 'Karan', 'Rahul', 'Vikram', 'Sanjay', 'Amit', 'Anil', 'Raj', 'Suresh', 'Ramesh', 'Harish', 'Nitin', 'Prakash', 'Sunil', 'Vijay'];
+const INDIAN_FEMALE_NAMES = ['Aadya', 'Diya', 'Ananya', 'Priya', 'Kavya', 'Neha', 'Pooja', 'Riya', 'Shruti', 'Sneha', 'Swati', 'Tanvi', 'Vidya', 'Maya', 'Meera', 'Nandini', 'Radha', 'Sita', 'Gita', 'Lata'];
+
 // ── Marriage pick modal ───────────────────────────────────────────────────────
 function MarriagePickModal({ onPick, onClose }) {
     const candidates = [
@@ -839,13 +865,13 @@ function MarriagePickModal({ onPick, onClose }) {
 export default function FamilyScreen({ onClose, onGoToBank }) {
     const {
         playerName, playerAge, playerSprite, balance, creditScore, happiness, currentJob,
-        dependents, marry, haveChild, feedDependent, addParent,
+        dependents, marry, haveChild, feedDependent, addParent, expectingChild,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
         activeInsurance, buyInsurance, cancelInsurance,
         ppf, fixedDeposits,
         loans, prepayLoan,
         getDependentCosts, setChildSchoolTier, setChildPreschoolTier,
-        pantry, consumeFood,
+        pantry, consumeFood, renameDependent,
         totalMonthsPlayed,
     } = useGame();
 
@@ -856,6 +882,16 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
     const [showLoanAdvisory, setShowLoanAdvisory] = useState(false);
     const [showNameBaby, setShowNameBaby]         = useState(false);
     const [babyNameInput, setBabyNameInput]       = useState('');
+    const [childToName, setChildToName]           = useState(null);
+
+    React.useEffect(() => {
+        const unnamedBaby = dependents.find(d => d.type === 'child' && (d.name === '' || d.name === 'Baby'));
+        if (unnamedBaby && !showNameBaby) {
+            setChildToName(unnamedBaby.id);
+            setBabyNameInput('');
+            setShowNameBaby(true);
+        }
+    }, [dependents, showNameBaby]);
 
     const showDialog = (title, message, type = 'info', onConfirm = null, onCancel = null, cancelText = null) => {
         const close = () => setDialog(d => ({ ...d, visible: false }));
@@ -967,7 +1003,8 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 {(() => {
                     // Build list: children + optional add-child slot
                     const slots = [...children.map(c => ({ type: 'child', data: c }))];
-                    if (spouse && children.length < 3) slots.push({ type: 'add' });
+                    if (expectingChild) slots.push({ type: 'expecting', data: expectingChild });
+                    if (spouse && children.length < 3 && !expectingChild) slots.push({ type: 'add' });
 
                     const rows = [];
                     for (let i = 0; i < slots.length; i += 2) {
@@ -977,12 +1014,16 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                             <View key={i} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
                                 {left.type === 'child'
                                     ? <ChildCard child={left.data} onPress={() => setSelectedDep(left.data)} />
-                                    : <AddChildCard onPress={() => { setBabyNameInput(''); setShowNameBaby(true); }} />
+                                    : left.type === 'expecting'
+                                    ? <ExpectingChildCard data={left.data} />
+                                    : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
                                 }
                                 {right ? (
                                     right.type === 'child'
                                         ? <ChildCard child={right.data} onPress={() => setSelectedDep(right.data)} />
-                                        : <AddChildCard onPress={() => { setBabyNameInput(''); setShowNameBaby(true); }} />
+                                        : right.type === 'expecting'
+                                        ? <ExpectingChildCard data={right.data} />
+                                        : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
                                 ) : <View style={{ flex: 1 }} />}
                             </View>
                         );
@@ -1195,8 +1236,9 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                 <TouchableOpacity
                                     onPress={() => {
                                         setShowNameBaby(false);
-                                        const r = haveChild(babyNameInput);
-                                        showDialog(r.success ? `Welcome, ${r.name}!` : 'Cannot', r.msg, r.success ? 'success' : 'error');
+                                        const finalName = babyNameInput.trim() || 'Baby';
+                                        renameDependent(childToName, finalName);
+                                        showDialog(`Welcome, ${finalName}!`, 'Your child has been named.', 'success');
                                     }}
                                     style={{ flex: 2, backgroundColor: C.pink, paddingVertical: 12, alignItems: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 2 }}>WELCOME BABY →</Text>

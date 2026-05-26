@@ -4,6 +4,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const WARN_IMG = require('../../assets/ui_comp/warning.png');
 const BULB_IMG = require('../../assets/ui_comp/bulb.png');
+const LIFESTYLE_IMG = require('../../assets/ui_comp/familyicon.png');
+const DEFAULT_IMG = require('../../assets/ui_comp/inbox.png');
 
 const { height: SH } = Dimensions.get('window');
 
@@ -60,7 +62,9 @@ export default function ChoiceDialog({ event, onChoice }) {
                                 ? <Image source={WARN_IMG} style={{ width: 24, height: 24 }} resizeMode="contain" />
                                 : event.category === 'opportunity'
                                 ? <Image source={BULB_IMG} style={{ width: 24, height: 24 }} resizeMode="contain" />
-                                : <FontAwesome5 name={catIcon} size={18} color={accentColor} />
+                                : event.category === 'lifestyle'
+                                ? <Image source={LIFESTYLE_IMG} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                                : <Image source={DEFAULT_IMG} style={{ width: 24, height: 24 }} resizeMode="contain" />
                             }
                         </View>
                         <View>

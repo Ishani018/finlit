@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Image } from 'react-native';
 
 const BORDER_COLOR = {
     info: '#2a3560', success: '#14532d', error: '#7f1d1d',
@@ -27,6 +27,7 @@ export default function PixelDialog({
     onCancel,
     confirmText = 'OK',
     cancelText = null,
+    image = null,
 }) {
     const scaleAnim = useRef(new Animated.Value(0.88)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -95,6 +96,11 @@ export default function PixelDialog({
 
                 {/* Body */}
                 <View style={{ padding: 18 }}>
+                    {image && (
+                        <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                            <Image source={typeof image === 'string' ? { uri: image } : image} style={{ width: 80, height: 80 }} resizeMode="contain" />
+                        </View>
+                    )}
                     <View style={{ backgroundColor: '#08112b', borderRadius: 12, padding: 16, marginBottom: 18 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 28 }}>
                             {message}
@@ -110,7 +116,7 @@ export default function PixelDialog({
                                     backgroundColor: '#0f1428', borderWidth: 1, borderColor: '#1e2840', borderRadius: 10,
                                 }}
                             >
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#6070a0', letterSpacing: 1 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#6070a0', letterSpacing: 1, textAlign: 'center' }}>
                                     {cancelText}
                                 </Text>
                             </TouchableOpacity>
@@ -120,14 +126,14 @@ export default function PixelDialog({
                             style={{
                                 flex: cancelText ? 1 : undefined,
                                 width: cancelText ? undefined : '100%',
-                                paddingVertical: 12, alignItems: 'center',
+                                paddingVertical: 12, paddingHorizontal: 6, alignItems: 'center', justifyContent: 'center',
                                 backgroundColor: confirmBg,
                                 borderWidth: 1, borderColor,
                                 borderRadius: 10,
                             }}
                             activeOpacity={0.8}
                         >
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2, textAlign: 'center' }}>
                                 {confirmText}
                             </Text>
                         </TouchableOpacity>

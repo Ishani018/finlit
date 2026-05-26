@@ -42,19 +42,7 @@ export const FAMILY_DEMANDS = [
         accept:  { happinessBoost: 6, depHappinessBoost: 15 },
         decline: { happinessPenalty: -4, depHealthPenalty: -5, depHappinessBoost: -10 },
     },
-    {
-        id: 'child_birthday_gift',
-        character: 'child',
-        cooldown: 12,
-        condition: (s) => s.dependents?.some(d => d.type === 'child'),
-        getTitle: (dep) => `${dep?.name || 'Your child'}'s birthday coming up!`,
-        getMessage: (dep) => `${dep?.name}'s birthday is next week. Their friends are all getting new things. Plan something special?`,
-        cost: 3000,
-        confirmText: 'CELEBRATE (₹3,000)',
-        declineText: 'KEEP IT LOW-KEY',
-        accept:  { happinessBoost: 10, depHealthBoost: 5, depHappinessBoost: 20 },
-        decline: { happinessPenalty: -6, depHappinessBoost: -8 },
-    },
+
     {
         id: 'child_sports_kit',
         character: 'child',

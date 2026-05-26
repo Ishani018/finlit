@@ -23,9 +23,9 @@ const C = {
     dark:    '#2a3560',
 };
 
-const KIRANA_IMG   = require('../../assets/jobs/kirana store.png');
-const PHARMACY_IMG = require('../../assets/jobs/chemist drugstore.png');
-const CLOTHES_IMG  = require('../../assets/jobs/coaching centre.png');
+const KIRANA_IMG   = require('../../assets/ui_comp/food_grocery.png');
+const PHARMACY_IMG = require('../../assets/ui_comp/pharmacy.png');
+const CLOTHES_IMG  = require('../../assets/ui_comp/clothing.png');
 
 const ITEM_IMAGES = {
     dal_chawal:       require('../../assets/groceries/dal chawal.png'),
@@ -70,22 +70,22 @@ function ScreenHeader({ title, subtitle, onBack, onClose }) {
 }
 
 // ── Landing category card ─────────────────────────────────────────────────────
-function CategoryCard({ title, subtitle, color, img, onPress }) {
+function SquareCategoryCard({ title, color, icon, onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ borderWidth: 1, borderColor: color + '50', backgroundColor: C.panel, overflow: 'hidden', marginBottom: GAP }}>
-            <View style={{ height: 130, position: 'relative' }}>
-                <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, backgroundColor: color }} />
-                <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: color, letterSpacing: 4 }}>{subtitle}</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 30 }}>{title}</Text>
-                </View>
-                <View style={{ position: 'absolute', top: 16, right: 16 }}>
-                    <FontAwesome5 name="chevron-right" size={14} color={color + '80'} />
-                </View>
-            </View>
+            style={{ 
+                width: '48%', 
+                aspectRatio: 1, 
+                borderWidth: 1, 
+                borderColor: color + '50', 
+                backgroundColor: C.panel, 
+                marginBottom: GAP,
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 12
+            }}>
+            <Image source={icon} style={{ width: 120, height: 120, marginBottom: 12 }} resizeMode="contain" />
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, textAlign: 'center', lineHeight: 22 }}>{title}</Text>
         </TouchableOpacity>
     );
 }
@@ -458,27 +458,26 @@ export default function ShopScreen({ onClose }) {
             </View>
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
-                <CategoryCard
-                    title="Grocery Store"
-                    subtitle="GROCERY & PANTRY"
-                    color={C.gold}
-                    img={KIRANA_IMG}
-                    onPress={() => setSection('grocery')}
-                />
-                <CategoryCard
-                    title="Pharmacy"
-                    subtitle="HEALTH & MEDICINE"
-                    color={C.sage}
-                    img={PHARMACY_IMG}
-                    onPress={() => setSection('pharmacy')}
-                />
-                <CategoryCard
-                    title="Clothes & Toys"
-                    subtitle="FASHION & FUN"
-                    color={C.pink}
-                    img={CLOTHES_IMG}
-                    onPress={() => setSection('clothes')}
-                />
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GAP, justifyContent: 'space-between' }}>
+                    <SquareCategoryCard
+                        title="Grocery Store"
+                        color={C.gold}
+                        icon={KIRANA_IMG}
+                        onPress={() => setSection('grocery')}
+                    />
+                    <SquareCategoryCard
+                        title="Pharmacy"
+                        color={C.sage}
+                        icon={PHARMACY_IMG}
+                        onPress={() => setSection('pharmacy')}
+                    />
+                    <SquareCategoryCard
+                        title="Clothes & Toys"
+                        color={C.pink}
+                        icon={CLOTHES_IMG}
+                        onPress={() => setSection('clothes')}
+                    />
+                </View>
             </ScrollView>
         </View>
     );

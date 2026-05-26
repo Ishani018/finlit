@@ -347,6 +347,7 @@ const GameLayout = ({ onHardReset }) => {
     getTotalEMI,
     pendingFamilyDemand, resolveFamilyDemand,
     pendingCreditCardOffer, setPendingCreditCardOffer,
+    pendingJobInterview,
     pantry,
     legacySummary, isLegacyMode,
   } = useGame();
@@ -431,10 +432,28 @@ const GameLayout = ({ onHardReset }) => {
   // Month summary card
   const [showSummary, setShowSummary] = useState(false);
 
-  const showDialog = (title, message, type = 'info', onConfirm = null, confirmText = 'OK', cancelText = null, onCancel = null) => {
-    setDialog({ visible: true, title, message, type, onConfirm: onConfirm || (() => setDialog(d => ({ ...d, visible: false }))), confirmText, cancelText, onCancel });
+  const showDialog = (title, message, type = 'info', onConfirm = null, confirmText = 'OK', cancelText = null, onCancel = null, image = null) => {
+    setDialog({ visible: true, title, message, type, onConfirm: onConfirm || (() => setDialog(d => ({ ...d, visible: false }))), confirmText, cancelText, onCancel, image });
   };
   const closeDialog = () => setDialog(d => ({ ...d, visible: false }));
+
+  // ── Next Month guard — prevents firing while any modal is open ──────────────
+  const handleAdvanceTime = () => {
+    try {
+      // If a modal is genuinely open, do nothing
+      if (dialog.visible || pendingJobInterview || pendingDecision || majorCrisisFlash || showSummary || pendingFamilyDemand) {
+        return;
+      }
+      // If isPlaying is false but no modal is open, it's a stuck state — clear it
+      if (!isPlaying) {
+        if (lastCrisisEvent) setLastCrisisEvent(null);
+      }
+      monthsPlayedTodayRef.current += 1;
+      nextMonth();
+    } catch (e) {
+      console.error('handleAdvanceTime error:', e);
+    }
+  };
 
   const openEventDetail = (event) => {
     markEventRead(event.id);
@@ -507,12 +526,19 @@ const GameLayout = ({ onHardReset }) => {
     const impactStr = lastCrisisEvent.impact !== 0
       ? `\n\n${lastCrisisEvent.impact > 0 ? '+' : ''}₹${Math.abs(lastCrisisEvent.impact).toLocaleString()}`
       : '';
+    const finalMessage = typeof lastCrisisEvent.message === 'string'
+      ? lastCrisisEvent.message + impactStr
+      : (lastCrisisEvent.message ? String(lastCrisisEvent.message) + impactStr : impactStr);
+
     showDialog(
       lastCrisisEvent.name,
-      lastCrisisEvent.message + impactStr,
+      finalMessage,
       isPositive ? 'positive' : 'crisis',
       () => { setLastCrisisEvent(null); closeDialog(); },
-      'OK'
+      'OK',
+      null,
+      null,
+      lastCrisisEvent.image
     );
   }, [lastCrisisEvent]);
 
@@ -920,8 +946,7 @@ const GameLayout = ({ onHardReset }) => {
                   key={step.id} 
                   onPress={() => {
                     if (step.action?.isAdvanceTime) {
-                      monthsPlayedTodayRef.current += 1;
-                      nextMonth();
+                      handleAdvanceTime();
                       return;
                     }
                     if (step.action?.tab) setActiveTab(step.action.tab);
@@ -2225,10 +2250,7 @@ const GameLayout = ({ onHardReset }) => {
           onGoals={() => { setShowGrocery(false); setShowGoals(true); }}
           showGrocery={showGrocery}
           showGoals={showGoals}
-          onNextMonth={() => {
-            monthsPlayedTodayRef.current += 1;
-            nextMonth();
-          }}
+          onNextMonth={handleAdvanceTime}
           turnsLeft={turnsLeftToday()}
           dailyLimit={DAILY_TURN_LIMIT}
           badges={{

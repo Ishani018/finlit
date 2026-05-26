@@ -4,49 +4,49 @@ export const RESIDENTIAL_PROPERTIES = [
     // --- TIER 1: Budget & Student Housing ---
     {
         id: '1bhk_starter',        name: 'Starter 1BHK Apartment',
-        category: 'residential',   life_quality: 5,
+        category: 'residential',   life_quality: 5,         capacity: 2,
         price: 2800000,            maintenance: 1800,   rental_income: 15000,
         image: require('../../assets/properties/1bhk_starter_apartment.png'),
         description: 'Compact 450 sq. ft. unit. Live here when starting out, or rent to recent graduates for steady income.'
     },
     {
         id: '1bhk_kids',           name: 'Starter 1BHK with Kids Room',
-        category: 'residential',   life_quality: 5,
+        category: 'residential',   life_quality: 5,         capacity: 3,
         price: 3200000,            maintenance: 2000,   rental_income: 18000,
         image: require('../../assets/properties/starter_1bhk_with_kids_room.png'),
         description: 'Starter home for a young couple with a child. Rent it to budget-conscious families or live here yourself.'
     },
     {
         id: 'studio_city',         name: 'City Studio Apartment',
-        category: 'residential',   life_quality: 4,
+        category: 'residential',   life_quality: 4,         capacity: 2,
         price: 3500000,            maintenance: 1200,   rental_income: 20000,
         image: require('../../assets/properties/studio_apartment.png'),
         description: 'Minimal living space in city center. High demand for rentals to single professionals.'
     },
     {
         id: 'studio_bed',          name: 'Studio with Single Bed',
-        category: 'residential',   life_quality: 3,
+        category: 'residential',   life_quality: 3,         capacity: 1,
         price: 2500000,            maintenance: 1500,   rental_income: 12000,
         image: require('../../assets/properties/studio_apartment_with_single_bed.png'),
         description: 'Furnished crash pad for gig workers or students. Frequent furniture repairs if rented out.'
     },
     {
         id: 'shared_apt',          name: 'Shared Student Apartment',
-        category: 'residential',   life_quality: 3,
+        category: 'residential',   life_quality: 3,         capacity: 3,
         price: 4500000,            maintenance: 5500,   rental_income: 28000,
         image: require('../../assets/properties/shared_apartment_for_students.png'),
         description: 'Chaotic unit housing multiple students. Excellent rental cash flow, but extreme wear and tear.'
     },
     {
         id: 'hostel_complex',      name: 'Student Hostel Complex',
-        category: 'residential',   life_quality: 2,
+        category: 'residential',   life_quality: 2,         capacity: 2,
         price: 25000000,           maintenance: 45000,  rental_income: 150000,
         image: require('../../assets/properties/student_hostel_complex.png'),
         description: 'Dense accommodation block. High rental income but requires full-time staff and heavy utility costs.'
     },
     {
         id: '1bhk_large',          name: 'Large 1BHK with Balcony',
-        category: 'residential',   life_quality: 5,
+        category: 'residential',   life_quality: 5,         capacity: 3,
         price: 4200000,            maintenance: 2500,   rental_income: 22000,
         image: require('../../assets/properties/larger_starter_apartment_with_1_bedroom.png'),
         description: 'Standard 1BHK with balcony. Attracts stable young professionals who pay rent on time.'
@@ -55,49 +55,49 @@ export const RESIDENTIAL_PROPERTIES = [
     // --- TIER 2: Middle Class & Family Homes ---
     {
         id: '2bhk_family',         name: 'Standard 2BHK Family Apt',
-        category: 'residential',   life_quality: 6,
+        category: 'residential',   life_quality: 6,         capacity: 4,
         price: 6500000,            maintenance: 3500,   rental_income: 35000,
         image: require('../../assets/properties/bigger_2bhk_with_kids_room.png'),
         description: 'Standard middle-class family apartment. Very stable tenants who usually stay 3-5 years.'
     },
     {
         id: '3bhk_office',         name: '3BHK with Home Office',
-        category: 'residential',   life_quality: 7,
+        category: 'residential',   life_quality: 7,         capacity: 5,
         price: 8500000,            maintenance: 4200,   rental_income: 45000,
         image: require('../../assets/properties/budget_apartment_for_family_of_3_with_home_office.png'),
         description: 'Designed for remote workers. Tenants home 24/7 increases utility load, but they pay a premium.'
     },
     {
         id: 'city_2bhk',           name: 'City 2BHK (Prime Location)',
-        category: 'residential',   life_quality: 7,
+        category: 'residential',   life_quality: 7,         capacity: 4,
         price: 9500000,            maintenance: 5000,   rental_income: 50000,
         image: require('../../assets/properties/city_apartment_with_2_beds_and_1_bath.png'),
         description: 'Prime location flat for professionals. High society fees due to elevator and security.'
     },
     {
         id: '3bhk_guest',          name: '3BHK with Guest Room',
-        category: 'residential',   life_quality: 7,
+        category: 'residential',   life_quality: 7,         capacity: 6,
         price: 11000000,           maintenance: 6000,   rental_income: 55000,
         image: require('../../assets/properties/apartment_for_family_of_3_with_guestbedroom.png'),
         description: 'Spacious unit for families hosting relatives. Low vacancy risk as families settle in.'
     },
     {
         id: 'townhouse',           name: 'Comfortable Townhouse',
-        category: 'residential',   life_quality: 6,
+        category: 'residential',   life_quality: 6,         capacity: 5,
         price: 7500000,            maintenance: 4500,   rental_income: 40000,
         image: require('../../assets/properties/comfortable_town_house.png'),
         description: 'Rowhouse in quiet neighborhood. No society fees, but you handle all repairs.'
     },
     {
         id: 'bungal_old',          name: 'Classic Family Bungalow',
-        category: 'residential',   life_quality: 7,
+        category: 'residential',   life_quality: 7,         capacity: 6,
         price: 12000000,           maintenance: 7000,   rental_income: 60000,
         image: require('../../assets/properties/lower_end_family_bunglow_for_family_of_4-5.png'),
         description: 'Older standalone house. Spacious but requires constant handyman work for leaks and wiring.'
     },
     {
         id: 'house_garden',        name: 'Family House with Garden',
-        category: 'residential',   life_quality: 8,
+        category: 'residential',   life_quality: 8,         capacity: 7,
         price: 15000000,           maintenance: 8500,   rental_income: 75000,
         image: require('../../assets/properties/family_house_with_garden_and_backyard.png'),
         description: 'Desirable family home. Garden adds value but requires seasonal landscaping costs.'
@@ -106,49 +106,49 @@ export const RESIDENTIAL_PROPERTIES = [
     // --- TIER 3: Luxury & High Net Worth ---
     {
         id: 'bungal_wine',         name: 'Bungalow with Wine Cellar',
-        category: 'residential',   life_quality: 8,
+        category: 'residential',   life_quality: 8,         capacity: 6,
         price: 35000000,           maintenance: 12000,  rental_income: 180000,
         image: require('../../assets/properties/family_bunglow_with_large_kitchen_and_wine_cellar.png'),
         description: 'Premium property for entertaining. High-end kitchen appliances cost a fortune to repair.'
     },
     {
         id: 'bungal_pool',         name: 'Luxury Villa with Pool',
-        category: 'residential',   life_quality: 9,
+        category: 'residential',   life_quality: 9,         capacity: 8,
         price: 55000000,           maintenance: 25000,  rental_income: 280000,
         image: require('../../assets/properties/family_bunglow_with_pool_and_backyard.png'),
         description: 'Luxury villa with massive pool expense (chemicals, cleaning), but commands premium rental value.'
     },
     {
         id: 'villa_theatre',       name: 'Smart Villa with Home Theatre',
-        category: 'residential',   life_quality: 9,
+        category: 'residential',   life_quality: 9,         capacity: 10,
         price: 75000000,           maintenance: 30000,  rental_income: 380000,
         image: require('../../assets/properties/fancy_family_villa_with_home_theatre_and_garden.png'),
         description: 'Tech-heavy smart home for executives with central AC. Automation repairs are costly.'
     },
     {
         id: 'villa_ultra',         name: 'Ultra-Luxury Movie Villa',
-        category: 'residential',   life_quality: 10,
+        category: 'residential',   life_quality: 10,        capacity: 12,
         price: 120000000,          maintenance: 50000,  rental_income: 550000,
         image: require('../../assets/properties/fully_furnish_villa_with_movie_theatre.png'),
         description: 'Ultra-luxury residence for celebrities. Must be kept in 5-star hotel condition for premium renters.'
     },
     {
         id: 'farmhouse',           name: 'Weekend Farmhouse',
-        category: 'residential',   life_quality: 8,
+        category: 'residential',   life_quality: 8,         capacity: 8,
         price: 40000000,           maintenance: 18000,  rental_income: 150000,
         image: require('../../assets/properties/mid_size_farmhouse_with_pool.png'),
         description: 'City outskirts getaway. Rent for events/weekends or use personally. Requires permanent staff.'
     },
     {
         id: 'beach_house',         name: 'Premium Beach House',
-        category: 'residential',   life_quality: 9,
+        category: 'residential',   life_quality: 9,         capacity: 6,
         price: 60000000,           maintenance: 15000,  rental_income: 220000,
         image: require('../../assets/properties/Beach_house_for_family_of_4-5.png'),
         description: 'Premium vacation rental. Salt air corrodes metal/paint, requiring structural maintenance.'
     },
     {
         id: 'villa_unfurn',        name: 'Large Unfurnished Villa',
-        category: 'residential',   life_quality: 8,
+        category: 'residential',   life_quality: 8,         capacity: 8,
         price: 30000000,           maintenance: 9000,   rental_income: 140000,
         image: require('../../assets/properties/villa_for_family_of_4-5.png'),
         description: 'Large villa where you maintain structure/walls, tenant handles interiors.'
@@ -157,14 +157,14 @@ export const RESIDENTIAL_PROPERTIES = [
     // --- TIER 4: Investment Complexes (liveable but not ideal) ---
     {
         id: 'complex_penthouse',   name: 'Apartment Complex + Penthouse',
-        category: 'residential',   life_quality: 8,
+        category: 'residential',   life_quality: 8,         capacity: 10,
         price: 150000000,          maintenance: 28000,  rental_income: 650000,
         image: require('../../assets/properties/3_floor_apartment_complex_with_penthouse.png'),
         description: 'You own the entire building + luxury penthouse. High rental income but requires property manager.'
     },
     {
         id: 'city_3floor',         name: '3-Floor City Complex',
-        category: 'residential',   life_quality: 6,
+        category: 'residential',   life_quality: 6,         capacity: 12,
         price: 90000000,           maintenance: 22000,  rental_income: 400000,
         image: require('../../assets/properties/city_apartment_with_3_floors.png'),
         description: 'Multi-family residential block. Good rental income but requires a manager for tenant disputes.'
@@ -173,14 +173,14 @@ export const RESIDENTIAL_PROPERTIES = [
     // --- GEMINI GENERATED ---
     {
         id: 'gemini_high_density', name: 'High-Density Vertical Project',
-        category: 'residential',   life_quality: 5,
+        category: 'residential',   life_quality: 5,         capacity: 15,
         price: 200000000,          maintenance: 15000,  rental_income: 850000,
         image: require('../../assets/properties/Gemini_Generated_Image_ls1ivyls1ivyls1i.png'),
         description: 'Cross-section view of a high-density vertical housing project. Maximum rental income from urban living.'
     },
     {
         id: 'gemini_luxury_cutaway', name: 'Luxury Complex Cutaway',
-        category: 'residential',   life_quality: 7,
+        category: 'residential',   life_quality: 7,         capacity: 20,
         price: 250000000,          maintenance: 20000,  rental_income: 1100000,
         image: require('../../assets/properties/Gemini_Generated_Image_soqxrtsoqxrtsoqx.png'),
         description: 'Luxury complex cutaway showing elevator shafts and multiple residential layers. Premium rental income.'

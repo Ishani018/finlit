@@ -36,7 +36,7 @@ export default function InterviewModal() {
     const job = pendingJobInterview;
 
     return (
-        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 999, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 999, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
             <View style={{ width: '100%', maxWidth: 400, backgroundColor: C.panel, borderWidth: 1, borderColor: C.blue, overflow: 'hidden' }}>
                 <View style={{ backgroundColor: '#1e3a8a', padding: 15, borderBottomWidth: 1, borderColor: C.border }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#93c5fd', letterSpacing: 2 }}>JOB INTERVIEW</Text>
