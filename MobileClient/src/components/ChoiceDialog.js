@@ -80,9 +80,13 @@ export default function ChoiceDialog({ event, onChoice }) {
                     {/* Message */}
                     <View style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0a0d1a', padding: 14, marginBottom: 18, position: 'relative' }}>
                         <Corners color={accentColor + '80'} />
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#a8b8d8', lineHeight: 24 }}>
-                            {event.message}
-                        </Text>
+                        {typeof event.message === 'string' ? (
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#a8b8d8', lineHeight: 24 }}>
+                                {event.message}
+                            </Text>
+                        ) : (
+                            event.message
+                        )}
                     </View>
 
                     {/* Choices */}

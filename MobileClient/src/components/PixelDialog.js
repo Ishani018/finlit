@@ -102,9 +102,13 @@ export default function PixelDialog({
                         </View>
                     )}
                     <View style={{ backgroundColor: '#08112b', borderRadius: 12, padding: 16, marginBottom: 18 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 28 }}>
-                            {message}
-                        </Text>
+                        {typeof message === 'string' ? (
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 28 }}>
+                                {message}
+                            </Text>
+                        ) : (
+                            message
+                        )}
                     </View>
 
                     <View style={{ flexDirection: 'row', gap: 10 }}>

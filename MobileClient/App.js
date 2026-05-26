@@ -26,6 +26,7 @@ import BankScreen from './src/screens/BankScreen';
 import ShopScreen from './src/screens/ShopScreen';
 import GoalsScreen from './src/screens/GoalsScreen';
 import ChoiceDialog from './src/components/ChoiceDialog';
+import BirthdayDialog from './src/components/BirthdayDialog';
 import FinancialTip, { FINANCIAL_TIPS } from './src/components/FinancialTip';
 import PixelDialog from './src/components/PixelDialog';
 import BottomTabBar from './src/components/BottomTabBar';
@@ -528,7 +529,12 @@ const GameLayout = ({ onHardReset }) => {
       : '';
     const finalMessage = typeof lastCrisisEvent.message === 'string'
       ? lastCrisisEvent.message + impactStr
-      : (lastCrisisEvent.message ? String(lastCrisisEvent.message) + impactStr : impactStr);
+      : (
+          <View>
+            {lastCrisisEvent.message}
+            {impactStr ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', marginTop: 10 }}>{impactStr}</Text> : null}
+          </View>
+      );
 
     showDialog(
       lastCrisisEvent.name,
@@ -2475,10 +2481,17 @@ const GameLayout = ({ onHardReset }) => {
       <CrisisFlash visible={majorCrisisFlash} />
 
       {/* ── LIFE DECISION DIALOG ── */}
-      <ChoiceDialog
-        event={pendingDecision}
-        onChoice={(choice) => resolveDecision(choice)}
-      />
+      {(pendingDecision?.isBirthday || pendingDecision?.isHospital) ? (
+        <BirthdayDialog
+          event={pendingDecision}
+          onChoice={(choice) => resolveDecision(choice)}
+        />
+      ) : (
+        <ChoiceDialog
+          event={pendingDecision}
+          onChoice={(choice) => resolveDecision(choice)}
+        />
+      )}
 
       {/* ── ACHIEVEMENT TOAST ── */}
       {newAchievement && (
