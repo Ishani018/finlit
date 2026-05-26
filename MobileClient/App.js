@@ -862,7 +862,7 @@ const GameLayout = ({ onHardReset }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0a0c12' }}>
-      <StyledView className="flex-1 relative" style={{ backgroundColor: '#0a0c12' }}>
+      <StyledView className="flex-1 relative" style={{ flex: 1, backgroundColor: '#0a0c12' }}>
         <StatusBar barStyle="light-content" />
 
         {/* ===== GAME HUD (Top) — home tab only ===== */}
@@ -2269,7 +2269,7 @@ const GameLayout = ({ onHardReset }) => {
           animationType="slide"
           onRequestClose={() => setSelectedJob(null)}
         >
-          <StyledView className="flex-1 justify-end bg-black">
+          <StyledView className="flex-1 justify-end bg-black" style={{ flex: 1 }}>
             {/* Header Image */}
             <StyledView className="h-64 w-full relative">
               <StyledImage source={selectedJob?.office_image || selectedJob?.image} className="w-full h-full" resizeMode="contain" style={{ width: '100%', height: '100%', backgroundColor: '#000' }} />
@@ -2282,7 +2282,7 @@ const GameLayout = ({ onHardReset }) => {
             </StyledView>
 
             {/* Content */}
-            <StyledView className="flex-1 p-6 bg-gray-900 rounded-t-3xl -mt-6">
+            <StyledView className="flex-1 p-6 bg-gray-900 rounded-t-3xl -mt-6" style={{ flex: 1 }}>
               <StyledText className="text-3xl font-bold text-white mb-1">{selectedJob?.name}</StyledText>
               <StyledText className="text-indigo-400 text-sm font-bold uppercase tracking-wider mb-6">{selectedJob?.type}</StyledText>
 
@@ -2335,7 +2335,7 @@ const GameLayout = ({ onHardReset }) => {
           animationType="slide"
           onRequestClose={() => setSelectedProperty(null)}
         >
-          <StyledView className="flex-1 justify-end bg-black">
+          <StyledView className="flex-1 justify-end bg-black" style={{ flex: 1 }}>
             {/* Header Image */}
             <StyledView className="h-64 w-full relative">
               <StyledImage source={selectedProperty?.image} className="w-full h-full" resizeMode="cover" style={{ width: '100%', height: '100%', backgroundColor: '#000' }} />
@@ -2348,7 +2348,7 @@ const GameLayout = ({ onHardReset }) => {
             </StyledView>
 
             {/* Content */}
-            <StyledView className="flex-1 p-6 bg-gray-900 rounded-t-3xl -mt-6">
+            <StyledView className="flex-1 p-6 bg-gray-900 rounded-t-3xl -mt-6" style={{ flex: 1 }}>
               <StyledText className="text-3xl font-bold text-white mb-1">{selectedProperty?.name}</StyledText>
               <StyledText className="text-green-400 text-sm font-bold uppercase tracking-wider mb-6">{selectedProperty?.category} Property</StyledText>
 
@@ -2816,6 +2816,27 @@ const GameLayout = ({ onHardReset }) => {
   );
 };
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>APP CRASHED</Text>
+          <Text style={{ color: 'white', marginTop: 10 }}>{this.state.error?.toString()}</Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   let [fontsLoaded] = useFonts({
     VT323_400Regular,
@@ -2828,10 +2849,12 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <GameProvider key={gameKey}>
-        <GameLayout onHardReset={() => setGameKey(k => k + 1)} />
-      </GameProvider>
+    <SafeAreaProvider style={{ flex: 1 }}>
+      <ErrorBoundary>
+        <GameProvider key={gameKey}>
+          <GameLayout onHardReset={() => setGameKey(k => k + 1)} />
+        </GameProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
