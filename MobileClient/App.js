@@ -32,6 +32,7 @@ import PixelDialog from './src/components/PixelDialog';
 import BottomTabBar from './src/components/BottomTabBar';
 import MonthSummaryCard from './src/components/MonthSummaryCard';
 import DailyLimitScreen from './src/components/DailyLimitScreen';
+import BirthdayCelebrationRoom from './src/components/BirthdayCelebrationRoom';
 import CrisisSimulator from './src/components/CrisisSimulator';
 import CRTOverlay from './src/components/CRTOverlay';
 import Vignette from './src/components/Vignette';
@@ -351,8 +352,10 @@ const GameLayout = ({ onHardReset }) => {
     pendingJobInterview,
     pantry,
     legacySummary, isLegacyMode,
+    playerBirthday, lastCelebrationChoice,
   } = useGame();
 
+  const [showBirthdayRoom, setShowBirthdayRoom] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [newGameConfirm, setNewGameConfirm] = useState(false);
@@ -1022,15 +1025,28 @@ const GameLayout = ({ onHardReset }) => {
           )}
 
           {/* For sale icon — top-left, home view only */}
-          {activeMenu !== 'advisor' && viewMode === 'home' && (
-            <TouchableOpacity
-              onPress={() => setShowHomeScreen(true)}
-              activeOpacity={0.8}
-              style={{ position: 'absolute', top: 8, left: 12, zIndex: 20 }}
-            >
-              <Image source={require('./assets/ui_comp/forsale.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
-            </TouchableOpacity>
-          )}
+          {activeMenu !== 'advisor' && viewMode === 'home' && (() => {
+            // Compute birthday info
+            let playerBdayMonth = null;
+            if (playerBirthday && playerBirthday.includes('/')) playerBdayMonth = parseInt(playerBirthday.split('/')[1], 10);
+            const currentMonth = (totalMonthsPlayed % 12) + 1;
+            const isPlayerBday = playerBdayMonth === currentMonth;
+            const bdayDep = dependents.find(d => d.bdayMonth === currentMonth);
+            const isBdayMonth = isPlayerBday || !!bdayDep;
+            return (
+              <View style={{ position: 'absolute', top: 8, left: 12, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setShowHomeScreen(true)} activeOpacity={0.8}>
+                  <Image source={require('./assets/ui_comp/forsale.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowBirthdayRoom(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
+                  <Image source={require('./assets/ui_comp/birthday_cake.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                  {isBdayMonth && (
+                    <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#ec4899', borderWidth: 1.5, borderColor: '#06080f' }} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            );
+          })()}
 
           {/* Grocery + Inbox icons — top-right, no labels */}
           {activeMenu !== 'advisor' && (() => {
@@ -2407,6 +2423,16 @@ const GameLayout = ({ onHardReset }) => {
 
       </StyledView>
 
+      <BirthdayCelebrationRoom
+        visible={showBirthdayRoom}
+        onClose={() => setShowBirthdayRoom(false)}
+        turn={{ month: (totalMonthsPlayed % 12) + 1 }}
+        playerBirthday={playerBirthday}
+        playerName={playerName}
+        dependents={dependents}
+        lastCelebrationChoice={lastCelebrationChoice}
+      />
+
       {/* ── First-load intro overlay ── */}
       {showIntro && (
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 800, backgroundColor: 'rgba(4,6,14,0.96)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
@@ -2779,7 +2805,9 @@ const GameLayout = ({ onHardReset }) => {
                           <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560' }}>Mo.{ev.month || 0}</Text>
                         </View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: ev.read ? '#445070' : '#c8d4f0', lineHeight: 19 }} numberOfLines={1}>{ev.name}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 15, marginTop: 1 }} numberOfLines={1}>{ev.message}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 15, marginTop: 1 }} numberOfLines={1}>
+                          {typeof ev.message === 'string' ? ev.message : 'Tap to view message details...'}
+                        </Text>
                       </View>
                       {/* Impact + unread dot */}
                       <View style={{ alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
