@@ -3359,7 +3359,7 @@ export const GameProvider = ({ children }) => {
                     const capacityWarning = {
                         id: `housing_warning_${totalMonthsPlayed}`, name: 'Housing Alert',
                         message: (
-                            <Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 28 }}>
                                 Your baby is arriving in {remaining} months!{"\n\n"}
                                 Your current house ({currentHousing.name}) has a capacity of {capacity}, but you will need capacity for {totalPeople}. Please buy or rent a bigger house from the Shop <Image source={require('../../assets/ui_comp/forsale.png')} style={{width: 24, height: 24}} resizeMode="contain" /> to avoid massive emergency moving fees.
                             </Text>
