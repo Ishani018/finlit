@@ -2433,7 +2433,7 @@ const GameLayout = ({ onHardReset }) => {
               {[
                 [
                   { img: require('./assets/ui_comp/career.png'),    label: 'JOBS',    sub: 'Earn a salary' },
-                  { img: require('./assets/ui_comp/achivements.png'),label: 'STUDY',   sub: 'Unlock careers' },
+                  { img: require('./assets/ui_comp/education.png'),label: 'STUDY',   sub: 'Unlock careers' },
                   { img: require('./assets/ui_comp/investicon.png'), label: 'INVEST',  sub: 'Grow wealth' },
                 ],
                 [
