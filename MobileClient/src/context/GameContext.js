@@ -91,6 +91,21 @@ export const GameProvider = ({ children }) => {
     const [childSavings, setChildSavings] = useState({}); // { [dependentId]: balance }
     const [legacySummary, setLegacySummary] = useState(null);
     const [isLegacyMode, setIsLegacyMode] = useState(false);
+    const [dailyTurns, setDailyTurns] = useState({ date: new Date().toDateString(), count: 0 });
+    const dailyTurnsRef = useRef({ date: new Date().toDateString(), count: 0 });
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const raw = await AsyncStorage.getItem('finlit_daily_turns');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    setDailyTurns(parsed);
+                    dailyTurnsRef.current = parsed;
+                }
+            } catch (_) {}
+        })();
+    }, []);
 
     // Education & Portfolio
     const [degrees, setDegrees] = useState([]);
@@ -2601,6 +2616,14 @@ export const GameProvider = ({ children }) => {
     // =========================================================================
 
     const nextMonth = () => {
+        const today = new Date().toDateString();
+        const newTurns = (dailyTurnsRef.current.date === today) 
+            ? { date: today, count: dailyTurnsRef.current.count + 1 }
+            : { date: today, count: 1 };
+        setDailyTurns(newTurns);
+        dailyTurnsRef.current = newTurns;
+        AsyncStorage.setItem('finlit_daily_turns', JSON.stringify(newTurns));
+
         // True end of life — legacy screen
         if (totalMonthsPlayed >= GAME_END_MONTH && !gameOver) {
             const score = calculateFinalScore();
@@ -3807,6 +3830,13 @@ export const GameProvider = ({ children }) => {
         }
         return null;
     }, [totalMonthsPlayed, currentJob, pantry, balance]);
+    const DAILY_TURN_LIMIT = 30;
+    const turnsLeftToday = () => {
+        const today = new Date().toDateString();
+        const { date, count } = dailyTurnsRef.current || dailyTurns;
+        if (date !== today) return DAILY_TURN_LIMIT;
+        return Math.max(0, DAILY_TURN_LIMIT - count);
+    };
 
     const value = {
         // Core
@@ -3921,6 +3951,7 @@ export const GameProvider = ({ children }) => {
 
         // New Mechanics
         expectingChild, setExpectingChild, resetGame,
+        turnsLeftToday, DAILY_TURN_LIMIT, dailyTurns,
     };
 
     return (
