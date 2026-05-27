@@ -1014,10 +1014,10 @@ const GameLayout = ({ onHardReset }) => {
                       : currentHousing.image
                 }
                 style={{ 
-                  width: Dimensions.get('window').width * 1.8, 
-                  height: Dimensions.get('window').height * 1.2 
+                  width: Dimensions.get('window').width * 1.4, 
+                  height: Dimensions.get('window').height * 1.4 
                 }}
-                resizeMode="cover"
+                resizeMode="contain"
               />
             </ScrollView>
           </ScrollView>
