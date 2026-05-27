@@ -59,9 +59,16 @@ const BRIDE_IMG = require('../../assets/sprites/bride.png');
 const BRIDE_V2_IMG = require('../../assets/sprites/bride version 2.png');
 const BRIDE_V3_IMG = require('../../assets/sprites/bride version 3.png');
 
+const GROOM_NORMAL_IMG = require('../../assets/sprites/groom normal clothes.png');
+const GROOM_V2_NORMAL_IMG = require('../../assets/sprites/groom version 2 normal clothes.png');
+const GROOM_V3_NORMAL_IMG = require('../../assets/sprites/groom version 3 normal clothes.png');
+const BRIDE_NORMAL_IMG = require('../../assets/sprites/bride normal clothes.png');
+const BRIDE_V2_NORMAL_IMG = require('../../assets/sprites/bride version 2 normal clothes.png');
+const BRIDE_V3_NORMAL_IMG = require('../../assets/sprites/bride version 3 normal clothes.png');
+
 const SPOUSE_IMAGES = {
-    groom: GROOM_IMG, groom_v1: GROOM_IMG, groom_v2: GROOM_V2_IMG, groom_v3: GROOM_V3_IMG,
-    bride: BRIDE_IMG, bride_v1: BRIDE_IMG, bride_v2: BRIDE_V2_IMG, bride_v3: BRIDE_V3_IMG,
+    groom: GROOM_NORMAL_IMG, groom_v1: GROOM_NORMAL_IMG, groom_v2: GROOM_V2_NORMAL_IMG, groom_v3: GROOM_V3_NORMAL_IMG,
+    bride: BRIDE_NORMAL_IMG, bride_v1: BRIDE_NORMAL_IMG, bride_v2: BRIDE_V2_NORMAL_IMG, bride_v3: BRIDE_V3_NORMAL_IMG,
 };
 
 const getSpouseImage = (s) => SPOUSE_IMAGES[s] || null;
