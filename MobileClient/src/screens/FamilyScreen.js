@@ -830,43 +830,43 @@ function MarriagePickModal({ onPick, onClose }) {
 
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ width: '92%', maxWidth: 420, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.bg, overflow: 'hidden', maxHeight: '90%' }}>
+            <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden' }}>
                 {/* Banquet hall banner */}
-                <View style={{ height: 100, overflow: 'hidden', position: 'relative' }}>
+                <View style={{ height: 120, overflow: 'hidden', position: 'relative' }}>
                     <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
-                    <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 14 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: selectedCandidate ? selectedCandidate.color : C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>
+                    <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 20 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: selectedCandidate ? selectedCandidate.color : C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: C.cream, lineHeight: 34 }}>
                             {selectedCandidate ? selectedCandidate.name : 'Who do you marry?'}
                         </Text>
                     </View>
-                    <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
-                        <FontAwesome5 name="times" size={12} color={C.dim} />
+                    <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
+                        <FontAwesome5 name="times" size={14} color={C.dim} />
                     </TouchableOpacity>
                 </View>
 
                 {!selectedCandidate ? (
                     <>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, textAlign: 'center', paddingVertical: 10 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, textAlign: 'center', paddingVertical: 14 }}>
                             ₹5L wedding cost  ·  Spouse may earn income
                         </Text>
 
-                        <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 16 }}>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' }}>
+                        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' }}>
                                 {candidates.map(v => (
                                     <TouchableOpacity key={v.id} onPress={() => setSelectedCandidate(v)} activeOpacity={0.85}
-                                        style={{ width: '31%', borderWidth: 1.5, borderColor: v.color + '60', backgroundColor: C.panel, overflow: 'hidden', marginBottom: 10 }}>
+                                        style={{ width: '31%', borderWidth: 1.5, borderColor: v.color + '60', backgroundColor: C.panel, overflow: 'hidden', marginBottom: 12 }}>
                                         <View style={{ height: 3, backgroundColor: v.color }} />
-                                        <View style={{ aspectRatio: 0.7, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                                        <View style={{ aspectRatio: 0.65, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
                                             <Image
                                                 source={v.image}
                                                 style={{ width: '100%', height: '200%', position: 'absolute', top: v.top, transform: [{ scale: v.scale || 1 }] }}
                                                 resizeMode="contain"
                                             />
-                                            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, backgroundColor: 'rgba(6,8,15,0.85)' }} />
-                                            <View style={{ position: 'absolute', bottom: 6, left: 0, right: 0, alignItems: 'center' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream }}>{v.name}</Text>
+                                            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, backgroundColor: 'rgba(6,8,15,0.85)' }} />
+                                            <View style={{ position: 'absolute', bottom: 8, left: 0, right: 0, alignItems: 'center' }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }}>{v.name}</Text>
                                             </View>
                                         </View>
                                     </TouchableOpacity>
@@ -875,37 +875,37 @@ function MarriagePickModal({ onPick, onClose }) {
                         </ScrollView>
                     </>
                 ) : (
-                    <View style={{ padding: 16 }}>
-                        <View style={{ flexDirection: 'row', gap: 16, marginBottom: 20 }}>
-                            <View style={{ width: 180, height: 340, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
-                                <Image
-                                    source={selectedCandidate.image}
-                                    style={{ width: '100%', height: '100%', transform: [{ scale: selectedCandidate.scale || 1 }] }}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <View style={{ flex: 1, justifyContent: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream, marginBottom: 8 }}>
-                                    A life partner ready to share the journey.
-                                </Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, lineHeight: 18 }}>
-                                    {selectedCandidate.desc}
-                                </Text>
-                                <View style={{ marginTop: 12, padding: 8, backgroundColor: 'rgba(0,0,0,0.2)', borderWidth: 1, borderColor: C.borderLt }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>• Wedding Cost: ₹5L</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>• Career: Unknown (50% chance)</Text>
-                                </View>
+                    <View style={{ padding: 24, flex: 1 }}>
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <Image
+                                source={selectedCandidate.image}
+                                style={{ width: '100%', height: '100%', transform: [{ scale: selectedCandidate.scale || 1 }] }}
+                                resizeMode="contain"
+                            />
+                        </View>
+                        
+                        <View style={{ alignItems: 'center', marginTop: 24, marginBottom: 30 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, marginBottom: 10, textAlign: 'center' }}>
+                                A life partner ready to share the journey.
+                            </Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, lineHeight: 22, textAlign: 'center', paddingHorizontal: 10 }}>
+                                {selectedCandidate.desc}
+                            </Text>
+                            
+                            <View style={{ marginTop: 20, padding: 14, backgroundColor: 'rgba(0,0,0,0.2)', borderWidth: 1, borderColor: C.borderLt, width: '100%', maxWidth: 400 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim }}>• Wedding Cost: ₹5L</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim }}>• Career: Unknown (50% chance)</Text>
                             </View>
                         </View>
 
-                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <View style={{ flexDirection: 'row', gap: 12, paddingBottom: 10 }}>
                             <TouchableOpacity onPress={() => setSelectedCandidate(null)}
-                                style={{ flex: 1, borderWidth: 1, borderColor: C.border, paddingVertical: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, letterSpacing: 2 }}>BACK</Text>
+                                style={{ flex: 1, borderWidth: 1, borderColor: C.border, paddingVertical: 14, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, letterSpacing: 2 }}>BACK</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => onPick({ id: selectedCandidate.id, name: selectedCandidate.type })}
-                                style={{ flex: 2, backgroundColor: selectedCandidate.color, paddingVertical: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 2 }}>MARRY {selectedCandidate.name.toUpperCase()}</Text>
+                                style={{ flex: 2, backgroundColor: selectedCandidate.color, paddingVertical: 14, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>MARRY {selectedCandidate.name.toUpperCase()}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
