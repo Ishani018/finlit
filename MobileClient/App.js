@@ -5,6 +5,8 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider, useGame } from './src/context/GameContext';
 import './imports';
 import { JOBS } from './src/data/jobs';
+import { calculateIncomeTax } from './src/data/taxes';
+import Constants from 'expo-constants';
 import { EDUCATION } from './src/data/education';
 import { STOCKS } from './src/data/stocks';
 import { MUTUAL_FUNDS } from './src/data/mutualFunds';
@@ -551,18 +553,72 @@ const GameLayout = ({ onHardReset }) => {
     );
   }, [lastCrisisEvent]);
 
-  // Family demand events — show YES/NO dialog
+  // Family demand events — show YES/NO dialog with beautiful live consequences preview
   useEffect(() => {
     if (!pendingFamilyDemand) return;
     const { demand, dep } = pendingFamilyDemand;
+
+    let depImage = null;
+    if (dep) {
+        if (dep.type === 'spouse') {
+            const src = getSpriteImage(dep.spouseSprite, playerAge);
+            if (src) depImage = { isSprite: true, source: src, scale: 1.6 }; // scale up to focus on face/torso
+        } else if (dep.type === 'child') {
+            const f = dep.gender === 'female';
+            const ageM = dep.childAgeMonths || 0;
+            let src;
+            if (ageM < 12) src = f ? require('./assets/dependents/baby daughter.png') : require('./assets/dependents/baby son.png');
+            else if (ageM < 60) src = f ? require('./assets/dependents/toddler daughter.png') : require('./assets/dependents/toddler son.png');
+            else if (ageM < 216) src = f ? require('./assets/dependents/pre schooler daughter.png') : require('./assets/dependents/pre schooler son.png');
+            else src = f ? require('./assets/dependents/teenage daughter.png') : require('./assets/dependents/teenage son.png');
+            
+            if (src) depImage = { isSprite: true, source: src, scale: 1.1 }; // Slight scale for full body children inside the circle
+        } else if (dep.type === 'parent') {
+            depImage = { isSprite: false, source: require('./assets/ui_comp/familyicon.png') };
+        }
+    }
+
+    const messageElement = (
+      <View style={{ gap: 18 }}>
+        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 28 }}>
+          {demand.getMessage(dep)}
+        </Text>
+
+        <View style={{ borderTopWidth: 1, borderColor: '#1e2840', paddingTop: 16 }}>
+          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6070a0', letterSpacing: 2, marginBottom: 12, textTransform: 'uppercase' }}>
+            Impact Preview
+          </Text>
+          
+          <View style={{ flexDirection: 'row', gap: 16, backgroundColor: '#0a0d1a', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#1e2840' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80', marginBottom: 6 }}>IF ACCEPTED</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>-₹{demand.cost.toLocaleString()}</Text>
+              {demand.accept.happinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+{demand.accept.happinessBoost} Happy (You)</Text> : null}
+              {demand.accept.depHealthBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+{demand.accept.depHealthBoost} HP ({dep?.name})</Text> : null}
+              {demand.accept.depHappinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+{demand.accept.depHappinessBoost} Happy ({dep?.name})</Text> : null}
+            </View>
+            <View style={{ width: 1, backgroundColor: '#1e2840' }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171', marginBottom: 6 }}>IF DECLINED</Text>
+              {demand.decline.happinessPenalty ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{demand.decline.happinessPenalty} Happy (You)</Text> : null}
+              {demand.decline.depHealthPenalty ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{demand.decline.depHealthPenalty} HP ({dep?.name})</Text> : null}
+              {demand.decline.depHappinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{demand.decline.depHappinessBoost} Happy ({dep?.name})</Text> : null}
+              {!demand.decline.happinessPenalty && !demand.decline.depHealthPenalty && !demand.decline.depHappinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#6070a0' }}>No impact</Text> : null}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+
     showDialog(
       demand.getTitle(dep),
-      demand.getMessage(dep),
+      messageElement,
       'warning',
       () => { closeDialog(); resolveFamilyDemand(true); },
       demand.confirmText || 'YES',
       demand.declineText || 'NOT NOW',
-      () => { closeDialog(); resolveFamilyDemand(false); }
+      () => { closeDialog(); resolveFamilyDemand(false); },
+      depImage
     );
   }, [pendingFamilyDemand]);
 
@@ -1303,7 +1359,7 @@ const GameLayout = ({ onHardReset }) => {
                 <TouchableOpacity onPress={() => setCareerSubTab('study')} activeOpacity={0.85}
                   style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden' }}>
                   <View style={{ height: 160, position: 'relative' }}>
-                    <Image source={require('./assets/jobs/streamer.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <Image source={require('./assets/ui_comp/education.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: '#818cf8' }} />
                     <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
@@ -2459,7 +2515,7 @@ const GameLayout = ({ onHardReset }) => {
               {[
                 [
                   { img: require('./assets/ui_comp/career.png'),    label: 'JOBS',    sub: 'Earn a salary' },
-                  { img: require('./assets/ui_comp/education.png'),label: 'STUDY',   sub: 'Unlock careers' },
+                  { img: require('./assets/ui_comp/grad_cap.png'),label: 'STUDY',   sub: 'Unlock careers' },
                   { img: require('./assets/ui_comp/investicon.png'), label: 'INVEST',  sub: 'Grow wealth' },
                 ],
                 [
@@ -2828,25 +2884,28 @@ const GameLayout = ({ onHardReset }) => {
       </ResponsiveModal>
       {/* ── Credit Card Offer Dialog ── */}
       <ResponsiveModal visible={pendingCreditCardOffer} transparent animationType="fade" onRequestClose={() => setPendingCreditCardOffer(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: '#070a16', borderWidth: 1, borderColor: '#60a5fa', overflow: 'hidden' }}>
-            <View style={{ padding: 20, alignItems: 'center' }}>
-              <Image source={require('./assets/ui_comp/credit card.png')} style={{ width: 120, height: 120, marginBottom: 16 }} resizeMode="contain" />
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#60a5fa', marginBottom: 8, textAlign: 'center' }}>PRE-APPROVED CREDIT CARD OFFER!</Text>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', textAlign: 'center', marginBottom: 16 }}>
-                Your excellent credit score has unlocked a new credit card offer. Build credit, enjoy interest-free days, and get lifestyle perks.
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 360, backgroundColor: '#070a16', borderRadius: 14, borderWidth: 2, borderColor: '#3b82f6', overflow: 'hidden' }}>
+            <View style={{ backgroundColor: '#1e3a8a', paddingVertical: 12, alignItems: 'center' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#bfdbfe', letterSpacing: 2 }}>CARD PRE-APPROVAL</Text>
+            </View>
+            <View style={{ padding: 24, alignItems: 'center' }}>
+              <Image source={require('./assets/ui_comp/credit card.png')} style={{ width: 140, height: 140, marginBottom: 20 }} resizeMode="contain" />
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#60a5fa', marginBottom: 10, textAlign: 'center' }}>CREDIT OFFER UNLOCKED!</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', textAlign: 'center', marginBottom: 24, lineHeight: 22 }}>
+                Your CIBIL score has pre-approved you for a new credit card. Use it wisely and pay on time to boost your credit limit and score!
               </Text>
               
               <TouchableOpacity onPress={() => {
                 setPendingCreditCardOffer(false);
                 setActiveTab('money');
                 setMoneySubTab('card');
-              }} style={{ width: '100%', backgroundColor: '#60a5fa', padding: 14, alignItems: 'center', marginBottom: 12 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#04060e', letterSpacing: 1 }}>SEE OFFER & APPLY →</Text>
+              }} style={{ width: '100%', backgroundColor: '#3b82f6', borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 12 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#ffffff', letterSpacing: 1 }}>SEE OFFER & APPLY →</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity onPress={() => setPendingCreditCardOffer(false)} style={{ width: '100%', borderWidth: 1, borderColor: '#1a2040', padding: 14, alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>NOT NOW</Text>
+              <TouchableOpacity onPress={() => setPendingCreditCardOffer(false)} style={{ width: '100%', borderWidth: 1, borderColor: '#1e3a8a', borderRadius: 8, padding: 14, alignItems: 'center' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa' }}>NOT NOW</Text>
               </TouchableOpacity>
             </View>
           </View>

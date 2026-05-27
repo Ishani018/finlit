@@ -44,7 +44,7 @@ const QualityBar = ({ score, size = 'normal' }) => {
 
 export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
     const {
-        currentHousing, properties, balance, moveIn, happiness,
+        currentHousing, properties, balance, moveIn, rentProperty, happiness,
     } = useGame();
 
     const [tab, setTab] = useState('owned');
@@ -256,7 +256,10 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
 
                                                     <View style={{ marginTop: 8, gap: 5 }}>
                                                         <TouchableOpacity
-                                                            onPress={() => handleMoveIn(prop)}
+                                                            onPress={() => {
+                                                                const res = rentProperty(prop.id);
+                                                                if (res.success) onClose();
+                                                            }}
                                                             style={{
                                                                 paddingVertical: 7, alignItems: 'center',
                                                                 backgroundColor: '#0a1a10',

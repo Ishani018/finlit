@@ -13,6 +13,7 @@ import { LIFE_DECISIONS, BUDGET_EVENTS } from '../data/lifeDecisions';
 import { ACHIEVEMENTS, NET_WORTH_MILESTONES } from '../data/achievements';
 import { GROCERY_ITEMS, MONTHLY_HEALTH_DRAIN, SICK_LEAVE_THRESHOLD, CRITICAL_HEALTH_THRESHOLD } from '../data/groceries';
 import { FAMILY_DEMANDS } from '../data/familyDemands';
+import { getSpriteImage } from '../data/spriteMap';
 import { GOLD_ASSETS, GOLD_PRICE_PER_GRAM_BASE } from '../data/gold';
 import { Platform, Text, Image } from 'react-native';
 import Constants from 'expo-constants';
@@ -43,7 +44,7 @@ const LIVING_COSTS_BASE = 2000;
 const STARTING_AGE = 18;
 const RETIREMENT_MONTH = 480; // Age 58 — career ends, retirement begins
 const GAME_END_MONTH = 684;   // Age 75 — end of life, legacy screen
-const STARTING_CREDIT_SCORE = 650;
+const STARTING_CREDIT_SCORE = 600;
 const CHILD_AGING_RATE = 3;
 const PPF_ANNUAL_RATE = 0.071;
 const PPF_MAX_ANNUAL = 150000;
@@ -155,6 +156,7 @@ export const GameProvider = ({ children }) => {
     // --- DEPENDENTS ---
     const [dependents, setDependents] = useState([]);
     const [expectingChild, setExpectingChild] = useState(null);
+    const [timesMarried, setTimesMarried] = useState(0);
     const [loans, setLoans] = useState([]);
     const [activeInsurance, setActiveInsurance] = useState([]);
     const [creditScore, setCreditScore] = useState(STARTING_CREDIT_SCORE);
@@ -211,6 +213,7 @@ export const GameProvider = ({ children }) => {
             health, pantry, sickLeaveMonths,
             generation, childSavings, legacySummary, isLegacyMode,
             playerSprite, playerName, playerBirthday,
+            timesMarried,
             playerAge: STARTING_AGE + Math.floor(totalMonthsPlayed / 12),
             netWorth: balance + Object.keys(portfolio).reduce((t, id) => t + (portfolio[id]?.qty || 0) * (marketPrices[id] || 0), 0),
         };
@@ -284,6 +287,7 @@ export const GameProvider = ({ children }) => {
                 childSavings: stateRef.current.childSavings,
                 legacySummary: stateRef.current.legacySummary,
                 isLegacyMode: stateRef.current.isLegacyMode,
+                timesMarried: stateRef.current.timesMarried,
                 ...extraState,
             };
             await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
@@ -369,6 +373,7 @@ export const GameProvider = ({ children }) => {
             if (s.childSavings) setChildSavings(s.childSavings);
             if (s.legacySummary) setLegacySummary(s.legacySummary);
             if (s.isLegacyMode !== undefined) setIsLegacyMode(s.isLegacyMode);
+            if (s.timesMarried !== undefined) setTimesMarried(s.timesMarried);
 
             // Reconstruct currentHousing from id (avoids serializing require() image)
             if (s.currentHousingId) {
@@ -406,7 +411,14 @@ export const GameProvider = ({ children }) => {
     }, [totalMonthsPlayed, saveLoaded]);
 
     // --- DERIVED VALUES ---
-    const playerAge = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
+    let playerAge = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
+    let _bdayMonth = 1;
+    if (playerBirthday && playerBirthday.includes('/')) {
+        _bdayMonth = parseInt(playerBirthday.split('/')[1], 10);
+    }
+    if (totalMonthsPlayed > 0 && _bdayMonth <= turn.month) {
+        playerAge += 1;
+    }
 
     const getStockValue = useCallback(() => {
         return Object.keys(portfolio).reduce((total, stockId) => {
@@ -470,15 +482,23 @@ export const GameProvider = ({ children }) => {
             if (dep.type === 'spouse') cost += 5000;
             else if (dep.type === 'child') {
                 const childAge = dep.childAgeMonths || 0;
-                if (childAge < 12) {
-                    cost += 8000; // infant
-                } else if (childAge < 60) {
-                    cost += 8000;
-                    cost += PRESCHOOL_TIER_EXTRA[dep.preschoolTier || 'home'] || 0;
-                } else if (childAge < 216) {
-                    cost += 12000;
-                    cost += SCHOOL_TIER_EXTRA[dep.schoolTier || 'government'] || 0;
-                } else if (childAge < 252) cost += 25000;
+                if (dep.custody === 'ex') {
+                    if (childAge < 216) {
+                        cost += 10000; // Flat Child Support Alimony
+                    }
+                } else {
+                    if (childAge < 12) {
+                        cost += 8000; // infant
+                    } else if (childAge < 60) {
+                        cost += 8000;
+                        cost += PRESCHOOL_TIER_EXTRA[dep.preschoolTier || 'home'] || 0;
+                    } else if (childAge < 216) {
+                        cost += 12000;
+                        cost += SCHOOL_TIER_EXTRA[dep.schoolTier || 'government'] || 0;
+                    } else if (childAge < 252) {
+                        cost += 25000; // college support
+                    }
+                }
             } else if (dep.type === 'parent') {
                 cost += 15000;
                 if (dep.caretaker) cost += 8000;
@@ -968,6 +988,15 @@ export const GameProvider = ({ children }) => {
         return { success: true, msg: `Moved into ${property.name}!` };
     };
 
+    const rentProperty = (propertyId) => {
+        const property = REAL_ESTATE.find(p => p.id === propertyId);
+        if (!property) return { success: false, msg: 'Property not found.' };
+        if (property.category !== 'residential') return { success: false, msg: 'You can only rent residential properties.' };
+        const rentAmount = property.rental_income || property.maintenance || 0;
+        setCurrentHousing({ ...property, category: 'rental', maintenance: rentAmount });
+        return { success: true, msg: `Rented ${property.name} for ₹${rentAmount.toLocaleString()}/mo!` };
+    };
+
     const markEventRead = (eventId) => {
         setEventInbox(prev => prev.map(e => e.id === eventId ? { ...e, read: true } : e));
     };
@@ -1080,9 +1109,10 @@ export const GameProvider = ({ children }) => {
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
         setExpectingChild(null);
+        setTimesMarried(0);
         setLoans([]);
         setActiveInsurance([]);
-        setCreditScore(300);
+        setCreditScore(600);
         setActiveEffects([]);
         setActiveEnrollment(null);
         setEventInbox([]);
@@ -1248,7 +1278,11 @@ export const GameProvider = ({ children }) => {
     const marry = (spouseName, spouseSprite) => {
         if (dependents.some(d => d.type === 'spouse')) return { success: false, msg: 'Already married.' };
         const houseCapacity = currentHousing.capacity || 2;
-        if (dependents.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
+        
+        // Only active (cohabiting) dependents count towards house capacity
+        const activeDeps = dependents.filter(d => d.custody !== 'ex');
+        if (activeDeps.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
+        
         const weddingCost = 500000;
         if (balance < weddingCost) return { success: false, msg: `Need ₹${weddingCost.toLocaleString()} for wedding expenses.` };
         setBalance(prev => prev - weddingCost);
@@ -1266,25 +1300,70 @@ export const GameProvider = ({ children }) => {
         if (playerBirthday && playerBirthday.includes('/')) playerBday = parseInt(playerBirthday.split('/')[1], 10);
         let bMonth = Math.floor(Math.random() * 12) + 1;
         while (bMonth === playerBday) bMonth = Math.floor(Math.random() * 12) + 1;
-        setDependents(prev => [...prev, {
-            id: `spouse_${Date.now()}`, type: 'spouse',
-            name: finalName,
-            spouseSprite: spouseSprite || 'bride',
-            monthAdded: totalMonthsPlayed, isWorking, income: spouseIncome,
-            bdayMonth: bMonth, happiness: 70
-        }]);
+        
+        const newTimesMarried = timesMarried + 1;
+        setTimesMarried(newTimesMarried);
+
+        // 20% chance of a stepchild from previous marriage if remarrying (2nd+ spouse)
+        const hasStepChild = newTimesMarried > 1 && Math.random() < 0.20;
+        let stepChildEntry = null;
+        const newSpouseId = `spouse_${Date.now()}`;
+
+        if (hasStepChild) {
+            const gender = Math.random() < 0.5 ? 'female' : 'male';
+            const ageYr = 4 + Math.floor(Math.random() * 8); // age 4 to 11
+            const childName = gender === 'female' 
+                ? INDIAN_FEMALE_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_NAMES.length)]
+                : INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)];
+            
+            stepChildEntry = {
+                id: `dep_child_${Date.now()}_step`,
+                type: 'child',
+                name: childName,
+                gender,
+                ageMonths: ageYr * 12,
+                childAgeMonths: ageYr * 12,
+                health: 100,
+                schoolTier: ageYr >= 5 ? 'government' : 'none',
+                preschoolTier: ageYr < 5 ? 'home' : 'none',
+                hobby: 'none',
+                isStepChild: true,
+                spouseId: newSpouseId,
+                bdayMonth: Math.floor(Math.random() * 12) + 1,
+            };
+        }
+
+        setDependents(prev => {
+            const next = [...prev, {
+                id: newSpouseId, type: 'spouse',
+                name: finalName,
+                spouseSprite: spouseSprite || 'bride',
+                monthAdded: totalMonthsPlayed, isWorking, income: spouseIncome,
+                bdayMonth: bMonth, happiness: 70,
+                marriageNumber: newTimesMarried,
+            }];
+            if (stepChildEntry) next.push(stepChildEntry);
+            return next;
+        });
+
         addHistory(`Got Married! ${isWorking ? `Spouse earns ₹${spouseIncome.toLocaleString()}/mo` : 'Spouse is homemaker'}`, -weddingCost, 'expense');
-        return { success: true, msg: `Congratulations! ${isWorking ? `Spouse earns ₹${spouseIncome.toLocaleString()}/mo` : ''}` };
+        
+        let msg = `Congratulations! You got married to ${finalName}! ${isWorking ? `Spouse earns ₹${spouseIncome.toLocaleString()}/mo` : 'Spouse is homemaker'}`;
+        if (stepChildEntry) {
+            msg += `\n\n👶 STEPCHILD: Welcomed ${stepChildEntry.name} (age ${Math.floor(stepChildEntry.childAgeMonths / 12)}) into your family!`;
+        }
+        return { success: true, msg };
     };
 
     const haveChild = () => {
-        if (!dependents.some(d => d.type === 'spouse')) return { success: false, msg: 'Must be married first.' };
+        const spouse = dependents.find(d => d.type === 'spouse');
+        if (!spouse) return { success: false, msg: 'Must be married first.' };
         if (expectingChild) return { success: false, msg: 'You are already expecting a child!' };
-        const childCount = dependents.filter(d => d.type === 'child').length;
-        if (childCount >= 3) return { success: false, msg: 'Maximum 3 children.' };
+        const activeChildrenWithCurrentSpouse = dependents.filter(d => d.type === 'child' && d.custody !== 'ex' && d.spouseId === spouse.id).length;
+        if (activeChildrenWithCurrentSpouse >= 3) return { success: false, msg: 'Maximum 3 children with your current spouse.' };
         const gender = Math.random() < 0.5 ? 'female' : 'male';
         
-        setExpectingChild({ name: '', gender, remaining: 9 });
+        setExpectingChild({ name: '', gender, remaining: 9, spouseId: spouse.id });
         addHistory('Expecting a baby!', 0, 'info');
         return { success: true, msg: `You are expecting a baby! They will arrive in 9 months. Upgrade your housing before then if needed!` };
     };
@@ -1333,15 +1412,17 @@ export const GameProvider = ({ children }) => {
                 setDependents(prev => prev.map(d => d.id === dep.id ? {
                     ...d,
                     health: demand.accept.depHealthBoost ? Math.min(100, (d.health ?? 80) + demand.accept.depHealthBoost) : d.health,
+                    happiness: demand.accept.depHappinessBoost ? Math.min(100, (d.happiness ?? 70) + demand.accept.depHappinessBoost) : d.happiness,
                 } : d));
             }
             addHistory(demand.getTitle(dep), -demand.cost, 'expense');
         } else {
             if (demand.decline.happinessPenalty) setHappiness(prev => Math.max(0, prev + demand.decline.happinessPenalty));
-            if (dep && demand.decline.depHealthPenalty) {
+            if (dep && (demand.decline.depHealthPenalty || demand.decline.depHappinessBoost)) {
                 setDependents(prev => prev.map(d => d.id === dep.id ? {
                     ...d,
-                    health: Math.max(0, (d.health ?? 80) + demand.decline.depHealthPenalty),
+                    health: demand.decline.depHealthPenalty ? Math.max(0, (d.health ?? 80) + demand.decline.depHealthPenalty) : d.health,
+                    happiness: demand.decline.depHappinessBoost ? Math.max(0, (d.happiness ?? 70) + demand.decline.depHappinessBoost) : d.happiness,
                 } : d));
             }
         }
@@ -1713,10 +1794,30 @@ export const GameProvider = ({ children }) => {
 
     const DIVORCE_PENALTY = 200000;
     const divorce = () => {
+        // Find if they have any active children before removing spouse/modifying dependents
+        const activeChildren = stateRef.current.dependents?.filter(d => d.type === 'child' && d.custody !== 'ex') || [];
+        const hasChildren = activeChildren.length > 0;
+
         setDependents(prev => prev.filter(d => d.type !== 'spouse'));
         setBalance(prev => Math.max(0, prev - DIVORCE_PENALTY));
         setHappiness(prev => Math.max(0, prev - 30));
         addHistory('Divorce settlement', -DIVORCE_PENALTY, 'expense');
+
+        if (hasChildren) {
+            setPendingDecision({
+                id: `custody_dilemma_${totalMonthsPlayed}`,
+                name: 'Custody Dilemma',
+                emoji: '⚖️',
+                category: 'dilemma',
+                message: 'With the divorce finalized, you must decide who keeps custody of the children. If you let your ex-spouse take custody, you will pay ₹10,000/mo per child in child support.',
+                choices: [
+                    { label: 'Keep Custody (Full Expenses)', color: '#4ade80', effect: { type: 'custody_keep', msg: 'You kept custody of your children. Full living and education costs apply.' } },
+                    { label: 'Ex Takes Custody (₹10k/mo child support)', color: '#f87171', effect: { type: 'custody_ex_spouse', msg: 'Your ex-spouse has taken custody. You will pay ₹10,000/mo per child in support payments.' } }
+                ]
+            });
+            setIsPlaying(false);
+        }
+
         return { success: true };
     };
 
@@ -1901,8 +2002,17 @@ export const GameProvider = ({ children }) => {
             if (balance >= eff.amount) {
                 setBalance(prev => prev - eff.amount);
                 if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
-                if (eff.happiness && eff.dependentId) {
-                    setDependents(prev => prev.map(d => d.id === eff.dependentId && d.type === 'spouse' ? { ...d, happiness: Math.max(0, Math.min(100, (d.happiness || 70) + (eff.happiness / 2))) } : d));
+                if (eff.dependentId) {
+                    setDependents(prev => prev.map(d => {
+                        if (d.id === eff.dependentId) {
+                            const newD = { ...d, lastCelebratedYear: turn.year };
+                            if (eff.happiness && d.type === 'spouse') {
+                                newD.happiness = Math.max(0, Math.min(100, (d.happiness || 70) + (eff.happiness / 2)));
+                            }
+                            return newD;
+                        }
+                        return d;
+                    }));
                 }
                 if (eff.health) setHealth(prev => Math.max(0, Math.min(100, prev + eff.health)));
                 if (eff.creditScore) setCreditScore(prev => Math.min(900, prev + eff.creditScore));
@@ -2069,6 +2179,14 @@ export const GameProvider = ({ children }) => {
             } else {
                 msg = 'Your parent is already living with you.';
             }
+        } else if (eff.type === 'custody_keep') {
+            setDependents(prev => prev.map(d => d.type === 'child' && d.custody === undefined ? { ...d, custody: 'player' } : d));
+            setHappiness(prev => Math.min(100, prev + 15));
+            msg = eff.msg || 'You kept custody of your children.';
+        } else if (eff.type === 'custody_ex_spouse') {
+            setDependents(prev => prev.map(d => d.type === 'child' && d.custody === undefined ? { ...d, custody: 'ex' } : d));
+            setHappiness(prev => Math.max(0, prev - 20));
+            msg = eff.msg || 'Your ex-spouse took custody. You will pay child support.';
         } else if (eff.type === 'parent_move_in') {
             setDependents(prev => [...prev, { id: `parent_${Date.now()}`, type: 'parent', parentType: 'elderly', name: 'Elderly Parent', monthAdded: totalMonthsPlayed, health: 70 }]);
             msg = 'Your parent has moved in with you. They appreciate your support.';
@@ -2182,7 +2300,7 @@ export const GameProvider = ({ children }) => {
 
     const applyCrisisEvent = (event) => {
         let financialImpact = 0;
-        const state = { balance, currentJob, currentHousing, properties, portfolio, dependents, playerAge, netWorth, loans, activeEffects };
+        const state = { balance, currentJob, currentHousing, properties, portfolio, dependents, playerAge, netWorth, loans, activeInsurance, activeEffects };
         let message = event.getMessage ? event.getMessage(state) : (event.message || event.name);
 
         const hasHealthInsurance = activeInsurance.some(i => {
@@ -2316,6 +2434,24 @@ export const GameProvider = ({ children }) => {
             message += ` (Insurance covered ${Math.round(mitigationRate * 100)}%)`;
         }
 
+        let eventImage = null;
+        if (event.id.includes('spouse')) {
+            const spouse = stateRef.current.dependents.find(d => d.type === 'spouse');
+            if (spouse) {
+                const currentPlayerAge = 18 + Math.floor(totalMonthsPlayed / 12);
+                const src = getSpriteImage(spouse.spriteId, currentPlayerAge);
+                if (src) eventImage = { isSprite: true, source: src };
+            }
+        } else if (event.id.includes('child')) {
+            const child = stateRef.current.dependents.find(d => d.type === 'child' && message.includes(d.name)) || stateRef.current.dependents.find(d => d.type === 'child');
+            if (child) {
+                const src = getSpriteImage(child.spriteId, (child.childAgeMonths || 0) / 12);
+                if (src) eventImage = { isSprite: true, source: src };
+            }
+        } else if (event.id.includes('parent')) {
+            eventImage = require('../../assets/ui_comp/familyicon.png');
+        }
+
         const crisisEntry = {
             id: `${event.id}_${totalMonthsPlayed}`,
             name: event.name,
@@ -2325,6 +2461,7 @@ export const GameProvider = ({ children }) => {
             impact: financialImpact,
             month: totalMonthsPlayed,
             read: false,
+            image: eventImage
         };
         setEventInbox(prev => [crisisEntry, ...prev].slice(0, 50));
         setLastCrisisEvent(crisisEntry);
@@ -2392,9 +2529,10 @@ export const GameProvider = ({ children }) => {
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
         setExpectingChild(null);
+        setTimesMarried(0);
         setLoans([]);
         setActiveInsurance([]);
-        setCreditScore(startsWithGoodCredit ? 750 : 300);
+        setCreditScore(startsWithGoodCredit ? 750 : 600);
         setActiveEffects([]);
         setActiveEnrollment(null);
         setEventInbox([]);
@@ -2418,25 +2556,22 @@ export const GameProvider = ({ children }) => {
         setPantry([]);
         setSickLeaveMonths(0);
         setMfPortfolio({});
-        setSipPlans({});
-        setPpf({ balance: 0, contributionsThisYear: 0 });
+        setSipPlans([]);
+        setPpf({ balance: 0, contributionsThisYear: 0, totalContributions: 0 });
         setNps({ balance: 0, contributionsThisYear: 0 });
         setFixedDeposits([]);
         setGoldHoldings({});
-        setGoldBalance(0);
         setCreditCard(null);
         setActiveCreditCards([]);
-        setMarketCycle({ phase: 'neutral', age: 0 });
-        
-        // Start next generation
+        setMarketCycle({ phase: 'sideways', monthsLeft: 12 });
+        setBalance(STARTING_BALANCE);
         setPlayerSprite(newSpriteId);
+        setPlayerName('');
+        setPlayerBirthday(null);
         setGeneration(prev => prev + 1);
-        setBalance(legacySummary.startingGenBalance);
-        
         setGameOver(false);
-        setLegacySummary(null);
-        setIsPlaying(true); // Auto start
-        addHistory(`Started Generation ${generation + 1}!`, 0, 'info');
+        setIsLegacyMode(false);
+        setChildSavings({});
     };
 
     // =========================================================================
@@ -2483,7 +2618,7 @@ export const GameProvider = ({ children }) => {
         if (sipPlans.length === 0 && (stockCount > 0 || mfCount > 0))
             tips.push({ icon: 'sync', color: '#34d399', title: 'Set Up SIPs', body: 'Lump-sum investing requires market timing. SIPs average out the cost over time (rupee-cost averaging). Set up a monthly SIP and forget it.' });
 
-        const totalAssets = balance + getStockValue() + getMFValue() + getRealEstateValue() + ppf.balance + nps.balance + getGoldValue();
+        const totalAssets = balance + getStockValue() + getMFValue() + getRealEstateValue() + ppf.balance + nps.balance + getFDValue();
         if (totalDebt > 0 && totalDebt > totalAssets * 0.5)
             tips.push({ icon: 'balance-scale', color: '#f87171', title: 'Debt > 50% of Net Assets', body: 'Your loans exceed half your total assets. Focus on reducing debt before expanding investments — guaranteed debt reduction beats uncertain investment returns.' });
 
@@ -2948,7 +3083,7 @@ export const GameProvider = ({ children }) => {
         }
 
         // ── BIRTHDAY MECHANICS ──
-        let bdayMonth = null;
+        let bdayMonth = 1; // Default to January if not set or parse fails
         if (playerBirthday && playerBirthday.includes('/')) {
             bdayMonth = parseInt(playerBirthday.split('/')[1], 10);
         }
@@ -2959,7 +3094,8 @@ export const GameProvider = ({ children }) => {
             return n + (s[(v - 20) % 10] || s[v] || s[0]);
         };
 
-        if (bdayMonth && turn.month === bdayMonth && !pendingDecision && totalMonthsPlayed > 0) {
+        const bdayDecisionId = `bday_${turn.year}`;
+        if (bdayMonth && turn.month >= bdayMonth && !firedDecisions.includes(bdayDecisionId) && !pendingDecision && totalMonthsPlayed > 0) {
             let currentAge = 18 + Math.floor(totalMonthsPlayed / 12);
             if (bdayMonth <= turn.month) currentAge += 1;
 
@@ -2982,6 +3118,7 @@ export const GameProvider = ({ children }) => {
                     category: 'crisis', impact: 0,
                 });
                 setHappiness(prev => Math.max(0, prev - 20));
+                setFiredDecisions(prev => [...prev, bdayDecisionId]);
                 setIsPlaying(false);
             } else if (currentAge === 40 && health < 50) {
                 setLastCrisisEvent({
@@ -2990,6 +3127,7 @@ export const GameProvider = ({ children }) => {
                     category: 'crisis', impact: 0,
                 });
                 setHealth(prev => Math.max(0, prev - 15));
+                setFiredDecisions(prev => [...prev, bdayDecisionId]);
                 setIsPlaying(false);
             } else if (currentAge === 50 && (ppf.balance + nps.balance) < 1000000) {
                 setLastCrisisEvent({
@@ -2998,6 +3136,7 @@ export const GameProvider = ({ children }) => {
                     category: 'crisis', impact: 0,
                 });
                 setHappiness(prev => Math.max(0, prev - 25));
+                setFiredDecisions(prev => [...prev, bdayDecisionId]);
                 setIsPlaying(false);
             } else if (!pendingDecision) {
                 // Regular Birthday Party (Forced)
@@ -3014,27 +3153,33 @@ export const GameProvider = ({ children }) => {
                         ...(balance < 1500 ? [{ label: 'Broke Birthday', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Broke Birthday', amount: 0, happiness: -15, health: -5, msg: 'A lonely, broke birthday.' } }] : [])
                     ],
                 });
+                setFiredDecisions(prev => [...prev, bdayDecisionId]);
                 setIsPlaying(false);
             }
         } else if (!pendingDecision && totalMonthsPlayed > 0) {
-            // Dependent Birthdays
-            const bdayDependent = dependents.find(d => d.bdayMonth === turn.month);
+            // Dependent Birthdays — check if birthday month is reached/passed and they haven't celebrated in turn.year yet
+            const bdayDependent = dependents.find(d => 
+                d.bdayMonth !== undefined && 
+                turn.month >= d.bdayMonth && 
+                (!d.lastCelebratedYear || d.lastCelebratedYear < turn.year) &&
+                d.custody !== 'ex'
+            );
             if (bdayDependent) {
                 const isSpouse = bdayDependent.type === 'spouse';
                 const age = Math.floor((totalMonthsPlayed - bdayDependent.monthAdded) / 12) + (isSpouse ? 25 : 1); // rough age
                 
                 let choices = [
-                    { label: 'Quiet Family Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Family Dinner', amount: 2500, happiness: 20, health: 10, msg: 'A lovely, peaceful family dinner.' } },
+                    { label: 'Quiet Family Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Family Dinner', amount: 2500, happiness: 20, health: 10, dependentId: bdayDependent.id, msg: 'A lovely, peaceful family dinner.' } },
                     { label: 'Big House Party', color: '#4ade80', effect: { type: 'birthday_celebration', choiceLabel: 'Big House Party', amount: 12000, happiness: 30, spouseIncomeBoost: isSpouse ? 0.10 : 0, childSavingsBoost: isSpouse ? 0 : 10000, dependentId: bdayDependent.id, msg: isSpouse ? 'Great party! Spouse got a 10% raise!' : 'Fun kids party! You also put ₹10,000 into their savings.' } },
                     { label: 'Lavish Celebration', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Celebration', amount: 45000, happiness: 60, creditScore: 25, spouseIncomeBoost: isSpouse ? 0.20 : 0, childSavingsBoost: isSpouse ? 0 : 25000, dependentId: bdayDependent.id, msg: 'An unforgettable bash! Huge happiness and status boost.' } }
                 ];
                 
-                let message = `It's ${bdayDependent.name}'s birthday! How do you want to celebrate for them?`;
+                let message = `How do you want to celebrate?`;
                 
                 if (isSpouse) {
                     const suggestionIndex = Math.floor(Math.random() * 3);
                     const suggestedChoice = choices[suggestionIndex];
-                    const hintMsg = `${bdayDependent.name} hinted they would really love a ${suggestedChoice.label} this year.`;
+                    const hintMsg = `Hint: ${bdayDependent.name} wants a ${suggestedChoice.label}.`;
                     message += `\n\n${hintMsg}`;
                     
                     choices = choices.map((choice, index) => {
@@ -3050,7 +3195,7 @@ export const GameProvider = ({ children }) => {
                 }
                 
                 if (balance < 2500) {
-                    choices.push({ label: 'Skip Party (Too Broke)', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0, happiness: isSpouse ? -50 : -20, msg: 'Your family is severely disappointed.' } });
+                    choices.push({ label: 'Skip Party (Too Broke)', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0, happiness: isSpouse ? -50 : -20, dependentId: bdayDependent.id, msg: 'Your family is severely disappointed.' } });
                 }
                 setPendingDecision({
                     id: `dep_bday_${bdayDependent.id}_${totalMonthsPlayed}`,
@@ -3062,6 +3207,7 @@ export const GameProvider = ({ children }) => {
                     message,
                     choices,
                 });
+                setDependents(prev => prev.map(d => d.id === bdayDependent.id ? { ...d, lastCelebratedYear: turn.year } : d));
                 setIsPlaying(false);
             }
         }
@@ -3308,9 +3454,10 @@ export const GameProvider = ({ children }) => {
 
         // Expecting Child logic
         if (expectingChild) {
+            const activeDeps = dependents.filter(d => d.custody !== 'ex');
             if (expectingChild.remaining <= 1) {
                 // Baby is born!
-                const totalPeople = dependents.length + 2; // Player + current dependents + 1 new baby
+                const totalPeople = activeDeps.length + 2; // Player + active dependents + 1 new baby
                 const capacity = currentHousing.capacity || 2;
                 
                 let emergencyMoveMsg = '';
@@ -3327,11 +3474,16 @@ export const GameProvider = ({ children }) => {
                     }
                 }
                 
-                // Add the child
+                // Resolve baby name dynamically if empty
+                const finalChildName = expectingChild.name || (expectingChild.gender === 'female' 
+                    ? INDIAN_FEMALE_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_NAMES.length)]
+                    : INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)]);
+
+                // Add the child (with custody undefined initially)
                 setDependents(prev => [...prev, {
                     id: `dep_child_${Date.now()}`,
                     type: 'child',
-                    name: expectingChild.name,
+                    name: finalChildName,
                     gender: expectingChild.gender,
                     ageMonths: 0,
                     childAgeMonths: 0,
@@ -3339,13 +3491,34 @@ export const GameProvider = ({ children }) => {
                     schoolTier: 'none',
                     preschoolTier: 'none',
                     hobby: 'none',
+                    spouseId: expectingChild.spouseId,
+                    bdayMonth: turn.month,
+                    monthAdded: totalMonthsPlayed,
                 }]);
                 setExpectingChild(null);
                 
+                // If divorced from the child's other parent, trigger Custody Dilemma for the newborn
+                const currentSpouse = dependents.find(d => d.type === 'spouse');
+                const isExSpouseChild = !currentSpouse || currentSpouse.id !== expectingChild.spouseId;
+
+                if (isExSpouseChild) {
+                    setPendingDecision({
+                        id: `custody_dilemma_newborn_${totalMonthsPlayed}`,
+                        name: 'Custody Dilemma',
+                        emoji: '⚖️',
+                        category: 'dilemma',
+                        message: `With the divorce from your ex-spouse finalized, you must decide who keeps custody of the newborn baby, ${finalChildName}. If you let your ex-spouse take custody, you will pay ₹10,000/mo in child support.`,
+                        choices: [
+                            { label: 'Keep Custody (Full Expenses)', color: '#4ade80', effect: { type: 'custody_keep', msg: `You kept custody of your newborn, ${finalChildName}. Full living and education costs apply.` } },
+                            { label: 'Ex Takes Custody (₹10k/mo child support)', color: '#f87171', effect: { type: 'custody_ex_spouse', msg: `Your ex-spouse has taken custody of the newborn, ${finalChildName}. You will pay ₹10,000/mo in support payments.` } }
+                        ]
+                    });
+                }
+
                 setLastCrisisEvent({
                     id: `child_born_${totalMonthsPlayed}`,
                     name: 'A New Life! 🍼',
-                    message: `${expectingChild.name} is finally here! A healthy baby ${expectingChild.gender.toLowerCase()} has joined your family. Your life will never be the same.${emergencyMoveMsg}`,
+                    message: `${finalChildName} is finally here! A healthy baby ${expectingChild.gender.toLowerCase()} has joined your family. Your life will never be the same.${emergencyMoveMsg}`,
                     category: emergencyMoveMsg ? 'crisis' : 'positive', impact: 0
                 });
                 setIsPlaying(false);
@@ -3353,7 +3526,7 @@ export const GameProvider = ({ children }) => {
                 const remaining = expectingChild.remaining - 1;
                 setExpectingChild({ ...expectingChild, remaining });
 
-                const totalPeople = dependents.length + 2; // Player + current dependents + 1 new baby
+                const totalPeople = activeDeps.length + 2; // Player + active dependents + 1 new baby
                 const capacity = currentHousing.capacity || 2;
                 if (capacity < totalPeople) {
                     const capacityWarning = {
@@ -3378,7 +3551,10 @@ export const GameProvider = ({ children }) => {
         }
 
         // Age children + decay dependent health each month
-        setDependents(prev => prev.map(d => {
+        const nextDependents = [];
+        let setGamePaused = false;
+
+        dependents.forEach(d => {
             if (d.type === 'child') {
                 const newHealth = Math.max(0, (d.health ?? 80) - 7);
                 const prevAge = d.childAgeMonths || 0;
@@ -3402,24 +3578,43 @@ export const GameProvider = ({ children }) => {
                         message: `${d.name} has grown up! Based on the opportunities you provided, they pursued ${careerName} and will earn ₹${careerIncome.toLocaleString()}/mo. They'll be independent from next month — no more child expenses.`,
                         category: 'positive', impact: 0, month: totalMonthsPlayed, read: false,
                     };
-                    setEventInbox(prev => [childEntry, ...prev].slice(0, 50));
-                    setLastCrisisEvent(childEntry);
-                    setIsPlaying(false);
-                    return { ...d, childAgeMonths: newAge, health: newHealth, careerOutcome: outcome, careerName, careerIncome };
+                    newInboxEvents.push(childEntry);
+                    latestCrisis = childEntry;
+                    setGamePaused = true;
+                    nextDependents.push({ ...d, childAgeMonths: newAge, health: newHealth, careerOutcome: outcome, careerName, careerIncome });
+                    return;
                 }
-                return { ...d, childAgeMonths: newAge, health: newHealth };
+                nextDependents.push({ ...d, childAgeMonths: newAge, health: newHealth });
+                return;
             }
             if (d.type === 'parent') {
                 const decay = d.caretaker ? 4 : 10;
-                return { ...d, health: Math.max(0, (d.health ?? 70) - decay) };
+                const newHealth = Math.max(0, (d.health ?? 70) - decay);
+                if (newHealth <= 0) {
+                    const deathEntry = {
+                        id: `parent_death_${d.id}_${Date.now()}`, name: 'Loss of a Parent',
+                        message: `Your parent, ${d.name}, has passed away. Rest in peace.`,
+                        category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                        image: require('../../assets/ui_comp/gravestone.png')
+                    };
+                    newInboxEvents.push(deathEntry);
+                    latestCrisis = deathEntry;
+                    setHappiness(prev => Math.max(0, prev - 50));
+                    setGamePaused = true;
+                    return; // omit from nextDependents to kill them off
+                }
+                nextDependents.push({ ...d, health: newHealth });
+                return;
             }
             if (d.type === 'spouse' && d.upskilling) {
                 const left = (d.upskillingMonthsLeft || 1) - 1;
                 if (left <= 0) {
                     const newIncome = 25000 + Math.floor(Math.random() * 20000);
-                    return { ...d, upskilling: false, upskillingMonthsLeft: 0, isWorking: true, income: newIncome };
+                    nextDependents.push({ ...d, upskilling: false, upskillingMonthsLeft: 0, isWorking: true, income: newIncome });
+                    return;
                 }
-                return { ...d, upskillingMonthsLeft: left };
+                nextDependents.push({ ...d, upskillingMonthsLeft: left });
+                return;
             }
             // Spouse career progression — salary raise every 36 months
             if (d.type === 'spouse' && d.isWorking && !d.upskilling) {
@@ -3432,12 +3627,21 @@ export const GameProvider = ({ children }) => {
                         message: `${d.name}'s career is growing — ${Math.round(raiseRate * 100)}% salary increase. New income: ₹${newIncome.toLocaleString()}/mo.`,
                         category: 'positive', impact: (newIncome - (d.income || 0)) * 12, month: totalMonthsPlayed, read: false,
                     };
-                    setEventInbox(prev => [raiseEntry, ...prev].slice(0, 50));
-                    return { ...d, income: newIncome, lastRaiseMonth: totalMonthsPlayed };
+                    newInboxEvents.push(raiseEntry);
+                    nextDependents.push({ ...d, income: newIncome, lastRaiseMonth: totalMonthsPlayed });
+                    return;
                 }
             }
-            return d;
-        }));
+            nextDependents.push(d);
+        });
+
+        setDependents(nextDependents);
+        if (happinessDelta !== 0) {
+            setHappiness(prev => Math.max(0, Math.min(100, prev + happinessDelta)));
+        }
+        if (setGamePaused) {
+            setIsPlaying(false);
+        }
 
         // Family demand events — random every 2-4 months
         if (!pendingFamilyDemand && dependents.length > 0 && Math.random() < 0.35) {
@@ -3448,13 +3652,15 @@ export const GameProvider = ({ children }) => {
             });
             if (eligible.length > 0) {
                 const demand = eligible[Math.floor(Math.random() * eligible.length)];
-                const dep = dependents.find(d => d.type === demand.character);
-                setPendingFamilyDemand({ demand, dep });
+                const dep = dependents.find(d => d.type === demand.character && d.custody !== 'ex');
+                if (dep) {
+                    setPendingFamilyDemand({ demand, dep });
+                }
             }
         }
 
         // Credit Card popup offer
-        if (!activeCreditCards.includes('standard') && !activeCreditCards.includes('premium') && creditScore >= 650 && Math.random() < 0.10) {
+        if (!activeCreditCards.includes('standard') && !activeCreditCards.includes('premium') && creditScore >= 600 && Math.random() < 0.10) {
             setPendingCreditCardOffer(true);
         }
 
@@ -3598,75 +3804,85 @@ export const GameProvider = ({ children }) => {
         });
 
         // Decay effects and apply decision-based consequences
-        setActiveEffects(prev => {
-            const nextEffects = [];
-            prev.forEach(effect => {
-                const nextRemaining = effect.remainingMonths - 1;
+        const nextEffects = [];
+        let balanceDelta = 0;
+        let newInboxEvents = [];
+        let latestCrisis = null;
+        let lostFreelanceJob = false;
 
-                if (effect.type === 'recurring_expense') {
-                    if (effect.monthlyAmount) {
-                        setBalance(prev => prev - effect.monthlyAmount);
-                        addHistory(effect.description || 'Recurring payment', -effect.monthlyAmount, 'expense');
-                    }
-                    if (nextRemaining > 0) {
-                        nextEffects.push({ ...effect, remainingMonths: nextRemaining });
-                    }
-                    return;
+        activeEffects.forEach(effect => {
+            const nextRemaining = effect.remainingMonths - 1;
+
+            if (effect.type === 'recurring_expense') {
+                if (effect.monthlyAmount) {
+                    balanceDelta -= effect.monthlyAmount;
+                    addHistory(effect.description || 'Recurring payment', -effect.monthlyAmount, 'expense');
                 }
-
-                if (effect.type === 'passive_income_project') {
-                    if (nextRemaining <= 0) {
-                        const success = Math.random() < (effect.chance ?? 0.5);
-                        const amount = Math.round(Math.random() * (effect.maxAmount || 80000));
-                        if (success && amount > 0) {
-                            setBalance(prev => prev + amount);
-                            const e = { id: `passive_income_success_${Date.now()}`, name: 'Passive Income', message: effect.msg || 'Your side project paid off!', category: 'positive', impact: amount, month: totalMonthsPlayed, read: false };
-                            setEventInbox(prev => [e, ...prev].slice(0, 50));
-                            setLastCrisisEvent(e);
-                        } else {
-                            const e = { id: `passive_income_fail_${Date.now()}`, name: 'Passive Income Failed', message: 'Your side project did not generate revenue this time.', category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false };
-                            setEventInbox(prev => [e, ...prev].slice(0, 50));
-                            setLastCrisisEvent(e);
-                        }
-                        return;
-                    }
-                    nextEffects.push({ ...effect, remainingMonths: nextRemaining });
-                    return;
-                }
-
-                if (effect.type === 'freelance_contract') {
-                    let nextEffect = { ...effect, remainingMonths: nextRemaining };
-                    if (!effect.riskChecked && effect.remainingMonths === effect.initialMonths) {
-                        const survived = Math.random() >= (effect.risk ?? 0.25);
-                        if (!survived) {
-                            setCurrentJob(prev => (prev && prev.isFreelance ? null : prev));
-                            const e = { id: `freelance_fail_${Date.now()}`, name: 'Freelance Client Lost', message: 'Client backed out after month 1. You lost your job for nothing.', category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false };
-                            setEventInbox(prev => [e, ...prev].slice(0, 50));
-                            setLastCrisisEvent(e);
-                            return;
-                        }
-                        nextEffect = { ...nextEffect, riskChecked: true };
-                    }
-                    if (nextRemaining <= 0) {
-                        setCurrentJob(prev => (prev && prev.isFreelance ? null : prev));
-                        if (effect.totalPayout > 0) {
-                            setBalance(prev => prev + effect.totalPayout);
-                        }
-                        const e = { id: `freelance_success_${Date.now()}`, name: 'Freelance Success', message: `Your freelance project completed and paid ₹${(effect.totalPayout || 0).toLocaleString()}!`, category: 'positive', impact: effect.totalPayout || 0, month: totalMonthsPlayed, read: false };
-                        setEventInbox(prev => [e, ...prev].slice(0, 50));
-                        setLastCrisisEvent(e);
-                        return;
-                    }
-                    nextEffects.push(nextEffect);
-                    return;
-                }
-
                 if (nextRemaining > 0) {
                     nextEffects.push({ ...effect, remainingMonths: nextRemaining });
                 }
-            });
-            return nextEffects;
+                return;
+            }
+
+            if (effect.type === 'passive_income_project') {
+                if (nextRemaining <= 0) {
+                    const success = Math.random() < (effect.chance ?? 0.5);
+                    const amount = Math.round(Math.random() * (effect.maxAmount || 80000));
+                    if (success && amount > 0) {
+                        balanceDelta += amount;
+                        const e = { id: `passive_income_success_${Date.now()}`, name: 'Passive Income', message: effect.msg || 'Your side project paid off!', category: 'positive', impact: amount, month: totalMonthsPlayed, read: false };
+                        newInboxEvents.push(e);
+                        latestCrisis = e;
+                    } else {
+                        const e = { id: `passive_income_fail_${Date.now()}`, name: 'Passive Income Failed', message: 'Your side project did not generate revenue this time.', category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false };
+                        newInboxEvents.push(e);
+                        latestCrisis = e;
+                    }
+                    return;
+                }
+                nextEffects.push({ ...effect, remainingMonths: nextRemaining });
+                return;
+            }
+
+            if (effect.type === 'freelance_contract') {
+                let nextEffect = { ...effect, remainingMonths: nextRemaining };
+                if (!effect.riskChecked && effect.remainingMonths === effect.initialMonths) {
+                    const survived = Math.random() >= (effect.risk ?? 0.25);
+                    if (!survived) {
+                        lostFreelanceJob = true;
+                        const e = { id: `freelance_fail_${Date.now()}`, name: 'Freelance Client Lost', message: 'Client backed out after month 1. You lost your job for nothing.', category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false };
+                        newInboxEvents.push(e);
+                        latestCrisis = e;
+                        return;
+                    }
+                    nextEffect = { ...nextEffect, riskChecked: true };
+                }
+                if (nextRemaining <= 0) {
+                    lostFreelanceJob = true;
+                    if (effect.totalPayout > 0) {
+                        balanceDelta += effect.totalPayout;
+                    }
+                    const e = { id: `freelance_success_${Date.now()}`, name: 'Freelance Success', message: `Your freelance project completed and paid ₹${(effect.totalPayout || 0).toLocaleString()}!`, category: 'positive', impact: effect.totalPayout || 0, month: totalMonthsPlayed, read: false };
+                    newInboxEvents.push(e);
+                    latestCrisis = e;
+                    return;
+                }
+                nextEffects.push(nextEffect);
+                return;
+            }
+
+            if (nextRemaining > 0) {
+                nextEffects.push({ ...effect, remainingMonths: nextRemaining });
+            }
         });
+
+        setActiveEffects(nextEffects);
+        if (balanceDelta !== 0) setBalance(prev => prev + balanceDelta);
+        if (lostFreelanceJob) setCurrentJob(prev => (prev && prev.isFreelance ? null : prev));
+        if (newInboxEvents.length > 0) {
+            setEventInbox(prev => [...newInboxEvents, ...prev].slice(0, 50));
+        }
+        if (latestCrisis) setLastCrisisEvent(latestCrisis);
 
         // History log
         setHistory(prev => {
@@ -3851,7 +4067,7 @@ export const GameProvider = ({ children }) => {
 
         // Actions
         enrollInCourse, enrollWithLoan, dropOut, activeEnrollment,
-        tradeStock, buyProperty, buyAndMoveIn, moveIn, applyForJob,
+        tradeStock, buyProperty, buyAndMoveIn, moveIn, rentProperty, applyForJob,
         checkJobRequirements, getCAAdvice, nextMonth, sellProperty,
         stockNews,
 
@@ -3950,7 +4166,7 @@ export const GameProvider = ({ children }) => {
         saveGame, loadGame, deleteSave, saveLoaded,
 
         // New Mechanics
-        expectingChild, setExpectingChild, resetGame,
+        expectingChild, setExpectingChild, timesMarried, setTimesMarried, resetGame,
         turnsLeftToday, DAILY_TURN_LIMIT, dailyTurns,
     };
 

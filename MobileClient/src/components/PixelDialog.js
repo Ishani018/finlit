@@ -65,42 +65,54 @@ export default function PixelDialog({
                 style={{
                     opacity: opacityAnim,
                     transform: [{ scale: scaleAnim }],
-                    marginHorizontal: 24,
+                    marginHorizontal: 16,
+                    maxWidth: 480,
+                    width: '96%',
+                    alignSelf: 'center',
+                    marginTop: image && typeof image === 'object' && image.isSprite ? 50 : 0,
+                    zIndex: 100,
+                }}
+            >
+                {image && typeof image === 'object' && image.isSprite && (
+                    <View style={{ position: 'absolute', top: -56, left: 0, right: 0, alignItems: 'center', zIndex: 100, elevation: 15 }}>
+                        <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: '#0d1730', borderWidth: 3, borderColor, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 10, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 8 }}>
+                            <Image source={image.source} style={{ width: 120 * (image.scale || 1.6), height: 120 * (image.scale || 1.6) }} resizeMode="contain" />
+                        </View>
+                    </View>
+                )}
+
+                <View style={{
                     borderWidth: 2,
                     borderColor,
                     backgroundColor: '#071025',
-                    maxWidth: 440,
-                    width: '92%',
-                    alignSelf: 'center',
-                    overflow: 'hidden',
                     borderRadius: 16,
+                    overflow: 'hidden',
                     shadowColor: '#000',
                     shadowOpacity: 0.32,
                     shadowRadius: 18,
                     shadowOffset: { width: 0, height: 10 },
                     elevation: 10,
-                }}
-            >
-                {/* Pixel corners */}
-                <View style={{ position: 'absolute', top: 0, left: 0,   width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
-                <View style={{ position: 'absolute', top: 0, right: 0,  width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
-                <View style={{ position: 'absolute', bottom: 0, left: 0,  width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
-                <View style={{ position: 'absolute', bottom: 0, right: 0, width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
+                }}>
+                    {/* Pixel corners */}
+                    <View style={{ position: 'absolute', top: 0, left: 0,   width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
+                    <View style={{ position: 'absolute', top: 0, right: 0,  width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
+                    <View style={{ position: 'absolute', bottom: 0, left: 0,  width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
+                    <View style={{ position: 'absolute', bottom: 0, right: 0, width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
 
-                {/* Title bar */}
-                <View style={{ backgroundColor: titleBg, paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderColor }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: titleColor, letterSpacing: 1 }}>
-                        {title || 'NOTICE'}
-                    </Text>
-                </View>
+                    {/* Title bar */}
+                    <View style={{ backgroundColor: titleBg, paddingHorizontal: 16, paddingBottom: 14, paddingTop: image && typeof image === 'object' && image.isSprite ? 68 : 14, borderBottomWidth: 1, borderColor, alignItems: 'center' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: titleColor, letterSpacing: 1, textAlign: 'center' }}>
+                            {title || 'NOTICE'}
+                        </Text>
+                    </View>
 
-                {/* Body */}
-                <View style={{ padding: 18 }}>
-                    {image && (
-                        <View style={{ alignItems: 'center', marginBottom: 16 }}>
-                            <Image source={typeof image === 'string' ? { uri: image } : image} style={{ width: 80, height: 80 }} resizeMode="contain" />
-                        </View>
-                    )}
+                    {/* Body */}
+                    <View style={{ padding: 20 }}>
+                        {image && !(typeof image === 'object' && image.isSprite) && (
+                            <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                                <Image source={typeof image === 'string' ? { uri: image } : image} style={{ width: 100, height: 100 }} resizeMode="contain" />
+                            </View>
+                        )}
                     <View style={{ backgroundColor: '#08112b', borderRadius: 12, padding: 16, marginBottom: 18 }}>
                         {typeof message === 'string' ? (
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 28 }}>

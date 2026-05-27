@@ -1,6 +1,12 @@
-// Maps sprite IDs to require() images so they can be resolved anywhere
-// Age-variant sprites: keyed as `${id}_${ageKey}`
 export const SPRITE_MAP = {
+    // Static spouse variants (for dating app matches)
+    'groom_v1': require('../../assets/sprites/groom normal clothes.png'),
+    'groom_v2': require('../../assets/sprites/groom version 2 normal clothes.png'),
+    'groom_v3': require('../../assets/sprites/groom version 3 normal clothes.png'),
+    'bride_v1': require('../../assets/sprites/bride normal clothes.png'),
+    'bride_v2': require('../../assets/sprites/bride version 2 normal clothes.png'),
+    'bride_v3': require('../../assets/sprites/bride version 3 normal clothes.png'),
+
     // Young variants (ages 18–24)
     'young_pia_1':     require('../../assets/sprites/young pia 1.png'),
     'young_raj_1':     require('../../assets/sprites/young raj 1.png'),

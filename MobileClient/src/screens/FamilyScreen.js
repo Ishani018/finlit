@@ -176,27 +176,40 @@ function ChildCard({ child, onPress }) {
     const ageYr = Math.floor((child.childAgeMonths || 0) / 12);
     const img   = getChildImage(child.gender, child.childAgeMonths || 0);
     const hp    = child.health ?? 80;
+    
+    const isEx = child.custody === 'ex';
+    const relationLabel = child.isStepChild 
+        ? (child.gender === 'female' ? 'STEPDAUGHTER' : 'STEPSON')
+        : (child.gender === 'female' ? 'DAUGHTER' : 'SON');
+
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ flex: 1, borderWidth: 1, borderColor: stage.color + '45', backgroundColor: C.panel, overflow: 'hidden' }}>
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: stage.color }} />
+            style={{ flex: 1, borderWidth: 1, borderColor: isEx ? C.gold + '50' : stage.color + '45', backgroundColor: C.panel, overflow: 'hidden' }}>
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: isEx ? C.gold : stage.color }} />
             <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative' }}>
                 <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.08)' }} />
                 <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: stage.color, paddingHorizontal: 7, paddingVertical: 2 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000', letterSpacing: 1 }}>{stage.label}</Text>
                 </View>
-                <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(6,8,15,0.85)', borderWidth: 1, borderColor: stage.color + '50', paddingHorizontal: 6, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: stage.color }}>{ageYr}yr</Text>
+                {isEx && (
+                    <View style={{ position: 'absolute', top: 32, left: 8, backgroundColor: C.gold, paddingHorizontal: 7, paddingVertical: 2 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000', letterSpacing: 1 }}>WITH EX</Text>
+                    </View>
+                )}
+                <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(6,8,15,0.85)', borderWidth: 1, borderColor: (isEx ? C.gold : stage.color) + '50', paddingHorizontal: 6, paddingVertical: 2 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: isEx ? C.gold : stage.color }}>{ageYr}yr</Text>
                 </View>
-                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: stage.color, paddingVertical: 5, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#000', letterSpacing: 1 }}>{child.gender === 'female' ? 'DAUGHTER' : 'SON'}</Text>
+                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: isEx ? C.gold : stage.color, paddingVertical: 5, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#000', letterSpacing: 1 }}>{relationLabel}</Text>
                 </View>
             </View>
             <View style={{ padding: 10 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, lineHeight: 22 }} numberOfLines={1}>{child.name}</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: stage.color }}>{stage.cost}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isEx ? C.gold : stage.color }}>
+                        {isEx ? '₹10,000/mo' : stage.cost}
+                    </Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor(hp) }}>{Math.round(hp)}HP</Text>
                 </View>
                 <View style={{ height: 4, backgroundColor: C.bg, marginTop: 7 }}>
@@ -449,10 +462,19 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                                     : <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, lineHeight: 20 }}>Homemaker</Text>
                                 }
                             </View>
-                            <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>COST</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, lineHeight: 20 }}>-₹5k</Text>
-                            </View>
+                            {dep.marriageNumber > 1 ? (
+                                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 1.5 }}>MARRIAGE</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, lineHeight: 20 }}>
+                                        {dep.marriageNumber === 2 ? '2nd' : dep.marriageNumber === 3 ? '3rd' : `${dep.marriageNumber}th`}
+                                    </Text>
+                                </View>
+                            ) : (
+                                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>COST</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, lineHeight: 20 }}>-₹5k</Text>
+                                </View>
+                            )}
                         </View>
 
                         <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: spouseColor + '25', padding: 14, marginBottom: GAP }}>
@@ -507,7 +529,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 1 }}>UPSKILL SPOUSE</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹50,000 · 6-month course · earns after</Text>
                                 </View>
-                                <FontAwesome5 name="graduation-cap" size={18} color={C.blue + '80'} />
+                                <Image source={require('../../assets/ui_comp/grad_cap.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                             </TouchableOpacity>
                         )}
                         {dep.upskilling && (
@@ -573,6 +595,9 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                             <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>MONTHLY</Text>
                                 {isChild ? (() => {
+                                    if (dep.custody === 'ex') {
+                                        return <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, lineHeight: 20 }}>₹10k</Text>;
+                                    }
                                     const cam = dep.childAgeMonths || 0;
                                     const base = cam < 60 ? 8000 : cam < 216 ? 12000 : cam < 252 ? 25000 : 0;
                                     const extra = cam >= 12 && cam < 60
@@ -596,7 +621,15 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                         </View>
 
                         {/* ── Child-specific actions ── */}
-                        {isChild && (
+                        {isChild && dep.custody === 'ex' && (
+                            <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.gold + '40', padding: 14, marginBottom: GAP }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2, marginBottom: 8 }}>CHILD STATUS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.gold, lineHeight: 22 }}>
+                                    {dep.name} lives with your ex-spouse under shared custody arrangements. You pay ₹10,000/mo in child support until they turn 18.
+                                </Text>
+                            </View>
+                        )}
+                        {isChild && dep.custody !== 'ex' && (
                             <>
                                 {/* Education fund */}
                                 {(() => {
@@ -771,7 +804,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                                     </Text>
                                 )}
                             </View>
-                        ) : (
+                        ) : dep.custody === 'ex' ? null : (
                             <>
                                 <SectionLabel label="FEED FROM PANTRY" />
                                 {pantryItems.length === 0 ? (
@@ -828,9 +861,6 @@ function MarriagePickModal({ onPick, onClose }) {
         { id: 'bride_v3', name: 'Bride III', image: BRIDE_V3_IMG, color: C.pink, type: 'Bride', scale: 1.35, top: '-8%', desc: 'Practical, supportive, and grounded. Prefers a quiet evening at home over a loud party.' },
     ];
 
-    return (
-        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden' }}>
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden' }}>
@@ -1034,7 +1064,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                             image={getSpouseImage(spouse.spouseSprite) || BRIDE_IMG}
                             headCrop
                             name={spouse.name}
-                            tag="SPOUSE"
+                            tag={spouse.marriageNumber === 2 ? '2ND SPOUSE' : spouse.marriageNumber === 3 ? '3RD SPOUSE' : spouse.marriageNumber > 3 ? `${spouse.marriageNumber}TH SPOUSE` : 'SPOUSE'}
                             color={C.pink}
                             sub1={spouse.isWorking ? `+₹${(spouse.income || 0).toLocaleString()}/mo` : 'Homemaker'}
                             sub2="₹5,000/mo cost"
@@ -1063,7 +1093,8 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                     // Build list: children + optional add-child slot
                     const slots = [...children.map(c => ({ type: 'child', data: c }))];
                     if (expectingChild) slots.push({ type: 'expecting', data: expectingChild });
-                    if (spouse && children.length < 3 && !expectingChild) slots.push({ type: 'add' });
+                    const activeChildrenWithCurrentSpouse = children.filter(c => c.custody !== 'ex' && c.spouseId === spouse?.id);
+                    if (spouse && activeChildrenWithCurrentSpouse.length < 3 && !expectingChild) slots.push({ type: 'add' });
 
                     const rows = [];
                     for (let i = 0; i < slots.length; i += 2) {
