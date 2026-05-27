@@ -817,13 +817,15 @@ const INDIAN_FEMALE_NAMES = ['Aadya', 'Diya', 'Ananya', 'Priya', 'Kavya', 'Neha'
 
 // ── Marriage pick modal ───────────────────────────────────────────────────────
 function MarriagePickModal({ onPick, onClose }) {
+    const [selectedCandidate, setSelectedCandidate] = React.useState(null);
+
     const candidates = [
-        { id: 'groom_v1', name: 'Groom I',   image: GROOM_IMG,    color: C.blue, type: 'Groom', scale: 1.15 },
-        { id: 'groom_v2', name: 'Groom II',  image: GROOM_V2_IMG, color: C.blue, type: 'Groom', scale: 1 },
-        { id: 'groom_v3', name: 'Groom III', image: GROOM_V3_IMG, color: C.blue, type: 'Groom', scale: 1.15 },
-        { id: 'bride_v1', name: 'Bride I',   image: BRIDE_IMG,    color: C.pink, type: 'Bride', scale: 1.35 },
-        { id: 'bride_v2', name: 'Bride II',  image: BRIDE_V2_IMG, color: C.pink, type: 'Bride', scale: 1 },
-        { id: 'bride_v3', name: 'Bride III', image: BRIDE_V3_IMG, color: C.pink, type: 'Bride', scale: 1.35 },
+        { id: 'groom_v1', name: 'Groom I',   image: GROOM_IMG,    color: C.blue, type: 'Groom', scale: 1.15, top: '4%', desc: 'A thoughtful and caring partner. Values financial stability and loves cooking on weekends.' },
+        { id: 'groom_v2', name: 'Groom II',  image: GROOM_V2_IMG, color: C.blue, type: 'Groom', scale: 1, top: '0%', desc: 'Adventurous and spontaneous. Always planning the next family trip and enjoys the outdoors.' },
+        { id: 'groom_v3', name: 'Groom III', image: GROOM_V3_IMG, color: C.blue, type: 'Groom', scale: 1.15, top: '4%', desc: 'Calm, collected, and highly organized. Believes in steady investments and a peaceful home.' },
+        { id: 'bride_v1', name: 'Bride I',   image: BRIDE_IMG,    color: C.pink, type: 'Bride', scale: 1.35, top: '-8%', desc: 'Warm, affectionate, and deeply family-oriented. Enjoys gardening and reading in her free time.' },
+        { id: 'bride_v2', name: 'Bride II',  image: BRIDE_V2_IMG, color: C.pink, type: 'Bride', scale: 1, top: '-2%', desc: 'Ambitious and creative. Loves interior design and is always looking for new ways to grow.' },
+        { id: 'bride_v3', name: 'Bride III', image: BRIDE_V3_IMG, color: C.pink, type: 'Bride', scale: 1.35, top: '-8%', desc: 'Practical, supportive, and grounded. Prefers a quiet evening at home over a loud party.' },
     ];
 
     return (
@@ -834,44 +836,80 @@ function MarriagePickModal({ onPick, onClose }) {
                     <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
                     <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 14 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>Who do you marry?</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: selectedCandidate ? selectedCandidate.color : C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>
+                            {selectedCandidate ? selectedCandidate.name : 'Who do you marry?'}
+                        </Text>
                     </View>
                     <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="times" size={12} color={C.dim} />
                     </TouchableOpacity>
                 </View>
 
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, textAlign: 'center', paddingVertical: 10 }}>
-                    ₹5L wedding cost  ·  Spouse may earn income
-                </Text>
+                {!selectedCandidate ? (
+                    <>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, textAlign: 'center', paddingVertical: 10 }}>
+                            ₹5L wedding cost  ·  Spouse may earn income
+                        </Text>
 
-                <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 16 }}>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' }}>
-                        {candidates.map(v => (
-                            <TouchableOpacity key={v.id} onPress={() => onPick({ id: v.id, name: v.type })} activeOpacity={0.85}
-                                style={{ width: '31%', borderWidth: 1.5, borderColor: v.color + '60', backgroundColor: C.panel, overflow: 'hidden', marginBottom: 10 }}>
-                                <View style={{ height: 3, backgroundColor: v.color }} />
-                                <View style={{ aspectRatio: 0.7, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
-                                    <Image
-                                        source={v.image}
-                                        style={{ width: '100%', height: '200%', position: 'absolute', top: v.type === 'Bride' ? '-8%' : 0, transform: [{ scale: v.scale || 1 }] }}
-                                        resizeMode="contain"
-                                    />
-                                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, backgroundColor: 'rgba(6,8,15,0.85)' }} />
-                                    <View style={{ position: 'absolute', bottom: 6, left: 0, right: 0, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream }}>{v.name}</Text>
-                                    </View>
+                        <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 16 }}>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' }}>
+                                {candidates.map(v => (
+                                    <TouchableOpacity key={v.id} onPress={() => setSelectedCandidate(v)} activeOpacity={0.85}
+                                        style={{ width: '31%', borderWidth: 1.5, borderColor: v.color + '60', backgroundColor: C.panel, overflow: 'hidden', marginBottom: 10 }}>
+                                        <View style={{ height: 3, backgroundColor: v.color }} />
+                                        <View style={{ aspectRatio: 0.7, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                                            <Image
+                                                source={v.image}
+                                                style={{ width: '100%', height: '200%', position: 'absolute', top: v.top, transform: [{ scale: v.scale || 1 }] }}
+                                                resizeMode="contain"
+                                            />
+                                            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, backgroundColor: 'rgba(6,8,15,0.85)' }} />
+                                            <View style={{ position: 'absolute', bottom: 6, left: 0, right: 0, alignItems: 'center' }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream }}>{v.name}</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </ScrollView>
+                    </>
+                ) : (
+                    <View style={{ padding: 16 }}>
+                        <View style={{ flexDirection: 'row', gap: 16, marginBottom: 20 }}>
+                            <View style={{ width: 140, aspectRatio: 0.7, overflow: 'hidden', backgroundColor: C.card, borderWidth: 1, borderColor: selectedCandidate.color + '60' }}>
+                                <Image
+                                    source={selectedCandidate.image}
+                                    style={{ width: '100%', height: '200%', position: 'absolute', top: selectedCandidate.top, transform: [{ scale: selectedCandidate.scale || 1 }] }}
+                                    resizeMode="contain"
+                                />
+                            </View>
+                            <View style={{ flex: 1, justifyContent: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream, marginBottom: 8 }}>
+                                    A life partner ready to share the journey.
+                                </Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, lineHeight: 18 }}>
+                                    {selectedCandidate.desc}
+                                </Text>
+                                <View style={{ marginTop: 12, padding: 8, backgroundColor: 'rgba(0,0,0,0.2)', borderWidth: 1, borderColor: C.borderLt }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>• Wedding Cost: ₹5L</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>• Career: Unknown (50% chance)</Text>
                                 </View>
-                                <View style={{ padding: 6 }}>
-                                    <View style={{ borderWidth: 1, borderColor: v.color + '50', backgroundColor: v.color + '12', paddingVertical: 4, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: v.color, letterSpacing: 2 }}>MARRY</Text>
-                                    </View>
-                                </View>
+                            </View>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                            <TouchableOpacity onPress={() => setSelectedCandidate(null)}
+                                style={{ flex: 1, borderWidth: 1, borderColor: C.border, paddingVertical: 12, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, letterSpacing: 2 }}>BACK</Text>
                             </TouchableOpacity>
-                        ))}
+                            <TouchableOpacity onPress={() => onPick({ id: selectedCandidate.id, name: selectedCandidate.type })}
+                                style={{ flex: 2, backgroundColor: selectedCandidate.color, paddingVertical: 12, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 2 }}>MARRY {selectedCandidate.name.toUpperCase()}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </ScrollView>
+                )}
             </View>
         </View>
     );
