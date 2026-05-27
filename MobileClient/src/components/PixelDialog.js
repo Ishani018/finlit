@@ -155,6 +155,7 @@ export default function PixelDialog({
                         </TouchableOpacity>
                     </View>
                 </View>
+                </View>
             </Animated.View>
         </View>
     );
