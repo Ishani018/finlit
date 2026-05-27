@@ -994,15 +994,16 @@ const GameLayout = ({ onHardReset }) => {
           {/* Room background with panning support */}
           <ScrollView 
             style={{ position: 'absolute', width: '100%', height: '100%' }}
-            contentContainerStyle={{ flexGrow: 1 }}
+            contentContainerStyle={{ height: Dimensions.get('window').height * 1.2 }}
             showsVerticalScrollIndicator={false}
             bounces={false}
             contentOffset={{ x: 0, y: Dimensions.get('window').height * 0.1 }}
           >
             <ScrollView 
               horizontal 
+              style={{ flex: 1 }}
+              contentContainerStyle={{ width: Dimensions.get('window').width * 1.8 }}
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ flexGrow: 1 }}
               bounces={false}
               contentOffset={{ x: Dimensions.get('window').width * 0.4, y: 0 }}
             >
