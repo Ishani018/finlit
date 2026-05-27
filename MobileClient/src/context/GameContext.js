@@ -1256,9 +1256,9 @@ export const GameProvider = ({ children }) => {
         const spouseIncome = isWorking ? (20000 + Math.floor(Math.random() * 20000)) : 0;
         
         let finalName = spouseName || 'Spouse';
-        if (spouseSprite === 'groom' || spouseName === 'Groom') {
+        if ((spouseSprite && spouseSprite.startsWith('groom')) || spouseName === 'Groom') {
             finalName = INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)];
-        } else if (spouseSprite === 'bride' || spouseName === 'Bride') {
+        } else if ((spouseSprite && spouseSprite.startsWith('bride')) || spouseName === 'Bride') {
             finalName = INDIAN_FEMALE_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_NAMES.length)];
         }
         

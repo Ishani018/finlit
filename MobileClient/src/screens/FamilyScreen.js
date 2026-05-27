@@ -53,10 +53,18 @@ const INSURE_IMAGES = {
 };
 
 const GROOM_IMG = require('../../assets/sprites/groom.png');
+const GROOM_V2_IMG = require('../../assets/sprites/groom version 2.png');
+const GROOM_V3_IMG = require('../../assets/sprites/groom version 3.png');
 const BRIDE_IMG = require('../../assets/sprites/bride.png');
+const BRIDE_V2_IMG = require('../../assets/sprites/bride version 2.png');
+const BRIDE_V3_IMG = require('../../assets/sprites/bride version 3.png');
 
-const getSpouseImage = (s) =>
-    s === 'groom' ? GROOM_IMG : s === 'bride' ? BRIDE_IMG : null;
+const SPOUSE_IMAGES = {
+    groom: GROOM_IMG, groom_v1: GROOM_IMG, groom_v2: GROOM_V2_IMG, groom_v3: GROOM_V3_IMG,
+    bride: BRIDE_IMG, bride_v1: BRIDE_IMG, bride_v2: BRIDE_V2_IMG, bride_v3: BRIDE_V3_IMG,
+};
+
+const getSpouseImage = (s) => SPOUSE_IMAGES[s] || null;
 
 const getChildImage = (gender, ageMonths) => {
     const f = gender === 'female';
@@ -382,7 +390,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                       : 'Critical! Needs immediate care.';
 
     const monthsMarried = isSpouse ? Math.max(0, (totalMonthsPlayed || 0) - (dep.monthAdded || 0)) : 0;
-    const spouseColor   = dep.spouseSprite === 'groom' ? C.blue : C.pink;
+    const spouseColor   = (dep.spouseSprite || '').startsWith('groom') ? C.blue : C.pink;
 
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: C.bg, zIndex: 50 }}>
@@ -800,23 +808,39 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
 const INDIAN_MALE_NAMES = ['Aarav', 'Vihaan', 'Aditya', 'Rohan', 'Arjun', 'Sai', 'Karan', 'Rahul', 'Vikram', 'Sanjay', 'Amit', 'Anil', 'Raj', 'Suresh', 'Ramesh', 'Harish', 'Nitin', 'Prakash', 'Sunil', 'Vijay'];
 const INDIAN_FEMALE_NAMES = ['Aadya', 'Diya', 'Ananya', 'Priya', 'Kavya', 'Neha', 'Pooja', 'Riya', 'Shruti', 'Sneha', 'Swati', 'Tanvi', 'Vidya', 'Maya', 'Meera', 'Nandini', 'Radha', 'Sita', 'Gita', 'Lata'];
 
-// ── Marriage pick modal ───────────────────────────────────────────────────────
+// ── Marriage pick modal (two-step: pick type, then pick version) ──────────────
 function MarriagePickModal({ onPick, onClose }) {
-    const candidates = [
-        { id: 'groom', name: 'Groom', image: GROOM_IMG, color: C.blue,  label: 'GROOM' },
-        { id: 'bride', name: 'Bride', image: BRIDE_IMG, color: C.pink,  label: 'BRIDE' },
+    const [step, setStep] = React.useState('type'); // 'type' or 'version'
+    const [chosenType, setChosenType] = React.useState(null); // 'groom' or 'bride'
+
+    const typeOptions = [
+        { id: 'groom', name: 'Groom', image: GROOM_IMG, color: C.blue, label: 'GROOM' },
+        { id: 'bride', name: 'Bride', image: BRIDE_IMG, color: C.pink, label: 'BRIDE' },
     ];
+
+    const versionOptions = chosenType === 'groom' ? [
+        { id: 'groom_v1', name: 'Groom I',   image: GROOM_IMG,    color: C.blue },
+        { id: 'groom_v2', name: 'Groom II',  image: GROOM_V2_IMG, color: C.blue },
+        { id: 'groom_v3', name: 'Groom III', image: GROOM_V3_IMG, color: C.blue },
+    ] : [
+        { id: 'bride_v1', name: 'Bride I',   image: BRIDE_IMG,    color: C.pink },
+        { id: 'bride_v2', name: 'Bride II',  image: BRIDE_V2_IMG, color: C.pink },
+        { id: 'bride_v3', name: 'Bride III', image: BRIDE_V3_IMG, color: C.pink },
+    ];
+
+    const bannerColor = chosenType === 'groom' ? C.blue : chosenType === 'bride' ? C.pink : C.pink;
+    const bannerTitle = step === 'type' ? 'Who do you marry?' : `Choose your ${chosenType}`;
 
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ width: '92%', maxWidth: 380, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.bg, overflow: 'hidden' }}>
+            <View style={{ width: '92%', maxWidth: 400, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.bg, overflow: 'hidden' }}>
                 {/* Banquet hall banner */}
                 <View style={{ height: 120, overflow: 'hidden', position: 'relative' }}>
                     <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
                     <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 14 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>Who do you marry?</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: bannerColor, letterSpacing: 4 }}>LIFE EVENT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>{bannerTitle}</Text>
                     </View>
                     <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="times" size={12} color={C.dim} />
@@ -824,38 +848,77 @@ function MarriagePickModal({ onPick, onClose }) {
                 </View>
 
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, textAlign: 'center', paddingVertical: 10 }}>
-                    ₹5L wedding cost  ·  Spouse may earn income
+                    {step === 'type' ? '₹5L wedding cost  ·  Spouse may earn income' : 'Tap to choose your partner'}
                 </Text>
 
-                <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 16, gap: 12 }}>
-                    {candidates.map(p => (
-                        <TouchableOpacity key={p.id} onPress={() => onPick(p)} activeOpacity={0.85}
-                            style={{ flex: 1, borderWidth: 1.5, borderColor: p.color + '60', backgroundColor: C.panel, overflow: 'hidden' }}>
-                            <View style={{ height: 3, backgroundColor: p.color }} />
-                            <View style={{ aspectRatio: 0.8, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
-                                {p.image && (
-                                    <Image
-                                        source={p.image}
-                                        style={{ width: '100%', height: '200%', position: 'absolute', top: p.id === 'bride' ? '-8%' : 0 }}
-                                        resizeMode="contain"
-                                    />
-                                )}
-                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, backgroundColor: 'rgba(6,8,15,0.85)' }} />
-                                <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, lineHeight: 24 }}>{p.name}</Text>
-                                    <View style={{ backgroundColor: p.color, paddingHorizontal: 10, paddingVertical: 2, marginTop: 4 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#000', letterSpacing: 2 }}>{p.label}</Text>
+                {/* Step 1: Pick groom or bride */}
+                {step === 'type' && (
+                    <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 16, gap: 12 }}>
+                        {typeOptions.map(p => (
+                            <TouchableOpacity key={p.id} onPress={() => { setChosenType(p.id); setStep('version'); }} activeOpacity={0.85}
+                                style={{ flex: 1, borderWidth: 1.5, borderColor: p.color + '60', backgroundColor: C.panel, overflow: 'hidden' }}>
+                                <View style={{ height: 3, backgroundColor: p.color }} />
+                                <View style={{ aspectRatio: 0.8, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                                    {p.image && (
+                                        <Image
+                                            source={p.image}
+                                            style={{ width: '100%', height: '200%', position: 'absolute', top: p.id === 'bride' ? '-8%' : 0 }}
+                                            resizeMode="contain"
+                                        />
+                                    )}
+                                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, backgroundColor: 'rgba(6,8,15,0.85)' }} />
+                                    <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, lineHeight: 24 }}>{p.name}</Text>
+                                        <View style={{ backgroundColor: p.color, paddingHorizontal: 10, paddingVertical: 2, marginTop: 4 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#000', letterSpacing: 2 }}>{p.label}</Text>
+                                        </View>
                                     </View>
                                 </View>
-                            </View>
-                            <View style={{ padding: 10 }}>
-                                <View style={{ borderWidth: 1, borderColor: p.color + '50', backgroundColor: p.color + '12', paddingVertical: 8, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: p.color, letterSpacing: 2 }}>CHOOSE</Text>
+                                <View style={{ padding: 10 }}>
+                                    <View style={{ borderWidth: 1, borderColor: p.color + '50', backgroundColor: p.color + '12', paddingVertical: 8, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: p.color, letterSpacing: 2 }}>CHOOSE</Text>
+                                    </View>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
+
+                {/* Step 2: Pick which version */}
+                {step === 'version' && (
+                    <View>
+                        {/* Back button */}
+                        <TouchableOpacity onPress={() => { setStep('type'); setChosenType(null); }}
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingBottom: 8 }}>
+                            <FontAwesome5 name="arrow-left" size={10} color={C.dim} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim }}>Back</Text>
                         </TouchableOpacity>
-                    ))}
-                </View>
+                        <View style={{ flexDirection: 'row', paddingHorizontal: 10, paddingBottom: 16, gap: 8 }}>
+                            {versionOptions.map(v => (
+                                <TouchableOpacity key={v.id} onPress={() => onPick({ id: v.id, name: chosenType === 'groom' ? 'Groom' : 'Bride' })} activeOpacity={0.85}
+                                    style={{ flex: 1, borderWidth: 1.5, borderColor: v.color + '60', backgroundColor: C.panel, overflow: 'hidden' }}>
+                                    <View style={{ height: 3, backgroundColor: v.color }} />
+                                    <View style={{ aspectRatio: 0.7, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                                        <Image
+                                            source={v.image}
+                                            style={{ width: '100%', height: '200%', position: 'absolute', top: chosenType === 'bride' ? '-8%' : 0 }}
+                                            resizeMode="contain"
+                                        />
+                                        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, backgroundColor: 'rgba(6,8,15,0.85)' }} />
+                                        <View style={{ position: 'absolute', bottom: 8, left: 0, right: 0, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }}>{v.name}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ padding: 8 }}>
+                                        <View style={{ borderWidth: 1, borderColor: v.color + '50', backgroundColor: v.color + '12', paddingVertical: 6, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: v.color, letterSpacing: 2 }}>MARRY</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                )}
             </View>
         </View>
     );
@@ -1229,7 +1292,17 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                 autoFocus
                             />
                             <View style={{ flexDirection: 'row', gap: 10 }}>
-                                <TouchableOpacity onPress={() => setShowNameBaby(false)}
+                                <TouchableOpacity onPress={() => {
+                                        // Auto-name to prevent the useEffect from re-opening
+                                        const child = dependents.find(d => d.id === childToName);
+                                        const isFemale = child?.gender === 'female';
+                                        const names = isFemale
+                                            ? ['Aadya','Diya','Ananya','Priya','Kavya','Neha','Pooja','Riya','Shruti','Sneha']
+                                            : ['Aarav','Vihaan','Aditya','Rohan','Arjun','Sai','Karan','Rahul','Vikram','Sanjay'];
+                                        const randomName = names[Math.floor(Math.random() * names.length)];
+                                        renameDependent(childToName, randomName);
+                                        setShowNameBaby(false);
+                                    }}
                                     style={{ flex: 1, borderWidth: 1, borderColor: C.border, paddingVertical: 12, alignItems: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, letterSpacing: 2 }}>CANCEL</Text>
                                 </TouchableOpacity>
