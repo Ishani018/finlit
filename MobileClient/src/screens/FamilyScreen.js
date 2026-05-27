@@ -883,7 +883,7 @@ function MarriagePickModal({ onPick, onClose }) {
                             <View style={{ width: 200, height: 380, alignItems: 'center', justifyContent: 'center' }}>
                                 <Image
                                     source={selectedCandidate.image}
-                                    style={{ width: 200 * (selectedCandidate.scale || 1), height: 380 * (selectedCandidate.scale || 1) }}
+                                    style={{ width: '100%', height: '100%' }}
                                     resizeMode="contain"
                                 />
                             </View>
