@@ -811,12 +811,12 @@ const INDIAN_FEMALE_NAMES = ['Aadya', 'Diya', 'Ananya', 'Priya', 'Kavya', 'Neha'
 // ── Marriage pick modal ───────────────────────────────────────────────────────
 function MarriagePickModal({ onPick, onClose }) {
     const candidates = [
-        { id: 'groom_v1', name: 'Groom I',   image: GROOM_IMG,    color: C.blue, type: 'Groom' },
-        { id: 'groom_v2', name: 'Groom II',  image: GROOM_V2_IMG, color: C.blue, type: 'Groom' },
-        { id: 'groom_v3', name: 'Groom III', image: GROOM_V3_IMG, color: C.blue, type: 'Groom' },
-        { id: 'bride_v1', name: 'Bride I',   image: BRIDE_IMG,    color: C.pink, type: 'Bride' },
-        { id: 'bride_v2', name: 'Bride II',  image: BRIDE_V2_IMG, color: C.pink, type: 'Bride' },
-        { id: 'bride_v3', name: 'Bride III', image: BRIDE_V3_IMG, color: C.pink, type: 'Bride' },
+        { id: 'groom_v1', name: 'Groom I',   image: GROOM_IMG,    color: C.blue, type: 'Groom', scale: 1.15 },
+        { id: 'groom_v2', name: 'Groom II',  image: GROOM_V2_IMG, color: C.blue, type: 'Groom', scale: 1 },
+        { id: 'groom_v3', name: 'Groom III', image: GROOM_V3_IMG, color: C.blue, type: 'Groom', scale: 1.15 },
+        { id: 'bride_v1', name: 'Bride I',   image: BRIDE_IMG,    color: C.pink, type: 'Bride', scale: 1.35 },
+        { id: 'bride_v2', name: 'Bride II',  image: BRIDE_V2_IMG, color: C.pink, type: 'Bride', scale: 1 },
+        { id: 'bride_v3', name: 'Bride III', image: BRIDE_V3_IMG, color: C.pink, type: 'Bride', scale: 1.35 },
     ];
 
     return (
@@ -848,7 +848,7 @@ function MarriagePickModal({ onPick, onClose }) {
                                 <View style={{ aspectRatio: 0.7, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
                                     <Image
                                         source={v.image}
-                                        style={{ width: '100%', height: '200%', position: 'absolute', top: v.type === 'Bride' ? '-8%' : 0 }}
+                                        style={{ width: '100%', height: '200%', position: 'absolute', top: v.type === 'Bride' ? '-8%' : 0, transform: [{ scale: v.scale || 1 }] }}
                                         resizeMode="contain"
                                     />
                                     <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, backgroundColor: 'rgba(6,8,15,0.85)' }} />
