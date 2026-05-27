@@ -831,23 +831,26 @@ function MarriagePickModal({ onPick, onClose }) {
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden' }}>
-                {/* Banquet hall banner */}
-                <View style={{ height: 120, overflow: 'hidden', position: 'relative' }}>
-                    <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
-                    <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 20 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: selectedCandidate ? selectedCandidate.color : C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: C.cream, lineHeight: 34 }}>
-                            {selectedCandidate ? selectedCandidate.name : 'Who do you marry?'}
-                        </Text>
-                    </View>
-                    <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
-                        <FontAwesome5 name="times" size={14} color={C.dim} />
-                    </TouchableOpacity>
-                </View>
-
+    return (
+        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden' }}>
                 {!selectedCandidate ? (
                     <>
+                        {/* Banquet hall banner */}
+                        <View style={{ height: 120, overflow: 'hidden', position: 'relative' }}>
+                            <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
+                            <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 20 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.pink, letterSpacing: 4 }}>LIFE EVENT</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: C.cream, lineHeight: 34 }}>
+                                    Who do you marry?
+                                </Text>
+                            </View>
+                            <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
+                                <FontAwesome5 name="times" size={14} color={C.dim} />
+                            </TouchableOpacity>
+                        </View>
+
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, textAlign: 'center', paddingVertical: 14 }}>
                             ₹5L wedding cost  ·  Spouse may earn income
                         </Text>
@@ -875,26 +878,28 @@ function MarriagePickModal({ onPick, onClose }) {
                         </ScrollView>
                     </>
                 ) : (
-                    <View style={{ padding: 24, flex: 1 }}>
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <Image
-                                source={selectedCandidate.image}
-                                style={{ width: '100%', height: '100%', transform: [{ scale: selectedCandidate.scale || 1 }] }}
-                                resizeMode="contain"
-                            />
-                        </View>
-                        
-                        <View style={{ alignItems: 'center', marginTop: 24, marginBottom: 30 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, marginBottom: 10, textAlign: 'center' }}>
-                                A life partner ready to share the journey.
-                            </Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, lineHeight: 22, textAlign: 'center', paddingHorizontal: 10 }}>
-                                {selectedCandidate.desc}
-                            </Text>
+                    <View style={{ padding: 24, flex: 1, justifyContent: 'center' }}>
+                        <View style={{ flexDirection: 'row', gap: 24, marginBottom: 40, alignItems: 'center' }}>
+                            <View style={{ width: 200, height: 380, alignItems: 'center', justifyContent: 'center' }}>
+                                <Image
+                                    source={selectedCandidate.image}
+                                    style={{ width: '100%', height: '100%', transform: [{ scale: selectedCandidate.scale || 1 }] }}
+                                    resizeMode="contain"
+                                />
+                            </View>
                             
-                            <View style={{ marginTop: 20, padding: 14, backgroundColor: 'rgba(0,0,0,0.2)', borderWidth: 1, borderColor: C.borderLt, width: '100%', maxWidth: 400 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim }}>• Wedding Cost: ₹5L</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim }}>• Career: Unknown (50% chance)</Text>
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, marginBottom: 12 }}>
+                                    A life partner ready to share the journey.
+                                </Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, lineHeight: 24 }}>
+                                    {selectedCandidate.desc}
+                                </Text>
+                                
+                                <View style={{ marginTop: 24, padding: 14, backgroundColor: 'rgba(0,0,0,0.2)', borderWidth: 1, borderColor: C.borderLt }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>• Wedding Cost: ₹5L</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>• Career: Unknown (50% chance)</Text>
+                                </View>
                             </View>
                         </View>
 
