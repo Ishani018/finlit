@@ -993,16 +993,18 @@ const GameLayout = ({ onHardReset }) => {
         <View style={{ flex: 1, position: 'relative', backgroundColor: '#0d1020', overflow: 'hidden' }}>
           {/* Room background with panning support */}
           <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentOffset={{ x: Dimensions.get('window').width * 0.4, y: 0 }}
-            bounces={false}
             style={{ position: 'absolute', width: '100%', height: '100%' }}
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            contentOffset={{ x: 0, y: Dimensions.get('window').height * 0.1 }}
           >
             <ScrollView 
-              showsVerticalScrollIndicator={false}
-              contentOffset={{ x: 0, y: Dimensions.get('window').height * 0.1 }}
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1 }}
               bounces={false}
+              contentOffset={{ x: Dimensions.get('window').width * 0.4, y: 0 }}
             >
               <Image
                 key={`${activeMenu}-${viewMode}`}
@@ -1017,7 +1019,7 @@ const GameLayout = ({ onHardReset }) => {
                   width: Dimensions.get('window').width * 1.8, 
                   height: Dimensions.get('window').height * 1.2 
                 }}
-                resizeMode="contain"
+                resizeMode="cover"
               />
             </ScrollView>
           </ScrollView>
