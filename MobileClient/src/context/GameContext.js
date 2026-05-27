@@ -2005,7 +2005,7 @@ export const GameProvider = ({ children }) => {
                 if (eff.dependentId) {
                     setDependents(prev => prev.map(d => {
                         if (d.id === eff.dependentId) {
-                            const newD = { ...d, lastCelebratedYear: turn.year };
+                            const newD = { ...d, lastCelebratedYear: (d.lastCelebratedYear || (turn.year - 1)) + 1 };
                             if (eff.happiness && d.type === 'spouse') {
                                 newD.happiness = Math.max(0, Math.min(100, (d.happiness || 70) + (eff.happiness / 2)));
                             }
@@ -3094,8 +3094,21 @@ export const GameProvider = ({ children }) => {
             return n + (s[(v - 20) % 10] || s[v] || s[0]);
         };
 
-        const bdayDecisionId = `bday_${turn.year}`;
-        if (bdayMonth && turn.month >= bdayMonth && !firedDecisions.includes(bdayDecisionId) && !pendingDecision && totalMonthsPlayed > 0) {
+        let playerBdayYearToCelebrate = null;
+        if (bdayMonth && totalMonthsPlayed > 0 && !pendingDecision) {
+            const startYear = 2024;
+            for (let y = startYear; y <= turn.year; y++) {
+                if (!firedDecisions.includes(`bday_${y}`)) {
+                    if (y < turn.year || (y === turn.year && turn.month >= bdayMonth)) {
+                        playerBdayYearToCelebrate = y;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (playerBdayYearToCelebrate !== null) {
+            const bdayDecisionId = `bday_${playerBdayYearToCelebrate}`;
             let currentAge = 18 + Math.floor(totalMonthsPlayed / 12);
             if (bdayMonth <= turn.month) currentAge += 1;
 
@@ -3178,14 +3191,17 @@ export const GameProvider = ({ children }) => {
                 setIsPlaying(false);
             }
         } else if (!pendingDecision && totalMonthsPlayed > 0) {
-            // Dependent Birthdays — check if birthday month is reached/passed and they haven't celebrated in turn.year yet
-            const bdayDependent = dependents.find(d => 
-                d.bdayMonth !== undefined && 
-                turn.month >= d.bdayMonth && 
-                (!d.lastCelebratedYear || d.lastCelebratedYear < turn.year) &&
-                d.custody !== 'ex'
-            );
+            // Dependent Birthdays — check if they missed a past birthday or are due for this year's
+            const bdayDependent = dependents.find(d => {
+                if (d.bdayMonth === undefined || d.custody === 'ex') return false;
+                const lastCel = d.lastCelebratedYear || (turn.year - 1);
+                if (lastCel < turn.year - 1) return true;
+                if (lastCel === turn.year - 1 && turn.month >= d.bdayMonth) return true;
+                return false;
+            });
+            
             if (bdayDependent) {
+                const yearToCelebrate = (bdayDependent.lastCelebratedYear || (turn.year - 1)) + 1;
                 const isSpouse = bdayDependent.type === 'spouse';
                 const age = Math.floor((totalMonthsPlayed - bdayDependent.monthAdded) / 12) + (isSpouse ? 25 : 1); // rough age
                 
@@ -3228,7 +3244,7 @@ export const GameProvider = ({ children }) => {
                     message,
                     choices,
                 });
-                setDependents(prev => prev.map(d => d.id === bdayDependent.id ? { ...d, lastCelebratedYear: turn.year } : d));
+                setDependents(prev => prev.map(d => d.id === bdayDependent.id ? { ...d, lastCelebratedYear: yearToCelebrate } : d));
                 setIsPlaying(false);
             }
         }
