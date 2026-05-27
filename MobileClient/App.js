@@ -991,36 +991,19 @@ const GameLayout = ({ onHardReset }) => {
         {/* HOME TAB */}
         {activeTab === 'home' && (
         <View style={{ flex: 1, position: 'relative', backgroundColor: '#0d1020', overflow: 'hidden' }}>
-          {/* Room background with panning support */}
-          <ScrollView 
+          {/* Room background */}
+          <Image
+            key={`${activeMenu}-${viewMode}`}
+            source={
+              activeMenu === 'advisor'
+                ? require('./assets/properties/CA_Office.png')
+                : viewMode === 'work' && currentJob?.office_image
+                  ? currentJob.office_image
+                  : currentHousing.image
+            }
             style={{ position: 'absolute', width: '100%', height: '100%' }}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-            contentOffset={{ x: 0, y: Dimensions.get('window').height * 0.1 }}
-          >
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              bounces={false}
-              contentOffset={{ x: Dimensions.get('window').width * 0.4, y: 0 }}
-            >
-              <Image
-                key={`${activeMenu}-${viewMode}`}
-                source={
-                  activeMenu === 'advisor'
-                    ? require('./assets/properties/CA_Office.png')
-                    : viewMode === 'work' && currentJob?.office_image
-                      ? currentJob.office_image
-                      : currentHousing.image
-                }
-                style={{ 
-                  width: Dimensions.get('window').width * 1.4, 
-                  height: Dimensions.get('window').height * 1.4 
-                }}
-                resizeMode="contain"
-              />
-            </ScrollView>
-          </ScrollView>
+            resizeMode="contain"
+          />
 
           <Vignette />
           <CRTOverlay />
