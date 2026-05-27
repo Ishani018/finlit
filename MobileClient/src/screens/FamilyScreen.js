@@ -877,10 +877,10 @@ function MarriagePickModal({ onPick, onClose }) {
                 ) : (
                     <View style={{ padding: 16 }}>
                         <View style={{ flexDirection: 'row', gap: 16, marginBottom: 20 }}>
-                            <View style={{ width: 150, height: 260, overflow: 'hidden', backgroundColor: C.card, borderWidth: 1, borderColor: selectedCandidate.color + '60', alignItems: 'center', justifyContent: 'center' }}>
+                            <View style={{ width: 160, height: 280, overflow: 'hidden', backgroundColor: C.card, borderWidth: 1, borderColor: selectedCandidate.color + '60', alignItems: 'center', justifyContent: 'center' }}>
                                 <Image
                                     source={selectedCandidate.image}
-                                    style={{ width: '140%', height: '140%', transform: [{ scale: selectedCandidate.scale || 1 }] }}
+                                    style={{ width: '100%', height: '100%', transform: [{ scale: selectedCandidate.scale || 1 }] }}
                                     resizeMode="contain"
                                 />
                             </View>
