@@ -3099,15 +3099,36 @@ export const GameProvider = ({ children }) => {
             let currentAge = 18 + Math.floor(totalMonthsPlayed / 12);
             if (bdayMonth <= turn.month) currentAge += 1;
 
-            // Family Gift (if happiness > 60 and has dependents)
-            if (happiness > 60 && dependents.length > 0 && Math.random() < 0.5) {
-                const gift = 2000 + Math.floor(Math.random() * 3000);
-                setBalance(prev => prev + gift);
-                setEventInbox(prev => [{
-                    id: `bday_gift_${totalMonthsPlayed}`, name: '🎁 Birthday Gift',
-                    message: `Your family threw you a small surprise and gifted you ₹${gift.toLocaleString()}!`,
-                    category: 'positive', impact: gift, month: totalMonthsPlayed, read: false,
-                }, ...prev].slice(0, 50));
+            // Family Gift logic on Player's Birthday
+            if (dependents.length > 0) {
+                let giftCash = 0;
+                let giftMsg = '';
+                const spouse = dependents.find(d => d.type === 'spouse');
+                const parents = dependents.filter(d => d.type === 'parent');
+
+                if (spouse && (spouse.happiness || 70) > 50) {
+                    const spouseGift = 3000 + Math.floor(Math.random() * 5000);
+                    giftCash += spouseGift;
+                    giftMsg += `Your spouse gave you a beautiful birthday gift worth ₹${spouseGift.toLocaleString()}! `;
+                }
+
+                if (parents.length > 0) {
+                    const goldGrams = parents.length * 1;
+                    setGoldHoldings(prev => {
+                        const existing = prev['gold_24k'] || { grams: 0, avgBuyPrice: goldPrice, buyMonth: totalMonthsPlayed, interestAccrued: 0 };
+                        return { ...prev, ['gold_24k']: { ...existing, grams: existing.grams + goldGrams } };
+                    });
+                    giftMsg += `Your parents blessed you with ${goldGrams}g of 24K Gold! `;
+                }
+
+                if (giftCash > 0 || parents.length > 0) {
+                    if (giftCash > 0) setBalance(prev => prev + giftCash);
+                    setEventInbox(prev => [{
+                        id: `bday_gift_${totalMonthsPlayed}`, name: '🎁 Family Birthday Gifts',
+                        message: giftMsg.trim(),
+                        category: 'positive', impact: giftCash, month: totalMonthsPlayed, read: false,
+                    }, ...prev].slice(0, 50));
+                }
             }
 
             // Milestone Checks
@@ -3557,6 +3578,19 @@ export const GameProvider = ({ children }) => {
         dependents.forEach(d => {
             if (d.type === 'child') {
                 const newHealth = Math.max(0, (d.health ?? 80) - 7);
+                if (newHealth <= 0) {
+                    const deathEntry = {
+                        id: `child_death_${d.id}_${Date.now()}`, name: 'Tragic Loss',
+                        message: `Your child, ${d.name}, has tragically passed away due to severe health neglect.`,
+                        category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                        image: require('../../assets/ui_comp/gravestone.png')
+                    };
+                    newInboxEvents.push(deathEntry);
+                    latestCrisis = deathEntry;
+                    setHappiness(prev => Math.max(0, prev - 80));
+                    setGamePaused = true;
+                    return;
+                }
                 const prevAge = d.childAgeMonths || 0;
                 const newAge = prevAge + CHILD_AGING_RATE;
                 // Child turns 18 (216 child-months) — fire career outcome event
