@@ -26,8 +26,9 @@ const C = {
     dark:     '#2a3560',
 };
 
-const BANNER_IMG  = require('../../assets/achivements/family portrait.png');
-const BANQUET_IMG = require('../../assets/properties/investment properties/marraige_banquet_hall.png');
+const BANNER_IMG     = require('../../assets/achivements/family portrait.png');
+const BANQUET_IMG    = require('../../assets/properties/investment properties/marraige_banquet_hall.png');
+const GRAVESTONE_IMG = require('../../assets/ui_comp/gravestone.png');
 
 const DEP_IMAGES = {
     baby_son:           require('../../assets/dependents/baby son.png'),
@@ -172,9 +173,10 @@ function EmptySpouseCard({ onPress }) {
 
 // ── Child card (fits in 2-col grid) ──────────────────────────────────────────
 function ChildCard({ child, onPress }) {
-    const stage = getChildStage(child.childAgeMonths || 0);
+    const isDead = child.isDead;
+    const stage = isDead ? { label: 'DECEASED', color: '#666', cost: '₹0/mo' } : getChildStage(child.childAgeMonths || 0);
     const ageYr = Math.floor((child.childAgeMonths || 0) / 12);
-    const img   = getChildImage(child.gender, child.childAgeMonths || 0);
+    const img   = isDead ? GRAVESTONE_IMG : getChildImage(child.gender, child.childAgeMonths || 0);
     const hp    = child.health ?? 80;
     
     const isEx = child.custody === 'ex';
@@ -208,13 +210,15 @@ function ChildCard({ child, onPress }) {
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, lineHeight: 22 }} numberOfLines={1}>{child.name}</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isEx ? C.gold : stage.color }}>
-                        {isEx ? '₹10,000/mo' : stage.cost}
+                        {isDead ? 'Rest in Peace' : (isEx ? '₹10,000/mo' : stage.cost)}
                     </Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor(hp) }}>{Math.round(hp)}HP</Text>
+                    {!isDead && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor(hp) }}>{Math.round(hp)}HP</Text>}
                 </View>
-                <View style={{ height: 4, backgroundColor: C.bg, marginTop: 7 }}>
-                    <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp) }} />
-                </View>
+                {!isDead && (
+                    <View style={{ height: 4, backgroundColor: C.bg, marginTop: 7 }}>
+                        <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp) }} />
+                    </View>
+                )}
             </View>
         </TouchableOpacity>
     );
@@ -1136,14 +1140,14 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                             <View key={i} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
                                 {left.type === 'parent' ? (
                                     <PersonCard
-                                        image={left.data.parentType === 'mother' ? DEP_IMAGES.elderly_mother : left.data.parentType === 'father' ? DEP_IMAGES.elderly_father : DEP_IMAGES.elderly_couple}
+                                        image={left.data.isDead ? GRAVESTONE_IMG : (left.data.parentType === 'mother' ? DEP_IMAGES.elderly_mother : left.data.parentType === 'father' ? DEP_IMAGES.elderly_father : DEP_IMAGES.elderly_couple)}
                                         contain
                                         name={left.data.name}
-                                        tag={left.data.parentType === 'mother' ? 'MOTHER' : left.data.parentType === 'father' ? 'FATHER' : 'PARENT'}
-                                        color={C.gold}
-                                        sub1="Under your care"
-                                        sub2="₹15,000/mo"
-                                        hp={left.data.health}
+                                        tag={left.data.isDead ? 'DECEASED' : (left.data.parentType === 'mother' ? 'MOTHER' : left.data.parentType === 'father' ? 'FATHER' : 'PARENT')}
+                                        color={left.data.isDead ? '#666' : C.gold}
+                                        sub1={left.data.isDead ? 'Rest in Peace' : "Under your care"}
+                                        sub2={left.data.isDead ? '' : "₹15,000/mo"}
+                                        hp={left.data.isDead ? undefined : left.data.health}
                                         onPress={() => setSelectedDep(left.data)}
                                     />
                                 ) : (

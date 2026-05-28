@@ -2482,7 +2482,7 @@ const GameLayout = ({ onHardReset }) => {
       <BirthdayCelebrationRoom
         visible={showBirthdayRoom}
         onClose={() => setShowBirthdayRoom(false)}
-        turn={{ month: (totalMonthsPlayed % 12) + 1 }}
+        turn={turn}
         playerBirthday={playerBirthday}
         playerName={playerName}
         dependents={dependents}
@@ -2563,7 +2563,7 @@ const GameLayout = ({ onHardReset }) => {
       <CrisisFlash visible={majorCrisisFlash} />
 
       {/* ── LIFE DECISION DIALOG ── */}
-      {(pendingDecision?.isBirthday || pendingDecision?.isHospital) ? (
+      {(pendingDecision?.isBirthday || pendingDecision?.isHospital || pendingDecision?.isBaby) ? (
         <BirthdayDialog
           event={pendingDecision}
           onChoice={(choice) => resolveDecision(choice)}

@@ -11,16 +11,19 @@ const HOSPITAL_IMG = require('../../assets/ui_comp/hospital.png');
 const QUIET_IMG   = require('../../assets/ui_comp/quiet dinner.png');
 const PARTY_IMG   = require('../../assets/ui_comp/house party birthday.png');
 const LAVISH_IMG  = require('../../assets/ui_comp/lavish birthday bash.png');
+const BROKE_IMG   = require('../../assets/ui_comp/brokebirthday.png');
 const WARN_IMG    = require('../../assets/ui_comp/warning.png');
 const HAPPY_ICON  = require('../../assets/ui_comp/happyicon.png');
 const HEALTH_ICON = require('../../assets/ui_comp/healthicon.png');
 
-const getChoiceImage = (label, isHospital) => {
-    const l = label.toLowerCase();
-    if (isHospital) return HOSPITAL_IMG;
+const getChoiceImage = (choice, event) => {
+    if (event.isBaby) return event.image;
+    if (event.isHospital) return HOSPITAL_IMG;
+    const l = choice.label.toLowerCase();
     if (l.includes('quiet') || l.includes('dinner')) return QUIET_IMG;
     if (l.includes('house party') || l.includes('big house')) return PARTY_IMG;
     if (l.includes('lavish')) return LAVISH_IMG;
+    if (l.includes('broke')) return BROKE_IMG;
     return WARN_IMG;
 };
 
@@ -57,6 +60,7 @@ export default function BirthdayDialog({ event, onChoice }) {
     
     let cakeImage = BDAY_CAKE;
     if (event.isHospital) cakeImage = WARN_IMG;
+    else if (event.isBaby) cakeImage = WARN_IMG;
     else if (event.dependentType === 'spouse') cakeImage = SPOUSE_CAKE;
     else if (event.dependentType === 'child') cakeImage = CHILD_CAKE;
 
@@ -137,7 +141,7 @@ export default function BirthdayDialog({ event, onChoice }) {
                 >
                     {choices.map((choice, index) => {
                         const eff = choice.effect;
-                        const img = getChoiceImage(choice.label, event.isHospital);
+                        const img = getChoiceImage(choice, event);
                         const isActive = index === activeIndex;
 
                         return (

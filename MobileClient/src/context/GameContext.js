@@ -177,6 +177,7 @@ export const GameProvider = ({ children }) => {
     const [pendingJobInterview, setPendingJobInterview] = useState(null);
     const [lastHappiness, setLastHappiness] = useState(50);
     const [pendingDecision, setPendingDecision] = useState(null);
+    const [pendingDecisionQueue, setPendingDecisionQueue] = useState([]);
     const [firedDecisions, setFiredDecisions] = useState([]);
     // Tracks the last birthday party choice for the Celebration Room visual
     const [lastCelebrationChoice, setLastCelebrationChoice] = useState(null); // { label, who: 'player'|depName }
@@ -1329,7 +1330,7 @@ export const GameProvider = ({ children }) => {
                 hobby: 'none',
                 isStepChild: true,
                 spouseId: newSpouseId,
-                bdayMonth: Math.floor(Math.random() * 12) + 1,
+                bdayMonth: Math.floor(Math.random() * 12) + 1 === playerBday ? (playerBday % 12) + 1 : Math.floor(Math.random() * 12) + 1,
             };
         }
 
@@ -1986,7 +1987,12 @@ export const GameProvider = ({ children }) => {
         const eff = choice.effect;
         if (!eff || eff.type === 'none') {
             if (eff?.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
-            setPendingDecision(null);
+            if (pendingDecisionQueue && pendingDecisionQueue.length > 0) {
+                setPendingDecision(pendingDecisionQueue[0]);
+                setPendingDecisionQueue(pendingDecisionQueue.slice(1));
+            } else {
+                setPendingDecision(null);
+            }
             return { msg: "You passed on this one." };
         }
         let msg = eff.msg || '';
@@ -2272,7 +2278,14 @@ export const GameProvider = ({ children }) => {
         if (eff.happiness && eff.type !== 'cash_spend' && eff.type !== 'emi_purchase' && eff.type !== 'birthday_celebration') {
             setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
         }
-        setPendingDecision(null);
+        
+        if (pendingDecisionQueue && pendingDecisionQueue.length > 0) {
+            setPendingDecision(pendingDecisionQueue[0]);
+            setPendingDecisionQueue(pendingDecisionQueue.slice(1));
+        } else {
+            setPendingDecision(null);
+        }
+        
         return { msg };
     };
 
@@ -2751,6 +2764,8 @@ export const GameProvider = ({ children }) => {
     // =========================================================================
 
     const nextMonth = () => {
+        if (pendingDecision) return;
+        const decisionsToQueue = [];
         const today = new Date().toDateString();
         const newTurns = (dailyTurnsRef.current.date === today) 
             ? { date: today, count: dailyTurnsRef.current.count + 1 }
@@ -3053,7 +3068,7 @@ export const GameProvider = ({ children }) => {
         if (turn.month === 7 && !pendingDecision && totalMonthsPlayed >= 6) {
             const gameYear = turn.year;
             if (!itrFiled[gameYear] && (currentJob || netWorth > 250000)) {
-                setPendingDecision({
+                decisionsToQueue.push({
                     id: `itr_${gameYear}`,
                     name: 'ITR Filing Deadline',
                     emoji: '📄',
@@ -3078,7 +3093,7 @@ export const GameProvider = ({ children }) => {
         if (turn.month === 2 && !pendingDecision && totalMonthsPlayed >= 2) {
             const yearIndex = Math.floor(totalMonthsPlayed / 12);
             const budgetEvent = BUDGET_EVENTS[yearIndex % BUDGET_EVENTS.length];
-            setPendingDecision({ ...budgetEvent, isBudget: true });
+            decisionsToQueue.push({ ...budgetEvent, isBudget: true });
             setIsPlaying(false);
         }
 
@@ -3099,7 +3114,7 @@ export const GameProvider = ({ children }) => {
             const startYear = 2024;
             for (let y = startYear; y <= turn.year; y++) {
                 if (!firedDecisions.includes(`bday_${y}`)) {
-                    if (y < turn.year || (y === turn.year && turn.month >= bdayMonth)) {
+                    if (y === turn.year && turn.month === bdayMonth) {
                         playerBdayYearToCelebrate = y;
                         break;
                     }
@@ -3174,10 +3189,11 @@ export const GameProvider = ({ children }) => {
                 setIsPlaying(false);
             } else if (!pendingDecision) {
                 // Regular Birthday Party (Forced)
-                setPendingDecision({
-                    id: `bday_${totalMonthsPlayed}`,
+                decisionsToQueue.push({
+                    id: `bday_${playerBdayYearToCelebrate}`,
                     name: `Happy ${getOrdinal(currentAge)} Birthday!`,
-                    isHospital: false,
+                    emoji: '🎂',
+                    category: 'dilemma',
                     isBirthday: true,
                     message: `It's your birthday! How do you want to celebrate?`,
                     choices: [
@@ -3195,8 +3211,7 @@ export const GameProvider = ({ children }) => {
             const bdayDependent = dependents.find(d => {
                 if (d.bdayMonth === undefined || d.custody === 'ex') return false;
                 const lastCel = d.lastCelebratedYear || (turn.year - 1);
-                if (lastCel < turn.year - 1) return true;
-                if (lastCel === turn.year - 1 && turn.month >= d.bdayMonth) return true;
+                if (lastCel === turn.year - 1 && turn.month === d.bdayMonth) return true;
                 return false;
             });
             
@@ -3234,7 +3249,7 @@ export const GameProvider = ({ children }) => {
                 if (balance < 2500) {
                     choices.push({ label: 'Skip Party (Too Broke)', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0, happiness: isSpouse ? -50 : -20, dependentId: bdayDependent.id, msg: 'Your family is severely disappointed.' } });
                 }
-                setPendingDecision({
+                decisionsToQueue.push({
                     id: `dep_bday_${bdayDependent.id}_${totalMonthsPlayed}`,
                     name: `Happy ${getOrdinal(age)} Birthday, ${bdayDependent.name}!`,
                     emoji: '🎂',
@@ -3305,7 +3320,7 @@ export const GameProvider = ({ children }) => {
                 parentOptions.push({ label: 'Send ₹10,000/mo', color: '#60a5fa', effect: { type: 'parent_support_allowance' } });
                 parentOptions.push({ label: 'Neglect Them', color: '#f87171', effect: { type: 'parent_decline' } });
 
-                setPendingDecision({
+                decisionsToQueue.push({
                     id: `parent_request_${totalMonthsPlayed}`,
                     name: 'Family Obligation',
                     emoji: '👴',
@@ -3375,7 +3390,7 @@ export const GameProvider = ({ children }) => {
             const bill = covered ? 10000 : 150000 + Math.floor(Math.random() * 50000);
             
             setHealth(30); // Restore to 30 to prevent immediate re-hospitalization next month
-            setPendingDecision({
+            decisionsToQueue.push({
                 id: `hospital_${totalMonthsPlayed}`,
                 name: 'HOSPITALIZED!',
                 emoji: '🏥',
@@ -3391,7 +3406,7 @@ export const GameProvider = ({ children }) => {
             // Forced sick leave — lose half salary this month
             const sickPenalty = Math.round(currentJob.salary * 0.5);
             setSickLeaveMonths(prev => prev + 1);
-            setPendingDecision({
+            decisionsToQueue.push({
                 id: `sick_leave_${totalMonthsPlayed}`,
                 name: 'SICK LEAVE',
                 emoji: '🤒',
@@ -3539,7 +3554,7 @@ export const GameProvider = ({ children }) => {
                 const isExSpouseChild = !currentSpouse || currentSpouse.id !== expectingChild.spouseId;
 
                 if (isExSpouseChild) {
-                    setPendingDecision({
+                    decisionsToQueue.push({
                         id: `custody_dilemma_newborn_${totalMonthsPlayed}`,
                         name: 'Custody Dilemma',
                         emoji: '⚖️',
@@ -3552,13 +3567,16 @@ export const GameProvider = ({ children }) => {
                     });
                 }
 
-                setLastCrisisEvent({
+                decisionsToQueue.push({
                     id: `child_born_${totalMonthsPlayed}`,
                     name: 'A New Life! 🍼',
+                    isBaby: true,
+                    gender: expectingChild.gender,
                     message: `${finalChildName} is finally here! A healthy baby ${expectingChild.gender.toLowerCase()} has joined your family. Your life will never be the same.${emergencyMoveMsg}`,
-                    category: emergencyMoveMsg ? 'crisis' : 'positive', impact: 0
+                    category: emergencyMoveMsg ? 'crisis' : 'positive',
+                    choices: [{ label: 'Welcome to the world!', color: '#4ade80', effect: { type: 'none' } }],
+                    image: expectingChild.gender === 'Female' ? require('../../assets/ui_comp/welcomebabygirl.png') : require('../../assets/ui_comp/welcomebabyboy.png')
                 });
-                setIsPlaying(false);
             } else {
                 const remaining = expectingChild.remaining - 1;
                 setExpectingChild({ ...expectingChild, remaining });
@@ -3592,6 +3610,10 @@ export const GameProvider = ({ children }) => {
         let setGamePaused = false;
 
         dependents.forEach(d => {
+            if (d.isDead) {
+                nextDependents.push(d);
+                return;
+            }
             if (d.type === 'child') {
                 const newHealth = Math.max(0, (d.health ?? 80) - 7);
                 if (newHealth <= 0) {
@@ -3605,6 +3627,7 @@ export const GameProvider = ({ children }) => {
                     latestCrisis = deathEntry;
                     setHappiness(prev => Math.max(0, prev - 80));
                     setGamePaused = true;
+                    nextDependents.push({ ...d, health: 0, isDead: true });
                     return;
                 }
                 const prevAge = d.childAgeMonths || 0;
@@ -3651,7 +3674,8 @@ export const GameProvider = ({ children }) => {
                     latestCrisis = deathEntry;
                     setHappiness(prev => Math.max(0, prev - 50));
                     setGamePaused = true;
-                    return; // omit from nextDependents to kill them off
+                    nextDependents.push({ ...d, health: 0, isDead: true });
+                    return; // keep in nextDependents with isDead=true
                 }
                 nextDependents.push({ ...d, health: newHealth });
                 return;
@@ -3685,7 +3709,12 @@ export const GameProvider = ({ children }) => {
             nextDependents.push(d);
         });
 
-        setDependents(nextDependents);
+        // Merge nextDependents with prev state to prevent overwriting new children added during nextMonth
+        setDependents(prev => prev.map(p => {
+            const aged = nextDependents.find(n => n.id === p.id);
+            if (aged) return { ...p, ...aged };
+            return p;
+        }));
         if (happinessDelta !== 0) {
             setHappiness(prev => Math.max(0, Math.min(100, prev + happinessDelta)));
         }
@@ -4053,6 +4082,13 @@ export const GameProvider = ({ children }) => {
         checkAchievements(achState);
 
         runCrisisEngine();
+
+        if (decisionsToQueue.length > 0) {
+            setPendingDecision(decisionsToQueue[0]);
+            setPendingDecisionQueue(decisionsToQueue.slice(1));
+        } else {
+            setPendingDecisionQueue([]);
+        }
     };
 
     // =========================================================================
