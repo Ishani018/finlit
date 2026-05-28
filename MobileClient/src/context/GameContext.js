@@ -3209,7 +3209,7 @@ export const GameProvider = ({ children }) => {
         } else if (!pendingDecision && totalMonthsPlayed > 0) {
             // Dependent Birthdays — check if they missed a past birthday or are due for this year's
             const bdayDependent = dependents.find(d => {
-                if (d.bdayMonth === undefined || d.custody === 'ex') return false;
+                if (d.isDead || d.bdayMonth === undefined || d.custody === 'ex') return false;
                 const lastCel = d.lastCelebratedYear || (turn.year - 1);
                 if (lastCel === turn.year - 1 && turn.month === d.bdayMonth) return true;
                 return false;
@@ -3396,9 +3396,12 @@ export const GameProvider = ({ children }) => {
                 emoji: '🏥',
                 category: 'dilemma',
                 isHospital: true,
-                message: `You collapsed from severe exhaustion and malnutrition. Medical bills cost you ₹${bill.toLocaleString()}${covered ? ' (covered mostly by your health insurance)' : ' out of pocket'}. Please buy food from the grocery store!`,
+                message: covered
+                    ? 'You collapsed from exhaustion. Insurance covered most of it.'
+                    : 'You collapsed from exhaustion and malnutrition.',
+                bill,
                 choices: [
-                    { label: 'Pay Bill', color: '#f87171', effect: { type: 'cash_spend', amount: bill, msg: 'Paid hospital bill.' } }
+                    { label: 'Pay Bill', color: '#f87171', effect: { type: 'cash_spend', amount: bill, msg: 'Paid hospital bill. Buy groceries to stay healthy!' } }
                 ]
             });
             setIsPlaying(false);
@@ -3412,9 +3415,10 @@ export const GameProvider = ({ children }) => {
                 emoji: '🤒',
                 category: 'dilemma',
                 isHospital: true,
-                message: `Your health (${Math.round(newHealth)}/100) forced you to take sick leave this month. You lost half your salary: -₹${sickPenalty.toLocaleString()}. Buy food from the grocery store to recover.`,
+                message: `Health at ${Math.round(newHealth)}/100. You had to take sick leave this month.`,
+                bill: sickPenalty,
                 choices: [
-                    { label: 'Take Rest', color: '#fbbf24', effect: { type: 'cash_spend', amount: sickPenalty, msg: 'Recovered slightly.' } }
+                    { label: 'Take Rest', color: '#fbbf24', effect: { type: 'cash_spend', amount: sickPenalty, msg: 'Recovered slightly. Buy groceries to stay healthy!' } }
                 ]
             });
             setIsPlaying(false);
@@ -3625,18 +3629,38 @@ export const GameProvider = ({ children }) => {
                 if (newHealth <= 0) {
                     const deathEntry = {
                         id: `child_death_${d.id}_${Date.now()}`, name: 'Tragic Loss',
-                        message: `Your child, ${d.name}, has tragically passed away due to severe health neglect.`,
-                        category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                        message: `Your child, ${d.name}, has tragically passed away from neglect. The grief is devastating. Funeral costs ₹30,000. This will be on your record.`,
+                        category: 'crisis', impact: -30000, month: totalMonthsPlayed, read: false,
                         image: require('../../assets/ui_comp/gravestone.png')
                     };
                     newInboxEvents.push(deathEntry);
                     latestCrisis = deathEntry;
+                    setBalance(prev => Math.max(0, prev - 30000)); // funeral cost
                     setHappiness(prev => Math.max(0, prev - 80));
+                    setHealth(prev => Math.max(0, prev - 15)); // grief takes physical toll
+                    setCreditScore(prev => Math.max(300, prev - 50)); // social stigma hits credit/reputation
                     setGamePaused = true;
                     nextDependents.push({ ...d, health: 0, isDead: true });
                     return;
                 }
+                // Warning: child health critical — will die within 1-3 months
+                if (newHealth <= 21 && newHealth > 0 && !d.healthWarnedAt) {
+                    const warnEntry = {
+                        id: `child_health_warn_${d.id}_${totalMonthsPlayed}`,
+                        name: `⚠️ ${d.name}'s Health Is Critical!`,
+                        message: `${d.name}'s health has dropped to ${Math.round(newHealth)}/100. Without proper nutrition they will not survive much longer. Buy groceries immediately!`,
+                        category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                        image: require('../../assets/ui_comp/healthicon.png'),
+                    };
+                    newInboxEvents.push(warnEntry);
+                    latestCrisis = warnEntry;
+                    setGamePaused = true;
+                    // mark warned so this only fires once per near-death episode
+                    nextDependents.push({ ...d, childAgeMonths: (d.childAgeMonths || 0) + 3, health: newHealth, healthWarnedAt: totalMonthsPlayed });
+                    return; // skip duplicate push below
+                }
                 const prevAge = d.childAgeMonths || 0;
+                const newAge = prevAge + CHILD_AGING_RATE;
                 const newAge = prevAge + CHILD_AGING_RATE;
                 // Child turns 18 (216 child-months) — fire career outcome event
                 if (prevAge < 216 && newAge >= 216 && !d.careerOutcome) {
@@ -3672,16 +3696,33 @@ export const GameProvider = ({ children }) => {
                 if (newHealth <= 0) {
                     const deathEntry = {
                         id: `parent_death_${d.id}_${Date.now()}`, name: 'Loss of a Parent',
-                        message: `Your parent, ${d.name}, has passed away. Rest in peace.`,
-                        category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                        message: `Your parent, ${d.name}, has passed away. The funeral costs ₹50,000 and your grief will weigh on you for months.`,
+                        category: 'crisis', impact: -50000, month: totalMonthsPlayed, read: false,
                         image: require('../../assets/ui_comp/gravestone.png')
                     };
                     newInboxEvents.push(deathEntry);
                     latestCrisis = deathEntry;
-                    setHappiness(prev => Math.max(0, prev - 50));
+                    setBalance(prev => Math.max(0, prev - 50000)); // funeral cost
+                    setHappiness(prev => Math.max(0, prev - 60));
+                    setHealth(prev => Math.max(0, prev - 10)); // grief affects player health
                     setGamePaused = true;
                     nextDependents.push({ ...d, health: 0, isDead: true });
-                    return; // keep in nextDependents with isDead=true
+                    return;
+                }
+                // Warning: parent health critical — will die within 1-2 months
+                if (newHealth <= (decay * 2) && newHealth > 0 && !d.healthWarnedAt) {
+                    const warnEntry = {
+                        id: `parent_health_warn_${d.id}_${totalMonthsPlayed}`,
+                        name: `⚠️ ${d.name} Needs Urgent Care!`,
+                        message: `${d.name}'s health has deteriorated to ${Math.round(newHealth)}/100. ${d.caretaker ? 'Even with a caretaker, they' : 'Without a caretaker, they'} may not survive much longer. Consider buying them a caretaker from the Family tab.`,
+                        category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                        image: require('../../assets/ui_comp/healthicon.png'),
+                    };
+                    newInboxEvents.push(warnEntry);
+                    latestCrisis = warnEntry;
+                    setGamePaused = true;
+                    nextDependents.push({ ...d, health: newHealth, healthWarnedAt: totalMonthsPlayed });
+                    return;
                 }
                 nextDependents.push({ ...d, health: newHealth });
                 return;

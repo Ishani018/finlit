@@ -94,36 +94,62 @@ export default function BirthdayDialog({ event, onChoice }) {
             }}>
                 {/* ── Header: cake + title in a row ── */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#0a0d1a', paddingHorizontal: 12, paddingVertical: 10, gap: 10 }}>
-                    <Image source={cakeImage} style={{ width: 68, height: 68 }} resizeMode="contain" />
+                    <Image source={cakeImage} style={{ width: 56, height: 56 }} resizeMode="contain" />
                     <View style={{ flex: 1 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: TEXT_PRIMARY, letterSpacing: 1 }}>
                             {event.name}
                         </Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: TEXT_SECONDARY }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: TEXT_SECONDARY, lineHeight: 17 }}>
                             {event.message}
                         </Text>
+                        {/* Bill amount callout — shown for hospital/sick-leave events */}
+                        {event.isHospital && event.bill != null && (
+                            <View style={{ marginTop: 6, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#f87171', letterSpacing: 2 }}>BILL</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#f87171', lineHeight: 30 }}>
+                                    ₹{event.bill.toLocaleString()}
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 </View>
 
                 <View style={{ height: 2, backgroundColor: ACCENT + '60' }} />
 
-                {/* ── Dots + label ── */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingTop: 8, paddingBottom: 4 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#556080', letterSpacing: 3 }}>
-                        SWIPE TO CHOOSE
-                    </Text>
-                    <View style={{ flexDirection: 'row', gap: 5 }}>
-                        {choices.map((c, i) => (
-                            <TouchableOpacity key={i} onPress={() => snapToCard(i)}>
-                                <View style={{
-                                    width: i === activeIndex ? 16 : 6, height: 6,
-                                    borderRadius: 3,
-                                    backgroundColor: i === activeIndex ? (c.color || ACCENT) : '#334155',
-                                }} />
-                            </TouchableOpacity>
-                        ))}
+                {/* ── Navigation bar — only shown when there are multiple choices ── */}
+                {choices.length > 1 && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingTop: 8, paddingBottom: 2, gap: 6 }}>
+                        {/* Prev arrow */}
+                        <TouchableOpacity
+                            onPress={() => snapToCard(Math.max(0, activeIndex - 1))}
+                            disabled={activeIndex === 0}
+                            style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center',
+                                backgroundColor: activeIndex === 0 ? '#111' : '#1a2040', borderRadius: 6, borderWidth: 1, borderColor: '#2a3560' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: activeIndex === 0 ? '#334155' : '#c0d0f0' }}>◀</Text>
+                        </TouchableOpacity>
+
+                        {/* Dots */}
+                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+                            {choices.map((c, i) => (
+                                <TouchableOpacity key={i} onPress={() => snapToCard(i)} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+                                    <View style={{
+                                        width: i === activeIndex ? 22 : 8, height: 8, borderRadius: 4,
+                                        backgroundColor: i === activeIndex ? (c.color || ACCENT) : '#334155',
+                                    }} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        {/* Next arrow */}
+                        <TouchableOpacity
+                            onPress={() => snapToCard(Math.min(choices.length - 1, activeIndex + 1))}
+                            disabled={activeIndex === choices.length - 1}
+                            style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center',
+                                backgroundColor: activeIndex === choices.length - 1 ? '#111' : '#1a2040', borderRadius: 6, borderWidth: 1, borderColor: '#2a3560' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: activeIndex === choices.length - 1 ? '#334155' : '#c0d0f0' }}>▶</Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
+                )}
 
                 {/* ── Swipeable cards ── */}
                 <ScrollView
@@ -167,9 +193,12 @@ export default function BirthdayDialog({ event, onChoice }) {
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#e2e8f0' }}>
                                             {choice.label}
                                         </Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>
-                                            {eff.amount > 0 ? `₹${eff.amount.toLocaleString()}` : 'Free'}
-                                        </Text>
+                                        {/* Don't repeat the bill for hospital events — it's shown prominently in the header */}
+                                        {!event.isHospital && (
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>
+                                                {eff.amount > 0 ? `₹${eff.amount.toLocaleString()}` : 'Free'}
+                                            </Text>
+                                        )}
                                     </View>
 
                                     {/* Stat chips */}
@@ -237,8 +266,8 @@ export default function BirthdayDialog({ event, onChoice }) {
                             alignItems: 'center',
                         }}
                     >
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#06080f', letterSpacing: 2 }}>
-                            {event.isHospital ? 'CONFIRM' : 'CELEBRATE'} — {choices[activeIndex]?.label?.toUpperCase()}
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#06080f', letterSpacing: 2 }}>
+                            {choices[activeIndex]?.label?.toUpperCase()} ▶
                         </Text>
                     </TouchableOpacity>
                 </View>
