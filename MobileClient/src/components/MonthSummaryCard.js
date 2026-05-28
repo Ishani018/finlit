@@ -77,7 +77,7 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
     return (
         <Animated.View style={{
             position: 'absolute', left: 0, right: 0, bottom: 0, top: 0,
-            zIndex: 300,
+            zIndex: 600,
             transform: [{ translateY: slideAnim }],
         }}>
             {/* Backdrop */}

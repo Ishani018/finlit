@@ -77,7 +77,7 @@ export default function BirthdayDialog({ event, onChoice }) {
 
     return (
         // Absolute overlay — stays within the game view like ChoiceDialog
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 600, justifyContent: 'center', alignItems: 'center' }}>
             {/* Semi-transparent backdrop (same opacity as ChoiceDialog) */}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.75)' }} />
 

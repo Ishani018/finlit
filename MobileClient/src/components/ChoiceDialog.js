@@ -69,7 +69,7 @@ export default function ChoiceDialog({ event, onChoice }) {
     if (isCustodyDilemma) {
         const MODAL_W = Math.min(SW * 0.9, 360);
         return (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 600, justifyContent: 'center', alignItems: 'center' }}>
                 {/* Backdrop */}
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)' }} />
 
@@ -172,7 +172,7 @@ export default function ChoiceDialog({ event, onChoice }) {
     }
 
     return (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, justifyContent: 'flex-end' }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 600, justifyContent: 'flex-end' }}>
             {/* Backdrop */}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.75)' }} />
 
