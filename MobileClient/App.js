@@ -520,6 +520,17 @@ const GameLayout = ({ onHardReset }) => {
     setShowSummary(true);
   }, [monthlyRecap]);
 
+  // Auto-show celebration room after resolving a real birthday (not broke/skip)
+  const prevCelebrationRef = useRef(null);
+  useEffect(() => {
+    if (!lastCelebrationChoice) return;
+    if (lastCelebrationChoice === prevCelebrationRef.current) return;
+    prevCelebrationRef.current = lastCelebrationChoice;
+    const label = (lastCelebrationChoice.label || '').toLowerCase();
+    const isBroke = label.includes('broke') || label.includes('skip');
+    if (!isBroke) setShowBirthdayRoom(true);
+  }, [lastCelebrationChoice]);
+
   // Pipe crisis events into PixelDialog
   useEffect(() => {
     if (!lastCrisisEvent) return;

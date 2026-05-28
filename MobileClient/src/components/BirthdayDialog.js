@@ -23,14 +23,13 @@ const getChoiceImage = (choice, event) => {
     if (l.includes('quiet') || l.includes('dinner')) return QUIET_IMG;
     if (l.includes('house party') || l.includes('big house')) return PARTY_IMG;
     if (l.includes('lavish')) return LAVISH_IMG;
-    if (l.includes('broke')) return BROKE_IMG;
+    if (l.includes('broke') || l.includes('skip')) return BROKE_IMG;
     return WARN_IMG;
 };
 
 export default function BirthdayDialog({ event, onChoice }) {
     const { width: W } = useWindowDimensions();
 
-    // Cap modal at 340px so it never overflows on web
     const MODAL_W = Math.min(W * 0.86, 340);
     const CARD_W  = MODAL_W - 28;
 
@@ -57,7 +56,8 @@ export default function BirthdayDialog({ event, onChoice }) {
 
     const choices = event.choices || [];
     const isDependent = event.name.includes(',');
-    
+    const multiChoice = choices.length > 1;
+
     let cakeImage = BDAY_CAKE;
     if (event.isHospital) cakeImage = WARN_IMG;
     else if (event.isBaby) cakeImage = WARN_IMG;
@@ -72,16 +72,12 @@ export default function BirthdayDialog({ event, onChoice }) {
         setActiveIndex(i);
         scrollRef.current?.scrollTo({ x: i * (CARD_W + 10), animated: true });
     };
-    
 
 
     return (
-        // Absolute overlay — stays within the game view like ChoiceDialog
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 600, justifyContent: 'center', alignItems: 'center' }}>
-            {/* Semi-transparent backdrop (same opacity as ChoiceDialog) */}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.75)' }} />
 
-            {/* Popup */}
             <Animated.View style={{
                 width: MODAL_W,
                 backgroundColor: '#06080f',
@@ -92,7 +88,7 @@ export default function BirthdayDialog({ event, onChoice }) {
                 transform: [{ scale: scaleAnim }],
                 opacity: opacityAnim,
             }}>
-                {/* ── Header: cake + title in a row ── */}
+                {/* ── Header ── */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#0a0d1a', paddingHorizontal: 12, paddingVertical: 10, gap: 10 }}>
                     <Image source={cakeImage} style={{ width: 56, height: 56 }} resizeMode="contain" />
                     <View style={{ flex: 1 }}>
@@ -102,7 +98,7 @@ export default function BirthdayDialog({ event, onChoice }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: TEXT_SECONDARY, lineHeight: 17 }}>
                             {event.message}
                         </Text>
-                        {/* Bill amount callout — shown for hospital/sick-leave events */}
+                        {/* Bill amount — hospital/sick-leave events only */}
                         {event.isHospital && event.bill != null && (
                             <View style={{ marginTop: 6, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#f87171', letterSpacing: 2 }}>BILL</Text>
@@ -116,143 +112,147 @@ export default function BirthdayDialog({ event, onChoice }) {
 
                 <View style={{ height: 2, backgroundColor: ACCENT + '60' }} />
 
-                {/* ── Navigation bar — only shown when there are multiple choices ── */}
-                {choices.length > 1 && (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingTop: 8, paddingBottom: 2, gap: 6 }}>
-                        {/* Prev arrow */}
-                        <TouchableOpacity
-                            onPress={() => snapToCard(Math.max(0, activeIndex - 1))}
-                            disabled={activeIndex === 0}
-                            style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center',
-                                backgroundColor: activeIndex === 0 ? '#111' : '#1a2040', borderRadius: 6, borderWidth: 1, borderColor: '#2a3560' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: activeIndex === 0 ? '#334155' : '#c0d0f0' }}>◀</Text>
-                        </TouchableOpacity>
-
-                        {/* Dots */}
-                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
-                            {choices.map((c, i) => (
-                                <TouchableOpacity key={i} onPress={() => snapToCard(i)} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
-                                    <View style={{
-                                        width: i === activeIndex ? 22 : 8, height: 8, borderRadius: 4,
-                                        backgroundColor: i === activeIndex ? (c.color || ACCENT) : '#334155',
-                                    }} />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        {/* Next arrow */}
-                        <TouchableOpacity
-                            onPress={() => snapToCard(Math.min(choices.length - 1, activeIndex + 1))}
-                            disabled={activeIndex === choices.length - 1}
-                            style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center',
-                                backgroundColor: activeIndex === choices.length - 1 ? '#111' : '#1a2040', borderRadius: 6, borderWidth: 1, borderColor: '#2a3560' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: activeIndex === choices.length - 1 ? '#334155' : '#c0d0f0' }}>▶</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {/* ── Swipeable cards ── */}
-                <ScrollView
-                    ref={scrollRef}
-                    horizontal
-                    snapToInterval={CARD_W + 10}
-                    snapToAlignment="start"
-                    decelerationRate="fast"
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 14, gap: 10, paddingBottom: 6 }}
-                    onMomentumScrollEnd={(e) => {
-                        const idx = Math.round(e.nativeEvent.contentOffset.x / (CARD_W + 10));
-                        setActiveIndex(Math.max(0, Math.min(idx, choices.length - 1)));
-                    }}
-                >
-                    {choices.map((choice, index) => {
-                        const eff = choice.effect;
-                        const img = getChoiceImage(choice, event);
-                        const isActive = index === activeIndex;
-
-                        return (
-                            <View key={index} style={{
-                                width: CARD_W,
-                                borderRadius: 10,
-                                overflow: 'hidden',
-                                borderWidth: 1.5,
-                                borderColor: isActive ? '#334155' : '#1a2040',
-                                backgroundColor: '#0c1020',
-                            }}>
-                                {/* Room scene — taller so the full room is visible */}
-                                <Image
-                                    source={img}
-                                    style={{ width: CARD_W, height: 280 }}
-                                    resizeMode="cover"
-                                />
-                                <View style={{ height: 2, backgroundColor: choice.color }} />
-
-                                {/* Card body */}
-                                <View style={{ paddingHorizontal: 10, paddingVertical: 8 }}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#e2e8f0' }}>
-                                            {choice.label}
-                                        </Text>
-                                        {/* Don't repeat the bill for hospital events — it's shown prominently in the header */}
-                                        {!event.isHospital && (
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>
-                                                {eff.amount > 0 ? `₹${eff.amount.toLocaleString()}` : 'Free'}
+                {/* ── Card area with side arrows overlaid ── */}
+                <View style={{ position: 'relative' }}>
+                    <ScrollView
+                        ref={scrollRef}
+                        horizontal
+                        snapToInterval={CARD_W + 10}
+                        snapToAlignment="start"
+                        decelerationRate="fast"
+                        showsHorizontalScrollIndicator={false}
+                        scrollEnabled={multiChoice}
+                        contentContainerStyle={{ paddingHorizontal: 14, gap: 10, paddingBottom: 6, paddingTop: 6 }}
+                        onMomentumScrollEnd={(e) => {
+                            const idx = Math.round(e.nativeEvent.contentOffset.x / (CARD_W + 10));
+                            setActiveIndex(Math.max(0, Math.min(idx, choices.length - 1)));
+                        }}
+                    >
+                        {choices.map((choice, index) => {
+                            const img = getChoiceImage(choice, event);
+                            const eff2 = choice.effect;
+                            return (
+                                <View key={index} style={{
+                                    width: CARD_W,
+                                    borderRadius: 10,
+                                    overflow: 'hidden',
+                                    borderWidth: 1.5,
+                                    borderColor: index === activeIndex ? (choice.color + '88') : '#1a2040',
+                                    backgroundColor: '#0c1020',
+                                }}>
+                                    <Image source={img} style={{ width: CARD_W, height: 240 }} resizeMode="cover" />
+                                    <View style={{ height: 2, backgroundColor: choice.color }} />
+                                    <View style={{ paddingHorizontal: 10, paddingVertical: 8 }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#e2e8f0' }}>
+                                                {choice.label}
                                             </Text>
-                                        )}
-                                    </View>
-
-                                    {/* Stat chips */}
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
-                                        {eff.happiness !== undefined && (
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Image source={HAPPY_ICON} style={{ width: 10, height: 10 }} resizeMode="contain" />
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: eff.happiness >= 0 ? '#86efac' : '#f87171' }}>
-                                                    {eff.happiness > 0 ? '+' : ''}{eff.happiness}
+                                            {!event.isHospital && (
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: eff2.amount > 0 ? '#f87171' : '#4ade80' }}>
+                                                    {eff2.amount > 0 ? `-₹${eff2.amount.toLocaleString()}` : 'Free'}
                                                 </Text>
-                                            </View>
-                                        )}
-                                        {eff.health !== undefined && (
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Image source={HEALTH_ICON} style={{ width: 10, height: 10 }} resizeMode="contain" />
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: eff.health >= 0 ? '#86efac' : '#f87171' }}>
-                                                    {eff.health > 0 ? '+' : ''}{eff.health} HP
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {eff.salaryBonusPct > 0 && (
-                                            <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
-                                                    +{(eff.salaryBonusPct * 100).toFixed(0)}% Salary
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {eff.creditScore > 0 && (
-                                            <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
-                                                    +{eff.creditScore} CIBIL
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {eff.spouseIncomeBoost > 0 && (
-                                            <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
-                                                    +{(eff.spouseIncomeBoost * 100).toFixed(0)}% Spouse
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {eff.childSavingsBoost > 0 && (
-                                            <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
-                                                    +₹{eff.childSavingsBoost.toLocaleString()} savings
-                                                </Text>
-                                            </View>
-                                        )}
+                                            )}
+                                        </View>
+                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                                            {eff2.happiness !== undefined && (
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Image source={HAPPY_ICON} style={{ width: 10, height: 10 }} resizeMode="contain" />
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: eff2.happiness >= 0 ? '#86efac' : '#f87171' }}>
+                                                        {eff2.happiness > 0 ? '+' : ''}{eff2.happiness}
+                                                    </Text>
+                                                </View>
+                                            )}
+                                            {eff2.health !== undefined && (
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Image source={HEALTH_ICON} style={{ width: 10, height: 10 }} resizeMode="contain" />
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: eff2.health >= 0 ? '#86efac' : '#f87171' }}>
+                                                        {eff2.health > 0 ? '+' : ''}{eff2.health} HP
+                                                    </Text>
+                                                </View>
+                                            )}
+                                            {eff2.salaryBonusPct > 0 && (
+                                                <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
+                                                        +{(eff2.salaryBonusPct * 100).toFixed(0)}% Salary
+                                                    </Text>
+                                                </View>
+                                            )}
+                                            {eff2.creditScore > 0 && (
+                                                <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
+                                                        +{eff2.creditScore} CIBIL
+                                                    </Text>
+                                                </View>
+                                            )}
+                                            {eff2.spouseIncomeBoost > 0 && (
+                                                <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
+                                                        +{(eff2.spouseIncomeBoost * 100).toFixed(0)}% Spouse
+                                                    </Text>
+                                                </View>
+                                            )}
+                                            {eff2.childSavingsBoost > 0 && (
+                                                <View style={{ backgroundColor: '#111827', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24' }}>
+                                                        +₹{eff2.childSavingsBoost.toLocaleString()} savings
+                                                    </Text>
+                                                </View>
+                                            )}
+                                        </View>
                                     </View>
                                 </View>
-                            </View>
-                        );
-                    })}
-                </ScrollView>
+                            );
+                        })}
+                    </ScrollView>
+
+                    {/* ── Side arrows overlaid on the card image area — only when multiple choices ── */}
+                    {multiChoice && activeIndex > 0 && (
+                        <View style={{ position: 'absolute', left: 4, top: 0, bottom: 0, justifyContent: 'center', pointerEvents: 'box-none' }}>
+                            <TouchableOpacity
+                                onPress={() => snapToCard(activeIndex - 1)}
+                                style={{
+                                    width: 36, height: 52,
+                                    backgroundColor: 'rgba(6,8,15,0.72)',
+                                    borderRadius: 8,
+                                    borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
+                                    alignItems: 'center', justifyContent: 'center',
+                                }}
+                            >
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c0d0f0' }}>◀</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {multiChoice && activeIndex < choices.length - 1 && (
+                        <View style={{ position: 'absolute', right: 4, top: 0, bottom: 0, justifyContent: 'center', pointerEvents: 'box-none' }}>
+                            <TouchableOpacity
+                                onPress={() => snapToCard(activeIndex + 1)}
+                                style={{
+                                    width: 36, height: 52,
+                                    backgroundColor: 'rgba(6,8,15,0.72)',
+                                    borderRadius: 8,
+                                    borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
+                                    alignItems: 'center', justifyContent: 'center',
+                                }}
+                            >
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c0d0f0' }}>▶</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+
+                {/* ── Dot indicators — only when multiple choices ── */}
+                {multiChoice && (
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, paddingTop: 4, paddingBottom: 2 }}>
+                        {choices.map((c, i) => (
+                            <TouchableOpacity key={i} onPress={() => snapToCard(i)} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+                                <View style={{
+                                    width: i === activeIndex ? 20 : 7, height: 7, borderRadius: 4,
+                                    backgroundColor: i === activeIndex ? (c.color || ACCENT) : '#334155',
+                                }} />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
 
                 {/* ── Confirm button ── */}
                 <View style={{ paddingHorizontal: 14, paddingTop: 8, paddingBottom: 16 }}>

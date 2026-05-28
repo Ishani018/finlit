@@ -3189,19 +3189,23 @@ export const GameProvider = ({ children }) => {
                 setIsPlaying(false);
             } else if (!pendingDecision) {
                 // Regular Birthday Party (Forced)
+                const isBrokeForBday = balance < 1500;
                 decisionsToQueue.push({
                     id: `bday_${playerBdayYearToCelebrate}`,
                     name: `Happy ${getOrdinal(currentAge)} Birthday!`,
                     emoji: '🎂',
                     category: 'dilemma',
                     isBirthday: true,
-                    message: `It's your birthday! How do you want to celebrate?`,
-                    choices: [
-                        { label: 'Quiet Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Dinner', amount: 1500, happiness: 15, health: 15, msg: 'A peaceful, restorative evening.' } },
-                        { label: 'House Party', color: '#4ade80', effect: { type: 'birthday_celebration', choiceLabel: 'House Party', amount: 10000, happiness: 25, salaryBonusPct: 0.05, msg: 'You networked with friends! Small 5% salary bump!' } },
-                        { label: 'Lavish Bash', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Bash', amount: 40000, happiness: 50, creditScore: 40, health: -10, msg: 'A wild party! Huge status boost but you feel hungover.' } },
-                        ...(balance < 1500 ? [{ label: 'Broke Birthday', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Broke Birthday', amount: 0, happiness: -15, health: -5, msg: 'A lonely, broke birthday.' } }] : [])
-                    ],
+                    message: isBrokeForBday
+                        ? `It's your birthday but you can't afford to celebrate. A tough day.`
+                        : `It's your birthday! How do you want to celebrate?`,
+                    choices: isBrokeForBday
+                        ? [{ label: 'Broke Birthday', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Broke Birthday', amount: 0, happiness: -30, health: -10, msg: 'A miserable, lonely birthday. No money, no joy.' } }]
+                        : [
+                            { label: 'Quiet Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Dinner', amount: 1500, happiness: 15, health: 15, msg: 'A peaceful, restorative evening.' } },
+                            { label: 'House Party', color: '#4ade80', effect: { type: 'birthday_celebration', choiceLabel: 'House Party', amount: 10000, happiness: 25, salaryBonusPct: 0.05, msg: 'You networked with friends! Small 5% salary bump!' } },
+                            { label: 'Lavish Bash', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Bash', amount: 40000, happiness: 50, creditScore: 40, health: -10, msg: 'A wild party! Huge status boost but you feel hungover.' } },
+                          ],
                 });
                 setFiredDecisions(prev => [...prev, bdayDecisionId]);
                 setIsPlaying(false);
@@ -3247,7 +3251,16 @@ export const GameProvider = ({ children }) => {
                 }
                 
                 if (balance < 2500) {
-                    choices.push({ label: 'Skip Party (Too Broke)', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0, happiness: isSpouse ? -50 : -20, dependentId: bdayDependent.id, msg: 'Your family is severely disappointed.' } });
+                    // Can't afford any party — only option is the broke path
+                    choices = [{ label: 'Skip (Too Broke)', color: '#f87171', effect: {
+                        type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0,
+                        happiness: isSpouse ? -70 : -30,
+                        depHappinessBoost: isSpouse ? -60 : -20,
+                        dependentId: bdayDependent.id,
+                        msg: isSpouse
+                            ? `${bdayDependent.name} is devastated and furious. You couldn't even spend ₹2,500 on their birthday. This will damage your relationship for months.`
+                            : `${bdayDependent.name}'s birthday came and went without any celebration. They are heartbroken.`,
+                    }}];
                 }
                 decisionsToQueue.push({
                     id: `dep_bday_${bdayDependent.id}_${totalMonthsPlayed}`,
