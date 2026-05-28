@@ -26,6 +26,7 @@ import EducationScreen from './src/screens/EducationScreen';
 import InsuranceScreen from './src/screens/InsuranceScreen';
 import BankScreen from './src/screens/BankScreen';
 import ShopScreen from './src/screens/ShopScreen';
+import GroceryScreen from './src/screens/GroceryScreen';
 import GoalsScreen from './src/screens/GoalsScreen';
 import ChoiceDialog from './src/components/ChoiceDialog';
 import BirthdayDialog from './src/components/BirthdayDialog';
@@ -367,6 +368,7 @@ const GameLayout = ({ onHardReset }) => {
   const [careerSubTab, setCareerSubTab] = useState(null); // null = landing | jobs | study
   const [moneySubTab, setMoneySubTab] = useState(null);
   const [showGrocery, setShowGrocery] = useState(false);
+  const [showPantry, setShowPantry] = useState(false);
   const [happinessToast, setHappinessToast] = useState(null);
   const happinessToastTimerRef = useRef(null);
   const [showPantryBanner, setShowPantryBanner] = useState(false);
@@ -1098,6 +1100,12 @@ const GameLayout = ({ onHardReset }) => {
             const isBdayMonth = isPlayerBday || !!bdayDep;
             return (
               <View style={{ position: 'absolute', top: 8, left: 12, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setShowPantry(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
+                  <Image source={require('./assets/ui_comp/pantry.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                  {(pantry || []).reduce((s, p) => s + (p.qty || 0), 0) <= 3 && (
+                    <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#f87171', borderWidth: 1.5, borderColor: '#06080f' }} />
+                  )}
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowHomeScreen(true)} activeOpacity={0.8}>
                   <Image source={require('./assets/ui_comp/forsale.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
                 </TouchableOpacity>
@@ -2283,6 +2291,12 @@ const GameLayout = ({ onHardReset }) => {
         {showGrocery && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
             <ShopScreen onClose={() => setShowGrocery(false)} />
+          </View>
+        )}
+
+        {showPantry && (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
+            <GroceryScreen onClose={() => setShowPantry(false)} initialTab="pantry" />
           </View>
         )}
 

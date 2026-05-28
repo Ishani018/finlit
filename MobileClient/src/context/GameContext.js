@@ -201,7 +201,7 @@ export const GameProvider = ({ children }) => {
     const stateRef = useRef({});
     useEffect(() => {
         stateRef.current = {
-            balance, currentJob, pendingApplications, pendingDecision, pendingJobInterview, currentHousing, properties, portfolio,
+            balance, currentJob, pendingApplications, pendingDecision, pendingDecisionQueue, pendingJobInterview, currentHousing, properties, portfolio,
             dependents, loans, activeInsurance, creditScore, activeEffects,
             marketPrices, degrees, totalMonthsPlayed, turn, gameOver,
             activeEnrollment, mfPortfolio, mfNavs, sipPlans, ppf, nps,
@@ -236,6 +236,7 @@ export const GameProvider = ({ children }) => {
                 currentJob: stateRef.current.currentJob,
                 pendingApplications: stateRef.current.pendingApplications,
                 pendingDecision: stateRef.current.pendingDecision,
+                pendingDecisionQueue: stateRef.current.pendingDecisionQueue,
                 pendingJobInterview: stateRef.current.pendingJobInterview,
                 currentHousingId: stateRef.current.currentHousing?.id || 'hostel',
                 playerSprite, playerName, playerBirthday,
@@ -320,6 +321,7 @@ export const GameProvider = ({ children }) => {
                     setPendingDecision(s.pendingDecision);
                 }
             }
+            if (Array.isArray(s.pendingDecisionQueue)) setPendingDecisionQueue(s.pendingDecisionQueue);
             if (s.pendingJobInterview !== undefined) setPendingJobInterview(s.pendingJobInterview);
             if (s.isPlaying !== undefined) setIsPlaying(s.isPlaying);
             if (s.playerSprite) setPlayerSprite(s.playerSprite);
@@ -2005,13 +2007,19 @@ export const GameProvider = ({ children }) => {
             } else { msg = "Not enough balance."; }
             if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
         } else if (eff.type === 'birthday_celebration') {
+            // Mark player birthday as fired at resolve time (not queue time)
+            if (pendingDecision?.isBirthday && pendingDecision?.id?.startsWith('bday_')) {
+                setFiredDecisions(prev => prev.includes(pendingDecision.id) ? prev : [...prev, pendingDecision.id]);
+            }
             if (balance >= eff.amount) {
                 setBalance(prev => prev - eff.amount);
                 if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
                 if (eff.dependentId) {
+                    // Use yearToCelebrate stored on the decision to avoid double-incrementing
+                    const yearToMark = pendingDecision?.yearToCelebrate;
                     setDependents(prev => prev.map(d => {
                         if (d.id === eff.dependentId) {
-                            const newD = { ...d, lastCelebratedYear: (d.lastCelebratedYear || (turn.year - 1)) + 1 };
+                            const newD = { ...d, lastCelebratedYear: yearToMark ?? ((d.lastCelebratedYear || (turn.year - 1)) + 1) };
                             if (eff.happiness && d.type === 'spouse') {
                                 newD.happiness = Math.max(0, Math.min(100, (d.happiness || 70) + (eff.happiness / 2)));
                             }
@@ -3207,7 +3215,8 @@ export const GameProvider = ({ children }) => {
                             { label: 'Lavish Bash', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Bash', amount: 40000, happiness: 50, creditScore: 40, health: -10, msg: 'A wild party! Huge status boost but you feel hungover.' } },
                           ],
                 });
-                setFiredDecisions(prev => [...prev, bdayDecisionId]);
+                // firedDecisions is marked at RESOLVE time (resolveDecision birthday_celebration handler),
+                // not here, so the birthday can't be permanently skipped if it's behind another queue item.
                 setIsPlaying(false);
             }
         } else if (!pendingDecision && totalMonthsPlayed > 0) {
@@ -3269,10 +3278,13 @@ export const GameProvider = ({ children }) => {
                     category: 'dilemma',
                     isBirthday: true,
                     dependentType: bdayDependent.type,
+                    dependentId: bdayDependent.id,
+                    yearToCelebrate,
                     message,
                     choices,
                 });
-                setDependents(prev => prev.map(d => d.id === bdayDependent.id ? { ...d, lastCelebratedYear: yearToCelebrate } : d));
+                // lastCelebratedYear is marked at RESOLVE time (resolveDecision), not here,
+                // to avoid double-incrementing when other events are ahead in the queue.
                 setIsPlaying(false);
             }
         }

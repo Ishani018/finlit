@@ -569,7 +569,9 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                         <TouchableOpacity
                             onPress={() => showDialog('File for Divorce',
                                 'This will end the marriage. You will pay ₹2,00,000 in settlement and lose 30 happiness points. This cannot be undone.',
-                                'warning', () => { divorce(); onClose(); }
+                                'warning', () => { divorce(); onClose(); },
+                                'YES, FILE', 'CANCEL', null,
+                                { isSprite: false, source: require('../../assets/ui_comp/divorcpopup.png') }
                             )}
                             style={{ borderWidth: 1, borderColor: C.red + '40', backgroundColor: C.red + '08', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                         >
@@ -1228,7 +1230,13 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                         if (!r.success && balance < 500000) {
                             setShowLoanAdvisory(true);
                         } else {
-                            showDialog(r.success ? 'Married!' : 'Cannot Marry', r.msg, r.success ? 'success' : 'error');
+                            showDialog(
+                                r.success ? '💍 Congratulations!' : 'Cannot Marry',
+                                r.msg,
+                                r.success ? 'success' : 'error',
+                                null, 'OK', null, null,
+                                r.success ? { isSprite: false, source: require('../../assets/ui_comp/marraige congratulations.png') } : null
+                            );
                         }
                     }}
                 />

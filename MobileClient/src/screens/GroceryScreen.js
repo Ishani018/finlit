@@ -119,9 +119,9 @@ function ItemGrid({ children }) {
     return <View>{rows}</View>;
 }
 
-export default function GroceryScreen({ onClose }) {
+export default function GroceryScreen({ onClose, initialTab = 'shop' }) {
     const { balance, health, pantry, buyGrocery, consumeFood } = useGame();
-    const [tab, setTab] = useState('shop');
+    const [tab, setTab] = useState(initialTab);
     const [toast, setToast] = useState(null);
 
     const showToast = (msg, color = C.sage) => {
