@@ -256,7 +256,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         <View style={{ marginTop: 16 }}>
                             <TouchableOpacity onPress={() => setTipsOpen(o => !o)} activeOpacity={0.8}
                                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: tipsOpen ? 10 : 0 }}>
-                                <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 14, height: 14, opacity: 0.6 }} resizeMode="contain" />
+                                <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, flex: 1 }}>ADVISOR TIPS</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560' }}>{tipsOpen ? '▲' : '▼'}</Text>
                             </TouchableOpacity>
@@ -468,7 +468,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                             <View style={{ height: CARD_H, position: 'relative' }}>
                                                                 {meta.img && <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
                                                                 <View style={{ position: 'absolute', inset: 0, backgroundColor: eligible ? 'rgba(4,6,14,0.35)' : 'rgba(4,6,14,0.65)' }} />
-                                                                {!eligible && <View style={{ position: 'absolute', top: 8, right: 8 }}><Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 16, height: 16, opacity: 0.5 }} resizeMode="contain" /></View>}
+                                                                {!eligible && <View style={{ position: 'absolute', top: 8, right: 8 }}><Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 24, height: 24 }} resizeMode="contain" /></View>}
                                                                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.8)', padding: 8 }}>
                                                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 1 }}>
                                                                         {eligible && <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: meta.color }} />}
@@ -534,8 +534,8 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>outstanding</Text>
                                                         </View>
                                                     </View>
-                                                    <View style={{ height: 5, backgroundColor: '#06080f', marginBottom: 5}}>
-                                                        <View style={{ height: '100%', width: `${paidPct * 100}%`, backgroundColor: meta.color}} />
+                                                    <View style={{ height: 5, backgroundColor: '#06080f', marginBottom: 5, borderRadius: 3 }}>
+                                                        <View style={{ height: '100%', width: `${paidPct * 100}%`, backgroundColor: meta.color, borderRadius: 3 }} />
                                                     </View>
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070' }}>EMI ₹{loan.emi.toLocaleString()}/mo · {monthsLeft}mo left</Text>
@@ -618,7 +618,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             </TouchableOpacity>
 
                             {/* Hero card */}
-                            <View style={{ height: 120, position: 'relative', borderWidth: 1, borderColor: meta.color + '50', overflow: 'hidden' }}>
+                            <View style={{ height: 120, position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
                                 {meta.img && <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
                                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.6)' }} />
                                 <View style={{ position: 'absolute', bottom: 12, left: 14, right: 14 }}>
@@ -630,10 +630,13 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 18 }}>{lt.description}</Text>
 
                             {!eligible ? (
-                                <View style={{ backgroundColor: '#1a0808', borderWidth: 1, borderColor: '#7f1d1d', padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', marginBottom: 6 }}>You don't qualify yet:</Text>
+                                <View style={{ backgroundColor: '#1a0808', borderRadius: 10, padding: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', marginBottom: 8 }}>You don't qualify yet:</Text>
                                     {issues.map((iss, i) => (
-                                        <Text key={i} style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f8717190', marginTop: 2 }}>• {iss}</Text>
+                                        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                                            <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 18, height: 18, tintColor: '#f87171' }} resizeMode="contain" />
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f8717190', flex: 1 }}>{iss}</Text>
+                                        </View>
                                     ))}
                                 </View>
                             ) : (
@@ -641,16 +644,16 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                     {/* Amount */}
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 2 }}>LOAN AMOUNT</Text>
                                     <View style={{ flexDirection: 'row', gap: 6 }}>
-                                        <View style={{ flex: 1, borderWidth: 1, borderColor: meta.color + '50', backgroundColor: '#0d1020', paddingHorizontal: 12, paddingVertical: 8 }}>
+                                        <View style={{ flex: 1, borderRadius: 8, backgroundColor: '#0d1020', paddingHorizontal: 12, paddingVertical: 10 }}>
                                             <TextInput value={loanAmount} onChangeText={setLoanAmount} keyboardType="numeric"
                                                 placeholder={`Max ₹${lt.max_amount ? (lt.max_amount / 100000).toFixed(0) + 'L' : 'varies'}`}
-                                                placeholderTextColor="#2a3560" style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }} />
+                                                placeholderTextColor="#2a3560" style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0' }} />
                                         </View>
                                         {lt.max_amount && [0.25, 0.5, 1].map(frac => {
                                             const a = Math.round(lt.max_amount * frac);
                                             return (
-                                                <TouchableOpacity key={frac} onPress={() => setLoanAmount(String(a))} style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#070a16', paddingHorizontal: 8, justifyContent: 'center' }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>₹{(a / 100000).toFixed(0)}L</Text>
+                                                <TouchableOpacity key={frac} onPress={() => setLoanAmount(String(a))} style={{ borderRadius: 8, backgroundColor: '#0d1020', paddingHorizontal: 10, justifyContent: 'center' }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{(a / 100000).toFixed(0)}L</Text>
                                                 </TouchableOpacity>
                                             );
                                         })}
@@ -661,8 +664,8 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                     <View style={{ flexDirection: 'row', gap: 6 }}>
                                         {tenures.map((t, i) => (
                                             <TouchableOpacity key={t} onPress={() => setLoanTenureIdx(i)}
-                                                style={{ flex: 1, paddingVertical: 7, alignItems: 'center', borderWidth: 1, borderColor: loanTenureIdx === i ? meta.color : '#1a2040', backgroundColor: loanTenureIdx === i ? meta.color + '18' : '#070a16' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: loanTenureIdx === i ? meta.color : '#445070' }}>
+                                                style={{ flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8, backgroundColor: loanTenureIdx === i ? meta.color + '22' : '#0d1020' }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: loanTenureIdx === i ? meta.color : '#445070' }}>
                                                     {t >= 12 ? `${t / 12}yr` : `${t}mo`}
                                                 </Text>
                                             </TouchableOpacity>
@@ -671,7 +674,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
 
                                     {/* EMI preview */}
                                     {previewEMI > 0 && (
-                                        <View style={{ borderWidth: 1, borderColor: meta.color + '30', backgroundColor: meta.color + '08', padding: 12 }}>
+                                        <View style={{ borderRadius: 10, backgroundColor: '#0a0d1a', padding: 14 }}>
                                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 1 }}>MONTHLY EMI</Text>
                                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: meta.color }}>₹{previewEMI.toLocaleString()}/mo</Text>
@@ -698,13 +701,13 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                     )}
 
                                     {lt.id === 'education_loan' && (
-                                        <View style={{ backgroundColor: '#818cf810', borderWidth: 1, borderColor: '#818cf830', padding: 10 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#818cf8' }}>Interest deductible under Sec 80E for up to 8 years</Text>
+                                        <View style={{ backgroundColor: '#818cf810', borderRadius: 8, padding: 12 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#818cf8' }}>Interest deductible under Sec 80E for up to 8 years</Text>
                                         </View>
                                     )}
                                     {lt.id === 'home_loan' && (
-                                        <View style={{ backgroundColor: '#4ade8010', borderWidth: 1, borderColor: '#4ade8030', padding: 10 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80' }}>Interest up to ₹2L/yr deductible (Sec 24b). Principal under 80C.</Text>
+                                        <View style={{ backgroundColor: '#4ade8010', borderRadius: 8, padding: 12 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80' }}>Interest up to ₹2L/yr deductible (Sec 24b). Principal under 80C.</Text>
                                         </View>
                                     )}
 
@@ -715,9 +718,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                             onShowDialog(res.success ? 'Loan Approved!' : 'Application Rejected', res.msg, res.success ? 'success' : 'error');
                                             if (res.success) { setApplyingLoanId(null); setLoanAmount(''); }
                                         }}
-                                        style={{ paddingVertical: 14, borderWidth: 1, borderColor: meta.color, backgroundColor: meta.color + '18', alignItems: 'center' }}
+                                        style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: meta.color + '22', alignItems: 'center' }}
                                     >
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: meta.color, letterSpacing: 1 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: meta.color, letterSpacing: 1 }}>
                                             {previewEMI > 0 ? `APPLY — ₹${previewEMI.toLocaleString()}/mo` : 'APPLY FOR LOAN'}
                                         </Text>
                                     </TouchableOpacity>
@@ -802,9 +805,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                         ))}
                                     </View>
                                     {['Auto-files ITR every July with optimised deductions', 'Finds ₹25,000+ extra deductions', 'Handles IT notices — you don\'t deal with the dept', 'Advises on 80C investments each April'].map((t, i) => (
-                                        <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
-                                            <View style={{ width: 4, height: 4, backgroundColor: '#a78bfa', borderRadius: 2, marginTop: 7 }} />
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', flex: 1 }}>{t}</Text>
+                                        <View key={i} style={{ flexDirection: 'row', gap: 10, alignItems: 'center', paddingVertical: 6, borderTopWidth: i === 0 ? 0 : 1, borderColor: '#0f1525' }}>
+                                            <Image source={require('../../assets/ui_comp/taxdept.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', flex: 1 }}>{t}</Text>
                                         </View>
                                     ))}
                                     <TouchableOpacity onPress={() => { const res = cancelCA(); onShowDialog('CA Cancelled', res.msg, 'warning'); }}

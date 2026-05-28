@@ -213,7 +213,7 @@ export default function InsuranceScreen({ onClose }) {
                                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: active ? '#c8d4f0' : '#556080' }} numberOfLines={1}>{plan.name}</Text>
                                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: active ? meta.accent : '#4a5580' }}>₹{premium.toLocaleString()}/mo</Text>
                                             </View>
-                                            <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 12, height: 12, opacity: 0.4 }} resizeMode="contain" />
+                                            <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
                                         </TouchableOpacity>
                                     );
                                 })}

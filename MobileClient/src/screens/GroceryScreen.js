@@ -164,7 +164,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 26, marginBottom: 5 }}>{pantryOnly ? 'YOUR PANTRY' : 'GROCERY STORE'}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                            <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 12, height: 12, opacity: 0.7 }} resizeMode="contain" />
+                            <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
                             <View style={{ flex: 1, height: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 2 }}>
                                 <View style={{ height: '100%', width: `${hpPct}%`, backgroundColor: hpColor, borderRadius: 2 }} />
                             </View>
@@ -184,13 +184,13 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
             )}
             {health >= CRITICAL_HEALTH_THRESHOLD && health < SICK_LEAVE_THRESHOLD && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: PAD, marginTop: PAD, backgroundColor: '#0d0c05', borderRadius: 8, padding: 12 }}>
-                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
+                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.gold, flex: 1 }}>LOW HEALTH — Risk of sick leave.</Text>
                 </View>
             )}
             {totalPantryQty <= 3 && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: PAD, marginTop: PAD, backgroundColor: '#080d15', borderRadius: 8, padding: 12 }}>
-                    <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
+                    <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#60a5fa', flex: 1 }}>
                         {totalPantryQty === 0 ? 'Pantry empty — stock up to avoid health drain.' : `Low stock — ${totalPantryQty} item${totalPantryQty === 1 ? '' : 's'} left.`}
                     </Text>
