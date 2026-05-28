@@ -110,7 +110,7 @@ export default function PixelDialog({
                     {image && typeof image === 'object' && !image.isSprite && image.source && (
                         <Image
                             source={image.source}
-                            style={{ width: '100%', height: 160 }}
+                            style={{ width: '100%', height: 240 }}
                             resizeMode="cover"
                         />
                     )}
