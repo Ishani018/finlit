@@ -861,35 +861,40 @@ export default function BankScreen({ onClose, onShowDialog }) {
             {tab === 'gold' && (
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 3, marginBottom: 12 }}>SPOT PRICE: ₹{goldPrice?.toLocaleString()}/g (24k)</Text>
-                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
+                    {/* Gold type selector */}
+                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
                         {GOLD_ASSETS.map(a => (
                             <TouchableOpacity key={a.id} onPress={() => setSelectedGoldAsset(a)} activeOpacity={0.8}
-                                style={{ flex: 1, borderWidth: 1, borderColor: selectedGoldAsset?.id === a.id ? '#fbbf24' : '#1a2040', backgroundColor: selectedGoldAsset?.id === a.id ? '#fbbf2415' : '#070a16', padding: 10, alignItems: 'center' }}>
-                                <FontAwesome5 name={a.type === 'bond' ? 'file-contract' : a.type === 'jewellery' ? 'gem' : 'coins'} size={20} color={selectedGoldAsset?.id === a.id ? '#fbbf24' : '#2a3560'} />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: selectedGoldAsset?.id === a.id ? '#fbbf24' : '#445070', marginTop: 6, textAlign: 'center' }}>{a.name}</Text>
+                                style={{ flex: 1, borderRadius: 10, backgroundColor: selectedGoldAsset?.id === a.id ? '#fbbf2418' : '#08101e', padding: 12, alignItems: 'center' }}>
+                                <Image source={require('../../assets/ui_comp/gold_vault.png')} style={{ width: 28, height: 28, marginBottom: 4 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: selectedGoldAsset?.id === a.id ? '#fbbf24' : '#445070', textAlign: 'center' }}>{a.name}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
                     {selectedGoldAsset && (
-                        <View style={{ borderWidth: 1, borderColor: '#fbbf2430', backgroundColor: '#070a16', padding: 14, marginBottom: 14 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24', marginBottom: 6 }}>{selectedGoldAsset.name}</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 18, marginBottom: 8 }}>{selectedGoldAsset.description}</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#818cf8' }}>Tax: {selectedGoldAsset.taxNote}</Text>
+                        <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, marginBottom: 16 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24', marginBottom: 6 }}>{selectedGoldAsset.name}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', lineHeight: 20, marginBottom: 10 }}>{selectedGoldAsset.description}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#818cf8' }}>Tax: {selectedGoldAsset.taxNote}</Text>
                             {selectedGoldAsset.makingCharges > 0 && (
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#f87171', marginTop: 4 }}>Making charges: {Math.round(selectedGoldAsset.makingCharges * 100)}% (non-recoverable on resale)</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', marginTop: 4 }}>Making charges: {Math.round(selectedGoldAsset.makingCharges * 100)}%</Text>
                             )}
                             {selectedGoldAsset.type === 'bond' && (
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4ade80', marginTop: 4 }}>+ 2.5% annual interest (paid every 6 months)</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80', marginTop: 4 }}>+ 2.5% annual interest (paid every 6 months)</Text>
                             )}
                         </View>
                     )}
-                    <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16', padding: 14, marginBottom: 14 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#c8d4f0', letterSpacing: 2, marginBottom: 10 }}>BUY GOLD</Text>
-                        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                            <TextInput value={goldGrams} onChangeText={setGoldGrams} keyboardType="decimal-pad"
-                                style={{ flex: 1, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 18, padding: 10 }}
-                                placeholder="grams" placeholderTextColor="#2a3560" />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>g</Text>
+
+                    {/* Buy section */}
+                    <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, marginBottom: 16 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 3, marginBottom: 12 }}>BUY GOLD</Text>
+                        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 12 }}>
+                            <View style={{ flex: 1, backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 }}>
+                                <TextInput value={goldGrams} onChangeText={setGoldGrams} keyboardType="decimal-pad"
+                                    style={{ color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 20 }}
+                                    placeholder="grams" placeholderTextColor="#2a3560" />
+                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>g</Text>
                         </View>
                         {(() => {
                             const g = parseFloat(goldGrams) || 0;
@@ -897,12 +902,12 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             const base = g * (goldPrice || 0) * purity;
                             const making = Math.round(base * (selectedGoldAsset?.makingCharges || 0));
                             const total = Math.round(base + making);
-                            return (
-                                <View style={{ marginBottom: 10 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>Base: ₹{Math.round(base).toLocaleString()}{making > 0 ? ` + ₹${making.toLocaleString()} making` : ''}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24', marginTop: 4 }}>Total: ₹{total.toLocaleString()}</Text>
+                            return g > 0 ? (
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{making > 0 ? `₹${Math.round(base).toLocaleString()} + ₹${making.toLocaleString()} making` : `₹${Math.round(base).toLocaleString()}`}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24' }}>₹{total.toLocaleString()}</Text>
                                 </View>
-                            );
+                            ) : null;
                         })()}
                         <TouchableOpacity onPress={() => {
                             const g = parseFloat(goldGrams);
@@ -910,10 +915,12 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             if (!selectedGoldAsset) { onShowDialog('Select Asset', 'Choose a gold type first.', 'error'); return; }
                             const r = buyGold(selectedGoldAsset.id, g);
                             onShowDialog(r.success ? 'Gold Purchased' : 'Failed', r.msg, r.success ? 'success' : 'error');
-                        }} style={{ borderWidth: 1, borderColor: '#fbbf24', backgroundColor: '#fbbf2415', padding: 12, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24', letterSpacing: 2 }}>BUY {goldGrams}g →</Text>
+                        }} style={{ borderRadius: 10, backgroundColor: '#1a1400', paddingVertical: 14, alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24', letterSpacing: 2 }}>BUY {goldGrams || '0'}g ›</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/* Holdings */}
                     {Object.entries(goldHoldings || {}).filter(([, h]) => h?.grams > 0).map(([assetId, h]) => {
                         const asset = GOLD_ASSETS.find(a => a.id === assetId);
                         const purity = asset?.purity || 1;
@@ -921,30 +928,32 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         const costBasis = Math.round(h.grams * (h.avgBuyPrice || 0));
                         const gain = currentVal - costBasis;
                         return (
-                            <View key={assetId} style={{ borderWidth: 1, borderColor: '#fbbf2430', backgroundColor: '#070a16', padding: 14, marginBottom: 10 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24' }}>{asset?.name}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24' }}>{h.grams.toFixed(2)}g</Text>
+                            <View key={assetId} style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, marginBottom: 10 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24' }}>{asset?.name}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24' }}>{h.grams.toFixed(2)}g</Text>
                                 </View>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>Value: ₹{currentVal.toLocaleString()}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: gain >= 0 ? '#4ade80' : '#f87171' }}>{gain >= 0 ? '+' : ''}₹{gain.toLocaleString()}</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>₹{currentVal.toLocaleString()}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: gain >= 0 ? '#4ade80' : '#f87171' }}>{gain >= 0 ? '+' : ''}₹{gain.toLocaleString()}</Text>
                                 </View>
                                 {asset?.type === 'bond' && h.interestAccrued > 0 && (
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80', marginBottom: 8 }}>Interest earned: ₹{h.interestAccrued.toLocaleString()}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80', marginBottom: 10 }}>Interest earned: ₹{h.interestAccrued.toLocaleString()}</Text>
                                 )}
-                                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                                    <TextInput value={goldSellGrams} onChangeText={setGoldSellGrams} keyboardType="decimal-pad"
-                                        style={{ flex: 1, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 16, padding: 8 }}
-                                        placeholder={`max ${h.grams.toFixed(2)}g`} placeholderTextColor="#2a3560" />
+                                <View style={{ flexDirection: 'row', gap: 10 }}>
+                                    <View style={{ flex: 1, backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 }}>
+                                        <TextInput value={goldSellGrams} onChangeText={setGoldSellGrams} keyboardType="decimal-pad"
+                                            style={{ color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 16 }}
+                                            placeholder={`max ${h.grams.toFixed(2)}g`} placeholderTextColor="#2a3560" />
+                                    </View>
                                     <TouchableOpacity onPress={() => {
                                         const sg = parseFloat(goldSellGrams);
                                         if (!sg || sg <= 0) { onShowDialog('Invalid', 'Enter grams to sell.', 'error'); return; }
                                         const r = sellGold(assetId, sg);
                                         onShowDialog(r.success ? 'Sold' : 'Failed', r.msg, r.success ? 'success' : 'error');
                                         if (r.success) setGoldSellGrams('');
-                                    }} style={{ borderWidth: 1, borderColor: '#f87171', backgroundColor: '#f8717115', padding: 10 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>SELL</Text>
+                                    }} style={{ borderRadius: 8, backgroundColor: '#1a0808', paddingHorizontal: 16, justifyContent: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>SELL ›</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -958,30 +967,34 @@ export default function BankScreen({ onClose, onShowDialog }) {
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40, gap: 16 }}>
                     {/* Sticky Dashboard if they have any card */}
                     {activeCreditCards?.length > 0 && creditCard && (
-                        <View style={{ borderWidth: 1, borderColor: creditCard.balance > 0 ? '#f87171' : '#60a5fa', backgroundColor: '#070a16', padding: 14 }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>TOTAL CREDIT LIMIT</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#60a5fa' }}>₹{creditCard.limit?.toLocaleString()}</Text>
-                            </View>
+                        <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>TOTAL OUTSTANDING</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: creditCard.balance > 0 ? '#f87171' : '#4ade80' }}>₹{creditCard.balance?.toLocaleString()}</Text>
+                                <View>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 2 }}>OUTSTANDING</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: creditCard.balance > 0 ? '#f87171' : '#4ade80', lineHeight: 34 }}>₹{creditCard.balance?.toLocaleString()}</Text>
+                                </View>
+                                <View style={{ alignItems: 'flex-end' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 2 }}>LIMIT</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#60a5fa' }}>₹{creditCard.limit?.toLocaleString()}</Text>
+                                </View>
                             </View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', marginBottom: creditCard.balance > 0 ? 14 : 0 }}>
                                 {creditCard.balance > 0 ? 'Pay before next month to avoid 3%/mo interest' : 'No outstanding bill'}
                             </Text>
                             {creditCard.balance > 0 && (
-                                <View style={{ marginTop: 10, gap: 8 }}>
-                                    <TextInput value={cardPayInput} onChangeText={setCardPayInput} keyboardType="number-pad"
-                                        style={{ backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 18, padding: 10 }}
-                                        placeholder={`max ₹${creditCard.balance?.toLocaleString()}`} placeholderTextColor="#2a3560" />
+                                <View style={{ gap: 10 }}>
+                                    <View style={{ backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 }}>
+                                        <TextInput value={cardPayInput} onChangeText={setCardPayInput} keyboardType="number-pad"
+                                            style={{ color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 20 }}
+                                            placeholder={`max ₹${creditCard.balance?.toLocaleString()}`} placeholderTextColor="#2a3560" />
+                                    </View>
                                     <TouchableOpacity onPress={() => {
                                         const amt = parseInt(cardPayInput) || creditCard.balance;
                                         const r = payCreditCardBill(amt);
                                         onShowDialog(r.success ? 'Paid!' : 'Failed', r.msg, r.success ? 'success' : 'error');
                                         if (r.success) setCardPayInput('');
-                                    }} style={{ borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#60a5fa15', padding: 12, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#60a5fa', letterSpacing: 2 }}>PAY FULL (₹{creditCard.balance?.toLocaleString()}) →</Text>
+                                    }} style={{ borderRadius: 10, backgroundColor: '#0d1a2e', paddingVertical: 14, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', letterSpacing: 2 }}>PAY ₹{creditCard.balance?.toLocaleString()} ›</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
@@ -991,31 +1004,30 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     {CREDIT_CARDS_DATA.map(card => {
                         const isOwned = activeCreditCards?.includes(card.id) || (card.id === 'standard' && creditCard && !activeCreditCards?.length);
                         return (
-                            <View key={card.id} style={{ borderWidth: 1, borderColor: isOwned ? '#4ade8050' : '#1a2040', backgroundColor: '#070a16', padding: 20 }}>
-                                <View style={{ alignItems: 'center', marginBottom: 16 }}>
-                                    <Image source={card.image} style={{ width: '100%', height: 180 }} resizeMode="contain" />
+                            <View key={card.id} style={{ borderRadius: 10, backgroundColor: '#08101e', overflow: 'hidden' }}>
+                                <Image source={card.image} style={{ width: '100%', height: 180 }} resizeMode="contain" />
+                                <View style={{ padding: 16 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: isOwned ? '#4ade80' : '#c8d4f0', marginBottom: 4 }}>{card.name}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#60a5fa', marginBottom: 8 }}>Perk: {card.perk}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', lineHeight: 20, marginBottom: 16 }}>{card.desc}</Text>
+                                    {isOwned ? (
+                                        <View style={{ borderRadius: 10, backgroundColor: '#0d1e12', paddingVertical: 14, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80', letterSpacing: 2 }}>CARD ACTIVE ✓</Text>
+                                        </View>
+                                    ) : card.isEligible ? (
+                                        <TouchableOpacity onPress={() => {
+                                            const r = openCreditCard(card.id);
+                                            onShowDialog(r.success ? 'Card Approved!' : 'Failed', r.msg, r.success ? 'success' : 'error');
+                                        }} style={{ borderRadius: 10, backgroundColor: '#0d1a2e', paddingVertical: 14, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#60a5fa', letterSpacing: 2 }}>APPLY NOW ›</Text>
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <View style={{ borderRadius: 10, backgroundColor: '#0d1020', paddingVertical: 14, alignItems: 'center', opacity: 0.5 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f87171' }}>Not Eligible</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>{card.criteriaText}</Text>
+                                        </View>
+                                    )}
                                 </View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: isOwned ? '#4ade80' : '#c8d4f0', marginBottom: 4 }}>{card.name}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#60a5fa', marginBottom: 8, fontStyle: 'italic' }}>Perk: {card.perk}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 20, marginBottom: 16 }}>{card.desc}</Text>
-                                
-                                {isOwned ? (
-                                    <View style={{ width: '100%', borderWidth: 1, borderColor: '#4ade80', backgroundColor: '#4ade8015', padding: 14, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80', letterSpacing: 2 }}>CARD ACTIVE ✓</Text>
-                                    </View>
-                                ) : card.isEligible ? (
-                                    <TouchableOpacity onPress={() => {
-                                        const r = openCreditCard(card.id);
-                                        onShowDialog(r.success ? 'Card Approved!' : 'Failed', r.msg, r.success ? 'success' : 'error');
-                                    }} style={{ width: '100%', borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#60a5fa15', padding: 14, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#60a5fa', letterSpacing: 2 }}>APPLY NOW →</Text>
-                                    </TouchableOpacity>
-                                ) : (
-                                    <View style={{ width: '100%', borderWidth: 1, borderColor: '#1a2040', padding: 14, alignItems: 'center', opacity: 0.5 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', textAlign: 'center' }}>Not Eligible</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', textAlign: 'center', marginTop: 4 }}>{card.criteriaText}</Text>
-                                    </View>
-                                )}
                             </View>
                         );
                     })}
@@ -1026,10 +1038,11 @@ export default function BankScreen({ onClose, onShowDialog }) {
             {tab === 'retire' && (
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
                     {!retirementBuckets ? (
-                        <View style={{ gap: 12 }}>
-                            <View style={{ borderWidth: 1, borderColor: '#818cf8', backgroundColor: '#070a16', padding: 16 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#818cf8', marginBottom: 8 }}>BUCKET STRATEGY</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 18 }}>
+                        <View style={{ gap: 14 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16 }}>
+                                <Image source={require('../../assets/ui_comp/retirement_buckets.png')} style={{ width: 48, height: 48, marginBottom: 10 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#818cf8', marginBottom: 6 }}>Bucket Strategy</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', lineHeight: 20 }}>
                                     Divide your retirement corpus into 3 buckets based on when you need the money.
                                 </Text>
                             </View>
@@ -1038,33 +1051,38 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                 { key: 'b2', label: 'BUCKET 2 — SOON', color: '#fbbf24', desc: '3–7 years of expenses in PPF/bonds/debt funds.', val: b2Input, set: setB2Input },
                                 { key: 'b3', label: 'BUCKET 3 — LATER', color: '#818cf8', desc: 'Everything else in equity. 7+ year horizon.', val: b3Input, set: setB3Input },
                             ].map(b => (
-                                <View key={b.key} style={{ borderWidth: 1, borderColor: b.color + '40', backgroundColor: '#070a16', padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: b.color, marginBottom: 4 }}>{b.label}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 18, marginBottom: 10 }}>{b.desc}</Text>
-                                    <TextInput value={b.val} onChangeText={b.set} keyboardType="number-pad"
-                                        style={{ backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 18, padding: 10 }}
-                                        placeholder="₹ amount" placeholderTextColor="#2a3560" />
+                                <View key={b.key} style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: b.color, letterSpacing: 2, marginBottom: 4 }}>{b.label}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', lineHeight: 20, marginBottom: 12 }}>{b.desc}</Text>
+                                    <View style={{ backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 }}>
+                                        <TextInput value={b.val} onChangeText={b.set} keyboardType="number-pad"
+                                            style={{ color: '#c8d4f0', fontFamily: 'VT323_400Regular', fontSize: 20 }}
+                                            placeholder="₹ amount" placeholderTextColor="#2a3560" />
+                                    </View>
                                 </View>
                             ))}
                             <TouchableOpacity onPress={() => {
                                 const b1 = parseInt(b1Input) || 0, b2 = parseInt(b2Input) || 0, b3 = parseInt(b3Input) || 0;
                                 const r = setupRetirementBuckets(b1, b2, b3);
                                 onShowDialog(r.success ? 'Buckets Configured!' : 'Failed', r.msg, r.success ? 'success' : 'error');
-                            }} style={{ borderWidth: 1, borderColor: '#818cf8', backgroundColor: '#818cf815', padding: 14, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#818cf8', letterSpacing: 2 }}>SET UP BUCKETS →</Text>
+                            }} style={{ borderRadius: 10, backgroundColor: '#818cf820', paddingVertical: 16, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#818cf8', letterSpacing: 2 }}>SET UP BUCKETS ›</Text>
                             </TouchableOpacity>
                         </View>
                     ) : (
-                        <View style={{ gap: 12 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80', letterSpacing: 2 }}>BUCKETS ACTIVE ✓</Text>
+                        <View style={{ gap: 10 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4ade80', letterSpacing: 3, marginBottom: 4 }}>BUCKETS ACTIVE ✓</Text>
                             {[
-                                { label: 'BUCKET 1 (NOW)', val: retirementBuckets.bucket1, color: '#4ade80' },
-                                { label: 'BUCKET 2 (SOON)', val: retirementBuckets.bucket2, color: '#fbbf24' },
-                                { label: 'BUCKET 3 (LATER)', val: retirementBuckets.bucket3, color: '#818cf8' },
+                                { label: 'Bucket 1 — Now', val: retirementBuckets.bucket1, color: '#4ade80', sub: 'FDs & savings · short term' },
+                                { label: 'Bucket 2 — Soon', val: retirementBuckets.bucket2, color: '#fbbf24', sub: 'PPF · bonds · 3–7 years' },
+                                { label: 'Bucket 3 — Later', val: retirementBuckets.bucket3, color: '#818cf8', sub: 'Equity · 7+ year horizon' },
                             ].map((b, i) => (
-                                <View key={i} style={{ borderWidth: 1, borderColor: b.color + '40', backgroundColor: '#070a16', padding: 14, flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: b.color }}>{b.label}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: b.color }}>₹{b.val?.toLocaleString()}</Text>
+                                <View key={i} style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: b.color }}>{b.label}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>{b.sub}</Text>
+                                    </View>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: b.color }}>₹{b.val?.toLocaleString()}</Text>
                                 </View>
                             ))}
                         </View>
@@ -1087,33 +1105,21 @@ export default function BankScreen({ onClose, onShowDialog }) {
                 return (
                     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
                         <View style={{ gap: 14 }}>
-                            <View style={{ borderWidth: 1, borderColor: '#ec489940', backgroundColor: '#0a0d1a', padding: 16, alignItems: 'center' }}>
-                                <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 80, height: 80, marginBottom: 10 }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ec4899', letterSpacing: 2 }}>CHILD SAVINGS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0', textAlign: 'center', marginTop: 4, lineHeight: 20 }}>
-                                    Build wealth for your children. They will start with this money when they take over your legacy.
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, alignItems: 'center' }}>
+                                <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 64, height: 64, marginBottom: 10 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ec4899', lineHeight: 30 }}>Child Savings</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', textAlign: 'center', marginTop: 6, lineHeight: 20 }}>
+                                    Build wealth for your children. They start their life with this when they take over your legacy.
                                 </Text>
                             </View>
 
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', letterSpacing: 2, marginTop: 10 }}>SELECT CHILD</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 3, marginTop: 8 }}>SELECT CHILD</Text>
                             <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
                                 {children.map(child => (
-                                    <TouchableOpacity 
-                                        key={child.id}
-                                        onPress={() => setSelectedChild(child.id)}
-                                        style={{ 
-                                            borderWidth: 1, 
-                                            borderColor: selectedChild === child.id ? '#ec4899' : '#1a2040', 
-                                            backgroundColor: selectedChild === child.id ? '#ec489920' : '#0a0d1a', 
-                                            padding: 12, 
-                                            borderRadius: 4,
-                                            flex: 1,
-                                            minWidth: '30%',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: selectedChild === child.id ? '#ec4899' : '#c8d4f0' }}>{child.name.toUpperCase()}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', marginTop: 2 }}>Age: {Math.floor(child.childAgeMonths / 12)}</Text>
+                                    <TouchableOpacity key={child.id} onPress={() => setSelectedChild(child.id)}
+                                        style={{ borderRadius: 10, backgroundColor: selectedChild === child.id ? '#ec489920' : '#08101e', padding: 14, flex: 1, minWidth: '30%', alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: selectedChild === child.id ? '#ec4899' : '#c8d4f0' }}>{child.name}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginTop: 2 }}>{Math.floor(child.childAgeMonths / 12)}yr</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -1122,32 +1128,24 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                 const activeChild = children.find(c => c.id === activeChildId);
                                 const balance = childSavings?.[activeChildId] || 0;
                                 return (
-                                    <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', padding: 16, marginTop: 10 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', letterSpacing: 2 }}>{activeChild ? activeChild.name.toUpperCase() : 'CHILD'}'S BALANCE</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 36, color: '#fbbf24', marginTop: 4 }}>₹{balance.toLocaleString()}</Text>
-                                        
-                                        <View style={{ height: 1, backgroundColor: '#1a2040', marginVertical: 16 }} />
-                                        
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6b7280', letterSpacing: 2, marginBottom: 8 }}>DEPOSIT FUNDS</Text>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0' }}>₹</Text>
-                                            <TextInput
-                                                value={childSaveAmount}
-                                                onChangeText={setChildSaveAmount}
-                                                keyboardType="number-pad"
-                                                style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 24, color: '#fff', backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1a2040', paddingHorizontal: 12, paddingVertical: 8 }}
-                                                placeholderTextColor="#445070"
-                                            />
+                                    <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, marginTop: 4 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 2 }}>{activeChild?.name?.toUpperCase() || 'CHILD'}'S BALANCE</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 40, color: '#fbbf24', lineHeight: 42, marginBottom: 18 }}>₹{balance.toLocaleString()}</Text>
+
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 2, marginBottom: 10 }}>DEPOSIT</Text>
+                                        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
+                                            <View style={{ flex: 1, backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 }}>
+                                                <TextInput value={childSaveAmount} onChangeText={setChildSaveAmount} keyboardType="number-pad"
+                                                    style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fff' }}
+                                                    placeholderTextColor="#445070" placeholder="₹ amount" />
+                                            </View>
                                         </View>
 
-                                        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+                                        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
                                             {[5000, 10000, 50000].map(amt => (
-                                                <TouchableOpacity 
-                                                    key={amt} 
-                                                    onPress={() => setChildSaveAmount(amt.toString())}
-                                                    style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#111827', padding: 8, alignItems: 'center' }}
-                                                >
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#9ca3af' }}>+{amt/1000}k</Text>
+                                                <TouchableOpacity key={amt} onPress={() => setChildSaveAmount(amt.toString())}
+                                                    style={{ flex: 1, borderRadius: 8, backgroundColor: '#0d1020', paddingVertical: 10, alignItems: 'center' }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070' }}>+{amt/1000}k</Text>
                                                 </TouchableOpacity>
                                             ))}
                                         </View>
@@ -1163,9 +1161,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                 onShowDialog(res.success ? 'Transferred' : 'Failed', res.msg, res.success ? 'success' : 'error');
                                                 if (res.success) setChildSaveAmount('');
                                             }}
-                                            style={{ backgroundColor: '#ec4899', padding: 14, alignItems: 'center' }}
+                                            style={{ backgroundColor: '#ec489922', borderRadius: 10, paddingVertical: 16, alignItems: 'center' }}
                                         >
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#000', letterSpacing: 2 }}>TRANSFER MONEY</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#ec4899', letterSpacing: 2 }}>TRANSFER ›</Text>
                                         </TouchableOpacity>
                                     </View>
                                 );
