@@ -2017,10 +2017,6 @@ export const GameProvider = ({ children }) => {
             } else { msg = "Not enough balance."; }
             if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
         } else if (eff.type === 'birthday_celebration') {
-            // Mark player birthday as fired at resolve time (not queue time)
-            if (pendingDecision?.isBirthday && pendingDecision?.id?.startsWith('bday_')) {
-                setFiredDecisions(prev => prev.includes(pendingDecision.id) ? prev : [...prev, pendingDecision.id]);
-            }
             if (balance >= eff.amount) {
                 setBalance(prev => prev - eff.amount);
                 if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
@@ -3133,16 +3129,10 @@ export const GameProvider = ({ children }) => {
         };
 
         let playerBdayYearToCelebrate = null;
-        if (bdayMonth && totalMonthsPlayed >= 0) {
-            const startYear = 2024;
-            for (let y = startYear; y <= turn.year; y++) {
-                if (!firedDecisions.includes(`bday_${y}`)) {
-                    // Fire if it's the right month this year, OR if it's a past year that was missed
-                    if ((y === turn.year && turn.month === bdayMonth) || y < turn.year) {
-                        playerBdayYearToCelebrate = y;
-                        break;
-                    }
-                }
+        if (bdayMonth && turn.month === bdayMonth) {
+            const key = `bday_${turn.year}`;
+            if (!firedDecisions.includes(key)) {
+                playerBdayYearToCelebrate = turn.year;
             }
         }
 
@@ -3231,8 +3221,7 @@ export const GameProvider = ({ children }) => {
                             { label: 'Lavish Bash', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Bash', amount: 40000, happiness: 50, creditScore: 40, health: -10, msg: 'A wild party! Huge status boost but you feel hungover.' } },
                           ],
                 });
-                // firedDecisions is marked at RESOLVE time (resolveDecision birthday_celebration handler),
-                // not here, so the birthday can't be permanently skipped if it's behind another queue item.
+                setFiredDecisions(prev => prev.includes(bdayDecisionId) ? prev : [...prev, bdayDecisionId]);
                 setIsPlaying(false);
             }
         }
