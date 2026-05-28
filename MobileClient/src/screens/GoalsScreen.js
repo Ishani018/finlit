@@ -131,8 +131,7 @@ function UnifiedCard({ item, state, unlocked }) {
     const { color, name, desc } = item;
 
     return (
-        <View style={{ backgroundColor: '#070a16', overflow: 'hidden', position: 'relative', flexDirection: 'row', height: 110 }}>
-            <View style={{ width: 3, backgroundColor: done ? color : '#1a2040' }} />
+        <View style={{ backgroundColor: '#070a16', overflow: 'hidden', position: 'relative', flexDirection: 'row', height: 110, borderRadius: 6 }}>
             {done && <Corners color={color} />}
 
             {/* Image */}
@@ -142,11 +141,6 @@ function UnifiedCard({ item, state, unlocked }) {
                     : <View style={{ flex: 1, backgroundColor: color + '10' }} />
                 }
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: done ? 'rgba(6,8,15,0.2)' : 'rgba(6,8,15,0.55)' }} />
-                <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: color + (done ? 'ee' : '80'), paddingHorizontal: 6, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#000', letterSpacing: 1 }}>
-                        {done ? 'DONE' : `${Math.round(pct * 100)}%`}
-                    </Text>
-                </View>
                 {/* Type tag — bottom of image */}
                 <View style={{ position: 'absolute', bottom: 6, left: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: color + 'aa', letterSpacing: 2 }}>
@@ -198,7 +192,7 @@ export default function GoalsScreen({ onClose, onShop }) {
             {/* Header */}
             <View style={{ backgroundColor: '#0d1020', paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: '#1a2040', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>AGE {playerAge}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>AGE {playerAge}</Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>Goals & Achievements</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

@@ -138,7 +138,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', lineHeight: 26 }}>Your Account</Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>BALANCE</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>BALANCE</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#4ade80', lineHeight: 26 }}>₹{balance?.toLocaleString()}</Text>
                     </View>
                 </View>
@@ -150,7 +150,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: creditBand.color, lineHeight: 30 }}>{creditScore}</Text>
                     <View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: creditBand.color, lineHeight: 14 }}>{creditBand.label}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', lineHeight: 12 }}>CREDIT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', lineHeight: 12 }}>CREDIT</Text>
                     </View>
                 </View>
                 <View style={{ width: 1, backgroundColor: '#1a2040' }} />
@@ -158,14 +158,14 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>
                         {totalEMI > 0 ? `₹${(totalEMI / 1000).toFixed(0)}k/mo` : 'NONE'}
                     </Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', lineHeight: 12 }}>EMI</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', lineHeight: 12 }}>EMI</Text>
                 </View>
                 <View style={{ width: 1, backgroundColor: '#1a2040' }} />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24', lineHeight: 24 }}>
                         {totalFDValue > 0 ? `₹${(totalFDValue / 1000).toFixed(0)}k` : 'NIL'}
                     </Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', lineHeight: 12 }}>FDs</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', lineHeight: 12 }}>FDs</Text>
                 </View>
             </View>}
 
@@ -204,12 +204,12 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         {/* Stats strip */}
                         <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>CREDIT</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>CREDIT</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: creditBand.color, lineHeight: 24 }}>{creditScore}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: creditBand.color }}>{creditBand.label}</Text>
                             </View>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>FD VALUE</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>FD VALUE</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24', lineHeight: 24 }}>{totalFDValue > 0 ? `₹${(totalFDValue/1000).toFixed(0)}k` : 'NIL'}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{fds.length} active</Text>
                             </View>
@@ -239,12 +239,12 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         {/* Stats strip */}
                         <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ACTIVE LOANS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>ACTIVE LOANS</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: loans.length > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{loans.length}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{loans.length === 0 ? 'debt free' : 'outstanding'}</Text>
                             </View>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>EMI / MO</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>EMI / MO</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'NONE'}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>monthly</Text>
                             </View>
@@ -273,12 +273,12 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         </View>
                         <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>STATUS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>STATUS</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: caSubscribed ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{caSubscribed ? 'ACTIVE' : 'INACTIVE'}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>₹2,000/mo</Text>
                             </View>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>ITR</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>ITR</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: itrFiled?.[turn?.year] ? '#4ade80' : '#fbbf24', lineHeight: 20, marginTop: 2 }}>
                                     {itrFiled?.[turn?.year] ? 'FILED' : 'PENDING'}
                                 </Text>
@@ -305,11 +305,11 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         </View>
                         <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#60a5fa20' }}>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#60a5fa20' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>CARDS HELD</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>CARDS HELD</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: (activeCreditCards?.length > 0 || creditCard) ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{(activeCreditCards || (creditCard ? ['standard'] : [])).length}</Text>
                             </View>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>OUTSTANDING</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>OUTSTANDING</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: (creditCard?.balance > 0) ? '#f87171' : '#4ade80', lineHeight: 20, marginTop: 2 }}>
                                     {creditCard?.balance ? `₹${creditCard.balance.toLocaleString()}` : '—'}
                                 </Text>
@@ -387,11 +387,11 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         </View>
                         <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#fbbf2430' }}>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#fbbf2430' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>SPOT PRICE</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>SPOT PRICE</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24', lineHeight: 22 }}>₹{goldPrice?.toLocaleString()}/g</Text>
                             </View>
                             <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>HOLDINGS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>HOLDINGS</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: totalGoldValue > 0 ? '#fbbf24' : '#445070', lineHeight: 22 }}>
                                     {totalGoldValue > 0 ? `₹${(totalGoldValue / 1000).toFixed(0)}k` : 'NONE'}
                                 </Text>
@@ -429,10 +429,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     <View style={{ gap: 12 }}>
 
                         {/* Credit score card */}
-                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', flexDirection: 'row', overflow: 'hidden' }}>
-                            <View style={{ width: 3, backgroundColor: creditBand.color }} />
+                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', borderRadius: 6, overflow: 'hidden' }}>
                             <View style={{ flex: 1, padding: 12 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 6 }}>CREDIT SCORE</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 6 }}>CREDIT SCORE</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginBottom: 8 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 48, color: creditBand.color, lineHeight: 50 }}>{creditScore}</Text>
                                     <View style={{ paddingBottom: 4 }}>
@@ -448,7 +447,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                 </View>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                     {['BAD', 'POOR', 'FAIR', 'GOOD', 'EXCELLENT'].map(l => (
-                                        <Text key={l} style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#2a3560' }}>{l}</Text>
+                                        <Text key={l} style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580' }}>{l}</Text>
                                     ))}
                                 </View>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 8 }}>
@@ -471,7 +470,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24', letterSpacing: 3, marginBottom: 12 }}>OPEN NEW FD</Text>
 
                             {/* Amount input */}
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2, marginBottom: 6 }}>AMOUNT</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2, marginBottom: 6 }}>AMOUNT</Text>
                             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                                 <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', paddingHorizontal: 12, paddingVertical: 8}}>
                                     <TextInput
@@ -491,7 +490,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             </View>
 
                             {/* Tenor options */}
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2, marginBottom: 8 }}>TENOR</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2, marginBottom: 8 }}>TENOR</Text>
                             <View style={{ gap: 6, marginBottom: 14 }}>
                                 {FD_OPTIONS.map(opt => {
                                     const isSelected = selectedFDOption.id === opt.id;
@@ -538,7 +537,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         {/* Active FDs */}
                         {fds.length > 0 && (
                             <View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 8 }}>ACTIVE FDs ({fds.length})</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 8 }}>ACTIVE FDs ({fds.length})</Text>
                                 {fds.map(fd => {
                                     const opt = FD_OPTIONS.find(o => o.id === fd.optionId) || FD_OPTIONS[2];
                                     const pct = 1 - (fd.monthsLeft / fd.totalMonths);
@@ -577,7 +576,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         {fds.length === 0 && (
                             <View style={{ alignItems: 'center', padding: 30}}>
                                 <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 32, height: 32, tintColor: '#1a2040' }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#2a3560', marginTop: 12, textAlign: 'center' }}>No active FDs{'\n'}Lock in your savings above</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4a5580', marginTop: 12, textAlign: 'center' }}>No active FDs{'\n'}Lock in your savings above</Text>
                             </View>
                         )}
                         </View>{/* end FD card */}
@@ -609,7 +608,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         const CARD_H = 130;
                         return (
                             <View style={{ gap: 10 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 4 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 4 }}>
                                     CREDIT: <Text style={{ color: creditBand.color }}>{creditScore} {creditBand.label}</Text>
                                 </Text>
 
@@ -727,13 +726,13 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                                 { label: 'BORROWED', val: `₹${originalPrincipal.toLocaleString()}`, sub: 'originally', col: '#445070' },
                                                             ].map((s, i) => (
                                                                 <View key={i} style={{ flex: 1, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1e2840', padding: 8}}>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#2a3560', letterSpacing: 1 }}>{s.label}</Text>
+                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 1 }}>{s.label}</Text>
                                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: s.col }}>{s.val}</Text>
                                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#445070' }}>{s.sub}</Text>
                                                                 </View>
                                                             ))}
                                                         </View>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>MAKE A PAYMENT</Text>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>MAKE A PAYMENT</Text>
                                                         <View style={{ flexDirection: 'row', gap: 6 }}>
                                                             {[loan.emi, Math.round(loan.emi * 3), Math.round(loan.remainingPrincipal)].map((amt, idx) => (
                                                                 <TouchableOpacity key={idx} onPress={() => setPrepayInput(String(amt))} style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 7, alignItems: 'center'}}>
@@ -930,7 +929,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                     color={itrThisYear ? '#4ade80' : inFilingWindow ? '#fbbf24' : '#2a3560'}
                                 />
                                 <View style={{ flex: 1 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>
                                         ITR — FY {currentYear - 1}-{String(currentYear).slice(2)}
                                     </Text>
                                     {itrThisYear ? (
@@ -952,7 +951,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             {/* ── HOW DO YOU WANT TO FILE? ── */}
                             {true && (
                                 <>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4, paddingHorizontal: 2 }}>{itrThisYear ? 'NEXT FILING YEAR — PLAN AHEAD' : 'CHOOSE HOW TO FILE YOUR ITR'}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4, paddingHorizontal: 2 }}>{itrThisYear ? 'NEXT FILING YEAR — PLAN AHEAD' : 'CHOOSE HOW TO FILE YOUR ITR'}</Text>
 
                                     <View style={{ flexDirection: 'row', gap: 10 }}>
                                         {/* CA Option */}
@@ -1037,7 +1036,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             {/* ── CA Active Details ── */}
                             {caSubscribed && (
                                 <View style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0618', padding: 14, gap: 8 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3 }}>YOUR CA — CA SHARMA & ASSOCIATES</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>YOUR CA — CA SHARMA & ASSOCIATES</Text>
 
                                     <View style={{ height: 90, position: 'relative', overflow: 'hidden' }}>
                                         <Image source={require('../../assets/CA_Office.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -1057,7 +1056,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                             { label: 'ITR', value: 'Auto July', color: '#a78bfa' },
                                         ].map((s, i) => (
                                             <View key={i} style={{ flex: 1, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1e2840', padding: 8, alignItems: 'center' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#2a3560', letterSpacing: 1 }}>{s.label}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 1 }}>{s.label}</Text>
                                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: s.color }}>{s.value}</Text>
                                             </View>
                                         ))}
@@ -1090,7 +1089,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             {/* ── Self-filing progress (if in progress) ── */}
                             {selfFilingInProgress && (
                                 <View style={{ borderWidth: 1, borderColor: '#60a5fa50', backgroundColor: '#030d1f', padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 6 }}>SELF-FILING IN PROGRESS</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 6 }}>SELF-FILING IN PROGRESS</Text>
                                     {['form_select', 'gather_docs', 'everify'].map((s, i) => {
                                         const labels = ['Pick ITR form', 'Gather documents', 'Compute & e-verify'];
                                         const stepIdx = ['form_select', 'gather_docs', 'everify'].indexOf(itrSelfFiling.step);

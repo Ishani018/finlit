@@ -1054,19 +1054,25 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 </View>
             </View>
 
-            {/* Stats row */}
-            <View style={{ flexDirection: 'row', backgroundColor: C.panel, borderBottomWidth: 1, borderColor: C.border }}>
-                {[
-                    { label: 'CREDIT', value: creditScore, sub: creditLabel, color: creditColor },
-                    { label: 'HAPPINESS', value: `${Math.round(happiness || 50)}`, sub: '/100', color: hapColor },
-                    { label: 'MEMBERS', value: dependents.length + 1, sub: 'people', color: C.blue },
-                ].map((t, i) => (
-                    <View key={t.label} style={{ flex: 1, paddingVertical: 10, alignItems: 'center', borderRightWidth: i < 2 ? 1 : 0, borderColor: C.border }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, letterSpacing: 2 }}>{t.label}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: t.color, lineHeight: 26 }}>{t.value}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color + 'aa' }}>{t.sub}</Text>
-                    </View>
-                ))}
+            {/* Stats strip — icon + value, no boxes */}
+            <View style={{ flexDirection: 'row', paddingHorizontal: PAD, paddingVertical: 12, gap: 20, backgroundColor: C.panel }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Image source={require('../../assets/ui_comp/saveandearn.png')} style={{ width: 14, height: 14, opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: creditColor, lineHeight: 22 }}>{creditScore}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: creditColor + '99' }}>{creditLabel}</Text>
+                </View>
+                <View style={{ width: 1, backgroundColor: C.border }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Image source={require('../../assets/ui_comp/happyicon.png')} style={{ width: 14, height: 14, opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: hapColor, lineHeight: 22 }}>{Math.round(happiness || 50)}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: hapColor + '99' }}>/100</Text>
+                </View>
+                <View style={{ width: 1, backgroundColor: C.border }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Image source={require('../../assets/ui_comp/familyicon.png')} style={{ width: 14, height: 14, opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.blue, lineHeight: 22 }}>{dependents.filter(d => !d.isDead && d.custody !== 'ex').length + 1}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.blue + '99' }}>people</Text>
+                </View>
             </View>
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>

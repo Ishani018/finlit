@@ -283,7 +283,6 @@ const AchievementToast = ({ achievement, onDone }) => {
       <View style={{
         backgroundColor: '#080b18',
         borderBottomWidth: 1, borderColor: '#1a2040',
-        borderLeftWidth: 3, borderLeftColor: color,
         paddingHorizontal: 16, paddingVertical: 14, paddingTop: 50,
         flexDirection: 'row', alignItems: 'center', gap: 14,
       }}>
@@ -748,7 +747,7 @@ const GameLayout = ({ onHardReset }) => {
   if (!currentHousing || balance === undefined) {
     return (
       <View style={{ flex: 1, backgroundColor: '#06080f', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#2a3560', letterSpacing: 4 }}>BOOTING LIFE OS...</Text>
+        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4a5580', letterSpacing: 4 }}>BOOTING LIFE OS...</Text>
       </View>
     );
   }
@@ -873,7 +872,7 @@ const GameLayout = ({ onHardReset }) => {
           {/* Header */}
           <View style={{ alignItems: 'center', marginBottom: 24, marginTop: 8 }}>
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1a2440', letterSpacing: 5 }}>━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', letterSpacing: 4, marginTop: 4 }}>AGE 75  •  END OF JOURNEY</Text>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', letterSpacing: 4, marginTop: 4 }}>AGE 75  •  END OF JOURNEY</Text>
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 48, color: '#c8d4f0', letterSpacing: 3, lineHeight: 52, marginTop: 6 }}>YOUR LEGACY</Text>
             <View style={{ paddingHorizontal: 20, paddingVertical: 6, borderWidth: 1, borderColor: rankColor + '88', backgroundColor: rankColor + '11', marginTop: 8 }}>
               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: rankColor, letterSpacing: 2 }}>{finalScore.rank}</Text>
@@ -967,8 +966,8 @@ const GameLayout = ({ onHardReset }) => {
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 22 }}>{playerName || 'Player'}  ·  Age {playerAge}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#445070', lineHeight: 18 }}>{currentJob?.name || 'Unemployed'}</Text>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 16 }}>{'·'}</Text>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 16 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', lineHeight: 16 }}>{'·'}</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', lineHeight: 16 }}>
                     {(() => { const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${months[(turn.month - 1) % 12]} ${turn.year}`; })()}
                   </Text>
                 </View>
@@ -1026,42 +1025,40 @@ const GameLayout = ({ onHardReset }) => {
           const obj = typeof getCurrentObjective === 'function' ? getCurrentObjective() : null;
           if (!obj) return null;
           return (
-            <View style={{ backgroundColor: '#1d4ed8', padding: 12, borderBottomWidth: 1, borderColor: '#3b82f6' }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#93c5fd', letterSpacing: 2 }}>CURRENT OBJECTIVES</Text>
+            <View style={{ backgroundColor: '#06080f', borderBottomWidth: 1, borderColor: '#1a2040', paddingHorizontal: 14, paddingVertical: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <Image source={require('./assets/ui_comp/bulb.png')} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>CURRENT OBJECTIVES</Text>
               </View>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#ffffff' }}>{obj.title}</Text>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#bfdbfe', marginBottom: 10 }}>{obj.desc}</Text>
-              
-              {obj.steps && obj.steps.map(step => (
-                <TouchableOpacity 
-                  key={step.id} 
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', lineHeight: 20, marginBottom: 2 }}>{obj.title}</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginBottom: 10 }}>{obj.desc}</Text>
+
+              {obj.steps && obj.steps.map((step, i) => (
+                <TouchableOpacity
+                  key={step.id}
                   onPress={() => {
-                    if (step.action?.isAdvanceTime) {
-                      handleAdvanceTime();
-                      return;
-                    }
+                    if (step.action?.isAdvanceTime) { handleAdvanceTime(); return; }
                     if (step.action?.tab) setActiveTab(step.action.tab);
                     if (step.action?.subTab === 'shop') setShowGrocery(true);
                     if (step.action?.subTab && step.action.tab === 'money') setMoneySubTab(step.action.subTab);
-                  }} 
+                  }}
                   activeOpacity={0.8}
-                  style={{ 
-                    flexDirection: 'row', alignItems: 'center', gap: 10, 
-                    backgroundColor: step.done ? '#1e3a8a80' : '#2563eb', 
-                    padding: 8, borderWidth: 1, borderColor: step.done ? '#1e3a8a' : '#60a5fa', 
-                    marginBottom: 6, opacity: step.done ? 0.6 : 1
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 10,
+                    backgroundColor: step.done ? '#070a14' : '#0a0f1e',
+                    paddingVertical: 8, paddingHorizontal: 10,
+                    borderRadius: 4,
+                    marginBottom: 5, opacity: step.done ? 0.55 : 1,
                   }}
                 >
-                  <Image source={step.icon} style={{ width: 24, height: 24, opacity: step.done ? 0.5 : 1 }} resizeMode="contain" />
-                  <Text style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 16, color: step.done ? '#93c5fd' : '#ffffff', textDecorationLine: step.done ? 'line-through' : 'none' }}>
+                  <Image source={step.icon} style={{ width: 20, height: 20, opacity: step.done ? 0.4 : 0.8 }} resizeMode="contain" />
+                  <Text style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 15, color: step.done ? '#2a5040' : '#c8d4f0', textDecorationLine: step.done ? 'line-through' : 'none' }}>
                     {step.label}
                   </Text>
-                  {step.done ? (
-                    <FontAwesome5 name="check" size={14} color="#4ade80" />
-                  ) : (
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#bfdbfe' }}>GO ▶</Text>
-                  )}
+                  {step.done
+                    ? <Image source={require('./assets/ui_comp/achivements.png')} style={{ width: 14, height: 14, opacity: 0.6 }} resizeMode="contain" />
+                    : <Image source={require('./assets/ui_comp/play button.png')} style={{ width: 14, height: 14, opacity: 0.7 }} resizeMode="contain" />
+                  }
                 </TouchableOpacity>
               ))}
             </View>
@@ -1199,18 +1196,18 @@ const GameLayout = ({ onHardReset }) => {
               <TouchableOpacity
                 onPress={() => { setShowPantryBanner(false); setShowGrocery(true); }}
                 activeOpacity={0.85}
-                style={{ position: 'absolute', bottom: 46, left: 10, right: 10, zIndex: 20, backgroundColor: 'rgba(8,13,25,0.97)', borderWidth: 1, borderColor: '#1e3a5f', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, gap: 10 }}
+                style={{ position: 'absolute', bottom: 46, left: 10, right: 10, zIndex: 20, backgroundColor: 'rgba(8,13,25,0.95)', borderRadius: 10, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, gap: 10 }}
               >
-                <Image source={require('./assets/ui_comp/groceryshop.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                <Image source={require('./assets/ui_comp/groceryshop.png')} style={{ width: 22, height: 22, opacity: 0.8 }} resizeMode="contain" />
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', letterSpacing: 1 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0', letterSpacing: 1 }}>
                     {totalQty === 0 ? 'PANTRY EMPTY — Stock up now!' : `LOW STOCK — ${totalQty} item${totalQty === 1 ? '' : 's'} left`}
                   </Text>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>
-                    Tap to buy groceries • dismisses in 20s
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580' }}>
+                    Tap to buy groceries
                   </Text>
                 </View>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa' }}>SHOP ▶</Text>
+                <Image source={require('./assets/ui_comp/play button.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
               </TouchableOpacity>
             );
           })()}
@@ -1282,7 +1279,7 @@ const GameLayout = ({ onHardReset }) => {
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderWidth: 1, borderColor: step.done ? '#4ade8030' : (step.onPress ? '#fbbf2430' : '#1e2840'), backgroundColor: step.done ? '#0d1e12' : '#0a0d1a' }}>
                       <View style={{ width: 22, height: 22, borderWidth: 1, borderColor: step.done ? '#4ade80' : '#2a3560', backgroundColor: step.done ? '#4ade8020' : 'transparent', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {step.done && <FontAwesome5 name="check" size={9} color="#4ade80" />}
-                        {!step.done && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3560' }}>{i + 1}</Text>}
+                        {!step.done && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4a5580' }}>{i + 1}</Text>}
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: step.done ? '#4ade80' : (step.onPress ? '#fbbf24' : '#c8d4f0'), textDecorationLine: step.done ? 'line-through' : 'none' }}>
@@ -1353,20 +1350,21 @@ const GameLayout = ({ onHardReset }) => {
             {!careerSubTab && (
               <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
                 <View style={{ marginBottom: 16, marginTop: 4 }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>CAREER PORTAL</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>CAREER PORTAL</Text>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 30 }}>Find Your Path</Text>
                 </View>
 
-                {/* Current job strip */}
+                {/* Current job — full image card */}
                 {currentJob && (
-                  <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', flexDirection: 'row', overflow: 'hidden', marginBottom: 14 }}>
-                    <View style={{ width: 3, backgroundColor: '#fbbf24' }} />
-                    <View style={{ flex: 1, padding: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3 }}>CURRENT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 22 }}>{currentJob.name}</Text>
+                  <View style={{ height: 120, overflow: 'hidden', marginBottom: 14, position: 'relative' }}>
+                    <Image source={currentJob.office_image || currentJob.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
+                    <View style={{ position: 'absolute', inset: 0, padding: 14, justifyContent: 'space-between' }}>
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 3 }}>CURRENT JOB</Text>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ffffff', lineHeight: 26 }}>{currentJob.name}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80' }}>₹{currentJob.salary.toLocaleString()}/mo</Text>
                       </View>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80' }}>₹{currentJob.salary.toLocaleString()}/mo</Text>
                     </View>
                   </View>
                 )}
@@ -1431,7 +1429,7 @@ const GameLayout = ({ onHardReset }) => {
             {!moneySubTab && (
               <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
                 <View style={{ marginBottom: 16, marginTop: 4 }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>FINANCES</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>FINANCES</Text>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 30 }}>Money</Text>
                 </View>
 
@@ -1464,8 +1462,8 @@ const GameLayout = ({ onHardReset }) => {
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>BANK</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>FD · Loans · CA · ITR</Text>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#38b2ac60', paddingHorizontal: 12, paddingVertical: 4 }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#38b2ac', letterSpacing: 2 }}>OPEN ▶</Text>
+                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
+                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -1481,8 +1479,8 @@ const GameLayout = ({ onHardReset }) => {
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>INSURE</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Health · Life · Property</Text>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#22c55e60', paddingHorizontal: 12, paddingVertical: 4 }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#22c55e', letterSpacing: 2 }}>OPEN ▶</Text>
+                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
+                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -1608,7 +1606,7 @@ const GameLayout = ({ onHardReset }) => {
                               if (stockNews.length === 0) {
                                 return (
                                   <View style={{ alignItems: 'center', paddingVertical: 40, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#2a3560', textAlign: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4a5580', textAlign: 'center' }}>
                                       No news yet.{'\n'}Advance a few months to see market events.
                                     </Text>
                                   </View>
@@ -1713,7 +1711,7 @@ const GameLayout = ({ onHardReset }) => {
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 1 }}>{stock.name}</Text>
                                     <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{stock.ticker}</Text>
-                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3560' }}>|</Text>
+                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4a5580' }}>|</Text>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{stock.sector}</Text>
                                       <View style={{ borderWidth: 1, borderColor: (riskColors[stock.riskLevel] || '#fbbf24') + '50', paddingHorizontal: 5 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: riskColors[stock.riskLevel] || '#fbbf24' }}>{stock.riskLevel} Risk</Text>
@@ -1739,17 +1737,17 @@ const GameLayout = ({ onHardReset }) => {
                                 <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
                                   {stock.dividendYield > 0 && (
                                     <View>
-                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560' }}>DIV YIELD</Text>
+                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580' }}>DIV YIELD</Text>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24' }}>{stock.dividendYield}% p.a.</Text>
                                     </View>
                                   )}
                                   <View>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560' }}>HIST RETURN</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580' }}>HIST RETURN</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa' }}>{stock.historicalReturn > 0 ? '+' : ''}{stock.historicalReturn}% avg</Text>
                                   </View>
                                   {holding && holding.qty > 0 && (
                                     <View>
-                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560' }}>YOU HOLD</Text>
+                                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580' }}>YOU HOLD</Text>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>{holding.qty} shares</Text>
                                     </View>
                                   )}
@@ -1772,7 +1770,7 @@ const GameLayout = ({ onHardReset }) => {
                                   ))}
                                 </View>
 
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', marginBottom: 4 }}>QUANTITY</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 4 }}>QUANTITY</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                                   <TouchableOpacity onPress={() => setTradeQty(q => String(Math.max(1, parseInt(q || '1') - 1)))} style={{ width: 36, height: 36, backgroundColor: '#111828', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#6070a0' }}>-</Text>
@@ -1879,11 +1877,11 @@ const GameLayout = ({ onHardReset }) => {
                                         )}
                                         <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
                                           <View>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#2a3560' }}>3Y</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580' }}>3Y</Text>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80' }}>{mf.returns_3yr}%</Text>
                                           </View>
                                           <View>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#2a3560' }}>5Y</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580' }}>5Y</Text>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80' }}>{mf.returns_5yr}%</Text>
                                           </View>
                                         </View>
@@ -1929,10 +1927,10 @@ const GameLayout = ({ onHardReset }) => {
                                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{mf.amc}  •  {mf.category}</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap', marginBottom: 12 }}>
-                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>CURRENT NAV</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff' }}>₹{currentNav.toFixed(2)}</Text></View>
-                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>1Y</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80' }}>{mf.returns_1yr}%</Text></View>
-                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>3Y</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80' }}>{mf.returns_3yr}%</Text></View>
-                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>EXP RATIO</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24' }}>{mf.expenseRatio}%</Text></View>
+                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580' }}>CURRENT NAV</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff' }}>₹{currentNav.toFixed(2)}</Text></View>
+                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580' }}>1Y</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80' }}>{mf.returns_1yr}%</Text></View>
+                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580' }}>3Y</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80' }}>{mf.returns_3yr}%</Text></View>
+                                  <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580' }}>EXP RATIO</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24' }}>{mf.expenseRatio}%</Text></View>
                                 </View>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', lineHeight: 22 }}>{mf.description}</Text>
                                 {holding && holding.units > 0 && (
@@ -1953,7 +1951,7 @@ const GameLayout = ({ onHardReset }) => {
                                 ))}
                               </View>
 
-                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', marginBottom: 6 }}>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 6 }}>
                                 {mfTab === 'SIP' ? 'MONTHLY SIP AMOUNT' : 'INVESTMENT AMOUNT'}
                               </Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -2006,7 +2004,7 @@ const GameLayout = ({ onHardReset }) => {
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#92400e' }}>MAX/YEAR</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>₹1,50,000</Text></View>
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#92400e' }}>TAX</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>80C deduction</Text></View>
                               </View>
-                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', marginBottom: 12 }}>CONTRIBUTE AMOUNT</Text>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 12 }}>CONTRIBUTE AMOUNT</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24' }}>₹</Text>
                                 <TextInput value={ppfAmount} onChangeText={setPpfAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderColor: '#78350f', paddingHorizontal: 12, paddingVertical: 8 }} />
@@ -2032,7 +2030,7 @@ const GameLayout = ({ onHardReset }) => {
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1e4080' }}>EST RETURN</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>8-14% p.a.</Text></View>
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1e4080' }}>TAX</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>80CCD +₹50K</Text></View>
                               </View>
-                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', marginBottom: 8 }}>EQUITY % (higher = more growth + risk)</Text>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 8 }}>EQUITY % (higher = more growth + risk)</Text>
                               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                                 {['25', '50', '75'].map(pct => (
                                   <TouchableOpacity key={pct} onPress={() => setNpsEquity(pct)} style={{ flex: 1, paddingVertical: 8, alignItems: 'center', borderWidth: 1, borderColor: npsEquity === pct ? '#60a5fa' : '#1e2840', backgroundColor: npsEquity === pct ? '#0d2040' : 'transparent' }}>
@@ -2040,7 +2038,7 @@ const GameLayout = ({ onHardReset }) => {
                                   </TouchableOpacity>
                                 ))}
                               </View>
-                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', marginBottom: 8 }}>AMOUNT</Text>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 8 }}>AMOUNT</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#60a5fa' }}>₹</Text>
                                 <TextInput value={npsAmount} onChangeText={setNpsAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderColor: '#1e3a5f', paddingHorizontal: 12, paddingVertical: 8 }} />
@@ -2051,7 +2049,7 @@ const GameLayout = ({ onHardReset }) => {
                             </View>
 
                             <View style={{ backgroundColor: '#060810', borderWidth: 1, borderColor: '#1a2040', padding: 12 }}>
-                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', lineHeight: 22 }}>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', lineHeight: 22 }}>
                                 PPF: Guaranteed 7.1%, tax-free maturity, 15-year lock-in. Max 80C deduction.{'\n'}
                                 NPS: Market-linked, 60% lump sum at 60, 40% annuity. Extra ₹50K deduction under 80CCD.
                               </Text>
@@ -2104,7 +2102,7 @@ const GameLayout = ({ onHardReset }) => {
                                   { label: 'Real Estate', value: `₹${properties.reduce((t, id) => { const p = REAL_ESTATE.find(x => x.id === id); return t + (p ? p.price : 0); }, 0).toLocaleString()}` },
                                 ].map(item => (
                                   <View key={item.label}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>{item.label.toUpperCase()}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580' }}>{item.label.toUpperCase()}</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }}>{item.value}</Text>
                                   </View>
                                 ))}
@@ -2170,7 +2168,7 @@ const GameLayout = ({ onHardReset }) => {
                             {/* Properties */}
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', letterSpacing: 2, marginBottom: 8, marginTop: 12 }}>REAL ESTATE</Text>
                             {properties.length === 0 ? (
-                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560', marginBottom: 12 }}>No properties owned yet.</Text>
+                              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 12 }}>No properties owned yet.</Text>
                             ) : properties.map(propId => {
                               const prop = REAL_ESTATE.find(p => p.id === propId);
                               if (!prop) return null;
@@ -2520,68 +2518,48 @@ const GameLayout = ({ onHardReset }) => {
 
       {/* ── First-load intro overlay ── */}
       {showIntro && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 800, backgroundColor: 'rgba(4,6,14,0.96)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-          <View style={{ width: '100%', maxWidth: 360, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16' }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 800, backgroundColor: 'rgba(4,6,14,0.97)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 28 }}>
+          <View style={{ width: '100%', maxWidth: 340, backgroundColor: '#111827', padding: 24, borderRadius: 12 }}>
 
-            {/* Header */}
-            <View style={{ backgroundColor: '#0d1020', borderBottomWidth: 1, borderColor: '#1a2040', padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* Logo + title */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 28 }}>
+              <Image source={require('./assets/icon.png')} style={{ width: 52, height: 52, borderRadius: 10 }} resizeMode="contain" />
               <View>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>LIFE SIMULATION</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 32 }}>FINLIT</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>LIFE SIMULATION</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 36, color: '#c8d4f0', lineHeight: 38 }}>FINLIT</Text>
               </View>
-              <Image source={require('./assets/ui_comp/saveandearn.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />
             </View>
 
-            <View style={{ padding: 16 }}>
-              {/* Mission statement */}
-              <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', padding: 12, marginBottom: 16 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 4 }}>YOUR MISSION</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', lineHeight: 22 }}>Start at age 18 with ₹5,000.</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24', lineHeight: 22 }}>Retire at 58 as wealthy as possible.</Text>
-              </View>
+            {/* Mission */}
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4, marginBottom: 6 }}>YOUR MISSION</Text>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 24, marginBottom: 2 }}>Start at age 18 with ₹50,000.</Text>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24', lineHeight: 24, marginBottom: 28 }}>Retire at 58 as wealthy as possible.</Text>
 
-              {/* Icon grid — 3 cols × 2 rows */}
+            {/* Icon row — no boxes, just icons + labels */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 }}>
               {[
-                [
-                  { img: require('./assets/ui_comp/career.png'),    label: 'JOBS',    sub: 'Earn a salary' },
-                  { img: require('./assets/ui_comp/grad_cap.png'),label: 'STUDY',   sub: 'Unlock careers' },
-                  { img: require('./assets/ui_comp/investicon.png'), label: 'INVEST',  sub: 'Grow wealth' },
-                ],
-                [
-                  { img: require('./assets/ui_comp/familyicon.png'),label: 'FAMILY',  sub: 'Build your life' },
-                  { img: require('./assets/ui_comp/home.png'),       label: 'HOME',    sub: 'Upgrade housing' },
-                  { img: require('./assets/ui_comp/inbox.png'),      label: 'INBOX',   sub: 'Life events' },
-                ],
-              ].map((row, ri) => (
-                <View key={ri} style={{ flexDirection: 'row', gap: 6, marginBottom: 6 }}>
-                  {row.map(item => (
-                    <View key={item.label} style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', padding: 8, alignItems: 'center' }}>
-                      <Image source={item.img} style={{ width: 28, height: 28, marginBottom: 4 }} resizeMode="contain" />
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#c8d4f0', letterSpacing: 1 }}>{item.label}</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', textAlign: 'center', lineHeight: 13 }}>{item.sub}</Text>
-                    </View>
-                  ))}
+                { img: require('./assets/ui_comp/career.png'),     label: 'JOBS' },
+                { img: require('./assets/ui_comp/investicon.png'),  label: 'INVEST' },
+                { img: require('./assets/ui_comp/familyicon.png'),  label: 'FAMILY' },
+                { img: require('./assets/ui_comp/home.png'),        label: 'HOME' },
+                { img: require('./assets/ui_comp/inbox.png'),       label: 'INBOX' },
+              ].map(item => (
+                <View key={item.label} style={{ alignItems: 'center', gap: 4 }}>
+                  <Image source={item.img} style={{ width: 24, height: 24, opacity: 0.55 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 1 }}>{item.label}</Text>
                 </View>
               ))}
-
-              {/* Footer hint */}
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3560', marginTop: 10, marginBottom: 16, textAlign: 'center', letterSpacing: 1 }}>
-                TAP NEXT MONTH TO ADVANCE TIME
-              </Text>
-
-              {/* CTA */}
-              <TouchableOpacity
-                onPress={() => setShowIntro(false)}
-                activeOpacity={0.85}
-                style={{ backgroundColor: '#0d1020', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#4ade80', position: 'relative' }}
-              >
-                <View style={{ position: 'absolute', top: 0, left: 0, width: 6, height: 6, backgroundColor: '#4ade80' }} />
-                <View style={{ position: 'absolute', top: 0, right: 0, width: 6, height: 6, backgroundColor: '#4ade80' }} />
-                <View style={{ position: 'absolute', bottom: 0, left: 0, width: 6, height: 6, backgroundColor: '#4ade80' }} />
-                <View style={{ position: 'absolute', bottom: 0, right: 0, width: 6, height: 6, backgroundColor: '#4ade80' }} />
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#4ade80', letterSpacing: 4 }}>BEGIN ▶</Text>
-              </TouchableOpacity>
             </View>
+
+            {/* CTA */}
+            <TouchableOpacity
+              onPress={() => setShowIntro(false)}
+              activeOpacity={0.85}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: '#080d1a', paddingVertical: 16 }}
+            >
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 4 }}>BEGIN</Text>
+              <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -2732,12 +2710,12 @@ const GameLayout = ({ onHardReset }) => {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Image source={require('./assets/ui_comp/healthicon.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                 <View>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3 }}>VITALS</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>VITALS</Text>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>HEALTH REPORT</Text>
                 </View>
               </View>
               <TouchableOpacity onPress={() => setShowHealthReport(false)}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#2a3560' }}>✕</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4a5580' }}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -2751,7 +2729,7 @@ const GameLayout = ({ onHardReset }) => {
                 <View style={{ marginBottom: 16 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 48, color: hpColor, lineHeight: 50 }}>{Math.round(health)}</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#2a3560' }}>/100</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4a5580' }}>/100</Text>
                     <View style={{ marginLeft: 8, backgroundColor: hpColor + '22', borderWidth: 1, borderColor: hpColor + '60', paddingHorizontal: 10, paddingVertical: 2 }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor, letterSpacing: 2 }}>{status}</Text>
                     </View>
@@ -2789,7 +2767,7 @@ const GameLayout = ({ onHardReset }) => {
 
             {/* How to restore */}
             <View style={{ backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', padding: 12, marginBottom: 16 }}>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560', letterSpacing: 2, marginBottom: 6 }}>HOW TO RESTORE HP</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 2, marginBottom: 6 }}>HOW TO RESTORE HP</Text>
               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 18 }}>Buy food from the grocery store each month. Each item restores HP instantly. Keep above 30 to avoid sick leave and salary cuts.</Text>
             </View>
 
@@ -2813,12 +2791,12 @@ const GameLayout = ({ onHardReset }) => {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                 <View>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3 }}>WELLBEING</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>WELLBEING</Text>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>HAPPINESS REPORT</Text>
                 </View>
               </View>
               <TouchableOpacity onPress={() => setShowHappinessReport(false)}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#2a3560' }}>✕</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4a5580' }}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -2855,7 +2833,7 @@ const GameLayout = ({ onHardReset }) => {
                 <View>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 48, color: hapColor, lineHeight: 50 }}>{Math.round(happiness)}</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#2a3560' }}>/100</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4a5580' }}>/100</Text>
                     <View style={{ marginLeft: 8, backgroundColor: hapColor + '22', borderWidth: 1, borderColor: hapColor + '60', paddingHorizontal: 10, paddingVertical: 2 }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hapColor, letterSpacing: 2 }}>{status}</Text>
                     </View>
@@ -2866,7 +2844,7 @@ const GameLayout = ({ onHardReset }) => {
                     ))}
                   </View>
 
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 6 }}>MONTHLY FACTORS</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 6 }}>MONTHLY FACTORS</Text>
                   <Factor label="Housing quality" value={housingEffect}
                     tip={qualityScore < 5 ? 'Upgrade your home to boost happiness' : qualityScore >= 7 ? 'Great home — positive effect' : null} />
                   <Factor label="Loan debt stress" value={debtEffect}
@@ -2888,60 +2866,52 @@ const GameLayout = ({ onHardReset }) => {
       <ResponsiveModal visible={showEventsInbox} transparent animationType="slide" onRequestClose={() => setShowEventsInbox(false)}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)' }} activeOpacity={1} onPress={() => setShowEventsInbox(false)} />
-          <View style={{ maxHeight: '94%', backgroundColor: '#06080f', borderTopWidth: 2, borderColor: '#1a2040' }}>
+          <View style={{ maxHeight: '94%', backgroundColor: '#070910', borderTopLeftRadius: 14, borderTopRightRadius: 14, overflow: 'hidden' }}>
             {/* Header */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingTop: 16, paddingBottom: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
-                <View>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>LIFE EVENTS</Text>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', lineHeight: 26 }}>INBOX</Text>
-                </View>
+                <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 22, height: 22, opacity: 0.7 }} resizeMode="contain" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>INBOX</Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 {eventInbox.some(e => !e.read) && (
-                  <TouchableOpacity onPress={() => markAllEventsRead()} style={{ borderWidth: 1, borderColor: '#1a2040', paddingHorizontal: 10, paddingVertical: 5 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#3b82f6', letterSpacing: 1 }}>READ ALL</Text>
+                  <TouchableOpacity onPress={() => markAllEventsRead()}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', letterSpacing: 1 }}>MARK ALL READ</Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity onPress={() => setShowEventsInbox(false)} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1a2040' }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#445070', lineHeight: 22 }}>✕</Text>
+                <TouchableOpacity onPress={() => setShowEventsInbox(false)}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4a5580', lineHeight: 24 }}>✕</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
-            {/* Category tabs — scrollable */}
+            {/* Category tabs — pill style, no borders */}
             {(() => {
               const allTabs = [
-                { key: 'all', label: 'ALL', accent: '#c8d4f0' },
-                { key: 'crisis', label: 'ALERTS', accent: '#f87171' },
-                { key: 'positive', label: 'BANK', accent: '#22c55e' },
-                { key: 'market', label: 'MARKET', accent: '#f59e0b' },
-                { key: 'property', label: 'PROPERTY', accent: '#60a5fa' },
-                { key: 'health', label: 'HEALTH', accent: '#f472b6' },
-                { key: 'dilemma', label: 'DECISIONS', accent: '#a855f7' },
-                { key: 'info', label: 'GOVT', accent: '#38bdf8' },
-                { key: 'other', label: 'OTHER', accent: '#94a3b8' },
+                { key: 'all',      label: 'All',       accent: '#c8d4f0' },
+                { key: 'crisis',   label: 'Alerts',    accent: '#f87171' },
+                { key: 'positive', label: 'Good News', accent: '#22c55e' },
+                { key: 'market',   label: 'Market',    accent: '#f59e0b' },
+                { key: 'property', label: 'Property',  accent: '#60a5fa' },
+                { key: 'health',   label: 'Health',    accent: '#f472b6' },
+                { key: 'dilemma',  label: 'Decisions', accent: '#a855f7' },
+                { key: 'info',     label: 'Govt',      accent: '#38bdf8' },
               ];
               return (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 10, gap: 6, flexDirection: 'row' }}>
+                  contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 12, gap: 8, flexDirection: 'row' }}>
                   {allTabs.map(tab => {
                     const count = tab.key === 'all'
                       ? eventInbox.filter(e => !e.read).length
                       : eventInbox.filter(e => (e.category || 'other') === tab.key && !e.read).length;
                     const isActive = inboxTab === tab.key;
                     return (
-                      <TouchableOpacity key={tab.key} onPress={() => setInboxTab(tab.key)} activeOpacity={0.8}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1,
-                          borderColor: isActive ? tab.accent : '#1a2040',
-                          backgroundColor: isActive ? tab.accent + '18' : '#0d1020' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: isActive ? tab.accent : '#445070', letterSpacing: 1 }}>{tab.label}</Text>
-                        {count > 0 && (
-                          <View style={{ minWidth: 16, height: 16, borderRadius: 8, backgroundColor: tab.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 }}>
-                            <Text style={{ fontSize: 9, color: '#000', fontWeight: 'bold' }}>{count > 9 ? '9+' : count}</Text>
-                          </View>
-                        )}
+                      <TouchableOpacity key={tab.key} onPress={() => setInboxTab(tab.key)} activeOpacity={0.7}
+                        style={{ alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: isActive ? tab.accent : '#4a5580' }}>
+                          {tab.label}{count > 0 ? ` (${count > 9 ? '9+' : count})` : ''}
+                        </Text>
+                        {isActive && <View style={{ height: 2, width: '80%', backgroundColor: tab.accent, borderRadius: 1, marginTop: 2 }} />}
                       </TouchableOpacity>
                     );
                   })}
@@ -2949,10 +2919,9 @@ const GameLayout = ({ onHardReset }) => {
               );
             })()}
 
-            {/* Divider */}
-            <View style={{ height: 1, backgroundColor: '#1a2040', marginHorizontal: 0 }} />
+            <View style={{ height: 1, backgroundColor: '#0f1628' }} />
 
-            {/* Email list */}
+            {/* Event list */}
             <ScrollView contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
               {(() => {
                 const filtered = inboxTab === 'all'
@@ -2962,9 +2931,9 @@ const GameLayout = ({ onHardReset }) => {
                 if (filtered.length === 0) {
                   return (
                     <View style={{ alignItems: 'center', paddingVertical: 52 }}>
-                      <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 32, height: 32, marginBottom: 14, opacity: 0.4 }} resizeMode="contain" />
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#2a3560', textAlign: 'center' }}>
-                        {inboxTab === 'all' ? 'No events yet.\nKeep playing — life has surprises.' : 'No messages in this category.'}
+                      <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 28, height: 28, marginBottom: 12, opacity: 0.3 }} resizeMode="contain" />
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', textAlign: 'center' }}>
+                        {inboxTab === 'all' ? 'No events yet.' : 'Nothing here yet.'}
                       </Text>
                     </View>
                   );
@@ -2973,52 +2942,47 @@ const GameLayout = ({ onHardReset }) => {
                 return filtered.map((ev, idx) => {
                   const cat = ev.category || 'other';
                   const accent = getCategoryAccent(cat);
-                  const senderLabel = getCategoryDisplay(cat).toUpperCase();
                   const isLast = idx === filtered.length - 1;
+                  const iconSrc =
+                    cat === 'positive' ? require('./assets/ui_comp/saveandearn.png') :
+                    cat === 'crisis'   ? require('./assets/ui_comp/warning.png') :
+                    cat === 'market'   ? require('./assets/ui_comp/investicon.png') :
+                    cat === 'property' ? require('./assets/ui_comp/forsale.png') :
+                    cat === 'health'   ? require('./assets/ui_comp/healthicon.png') :
+                    cat === 'dilemma'  ? require('./assets/ui_comp/bulb.png') :
+                                        require('./assets/ui_comp/inbox.png');
                   return (
                     <TouchableOpacity
                       key={ev.id}
                       onPress={() => openEventDetail(ev)}
-                      activeOpacity={0.8}
+                      activeOpacity={0.75}
                       style={{
-                        flexDirection: 'row', alignItems: 'center', gap: 12,
-                        paddingHorizontal: 16, paddingVertical: 13,
-                        borderBottomWidth: isLast ? 0 : 1, borderColor: '#0f1628',
-                        backgroundColor: ev.read ? '#06080f' : accent + '08',
+                        flexDirection: 'row', alignItems: 'center', gap: 14,
+                        paddingHorizontal: 18, paddingVertical: 14,
+                        borderBottomWidth: isLast ? 0 : 1, borderColor: '#0c1020',
+                        backgroundColor: ev.read ? 'transparent' : accent + '06',
                       }}
                     >
-                      {/* Sender icon */}
-                      <View style={{ width: 36, height: 36, backgroundColor: accent + '15', borderWidth: 1, borderColor: accent + '35', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Image source={
-                          cat === 'positive' ? require('./assets/ui_comp/saveandearn.png') :
-                          cat === 'crisis'   ? require('./assets/ui_comp/warning.png') :
-                          cat === 'market'   ? require('./assets/ui_comp/investicon.png') :
-                          cat === 'property' ? require('./assets/ui_comp/forsale.png') :
-                          cat === 'health'   ? require('./assets/ui_comp/healthicon.png') :
-                          cat === 'dilemma'  ? require('./assets/ui_comp/bulb.png') :
-                          cat === 'info'     ? require('./assets/ui_comp/inbox.png') :
-                                              require('./assets/ui_comp/inbox.png')
-                        } style={{ width: 20, height: 20 }} resizeMode="contain" />
-                      </View>
+                      {/* Icon — no box, just the image with tint opacity */}
+                      <Image source={iconSrc} style={{ width: 22, height: 22, opacity: ev.read ? 0.3 : 0.75, flexShrink: 0 }} resizeMode="contain" />
+
                       {/* Content */}
                       <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: accent, letterSpacing: 1 }}>{senderLabel}</Text>
-                          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#2a3560' }}>Mo.{ev.month || 0}</Text>
-                        </View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: ev.read ? '#445070' : '#c8d4f0', lineHeight: 19 }} numberOfLines={1}>{ev.name}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', lineHeight: 15, marginTop: 1 }} numberOfLines={1}>
-                          {typeof ev.message === 'string' ? ev.message : 'Tap to view message details...'}
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', lineHeight: 15, marginTop: 1 }} numberOfLines={1}>
+                          {typeof ev.message === 'string' ? ev.message : 'Tap to view details'}
                         </Text>
                       </View>
-                      {/* Impact + unread dot */}
-                      <View style={{ alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-                        {ev.impact !== 0 && (
+
+                      {/* Right side */}
+                      <View style={{ alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                        {ev.impact !== 0 && ev.impact != null && (
                           <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: ev.impact > 0 ? '#4ade80' : '#f87171' }}>
                             {ev.impact > 0 ? '+' : ''}₹{Math.abs(ev.impact) >= 100000 ? (Math.abs(ev.impact) / 100000).toFixed(1) + 'L' : Math.abs(ev.impact).toLocaleString()}
                           </Text>
                         )}
-                        {!ev.read && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: accent }} />}
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580' }}>Mo.{ev.month || 0}</Text>
+                        {!ev.read && <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accent }} />}
                       </View>
                     </TouchableOpacity>
                   );

@@ -100,54 +100,55 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
             {/* Card */}
             <View style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: 16, paddingBottom: 28 }}>
 
-                <View style={{ backgroundColor: '#070910', borderWidth: 1, borderTopWidth: 0, borderColor: '#1a2040', padding: 18 }}>
+                <View style={{ backgroundColor: '#0a0d1a', borderRadius: 12, padding: 20 }}>
 
-                    {/* Month + year label */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    {/* Month + happiness row */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                         <View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 4 }}>MONTH SUMMARY</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 30 }}>{monthLabel} {year}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>MONTH SUMMARY</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 32 }}>{monthLabel} {year}</Text>
                         </View>
                         {happinessDelta !== undefined && (
-                            <View style={{ alignItems: 'center', gap: 2 }}>
-                                <Image source={HAPPY_ICON} style={{ width: 18, height: 18, opacity: happinessDelta >= 0 ? 1 : 0.5 }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: happinessDelta >= 0 ? '#fbbf24' : '#f87171', lineHeight: 18 }}>
+                            <View style={{ alignItems: 'center', gap: 2, marginTop: 4 }}>
+                                <Image source={HAPPY_ICON} style={{ width: 18, height: 18, opacity: happinessDelta >= 0 ? 0.9 : 0.4 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: happinessDelta >= 0 ? '#fbbf24' : '#f87171' }}>
                                     {happinessDelta >= 0 ? '+' : ''}{happinessDelta.toFixed(0)}
                                 </Text>
                             </View>
                         )}
                     </View>
 
-                    {/* Big net flow */}
-                    <View style={{ borderWidth: 1, borderColor: flowColor + '30', backgroundColor: flowColor + '08', padding: 12, marginBottom: 14, alignItems: 'center' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 2 }}>NET FLOW</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 40, color: flowColor, lineHeight: 42 }}>
+                    {/* Net flow — no box, just large centred number */}
+                    <View style={{ alignItems: 'center', paddingVertical: 16, marginBottom: 4 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 2 }}>NET FLOW</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 46, color: flowColor, lineHeight: 48 }}>
                             {isPositive ? '+' : ''}₹{Math.abs(netFlow).toLocaleString()}
                         </Text>
                         {nwDelta !== null && (
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: nwDelta >= 0 ? '#4ade80' : '#f87171', marginTop: 2 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: nwDelta >= 0 ? '#4ade80' : '#f87171', marginTop: 2, opacity: 0.8 }}>
                                 Net worth {nwDelta >= 0 ? '▲' : '▼'} ₹{Math.abs(nwDelta).toLocaleString()}
                             </Text>
                         )}
                     </View>
 
-                    {/* Income / Expenses columns */}
-                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
+                    {/* Thin divider */}
+                    <View style={{ height: 1, backgroundColor: '#141a2e', marginBottom: 14 }} />
+
+                    {/* Income / Expenses — flat rows, no column borders */}
+                    <View style={{ flexDirection: 'row', gap: 16, marginBottom: 14 }}>
                         <View style={{ flex: 1 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a5040', letterSpacing: 2, marginBottom: 6 }}>INCOME</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 3, marginBottom: 8 }}>INCOME</Text>
                             {income.salary > 0 && <Row label="Salary" value={`+₹${income.salary.toLocaleString()}`} color="#4ade80" />}
                             {income.rental > 0 && <Row label="Rental" value={`+₹${income.rental.toLocaleString()}`} color="#4ade80" />}
                             {income.spouse > 0 && <Row label="Spouse" value={`+₹${income.spouse.toLocaleString()}`} color="#4ade80" />}
                             {income.dividend > 0 && <Row label="Dividend" value={`+₹${income.dividend.toLocaleString()}`} color="#fbbf24" />}
                             {income.pension > 0 && <Row label="Pension" value={`+₹${income.pension.toLocaleString()}`} color="#60a5fa" />}
-                            {totalIncome === 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3860' }}>₹0</Text>}
-                            <View style={{ borderTopWidth: 1, borderTopColor: '#1a2040', marginTop: 4, paddingTop: 4 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80', lineHeight: 18 }}>₹{totalIncome.toLocaleString()}</Text>
-                            </View>
+                            {totalIncome === 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4a5580' }}>—</Text>}
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4ade80', marginTop: 6 }}>₹{totalIncome.toLocaleString()}</Text>
                         </View>
-                        <View style={{ width: 1, backgroundColor: '#1a2040' }} />
+                        <View style={{ width: 1, backgroundColor: '#141a2e' }} />
                         <View style={{ flex: 1 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#5a2020', letterSpacing: 2, marginBottom: 6 }}>EXPENSES</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 3, marginBottom: 8 }}>EXPENSES</Text>
                             {expenses.living > 0 && <Row label="Living" value={`-₹${expenses.living.toLocaleString()}`} color="#f87171" />}
                             {expenses.housing > 0 && <Row label="Housing" value={`-₹${expenses.housing.toLocaleString()}`} color="#f87171" />}
                             {expenses.emi > 0 && <Row label="EMI" value={`-₹${expenses.emi.toLocaleString()}`} color="#f87171" />}
@@ -155,29 +156,27 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                             {expenses.insurance > 0 && <Row label="Insurance" value={`-₹${expenses.insurance.toLocaleString()}`} color="#f87171" />}
                             {expenses.sip > 0 && <Row label="SIP" value={`-₹${expenses.sip.toLocaleString()}`} color="#a78bfa" />}
                             {expenses.tuition > 0 && <Row label="Tuition" value={`-₹${expenses.tuition.toLocaleString()}`} color="#f87171" />}
-                            <View style={{ borderTopWidth: 1, borderTopColor: '#1a2040', marginTop: 4, paddingTop: 4 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', lineHeight: 18 }}>₹{totalExpenses.toLocaleString()}</Text>
-                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f87171', marginTop: 6 }}>₹{totalExpenses.toLocaleString()}</Text>
                         </View>
                     </View>
 
                     {/* Net worth bar chart */}
                     {netWorthHistory.length >= 2 && (
                         <View style={{ marginBottom: 14 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#2a3860', letterSpacing: 3, marginBottom: 6 }}>NET WORTH TREND</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 3, marginBottom: 6 }}>NET WORTH TREND</Text>
                             <NetWorthBar history={netWorthHistory} />
                         </View>
                     )}
 
-                    {/* Uncle Fin's Tip */}
+                    {/* Uncle Fin's Tip — no border box */}
                     {tip && (
-                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d111a', padding: 10, marginBottom: 16, flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: '#3b82f6' }}>
+                        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 18, backgroundColor: '#070a14', borderRadius: 8, padding: 12 }}>
+                            <View style={{ width: 44, height: 44, borderRadius: 22, overflow: 'hidden' }}>
                                 <Image source={require('../../assets/ui_comp/uncle_fin.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#93c5fd', letterSpacing: 1, marginBottom: 2 }}>UNCLE FIN SAYS:</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#c8d4f0', lineHeight: 16 }}>{tip.stat || tip.body || tip.title}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 2, marginBottom: 3 }}>UNCLE FIN SAYS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#a8b8d8', lineHeight: 17 }}>{tip.stat || tip.body || tip.title}</Text>
                             </View>
                         </View>
                     )}
@@ -186,7 +185,7 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                     <TouchableOpacity
                         onPress={onContinue}
                         activeOpacity={0.8}
-                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 1, borderColor: '#1a2840', backgroundColor: '#08101e', paddingVertical: 14 }}
+                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: '#080d1a', paddingVertical: 14, borderRadius: 8 }}
                     >
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 2, lineHeight: 24 }}>CONTINUE</Text>
                         <Image source={NEXT_ICON} style={{ width: 24, height: 24 }} resizeMode="contain" />

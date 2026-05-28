@@ -167,7 +167,8 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
                         paddingHorizontal: 10, paddingVertical: 5,
                     }}
                 >
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', letterSpacing: 2, lineHeight: 18 }}>◀  BACK</Text>
+                    <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 16, height: 16, transform: [{ scaleX: -1 }], opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', letterSpacing: 2, lineHeight: 18 }}>BACK</Text>
                 </TouchableOpacity>
 
 
@@ -188,9 +189,7 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
                 {!childMode && (
                     <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 14, borderBottomWidth: 1, borderColor: '#0d1228', flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                         {TRAIT_ICONS[sprite.id] && (
-                            <View style={{ width: 40, height: 40, backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1a2440', alignItems: 'center', justifyContent: 'center' }}>
-                                <Image source={TRAIT_ICONS[sprite.id]} style={{ width: 22, height: 22, opacity: 0.7 }} resizeMode="contain" />
-                            </View>
+                            <Image source={TRAIT_ICONS[sprite.id]} style={{ width: 28, height: 28, opacity: 0.65 }} resizeMode="contain" />
                         )}
                         <View style={{ flex: 1 }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', letterSpacing: 2, lineHeight: 28 }}>{trait.name}</Text>
@@ -253,16 +252,19 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
                         style={{
                             backgroundColor: '#08101e',
                             borderWidth: 1,
-                            borderColor: '#1a2440',
+                            borderColor: '#1e2a40',
+                            borderRadius: 6,
                             paddingVertical: 14,
+                            flexDirection: 'row',
                             alignItems: 'center',
-                            position: 'relative',
+                            justifyContent: 'center',
+                            gap: 10,
                         }}
                     >
-                        <Corners color="#2a3a5a" size={5} />
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 3, lineHeight: 24 }}>
-                            {childMode ? 'SELECT THIS LOOK  ▶' : 'BEGIN JOURNEY  ▶'}
+                            {childMode ? 'SELECT THIS LOOK' : 'BEGIN JOURNEY'}
                         </Text>
+                        <Image source={require('../../assets/ui_comp/nextbutton.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -296,10 +298,7 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
             <View style={{ alignItems: 'center', paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderColor: '#0a0f1e' }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1a2440', letterSpacing: 5 }}>FINLIT  v1.0</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 2, lineHeight: 28, textAlign: 'center', paddingHorizontal: 20 }}>
-                    {childMode ? `PICK A SPRITE TO REPRESENT ${childName ? childName.toUpperCase() : 'YOUR CHILD'}` : 'CHOOSE YOUR CLASS'}
-                </Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#2a3a5a', letterSpacing: 1, marginTop: 4 }}>
-                    Tap a character to see their full profile
+                    {childMode ? `PICK A SPRITE FOR ${childName ? childName.toUpperCase() : 'YOUR CHILD'}` : 'CHOOSE YOUR PLAYER'}
                 </Text>
             </View>
 
@@ -327,9 +326,6 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                                         overflow: 'hidden', position: 'relative',
                                     }}
                                 >
-                                    {isSel && (
-                                        <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: t.color, zIndex: 5 }} />
-                                    )}
                                     <View style={{ height: SPRITE_H, overflow: 'hidden', alignItems: 'center', paddingTop: 6 }}>
                                         <Image source={sprite.image} style={{ width: CARD_W, height: CARD_W * 1.75 }} resizeMode="contain" />
                                     </View>
@@ -400,6 +396,15 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     style={{ width: SW * 0.52, height: heroH * 0.94 }}
                     resizeMode="contain"
                 />
+                {/* Back button — top left */}
+                <TouchableOpacity
+                    onPress={onBack}
+                    activeOpacity={0.7}
+                    style={{ position: 'absolute', top: 14, left: 14, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(4,6,14,0.7)', paddingHorizontal: 10, paddingVertical: 6 }}
+                >
+                    <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 14, height: 14, transform: [{ scaleX: -1 }], opacity: 0.6 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', letterSpacing: 2 }}>BACK</Text>
+                </TouchableOpacity>
             </View>
 
             {/* ── FORM ── */}
@@ -424,7 +429,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     style={{
                         fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0',
                         paddingVertical: 12, paddingHorizontal: 14,
-                        borderLeftWidth: 3, borderLeftColor: nameError ? '#f87171' : '#3b82f6',
+                        borderBottomWidth: 2, borderBottomColor: nameError ? '#f87171' : '#3b82f6',
                         borderTopWidth: 0, borderRightWidth: 0, borderBottomWidth: 0,
                         backgroundColor: '#080d1a',
                         marginBottom: 4,
@@ -449,7 +454,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     style={{
                         fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0',
                         paddingVertical: 12, paddingHorizontal: 14,
-                        borderLeftWidth: 3, borderLeftColor: bdayError ? '#f87171' : '#1a2840',
+                        borderBottomWidth: 2, borderBottomColor: bdayError ? '#f87171' : '#3b82f6',
                         borderTopWidth: 0, borderRightWidth: 0, borderBottomWidth: 0,
                         backgroundColor: '#080d1a',
                         marginBottom: 4,
@@ -463,23 +468,15 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     : <View style={{ height: 20 }} />
                 }
 
-                {/* Buttons */}
-                <View style={{ flexDirection: 'row', gap: 10, alignItems: 'stretch' }}>
-                    <TouchableOpacity
-                        onPress={onBack}
-                        style={{ paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#080d1a' }}
-                    >
-                        <Image source={require('../../assets/ui_comp/nextbutton.png')} style={{ width: 20, height: 20, transform: [{ scaleX: -1 }], opacity: 0.4 }} resizeMode="contain" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={handleStart}
-                        activeOpacity={0.85}
-                        style={{ flex: 1, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#080d1a', position: 'relative' }}
-                    >
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 3, lineHeight: 24 }}>BEGIN</Text>
-                        <Image source={require('../../assets/ui_comp/nextbutton.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
-                    </TouchableOpacity>
-                </View>
+                {/* Begin button — full width */}
+                <TouchableOpacity
+                    onPress={handleStart}
+                    activeOpacity={0.85}
+                    style={{ paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#080d1a', borderRadius: 6 }}
+                >
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 3, lineHeight: 24 }}>BEGIN</Text>
+                    <Image source={require('../../assets/ui_comp/nextbutton.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );
@@ -501,7 +498,7 @@ const STARTER_JOBS = {
 export default function SpriteSelectionScreen({ childMode = false, childName = '', hasSave = false, onResume, onStart }) {
     const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob, startNextGeneration, resetGame } = useGame();
     const [step, setStep]           = useState(childMode ? 1 : 0);
-    const [selectedIdx, setSelectedIdx] = useState(0);
+    const [selectedIdx, setSelectedIdx] = useState(null);
     const soundRef = useRef(null);
 
     // Music starts immediately when this screen mounts (first thing user sees)
