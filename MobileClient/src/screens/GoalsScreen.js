@@ -5,6 +5,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { ACHIEVEMENTS } from '../data/achievements';
 import { ACHIEVEMENT_IMAGES, GOAL_IMAGES } from '../data/achievementImages';
 
+const ACH_ICON = require('../../assets/ui_comp/achivements.png');
+
 const PAD = 14;
 const GAP = 8;
 
@@ -129,8 +131,8 @@ function UnifiedCard({ item, state, unlocked }) {
     const { color, name, desc } = item;
 
     return (
-        <View style={{ borderWidth: 1, borderColor: done ? color + '70' : '#1e2840', backgroundColor: '#070a16', overflow: 'hidden', position: 'relative', flexDirection: 'row', height: 110 }}>
-            <View style={{ width: 2, backgroundColor: done ? color : '#1e2840' }} />
+        <View style={{ backgroundColor: '#070a16', overflow: 'hidden', position: 'relative', flexDirection: 'row', height: 110 }}>
+            <View style={{ width: 3, backgroundColor: done ? color : '#1a2040' }} />
             {done && <Corners color={color} />}
 
             {/* Image */}
@@ -209,20 +211,22 @@ export default function GoalsScreen({ onClose, onShop }) {
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }} showsVerticalScrollIndicator={false}>
 
-                {/* Summary */}
-                <View style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP + 4 }}>
-                    <View style={{ flex: 1, borderWidth: 1, borderColor: '#166534', backgroundColor: '#0d1e12', padding: 12, alignItems: 'center' }}>
+                {/* Summary strip — inline with header feel */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80', lineHeight: 24 }}>{completedGoals.length}<Text style={{ fontSize: 14, color: '#2a5040' }}>/{LIFE_GOALS.length}</Text></Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a5040', letterSpacing: 2 }}>GOALS</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: '#4ade80', lineHeight: 36 }}>{completedGoals.length}/{LIFE_GOALS.length}</Text>
                     </View>
-                    <View style={{ flex: 1, borderWidth: 1, borderColor: '#f59e0b40', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 2 }}>ACHIEVEMENTS</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: '#fbbf24', lineHeight: 36 }}>{unlockedAch.length}/{ACHIEVEMENTS.length}</Text>
+                    <View style={{ width: 1, height: 14, backgroundColor: '#1a2040' }} />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Image source={ACH_ICON} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24', lineHeight: 24 }}>{unlockedAch.length}<Text style={{ fontSize: 14, color: '#445070' }}>/{ACHIEVEMENTS.length}</Text></Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 2 }}>UNLOCKED</Text>
                     </View>
                 </View>
 
-                {allItems.map(item => (
-                    <View key={item.id} style={{ marginBottom: GAP }}>
+                {allItems.map((item, i) => (
+                    <View key={item.id} style={{ marginBottom: 14 }}>
                         <UnifiedCard
                             item={item}
                             state={state}

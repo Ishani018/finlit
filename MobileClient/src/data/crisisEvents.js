@@ -3,7 +3,7 @@
 
 // Helper to pick a random dependent of a type
 const pickDependent = (dependents, type) => {
-    const matches = dependents.filter(d => d.type === type);
+    const matches = dependents.filter(d => d.type === type && !d.isDead);
     return matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : null;
 };
 
@@ -61,7 +61,7 @@ export const CRISIS_EVENTS = [
             const spouse = pickDependent(state.dependents, 'spouse');
             return spouse ? `${spouse.name} has dengue. Hospital stay + treatment costs pile up.` : 'Your spouse is seriously ill.';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'spouse'),
+        condition: (state) => state.dependents.some(d => d.type === 'spouse' && !d.isDead),
         mitigated_by: 'health',
     },
     {
@@ -74,7 +74,7 @@ export const CRISIS_EVENTS = [
             const child = pickDependent(state.dependents, 'child');
             return child ? `${child.name} had a high fever and needed to be hospitalized for 3 days.` : 'Your child is in the hospital.';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'child'),
+        condition: (state) => state.dependents.some(d => d.type === 'child' && !d.isDead),
         mitigated_by: 'health',
     },
     {
@@ -87,7 +87,7 @@ export const CRISIS_EVENTS = [
             const parent = pickDependent(state.dependents, 'parent');
             return parent ? `${parent.name} had a cardiac episode. ICU + procedures = massive bill.` : 'Your parent needs emergency surgery.';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'parent'),
+        condition: (state) => state.dependents.some(d => d.type === 'parent' && !d.isDead),
         mitigated_by: 'health',
     },
     {
@@ -100,7 +100,7 @@ export const CRISIS_EVENTS = [
             const child = pickDependent(state.dependents, 'child');
             return child ? `${child.name} got into a good school but they want a "donation" of ₹1L.` : 'School demands a hefty admission donation.';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'child' && (d.childAgeMonths || 0) >= 18 && (d.childAgeMonths || 0) < 216),
+        condition: (state) => state.dependents.some(d => d.type === 'child' && !d.isDead && (d.childAgeMonths || 0) >= 18 && (d.childAgeMonths || 0) < 216),
     },
 
     // ============ MARKET/ECONOMIC ============
@@ -159,7 +159,7 @@ export const CRISIS_EVENTS = [
             const spouse = pickDependent(state.dependents, 'spouse');
             return spouse ? `${spouse.name} got laid off. Family income drops until they find work.` : 'Your spouse lost their job.';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'spouse' && d.isWorking) && !(state.activeEffects || []).some(e => e.type === 'spouse_income_loss'),
+        condition: (state) => state.dependents.some(d => d.type === 'spouse' && !d.isDead && d.isWorking) && !(state.activeEffects || []).some(e => e.type === 'spouse_income_loss'),
     },
 
     // ============ PROPERTY ============
@@ -212,7 +212,7 @@ export const CRISIS_EVENTS = [
         effect: 'add_dependent',
         dependent_type: 'parent',
         getMessage: () => 'Your parent can no longer live alone. They move in with you. +₹15,000/month expenses.',
-        condition: (state) => state.playerAge >= 35 && !state.dependents.some(d => d.type === 'parent'),
+        condition: (state) => state.playerAge >= 35 && !state.dependents.some(d => d.type === 'parent' && !d.isDead),
     },
     {
         id: 'tax_audit',
@@ -328,7 +328,7 @@ export const CRISIS_EVENTS = [
             const child = pickDependent(state.dependents, 'child');
             return child ? `${child.name} topped their exams and won a scholarship!` : 'Your child won a scholarship!';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'child' && (d.childAgeMonths || 0) >= 60),
+        condition: (state) => state.dependents.some(d => d.type === 'child' && !d.isDead && (d.childAgeMonths || 0) >= 60),
     },
     {
         id: 'spouse_promotion',
@@ -341,7 +341,7 @@ export const CRISIS_EVENTS = [
             const spouse = pickDependent(state.dependents, 'spouse');
             return spouse ? `${spouse.name} got promoted at work! Monthly income +₹10,000.` : 'Your spouse got a raise!';
         },
-        condition: (state) => state.dependents.some(d => d.type === 'spouse' && d.isWorking),
+        condition: (state) => state.dependents.some(d => d.type === 'spouse' && !d.isDead && d.isWorking),
     },
 ];
 

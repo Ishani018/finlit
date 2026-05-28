@@ -17,6 +17,7 @@ const HAPPY_ICON  = require('../../assets/ui_comp/happyicon.png');
 const HEALTH_ICON = require('../../assets/ui_comp/healthicon.png');
 
 const getChoiceImage = (choice, event) => {
+    if (!choice || !choice.label) return WARN_IMG;
     if (event.isBaby) return event.image;
     if (event.isHospital) return HOSPITAL_IMG;
     const l = choice.label.toLowerCase();

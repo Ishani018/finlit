@@ -632,7 +632,6 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                             activeOpacity={0.8}
                                                             style={{ flex: 1, borderWidth: 1, borderColor: eligible ? meta.color + '50' : '#1a2040', overflow: 'hidden', backgroundColor: '#0a0d1a' }}
                                                         >
-                                                            <View style={{ height: 2, backgroundColor: eligible ? meta.color : '#1e2840' }} />
                                                             <View style={{ height: CARD_H, position: 'relative' }}>
                                                                 {meta.img && (
                                                                     <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -751,6 +750,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                                 onPress={() => {
                                                                     const amt = parseInt(prepayInput) || 0;
                                                                     if (amt < loan.emi) { onShowDialog('Too Low', `Min ₹${loan.emi.toLocaleString()} (1 EMI).`, 'error'); return; }
+                                                                    if (amt > loan.remainingPrincipal) { onShowDialog('Too High', `Max ₹${loan.remainingPrincipal.toLocaleString()} (outstanding balance).`, 'error'); return; }
                                                                     const res = prepayLoan ? prepayLoan(loan.id, amt) : { success: false, msg: 'Not available' };
                                                                     if (res.success) { setPrepayInput(''); if (amt >= loan.remainingPrincipal) setSelectedLoanId(null); }
                                                                     onShowDialog(res.success ? 'Payment Made' : 'Failed', res.msg, res.success ? 'success' : 'error');
@@ -795,7 +795,6 @@ export default function BankScreen({ onClose, onShowDialog }) {
 
                             {/* Hero card */}
                             <View style={{ height: 120, position: 'relative', borderWidth: 1, borderColor: meta.color + '50', overflow: 'hidden' }}>
-                                <View style={{ height: 2, backgroundColor: meta.color }} />
                                 {meta.img && <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
                                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.6)' }} />
                                 <View style={{ position: 'absolute', bottom: 12, left: 14, right: 14 }}>

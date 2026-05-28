@@ -281,13 +281,17 @@ const AchievementToast = ({ achievement, onDone }) => {
     }} pointerEvents="none">
       {confettiPieces.map(p => <ConfettiPiece key={p.id} color={p.color} startX={p.startX} delay={p.delay} />)}
       <View style={{
-        backgroundColor: '#080b18', borderBottomWidth: 2, borderColor: color,
+        backgroundColor: '#080b18',
+        borderBottomWidth: 1, borderColor: '#1a2040',
+        borderLeftWidth: 3, borderLeftColor: color,
         paddingHorizontal: 16, paddingVertical: 14, paddingTop: 50,
         flexDirection: 'row', alignItems: 'center', gap: 14,
-        borderLeftWidth: achievement.isMilestone ? 4 : 0, borderLeftColor: color,
       }}>
-        <View style={{ width: achievement.isMilestone ? 44 : 36, height: achievement.isMilestone ? 44 : 36, borderWidth: 2, borderColor: color, backgroundColor: color + '15', alignItems: 'center', justifyContent: 'center' }}>
-          <FontAwesome5 name={achievement.isMilestone ? 'trophy' : 'check'} size={achievement.isMilestone ? 18 : 14} color={color} />
+        <View style={{ width: 36, height: 36, backgroundColor: '#0a0d1a', alignItems: 'center', justifyContent: 'center' }}>
+          {achievement.isMilestone
+            ? <FontAwesome5 name="trophy" size={18} color={color} />
+            : <Image source={require('./assets/ui_comp/achivements.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+          }
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: color, letterSpacing: 3 }}>
@@ -321,7 +325,7 @@ const CrisisFlash = ({ visible }) => {
 const GameLayout = ({ onHardReset }) => {
   const {
     balance, turn, netWorth,
-    currentJob, currentHousing, isPlaying,
+    currentJob, currentHousing, isPlaying, setIsPlaying,
     gameSpeed, setGameSpeed,
     degrees, portfolio, properties, marketPrices, priceHistory,
     enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice,
@@ -351,6 +355,8 @@ const GameLayout = ({ onHardReset }) => {
     health, sickLeaveMonths,
     getTotalEMI,
     pendingFamilyDemand, resolveFamilyDemand,
+    pendingDeathEvent, setPendingDeathEvent,
+    deathEventQueue, setDeathEventQueue,
     pendingCreditCardOffer, setPendingCreditCardOffer,
     pendingJobInterview,
     pantry,
@@ -434,6 +440,9 @@ const GameLayout = ({ onHardReset }) => {
   // Pixel dialog state
   const [dialog, setDialog] = useState({ visible: false, title: '', message: '', type: 'info', onConfirm: null, confirmText: 'OK', cancelText: null, onCancel: null });
 
+  // Family demand consequence result — shown after choice is made
+  const [familyDemandResult, setFamilyDemandResult] = useState(null);
+
   // First-load intro overlay
   const [showIntro, setShowIntro] = useState(true);
 
@@ -447,14 +456,11 @@ const GameLayout = ({ onHardReset }) => {
 
   // ── Next Month guard — prevents firing while any modal is open ──────────────
   const handleAdvanceTime = () => {
-    // If a modal is genuinely open, do nothing
-    if (dialog.visible || pendingJobInterview || pendingDecision || majorCrisisFlash || showSummary || pendingFamilyDemand) {
+    if (dialog.visible || pendingJobInterview || pendingDecision || majorCrisisFlash || showSummary || pendingFamilyDemand || familyDemandResult || pendingDeathEvent) {
       return;
     }
-    // If isPlaying is false but no modal is open, it's a stuck state — clear it
-    if (!isPlaying) {
-      if (lastCrisisEvent) setLastCrisisEvent(null);
-    }
+    if (lastCrisisEvent) setLastCrisisEvent(null);
+    if (!isPlaying) setIsPlaying(true);
     monthsPlayedTodayRef.current += 1;
     nextMonth();
   };
@@ -528,9 +534,6 @@ const GameLayout = ({ onHardReset }) => {
     if (!lastCelebrationChoice) return;
     if (lastCelebrationChoice === prevCelebrationRef.current) return;
     prevCelebrationRef.current = lastCelebrationChoice;
-    const label = (lastCelebrationChoice.label || '').toLowerCase();
-    const isBroke = label.includes('broke') || label.includes('skip');
-    if (!isBroke) setShowBirthdayRoom(true);
   }, [lastCelebrationChoice]);
 
   // Pipe crisis events into PixelDialog
@@ -589,7 +592,7 @@ const GameLayout = ({ onHardReset }) => {
     );
   }, [lastCrisisEvent]);
 
-  // Family demand events — show YES/NO dialog with beautiful live consequences preview
+  // Family demand events — show clean dialog with two options, then show consequences after
   useEffect(() => {
     if (!pendingFamilyDemand) return;
     const { demand, dep } = pendingFamilyDemand;
@@ -598,7 +601,7 @@ const GameLayout = ({ onHardReset }) => {
     if (dep) {
         if (dep.type === 'spouse') {
             const src = getSpriteImage(dep.spouseSprite, playerAge);
-            if (src) depImage = { isSprite: true, source: src, scale: 1.6 }; // scale up to focus on face/torso
+            if (src) depImage = { isSprite: true, source: src, scale: 1.6 };
         } else if (dep.type === 'child') {
             const f = dep.gender === 'female';
             const ageM = dep.childAgeMonths || 0;
@@ -607,61 +610,41 @@ const GameLayout = ({ onHardReset }) => {
             else if (ageM < 60) src = f ? require('./assets/dependents/toddler daughter.png') : require('./assets/dependents/toddler son.png');
             else if (ageM < 216) src = f ? require('./assets/dependents/pre schooler daughter.png') : require('./assets/dependents/pre schooler son.png');
             else src = f ? require('./assets/dependents/teenage daughter.png') : require('./assets/dependents/teenage son.png');
-            
-            if (src) depImage = { isSprite: true, source: src, scale: 1.1 }; // Slight scale for full body children inside the circle
+            if (src) depImage = { isSprite: true, source: src, scale: 1.1 };
         } else if (dep.type === 'parent') {
-            depImage = { isSprite: false, source: require('./assets/ui_comp/familyicon.png') };
+            const isMother = dep.parentType === 'mother' || dep.name === 'Mother';
+            depImage = { isSprite: true, source: isMother ? require('./assets/dependents/elderlymother.png') : require('./assets/dependents/elderlyfather.png'), scale: 1.0 };
         }
     }
 
-    const Chip = ({ label, color }) => (
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: color + '18', borderWidth: 1, borderColor: color + '40', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' }}>
-        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color, lineHeight: 17 }}>{label}</Text>
-      </View>
-    );
-
-    const messageElement = (
-      <View style={{ gap: 14 }}>
-        {/* Message */}
-        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 26 }}>
-          {demand.getMessage(dep)}
-        </Text>
-
-        {/* Impact side-by-side */}
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {/* Accept column */}
-          <View style={{ flex: 1, backgroundColor: '#071a0e', borderWidth: 1, borderColor: '#166534', borderRadius: 10, padding: 10, gap: 5 }}>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80', letterSpacing: 2, marginBottom: 2 }}>✓ SAY YES</Text>
-            <Chip label={`-₹${demand.cost.toLocaleString()}`} color="#f87171" />
-            {demand.accept.happinessBoost ? <Chip label={`+${demand.accept.happinessBoost} 😊 You`} color="#4ade80" /> : null}
-            {demand.accept.depHealthBoost ? <Chip label={`+${demand.accept.depHealthBoost} ❤️ ${dep?.name}`} color="#4ade80" /> : null}
-            {demand.accept.depHappinessBoost ? <Chip label={`+${demand.accept.depHappinessBoost} 😊 ${dep?.name}`} color="#4ade80" /> : null}
-          </View>
-          {/* Decline column */}
-          <View style={{ flex: 1, backgroundColor: '#1a0808', borderWidth: 1, borderColor: '#7f1d1d', borderRadius: 10, padding: 10, gap: 5 }}>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2, marginBottom: 2 }}>✗ SAY NO</Text>
-            {demand.decline.happinessPenalty ? <Chip label={`${demand.decline.happinessPenalty} 😊 You`} color="#f87171" /> : null}
-            {demand.decline.depHealthPenalty ? <Chip label={`${demand.decline.depHealthPenalty} ❤️ ${dep?.name}`} color="#f87171" /> : null}
-            {demand.decline.depHappinessBoost ? <Chip label={`${demand.decline.depHappinessBoost} 😊 ${dep?.name}`} color="#f87171" /> : null}
-            {!demand.decline.happinessPenalty && !demand.decline.depHealthPenalty && !demand.decline.depHappinessBoost
-              ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>No penalty</Text>
-              : null}
-          </View>
-        </View>
-      </View>
-    );
+    const handleChoice = (accepted) => {
+        closeDialog();
+        // Capture consequence data before resolving (resolve clears pendingFamilyDemand)
+        const consequences = accepted ? demand.accept : demand.decline;
+        const cost = accepted ? demand.cost : 0;
+        resolveFamilyDemand(accepted);
+        setFamilyDemandResult({ accepted, consequences, cost, dep, depImage });
+    };
 
     showDialog(
       demand.getTitle(dep),
-      messageElement,
+      demand.getMessage(dep),
       'warning',
-      () => { closeDialog(); resolveFamilyDemand(true); },
+      () => handleChoice(true),
       demand.confirmText || 'YES',
       demand.declineText || 'NOT NOW',
-      () => { closeDialog(); resolveFamilyDemand(false); },
+      () => handleChoice(false),
       depImage
     );
   }, [pendingFamilyDemand]);
+
+  // Pop death events from the queue one at a time
+  useEffect(() => {
+    if (!pendingDeathEvent && deathEventQueue.length > 0) {
+      setPendingDeathEvent(deathEventQueue[0]);
+      setDeathEventQueue(prev => prev.slice(1));
+    }
+  }, [pendingDeathEvent, deathEventQueue]);
 
   useBackgroundMusic(isPlaying);
 
@@ -734,24 +717,27 @@ const GameLayout = ({ onHardReset }) => {
         <View style={{ paddingHorizontal: 20, gap: 10 }}>
           <TouchableOpacity
             onPress={() => setShowSettings(false)}
-            style={{ borderWidth: 1, borderColor: GOLD + '60', backgroundColor: GOLD + '12', padding: 16, alignItems: 'center' }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', padding: 16 }}
           >
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: GOLD, letterSpacing: 2 }}>◀  BACK TO GAME</Text>
+            <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 20, height: 20, transform: [{ scaleX: -1 }] }} resizeMode="contain" />
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', letterSpacing: 2 }}>BACK TO GAME</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => { setShowSettings(false); setPlayerSprite(null); }}
-            style={{ borderWidth: 1, borderColor: BORDER, backgroundColor: PANEL, padding: 16, alignItems: 'center' }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16', padding: 16 }}
           >
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: DIM, letterSpacing: 2 }}>TITLE SCREEN</Text>
+            <Image source={require('./assets/ui_comp/home.png')} style={{ width: 18, height: 18, opacity: 0.5 }} resizeMode="contain" />
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#445070', letterSpacing: 2 }}>TITLE SCREEN</Text>
           </TouchableOpacity>
 
-          <View style={{ height: 1, backgroundColor: BORDER, marginVertical: 4 }} />
+          <View style={{ height: 1, backgroundColor: '#1a2040', marginVertical: 4 }} />
 
           <TouchableOpacity
             onPress={() => setNewGameConfirm(true)}
-            style={{ borderWidth: 1, borderColor: RED + '50', backgroundColor: RED + '10', padding: 16, alignItems: 'center' }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: RED + '40', backgroundColor: RED + '0c', padding: 16 }}
           >
+            <Image source={require('./assets/ui_comp/warning.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: RED, letterSpacing: 2 }}>START NEW GAME</Text>
           </TouchableOpacity>
         </View>
@@ -1391,14 +1377,13 @@ const GameLayout = ({ onHardReset }) => {
                   <View style={{ height: 160, position: 'relative' }}>
                     <Image source={require('./assets/jobs/SDE.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
-                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: '#fbbf24' }} />
                     <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 4 }}>EXPLORE OPPORTUNITIES</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>JOBS</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Gig · Careers · Business · Executive</Text>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#fbbf2460', paddingHorizontal: 12, paddingVertical: 4 }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#fbbf24', letterSpacing: 2 }}>BROWSE ▶</Text>
+                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
+                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -1409,14 +1394,13 @@ const GameLayout = ({ onHardReset }) => {
                   <View style={{ height: 160, position: 'relative' }}>
                     <Image source={require('./assets/ui_comp/education.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
-                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: '#818cf8' }} />
                     <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#818cf8', letterSpacing: 4 }}>LEVEL UP YOUR SKILLS</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>STUDY</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Courses · Degrees · Certifications</Text>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#818cf860', paddingHorizontal: 12, paddingVertical: 4 }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#818cf8', letterSpacing: 2 }}>BROWSE ▶</Text>
+                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
+                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -1451,20 +1435,6 @@ const GameLayout = ({ onHardReset }) => {
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 30 }}>Money</Text>
                 </View>
 
-                {/* Net worth summary strip */}
-                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 18 }}>
-                  {[
-                    { label: 'NET WORTH', value: `₹${netWorth >= 100000 ? (netWorth/100000).toFixed(1)+'L' : netWorth.toLocaleString()}`, color: netWorth >= 0 ? '#4ade80' : '#f87171', icon: require('./assets/achivements/graphs and stats.png') },
-                    { label: 'BALANCE',   value: `₹${balance >= 100000 ? (balance/100000).toFixed(1)+'L' : balance.toLocaleString()}`, color: '#38b2ac', icon: require('./assets/achivements/coin stack.png') },
-                    { label: 'EMI/MO',   value: getTotalEMI() > 0 ? `-₹${(getTotalEMI()/1000).toFixed(0)}k` : 'NONE', color: getTotalEMI() > 0 ? '#f87171' : '#4ade80', icon: require('./assets/achivements/piggy bank.png') },
-                  ].map(s => (
-                    <View key={s.label} style={{ flex: 1, backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1a2040', padding: 8, alignItems: 'center' }}>
-                      <Image source={s.icon} style={{ width: 22, height: 22, marginBottom: 4 }} resizeMode="contain" />
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#2a3560', letterSpacing: 2 }}>{s.label}</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: s.color, lineHeight: 19, marginTop: 1 }}>{s.value}</Text>
-                    </View>
-                  ))}
-                </View>
 
                 {/* INVEST card — full width */}
                 <TouchableOpacity onPress={() => setMoneySubTab('invest')} activeOpacity={0.85}
@@ -1477,8 +1447,8 @@ const GameLayout = ({ onHardReset }) => {
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>INVEST</Text>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Stocks · Mutual Funds · PPF · NPS · FD</Text>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#4ade8060', paddingHorizontal: 12, paddingVertical: 4 }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80', letterSpacing: 2 }}>OPEN ▶</Text>
+                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
+                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -2379,6 +2349,7 @@ const GameLayout = ({ onHardReset }) => {
           onTabPress={(tab) => {
             setShowGrocery(false);
             setShowGoals(false);
+            setShowPantry(false);
             setActiveTab(tab);
             if (tab !== 'money') { setInvestCategory(null); setMoneySubTab(null); setSelectedMF(null); }
           }}
@@ -2616,6 +2587,114 @@ const GameLayout = ({ onHardReset }) => {
       )}
 
       <PixelDialog {...dialog} onConfirm={dialog.onConfirm || closeDialog} />
+
+      {/* ── FAMILY DEMAND CONSEQUENCE RESULT ── */}
+      {familyDemandResult && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 950, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.75)' }}>
+          <View style={{ width: '88%', maxWidth: 360, backgroundColor: '#06080f', borderWidth: 2, borderColor: familyDemandResult.accepted ? '#166534' : '#7f1d1d', borderRadius: 14, overflow: 'hidden' }}>
+            {/* Title bar */}
+            <View style={{ backgroundColor: familyDemandResult.accepted ? '#071a0e' : '#1a0808', padding: 16, alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: familyDemandResult.accepted ? '#4ade80' : '#f87171', letterSpacing: 3 }}>
+                {familyDemandResult.accepted ? 'DECISION MADE' : 'DECLINED'}
+              </Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', marginTop: 2 }}>
+                {familyDemandResult.accepted ? 'Here\'s what happened' : 'Here\'s what happened'}
+              </Text>
+            </View>
+            {/* Consequence rows */}
+            <View style={{ padding: 16, gap: 10 }}>
+              {familyDemandResult.accepted && familyDemandResult.cost > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/investicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>
+                    -₹{familyDemandResult.cost.toLocaleString()} spent
+                  </Text>
+                </View>
+              )}
+              {familyDemandResult.consequences?.happinessBoost > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80' }}>
+                    +{familyDemandResult.consequences.happinessBoost} happiness (You)
+                  </Text>
+                </View>
+              )}
+              {familyDemandResult.consequences?.happinessPenalty && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>
+                    {familyDemandResult.consequences.happinessPenalty} happiness (You)
+                  </Text>
+                </View>
+              )}
+              {familyDemandResult.consequences?.depHappinessBoost > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80' }}>
+                    +{familyDemandResult.consequences.depHappinessBoost} happiness ({familyDemandResult.dep?.name || 'them'})
+                  </Text>
+                </View>
+              )}
+              {familyDemandResult.consequences?.depHappinessBoost < 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>
+                    {familyDemandResult.consequences.depHappinessBoost} happiness ({familyDemandResult.dep?.name || 'them'})
+                  </Text>
+                </View>
+              )}
+              {familyDemandResult.consequences?.depHealthBoost > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/healthicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80' }}>
+                    +{familyDemandResult.consequences.depHealthBoost} health ({familyDemandResult.dep?.name || 'them'})
+                  </Text>
+                </View>
+              )}
+              {familyDemandResult.consequences?.depHealthPenalty && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Image source={require('./assets/ui_comp/healthicon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>
+                    {familyDemandResult.consequences.depHealthPenalty} health ({familyDemandResult.dep?.name || 'them'})
+                  </Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              onPress={() => setFamilyDemandResult(null)}
+              style={{ margin: 16, marginTop: 4, backgroundColor: familyDemandResult.accepted ? '#166534' : '#7f1d1d', padding: 14, alignItems: 'center', borderRadius: 8 }}
+            >
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* ── DEATH POPUP ── */}
+      {pendingDeathEvent && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.85)' }}>
+          <View style={{ width: '88%', maxWidth: 360, backgroundColor: '#06080f', borderWidth: 2, borderColor: '#7f1d1d', borderRadius: 14, overflow: 'hidden' }}>
+            <Image source={require('./assets/ui_comp/funeral.png')} style={{ width: '100%', height: 260 }} resizeMode="cover" />
+            <View style={{ backgroundColor: '#1a0808', padding: 16, alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 3 }}>PASSING</Text>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', marginTop: 2, textAlign: 'center' }}>{pendingDeathEvent.name}</Text>
+            </View>
+            <View style={{ padding: 20, gap: 12 }}>
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#a8b8d8', lineHeight: 26 }}>{pendingDeathEvent.message}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                <Image source={require('./assets/ui_comp/investicon.png')} style={{ width: 18, height: 18 }} resizeMode="contain" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>-₹{(pendingDeathEvent.funeralCost || 50000).toLocaleString()} funeral expenses</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={() => { setPendingDeathEvent(null); setIsPlaying(true); }}
+              style={{ margin: 16, marginTop: 4, backgroundColor: '#7f1d1d', padding: 14, alignItems: 'center', borderRadius: 8 }}
+            >
+              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>PAY RESPECTS</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* ── CRISIS FLASH OVERLAY ── */}
       <CrisisFlash visible={majorCrisisFlash} />
@@ -2908,9 +2987,18 @@ const GameLayout = ({ onHardReset }) => {
                         backgroundColor: ev.read ? '#06080f' : accent + '08',
                       }}
                     >
-                      {/* Sender avatar */}
-                      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: accent + '20', borderWidth: 1, borderColor: accent + '40', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: accent, lineHeight: 18 }}>{senderLabel.slice(0, 2)}</Text>
+                      {/* Sender icon */}
+                      <View style={{ width: 36, height: 36, backgroundColor: accent + '15', borderWidth: 1, borderColor: accent + '35', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Image source={
+                          cat === 'positive' ? require('./assets/ui_comp/saveandearn.png') :
+                          cat === 'crisis'   ? require('./assets/ui_comp/warning.png') :
+                          cat === 'market'   ? require('./assets/ui_comp/investicon.png') :
+                          cat === 'property' ? require('./assets/ui_comp/forsale.png') :
+                          cat === 'health'   ? require('./assets/ui_comp/healthicon.png') :
+                          cat === 'dilemma'  ? require('./assets/ui_comp/bulb.png') :
+                          cat === 'info'     ? require('./assets/ui_comp/inbox.png') :
+                                              require('./assets/ui_comp/inbox.png')
+                        } style={{ width: 20, height: 20 }} resizeMode="contain" />
                       </View>
                       {/* Content */}
                       <View style={{ flex: 1 }}>

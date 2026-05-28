@@ -242,8 +242,6 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                                                     <Image source={course.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                                                     {/* Scrim */}
                                                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isLocked ? 'rgba(4,6,14,0.72)' : 'rgba(4,6,14,0.45)' }} />
-                                                    {/* Top accent bar */}
-                                                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: isCompleted ? '#22c55e' : isStudying ? meta.color : meta.color + '60' }} />
                                                     {/* Status badge top-right */}
                                                     {isCompleted && (
                                                         <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: '#22c55e', paddingHorizontal: 6, paddingVertical: 2 }}>

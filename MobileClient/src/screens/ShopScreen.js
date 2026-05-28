@@ -92,8 +92,7 @@ function SquareCategoryCard({ title, color, icon, onPress }) {
 
 // ── Grocery section (inline) ──────────────────────────────────────────────────
 function GrocerySection({ onBack, onClose }) {
-    const { balance, health, happiness, pantry, buyGrocery, consumeFood } = useGame();
-    const [tab, setTab] = useState('shop');
+    const { balance, buyGrocery } = useGame();
     const [toast, setToast] = useState(null);
 
     const showToast = (msg, ok, extra) => { setToast({ msg, ok, extra }); setTimeout(() => setToast(null), 2500); };
@@ -106,94 +105,43 @@ function GrocerySection({ onBack, onClose }) {
             showToast(r.msg, false);
         }
     };
-    const handleConsume = (itemId) => {
-        const item = GROCERY_ITEMS.find(g => g.id === itemId);
-        const r = consumeFood(itemId);
-        showToast(r.success ? `+${item?.healthRestore || 0} HP restored` : r.msg, r.success);
-    };
-
-    const pantryItems = (pantry || []).filter(p => p.qty > 0);
 
     return (
         <View style={{ flex: 1 }}>
             <ScreenHeader title="Grocery Store" subtitle="GROCERY" onBack={onBack} onClose={onClose} />
 
-            {/* Tabs */}
-            <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: C.border, backgroundColor: C.panel }}>
-                {[['shop', 'SHOP'], ['pantry', 'PANTRY']].map(([key, label]) => (
-                    <TouchableOpacity key={key} onPress={() => setTab(key)}
-                        style={{ flex: 1, paddingVertical: 10, alignItems: 'center', borderBottomWidth: 2, borderColor: tab === key ? C.gold : 'transparent' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: tab === key ? C.gold : C.dim, letterSpacing: 2 }}>{label}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
-                {tab === 'shop' ? (
-                    <>
-                        {Array.from({ length: Math.ceil(GROCERY_ITEMS.length / 2) }).map((_, row) => (
-                            <View key={row} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
-                                {GROCERY_ITEMS.slice(row * 2, row * 2 + 2).map(item => {
-                                    const catColor = CATEGORY_COLORS[item.category] || C.dim;
-                                    const canAfford = balance >= item.price;
-                                    const img = ITEM_IMAGES[item.id];
-                                    return (
-                                        <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
-                                            <View style={{ height: 90, position: 'relative' }}>
-                                                {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: catColor + '15' }} />}
-                                                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
-                                                <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: catColor, paddingHorizontal: 5, paddingVertical: 1 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
-                                                </View>
-                                            </View>
-                                            <View style={{ padding: 8 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
-                                                <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
-                                                    {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}😊</Text>}
-                                                </View>
-                                                <TouchableOpacity onPress={() => handleBuy(item)} disabled={!canAfford}
-                                                    style={{ marginTop: 6, borderWidth: 1, borderColor: canAfford ? C.gold + '60' : C.border, backgroundColor: canAfford ? C.gold + '12' : C.card, paddingVertical: 5, alignItems: 'center' }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: canAfford ? C.gold : C.dark }}>₹{item.price.toLocaleString()}</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    );
-                                })}
-                            </View>
-                        ))}
-                    </>
-                ) : (
-                    pantryItems.length === 0 ? (
-                        <View style={{ padding: 30, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, textAlign: 'center', lineHeight: 24 }}>Pantry is empty.{'\n'}Buy items from the shop.</Text>
-                        </View>
-                    ) : (
-                        pantryItems.map(entry => {
-                            const item = GROCERY_ITEMS.find(g => g.id === entry.itemId);
-                            if (!item) return null;
+                {Array.from({ length: Math.ceil(GROCERY_ITEMS.length / 2) }).map((_, row) => (
+                    <View key={row} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+                        {GROCERY_ITEMS.slice(row * 2, row * 2 + 2).map(item => {
+                            const catColor = CATEGORY_COLORS[item.category] || C.dim;
+                            const canAfford = balance >= item.price;
                             const img = ITEM_IMAGES[item.id];
                             return (
-                                <View key={entry.itemId} style={{ flexDirection: 'row', borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, marginBottom: GAP, overflow: 'hidden' }}>
-                                    <View style={{ width: 70, height: 70, position: 'relative' }}>
-                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.card }} />}
-                                        <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: C.gold, paddingHorizontal: 5, paddingVertical: 1 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000' }}>×{entry.qty}</Text>
+                                <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+                                    <View style={{ height: 90, position: 'relative' }}>
+                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: catColor + '15' }} />}
+                                        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
+                                        <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: catColor, paddingHorizontal: 5, paddingVertical: 1 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
                                         </View>
                                     </View>
-                                    <View style={{ flex: 1, padding: 10, justifyContent: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream }}>{item.name}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore} HP</Text>
+                                    <View style={{ padding: 8 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
+                                        <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
+                                            {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}</Text>}
+                                        </View>
+                                        <TouchableOpacity onPress={() => handleBuy(item)} disabled={!canAfford}
+                                            style={{ marginTop: 6, borderWidth: 1, borderColor: canAfford ? C.gold + '60' : C.border, backgroundColor: canAfford ? C.gold + '12' : C.card, paddingVertical: 5, alignItems: 'center' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: canAfford ? C.gold : C.dark }}>₹{item.price.toLocaleString()}</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity onPress={() => handleConsume(entry.itemId)}
-                                        style={{ width: 60, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderColor: C.border, backgroundColor: C.card }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.gold }}>EAT</Text>
-                                    </TouchableOpacity>
                                 </View>
                             );
-                        })
-                    )
-                )}
+                        })}
+                    </View>
+                ))}
             </ScrollView>
 
             {toast && (
@@ -265,7 +213,7 @@ function PharmacySection({ onBack, onClose }) {
                             const img = MEDICINE_IMAGES[item.id];
                             return (
                                 <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
-                                    <View style={{ height: 90, position: 'relative' }}>
+                                    <View style={{ height: 180, position: 'relative' }}>
                                         {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.sage + '15' }} />}
                                         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
                                         <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: C.sage, paddingHorizontal: 5, paddingVertical: 1 }}>
@@ -317,7 +265,7 @@ function PharmacySection({ onBack, onClose }) {
 function RecipientPicker({ item, dependents, balance, buyPharmacyItem, onPick, onClose }) {
     const members = [
         { id: 'self', name: 'Yourself', type: 'self' },
-        ...dependents.filter(d => d.type === 'child' || d.type === 'parent' || d.type === 'spouse'),
+        ...dependents.filter(d => (d.type === 'child' || d.type === 'parent' || d.type === 'spouse') && !d.isDead),
     ];
 
     const handlePick = (member) => {

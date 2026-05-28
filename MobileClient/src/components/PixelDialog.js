@@ -59,7 +59,7 @@ export default function PixelDialog({
                 justifyContent: 'center', alignItems: 'center',
                 backgroundColor: 'rgba(0,0,0,0.72)',
             }}
-            pointerEvents="box-none"
+            pointerEvents="auto"
         >
             <Animated.View
                 style={{

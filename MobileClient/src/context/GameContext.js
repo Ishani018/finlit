@@ -57,7 +57,6 @@ const TRAIT_MODIFIERS = {
     young_karthik_1: { loanRateReduction: 0.015 },
     young_riya_1:    { livingCostDiscount: 0.10 },
     young_rahul_1:   { stockGainMultiplier: 1.2 },
-    young_sara_1:    { crisisChanceReduction: 0.25 },
     young_sia_1:     { rentalBonus: 0.15 },
     young_soms_1:    { inflationImmune: true },
     young_soni_1:    { familyCostDiscount: 0.20 },
@@ -166,6 +165,8 @@ export const GameProvider = ({ children }) => {
     const [lastCrisisEvent, setLastCrisisEvent] = useState(null);
     const [eventInbox, setEventInbox] = useState([]);
     const [pendingFamilyDemand, setPendingFamilyDemand] = useState(null);
+    const [pendingDeathEvent, setPendingDeathEvent] = useState(null);
+    const [deathEventQueue, setDeathEventQueue] = useState([]);
     const [pendingCreditCardOffer, setPendingCreditCardOffer] = useState(false);
     const [demandCooldowns, setDemandCooldowns] = useState({});
     const [lastMonthTax, setLastMonthTax] = useState(0);
@@ -482,6 +483,7 @@ export const GameProvider = ({ children }) => {
     const getDependentCosts = () => {
         let cost = 0;
         for (const dep of dependents) {
+            if (dep.isDead) continue;
             if (dep.type === 'spouse') cost += 5000;
             else if (dep.type === 'child') {
                 const childAge = dep.childAgeMonths || 0;
@@ -521,7 +523,7 @@ export const GameProvider = ({ children }) => {
     };
 
     const getSpouseIncome = () => {
-        const spouse = dependents.find(d => d.type === 'spouse' && d.isWorking);
+        const spouse = dependents.find(d => d.type === 'spouse' && !d.isDead && d.isWorking);
         if (!spouse) return 0;
         const spouseLoss = activeEffects.find(e => e.type === 'spouse_income_loss');
         if (spouseLoss) return 0;
@@ -1275,15 +1277,21 @@ export const GameProvider = ({ children }) => {
     // DEPENDENTS
     // =========================================================================
 
-    const INDIAN_MALE_NAMES = ['Aarav', 'Vihaan', 'Aditya', 'Rohan', 'Arjun', 'Sai', 'Karan', 'Rahul', 'Vikram', 'Sanjay', 'Amit', 'Anil', 'Raj', 'Suresh', 'Ramesh', 'Harish', 'Nitin', 'Prakash', 'Sunil', 'Vijay'];
-    const INDIAN_FEMALE_NAMES = ['Aadya', 'Diya', 'Ananya', 'Priya', 'Kavya', 'Neha', 'Pooja', 'Riya', 'Shruti', 'Sneha', 'Swati', 'Tanvi', 'Vidya', 'Maya', 'Meera', 'Nandini', 'Radha', 'Sita', 'Gita', 'Lata'];
+    const INDIAN_MALE_NAMES = ['Aarav', 'Vihaan', 'Aditya', 'Rohan', 'Arjun', 'Sai', 'Karan', 'Rahul', 'Vikram', 'Sanjay', 'Amit', 'Anil', 'Raj', 'Suresh', 'Ramesh', 'Harish', 'Nitin', 'Prakash', 'Sunil', 'Vijay', 'Dev', 'Ishaan', 'Kabir', 'Laksh', 'Mohit', 'Nakul', 'Om', 'Parth', 'Qasim', 'Rishi', 'Sahil', 'Tarun', 'Uday', 'Varun', 'Yash', 'Zubin', 'Ansh', 'Bhuvan', 'Chirag', 'Dhruv', 'Eklavya', 'Farhan', 'Gaurav', 'Hemant', 'Ishan', 'Jatin', 'Kunal', 'Luv', 'Manav', 'Neel', 'Omkar', 'Pranav', 'Ritesh', 'Shivam', 'Tanmay', 'Utkarsh', 'Vivek', 'Waris', 'Xander', 'Yogesh', 'Aman', 'Bhavesh', 'Chetan', 'Dilip', 'Eshan', 'Faisal', 'Girish', 'Hardik', 'Indra', 'Jayesh'];
+    const INDIAN_FEMALE_NAMES = ['Aadya', 'Diya', 'Ananya', 'Priya', 'Kavya', 'Neha', 'Pooja', 'Riya', 'Shruti', 'Sneha', 'Swati', 'Tanvi', 'Vidya', 'Maya', 'Meera', 'Nandini', 'Radha', 'Sita', 'Gita', 'Lata', 'Aisha', 'Bhumi', 'Charvi', 'Deepika', 'Esha', 'Falak', 'Gargi', 'Hina', 'Isha', 'Jhanvi', 'Kritika', 'Lavanya', 'Mahi', 'Nisha', 'Oviya', 'Pari', 'Rhea', 'Simran', 'Tara', 'Uma', 'Vanya', 'Wafa', 'Yamini', 'Zara', 'Aditi', 'Bhavna', 'Chhavi', 'Divya', 'Ekta', 'Falguni', 'Gunjan', 'Heena', 'Indira', 'Juhi', 'Komal', 'Leela', 'Mansi', 'Natasha', 'Ojasvi', 'Pallavi', 'Rani', 'Sakshi', 'Trisha', 'Urmi', 'Varsha', 'Yashvi', 'Zoya', 'Archana', 'Bindiya', 'Charu'];
+    const pickUniqueName = (nameList) => {
+        const usedNames = new Set(dependents.map(d => d.name));
+        const available = nameList.filter(n => !usedNames.has(n));
+        const pool = available.length > 0 ? available : nameList;
+        return pool[Math.floor(Math.random() * pool.length)];
+    };
 
     const marry = (spouseName, spouseSprite) => {
-        if (dependents.some(d => d.type === 'spouse')) return { success: false, msg: 'Already married.' };
+        if (dependents.some(d => d.type === 'spouse' && !d.isDead)) return { success: false, msg: 'Already married.' };
         const houseCapacity = currentHousing.capacity || 2;
         
-        // Only active (cohabiting) dependents count towards house capacity
-        const activeDeps = dependents.filter(d => d.custody !== 'ex');
+        // Only living, cohabiting dependents count towards house capacity
+        const activeDeps = dependents.filter(d => d.custody !== 'ex' && !d.isDead);
         if (activeDeps.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
         
         const weddingCost = 500000;
@@ -1294,9 +1302,9 @@ export const GameProvider = ({ children }) => {
         
         let finalName = spouseName || 'Spouse';
         if ((spouseSprite && spouseSprite.startsWith('groom')) || spouseName === 'Groom') {
-            finalName = INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)];
+            finalName = pickUniqueName(INDIAN_MALE_NAMES);
         } else if ((spouseSprite && spouseSprite.startsWith('bride')) || spouseName === 'Bride') {
-            finalName = INDIAN_FEMALE_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_NAMES.length)];
+            finalName = pickUniqueName(INDIAN_FEMALE_NAMES);
         }
         
         let playerBday = null;
@@ -1315,9 +1323,9 @@ export const GameProvider = ({ children }) => {
         if (hasStepChild) {
             const gender = Math.random() < 0.5 ? 'female' : 'male';
             const ageYr = 4 + Math.floor(Math.random() * 8); // age 4 to 11
-            const childName = gender === 'female' 
-                ? INDIAN_FEMALE_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_NAMES.length)]
-                : INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)];
+            const childName = gender === 'female'
+                ? pickUniqueName(INDIAN_FEMALE_NAMES)
+                : pickUniqueName(INDIAN_MALE_NAMES);
             
             stepChildEntry = {
                 id: `dep_child_${Date.now()}_step`,
@@ -1380,7 +1388,8 @@ export const GameProvider = ({ children }) => {
     const PARENT_SETUP_COST = 25000;
     const addParent = (parentType) => {
         const houseCapacity = currentHousing.capacity || 2;
-        if (dependents.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
+        const livingDeps = dependents.filter(d => !d.isDead && d.custody !== 'ex');
+        if (livingDeps.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
         const existing = dependents.filter(d => d.type === 'parent');
         if (existing.length >= 2) return { success: false, msg: 'Both parents are already living with you.' };
         if (existing.some(d => d.parentType === parentType))
@@ -1470,7 +1479,7 @@ export const GameProvider = ({ children }) => {
     };
 
     const planVacation = () => {
-        const familySize = 1 + dependents.length;
+        const familySize = 1 + dependents.filter(d => !d.isDead && d.custody !== 'ex').length;
         const cost = familySize * 5000;
         if (balance < cost) return { success: false, msg: `Need ₹${cost.toLocaleString()} for the vacation (₹5,000 × ${familySize} people).` };
         setBalance(prev => prev - cost);
@@ -2036,9 +2045,9 @@ export const GameProvider = ({ children }) => {
                     setCurrentJob(prev => ({ ...prev, salary: Math.round(prev.salary * (1 + eff.salaryBonusPct)) }));
                 }
                 // Spouse income boost
-                if (eff.spouseIncomeBoost && dependents.some(d => d.type === 'spouse' && d.isWorking)) {
-                    setDependents(prev => prev.map(d => 
-                        (d.type === 'spouse' && d.isWorking) ? { ...d, income: Math.round(d.income * (1 + eff.spouseIncomeBoost)) } : d
+                if (eff.spouseIncomeBoost && dependents.some(d => d.type === 'spouse' && !d.isDead && d.isWorking)) {
+                    setDependents(prev => prev.map(d =>
+                        (d.type === 'spouse' && !d.isDead && d.isWorking) ? { ...d, income: Math.round(d.income * (1 + eff.spouseIncomeBoost)) } : d
                     ));
                 }
                 // Child savings boost
@@ -2202,8 +2211,13 @@ export const GameProvider = ({ children }) => {
             setHappiness(prev => Math.max(0, prev - 20));
             msg = eff.msg || 'Your ex-spouse took custody. You will pay child support.';
         } else if (eff.type === 'parent_move_in') {
-            setDependents(prev => [...prev, { id: `parent_${Date.now()}`, type: 'parent', parentType: 'elderly', name: 'Elderly Parent', monthAdded: totalMonthsPlayed, health: 70 }]);
-            msg = 'Your parent has moved in with you. They appreciate your support.';
+            const alreadyLiving = stateRef.current.dependents.some(d => d.type === 'parent' && !d.isDead);
+            if (!alreadyLiving) {
+                setDependents(prev => [...prev, { id: `parent_${Date.now()}`, type: 'parent', parentType: 'elderly', name: 'Elderly Parent', monthAdded: totalMonthsPlayed, health: 70 }]);
+                msg = 'Your parent has moved in with you. They appreciate your support.';
+            } else {
+                msg = 'A parent is already living with you.';
+            }
         } else if (eff.type === 'parent_support_allowance') {
             if (balance >= 10000) setBalance(prev => prev - 10000);
             setActiveEffects(prev => [...prev, {
@@ -2788,7 +2802,7 @@ export const GameProvider = ({ children }) => {
             setFinalScore(score);
             
             // --- Legacy Generation Splitting ---
-            const currentNetWorth = balance + getStockValue() + getMFValue() + getGoldValue() + getPropertyTotalValue() + ppf.balance + nps.balance;
+            const currentNetWorth = balance + getStockValue() + getMFValue() + getGoldValue() + getRealEstateValue() + ppf.balance + nps.balance;
             const totalLoanAmount = loans.reduce((sum, loan) => sum + loan.principal, 0);
             const totalChildSavingsAmt = Object.values(childSavings).reduce((sum, amt) => sum + amt, 0);
             
@@ -3118,11 +3132,12 @@ export const GameProvider = ({ children }) => {
         };
 
         let playerBdayYearToCelebrate = null;
-        if (bdayMonth && totalMonthsPlayed > 0 && !pendingDecision) {
+        if (bdayMonth && totalMonthsPlayed > 0) {
             const startYear = 2024;
             for (let y = startYear; y <= turn.year; y++) {
                 if (!firedDecisions.includes(`bday_${y}`)) {
-                    if (y === turn.year && turn.month === bdayMonth) {
+                    // Fire if it's the right month this year, OR if it's a past year that was missed
+                    if ((y === turn.year && turn.month === bdayMonth) || y < turn.year) {
                         playerBdayYearToCelebrate = y;
                         break;
                     }
@@ -3195,7 +3210,7 @@ export const GameProvider = ({ children }) => {
                 setHappiness(prev => Math.max(0, prev - 25));
                 setFiredDecisions(prev => [...prev, bdayDecisionId]);
                 setIsPlaying(false);
-            } else if (!pendingDecision) {
+            } else {
                 // Regular Birthday Party (Forced)
                 const isBrokeForBday = balance < 1500;
                 decisionsToQueue.push({
@@ -3219,34 +3234,33 @@ export const GameProvider = ({ children }) => {
                 // not here, so the birthday can't be permanently skipped if it's behind another queue item.
                 setIsPlaying(false);
             }
-        } else if (!pendingDecision && totalMonthsPlayed > 0) {
-            // Dependent Birthdays — check if they missed a past birthday or are due for this year's
-            const bdayDependent = dependents.find(d => {
+        }
+
+        if (totalMonthsPlayed > 0) {
+            // Dependent Birthdays — collect ALL dependents due this month (filter, not find)
+            const bdayDependents = dependents.filter(d => {
                 if (d.isDead || d.bdayMonth === undefined || d.custody === 'ex') return false;
                 const lastCel = d.lastCelebratedYear || (turn.year - 1);
-                if (lastCel === turn.year - 1 && turn.month === d.bdayMonth) return true;
-                return false;
+                return lastCel === turn.year - 1 && turn.month === d.bdayMonth;
             });
-            
-            if (bdayDependent) {
+
+            bdayDependents.forEach(bdayDependent => {
                 const yearToCelebrate = (bdayDependent.lastCelebratedYear || (turn.year - 1)) + 1;
                 const isSpouse = bdayDependent.type === 'spouse';
-                const age = Math.floor((totalMonthsPlayed - bdayDependent.monthAdded) / 12) + (isSpouse ? 25 : 1); // rough age
-                
+                const age = Math.floor((totalMonthsPlayed - bdayDependent.monthAdded) / 12) + (isSpouse ? 25 : 1);
+
                 let choices = [
                     { label: 'Quiet Family Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Family Dinner', amount: 2500, happiness: 20, health: 10, dependentId: bdayDependent.id, msg: 'A lovely, peaceful family dinner.' } },
                     { label: 'Big House Party', color: '#4ade80', effect: { type: 'birthday_celebration', choiceLabel: 'Big House Party', amount: 12000, happiness: 30, spouseIncomeBoost: isSpouse ? 0.10 : 0, childSavingsBoost: isSpouse ? 0 : 10000, dependentId: bdayDependent.id, msg: isSpouse ? 'Great party! Spouse got a 10% raise!' : 'Fun kids party! You also put ₹10,000 into their savings.' } },
                     { label: 'Lavish Celebration', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Celebration', amount: 45000, happiness: 60, creditScore: 25, spouseIncomeBoost: isSpouse ? 0.20 : 0, childSavingsBoost: isSpouse ? 0 : 25000, dependentId: bdayDependent.id, msg: 'An unforgettable bash! Huge happiness and status boost.' } }
                 ];
-                
+
                 let message = `How do you want to celebrate?`;
-                
+
                 if (isSpouse) {
                     const suggestionIndex = Math.floor(Math.random() * 3);
                     const suggestedChoice = choices[suggestionIndex];
-                    const hintMsg = `Hint: ${bdayDependent.name} wants a ${suggestedChoice.label}.`;
-                    message += `\n\n${hintMsg}`;
-                    
+                    message += `\n\nHint: ${bdayDependent.name} wants a ${suggestedChoice.label}.`;
                     choices = choices.map((choice, index) => {
                         if (index === suggestionIndex) {
                             choice.effect.happiness += 20;
@@ -3258,9 +3272,8 @@ export const GameProvider = ({ children }) => {
                         return choice;
                     });
                 }
-                
+
                 if (balance < 2500) {
-                    // Can't afford any party — only option is the broke path
                     choices = [{ label: 'Skip (Too Broke)', color: '#f87171', effect: {
                         type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0,
                         happiness: isSpouse ? -70 : -30,
@@ -3271,6 +3284,7 @@ export const GameProvider = ({ children }) => {
                             : `${bdayDependent.name}'s birthday came and went without any celebration. They are heartbroken.`,
                     }}];
                 }
+
                 decisionsToQueue.push({
                     id: `dep_bday_${bdayDependent.id}_${totalMonthsPlayed}`,
                     name: `Happy ${getOrdinal(age)} Birthday, ${bdayDependent.name}!`,
@@ -3283,10 +3297,8 @@ export const GameProvider = ({ children }) => {
                     message,
                     choices,
                 });
-                // lastCelebratedYear is marked at RESOLVE time (resolveDecision), not here,
-                // to avoid double-incrementing when other events are ahead in the queue.
                 setIsPlaying(false);
-            }
+            });
         }
 
         // Career advancement offer — every 24–36 months with a job, 35% chance
@@ -3327,7 +3339,8 @@ export const GameProvider = ({ children }) => {
                     setLastCrisisEvent({
                         id: `divorce_${totalMonthsPlayed}`, name: 'Divorce',
                         message: `Your spouse was too unhappy and decided to leave you. You paid ₹2,00,000 in settlement.`,
-                        category: 'crisis', impact: -200000, month: totalMonthsPlayed, read: false
+                        category: 'crisis', impact: -200000, month: totalMonthsPlayed, read: false,
+                        image: { isSprite: false, source: require('../../assets/ui_comp/divorcpopup.png') },
                     });
                     setIsPlaying(false);
                 }
@@ -3336,10 +3349,11 @@ export const GameProvider = ({ children }) => {
 
         // ── ELDERLY PARENT MECHANIC ──
         if (totalMonthsPlayed > 0 && !pendingDecision) {
-            const numParents = stateRef.current.dependents.filter(d => d.type === 'parent').length;
+            // Only count living parents — dead ones don't block new requests
+            const numParents = stateRef.current.dependents.filter(d => d.type === 'parent' && !d.isDead).length;
             if (playerAge >= 28 && numParents < 2 && Math.random() < 0.035) {
                 const parentOptions = [];
-                if (currentHousing.capacity >= stateRef.current.dependents.length + 2) {
+                if (currentHousing.capacity >= stateRef.current.dependents.filter(d => !d.isDead && d.custody !== 'ex').length + 2) {
                     parentOptions.push({ label: 'Move Them In', color: '#4ade80', effect: { type: 'parent_move_in' } });
                 }
                 parentOptions.push({ label: 'Send ₹10,000/mo', color: '#60a5fa', effect: { type: 'parent_support_allowance' } });
@@ -3361,7 +3375,7 @@ export const GameProvider = ({ children }) => {
         const qualityScore = currentHousing.life_quality || 2;
         const housingEffect  = (qualityScore - 5) * 0.25;
         const debtStress     = -(totalLoanOutstanding / 10000000) * 0.4;
-        const familyWarmth   = Math.min(dependents.length * 0.3, 1.2);
+        const familyWarmth   = Math.min(dependents.filter(d => !d.isDead && d.custody !== 'ex').length * 0.3, 1.2);
         const jobSatisfaction = currentJob ? 0.15 : -0.4;
         const financeStress  = netFlow < 0 ? -0.5 : 0.1;
         const neglectEffect = activeEffects.find(e => e.type === 'parent_neglect');
@@ -3535,7 +3549,7 @@ export const GameProvider = ({ children }) => {
 
         // Expecting Child logic
         if (expectingChild) {
-            const activeDeps = dependents.filter(d => d.custody !== 'ex');
+            const activeDeps = dependents.filter(d => d.custody !== 'ex' && !d.isDead);
             if (expectingChild.remaining <= 1) {
                 // Baby is born!
                 const totalPeople = activeDeps.length + 2; // Player + active dependents + 1 new baby
@@ -3556,9 +3570,9 @@ export const GameProvider = ({ children }) => {
                 }
                 
                 // Resolve baby name dynamically if empty
-                const finalChildName = expectingChild.name || (expectingChild.gender === 'female' 
-                    ? INDIAN_FEMALE_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_NAMES.length)]
-                    : INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)]);
+                const finalChildName = expectingChild.name || (expectingChild.gender === 'female'
+                    ? pickUniqueName(INDIAN_FEMALE_NAMES)
+                    : pickUniqueName(INDIAN_MALE_NAMES));
 
                 // Add the child (with custody undefined initially)
                 setDependents(prev => [...prev, {
@@ -3604,7 +3618,7 @@ export const GameProvider = ({ children }) => {
                     message: `${finalChildName} is finally here! A healthy baby ${expectingChild.gender.toLowerCase()} has joined your family. Your life will never be the same.${emergencyMoveMsg}`,
                     category: emergencyMoveMsg ? 'crisis' : 'positive',
                     choices: [{ label: 'Welcome to the world!', color: '#4ade80', effect: { type: 'none' } }],
-                    image: expectingChild.gender === 'Female' ? require('../../assets/ui_comp/welcomebabygirl.png') : require('../../assets/ui_comp/welcomebabyboy.png')
+                    image: expectingChild.gender === 'female' ? require('../../assets/ui_comp/welcomebabygirl.png') : require('../../assets/ui_comp/welcomebabyboy.png')
                 });
             } else {
                 const remaining = expectingChild.remaining - 1;
@@ -3643,6 +3657,7 @@ export const GameProvider = ({ children }) => {
         let lostFreelanceJob = false;
         let balanceDelta = 0;
         const nextEffects = [];
+        let deathOccurred = false;
 
         dependents.forEach(d => {
             if (d.isDead) {
@@ -3653,18 +3668,22 @@ export const GameProvider = ({ children }) => {
                 const newHealth = Math.max(0, (d.health ?? 80) - 7);
                 if (newHealth <= 0) {
                     const deathEntry = {
-                        id: `child_death_${d.id}_${Date.now()}`, name: 'Tragic Loss',
-                        message: `Your child, ${d.name}, has tragically passed away from neglect. The grief is devastating. Funeral costs ₹30,000. This will be on your record.`,
-                        category: 'crisis', impact: -30000, month: totalMonthsPlayed, read: false,
-                        image: require('../../assets/ui_comp/gravestone.png'),
-                        depId: d.id, depType: 'child', depGender: d.gender, depChildAgeMonths: d.childAgeMonths,
+                        id: `child_death_${d.id}_${Date.now()}`,
+                        name: 'Tragic Loss',
+                        message: `Your child, ${d.name}, has passed away. Funeral costs ₹50,000.`,
+                        funeralCost: 50000,
+                        depName: d.name,
                     };
-                    newInboxEvents.push(deathEntry);
-                    latestCrisis = deathEntry;
-                    setBalance(prev => Math.max(0, prev - 30000)); // funeral cost
+                    newInboxEvents.push({ ...deathEntry, category: 'crisis', impact: -50000, month: totalMonthsPlayed, read: false });
+                    setDeathEventQueue(prev => [...prev, deathEntry]);
+                    deathOccurred = true;
+                    setBalance(prev => Math.max(0, prev - 50000));
                     setHappiness(prev => Math.max(0, prev - 80));
-                    setHealth(prev => Math.max(0, prev - 15)); // grief takes physical toll
-                    setCreditScore(prev => Math.max(300, prev - 50)); // social stigma hits credit/reputation
+                    setHealth(prev => Math.max(0, prev - 15));
+                    setCreditScore(prev => Math.max(300, prev - 50));
+                    setDependents(prev => prev.map(dep =>
+                        dep.type === 'spouse' ? { ...dep, happiness: Math.max(0, (dep.happiness ?? 70) - 40) } : dep
+                    ));
                     setGamePaused = true;
                     nextDependents.push({ ...d, health: 0, isDead: true });
                     return;
@@ -3721,17 +3740,21 @@ export const GameProvider = ({ children }) => {
                 const newHealth = Math.max(0, (d.health ?? 70) - decay);
                 if (newHealth <= 0) {
                     const deathEntry = {
-                        id: `parent_death_${d.id}_${Date.now()}`, name: 'Loss of a Parent',
-                        message: `Your parent, ${d.name}, has passed away. The funeral costs ₹50,000 and your grief will weigh on you for months.`,
-                        category: 'crisis', impact: -50000, month: totalMonthsPlayed, read: false,
-                        image: require('../../assets/ui_comp/gravestone.png'),
-                        depId: d.id, depType: 'parent', depParentType: d.parentType,
+                        id: `parent_death_${d.id}_${Date.now()}`,
+                        name: 'Loss of a Parent',
+                        message: `Your parent, ${d.name}, has passed away. Funeral costs ₹50,000.`,
+                        funeralCost: 50000,
+                        depName: d.name,
                     };
-                    newInboxEvents.push(deathEntry);
-                    latestCrisis = deathEntry;
-                    setBalance(prev => Math.max(0, prev - 50000)); // funeral cost
+                    newInboxEvents.push({ ...deathEntry, category: 'crisis', impact: -50000, month: totalMonthsPlayed, read: false });
+                    setDeathEventQueue(prev => [...prev, deathEntry]);
+                    deathOccurred = true;
+                    setBalance(prev => Math.max(0, prev - 50000));
                     setHappiness(prev => Math.max(0, prev - 60));
-                    setHealth(prev => Math.max(0, prev - 10)); // grief affects player health
+                    setHealth(prev => Math.max(0, prev - 10));
+                    setDependents(prev => prev.map(dep =>
+                        dep.type === 'spouse' ? { ...dep, happiness: Math.max(0, (dep.happiness ?? 70) - 20) } : dep
+                    ));
                     setGamePaused = true;
                     nextDependents.push({ ...d, health: 0, isDead: true });
                     return;
@@ -3754,7 +3777,7 @@ export const GameProvider = ({ children }) => {
                 nextDependents.push({ ...d, health: newHealth });
                 return;
             }
-            if (d.type === 'spouse' && d.upskilling) {
+            if (d.type === 'spouse' && !d.isDead && d.upskilling) {
                 const left = (d.upskillingMonthsLeft || 1) - 1;
                 if (left <= 0) {
                     const newIncome = 25000 + Math.floor(Math.random() * 20000);
@@ -3765,7 +3788,7 @@ export const GameProvider = ({ children }) => {
                 return;
             }
             // Spouse career progression — salary raise every 36 months
-            if (d.type === 'spouse' && d.isWorking && !d.upskilling) {
+            if (d.type === 'spouse' && !d.isDead && d.isWorking && !d.upskilling) {
                 const monthsSinceRaise = totalMonthsPlayed - (d.lastRaiseMonth ?? d.monthAdded ?? 0);
                 if (monthsSinceRaise >= 36) {
                     const raiseRate = 0.04 + Math.random() * 0.06; // 4–10%
@@ -3789,9 +3812,7 @@ export const GameProvider = ({ children }) => {
             if (aged) return { ...p, ...aged };
             return p;
         }));
-        if (happinessDelta !== 0) {
-            setHappiness(prev => Math.max(0, Math.min(100, prev + happinessDelta)));
-        }
+        // happiness already set to newHappiness above — no double-apply here
         if (setGamePaused) {
             setIsPlaying(false);
         }
@@ -3805,7 +3826,7 @@ export const GameProvider = ({ children }) => {
             });
             if (eligible.length > 0) {
                 const demand = eligible[Math.floor(Math.random() * eligible.length)];
-                const dep = dependents.find(d => d.type === demand.character && d.custody !== 'ex');
+                const dep = dependents.find(d => d.type === demand.character && d.custody !== 'ex' && !d.isDead);
                 if (dep) {
                     setPendingFamilyDemand({ demand, dep });
                 }
@@ -4151,7 +4172,7 @@ export const GameProvider = ({ children }) => {
         };
         checkAchievements(achState);
 
-        runCrisisEngine();
+        if (!deathOccurred) runCrisisEngine();
 
         if (decisionsToQueue.length > 0) {
             setPendingDecision(decisionsToQueue[0]);
@@ -4270,6 +4291,8 @@ export const GameProvider = ({ children }) => {
         itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
         selectITRForm, collectITRDoc, computeITRTaxFull, submitITR,
         pendingFamilyDemand, resolveFamilyDemand,
+        pendingDeathEvent, setPendingDeathEvent,
+        deathEventQueue, setDeathEventQueue,
 
         // Crisis
         lastCrisisEvent, activeEffects, setLastCrisisEvent,

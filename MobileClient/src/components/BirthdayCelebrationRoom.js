@@ -40,14 +40,14 @@ export default function BirthdayCelebrationRoom({
 
     const currentMonth = turn?.month || 1;
     const isPlayerBday = playerBdayMonth === currentMonth;
-    const bdayDependents = dependents?.filter(d => d.bdayMonth === currentMonth) || [];
+    const bdayDependents = dependents?.filter(d => d.bdayMonth === currentMonth && !d.isDead) || [];
     const isBdayMonth = isPlayerBday || bdayDependents.length > 0;
 
     const allBdays = [];
     if (playerBdayMonth) {
         allBdays.push({ name: playerName || 'You', month: playerBdayMonth, isPlayer: true });
     }
-    (dependents || []).forEach(d => {
+    (dependents || []).filter(d => !d.isDead).forEach(d => {
         if (d.bdayMonth) allBdays.push({ name: d.name, month: d.bdayMonth, isPlayer: false });
     });
     

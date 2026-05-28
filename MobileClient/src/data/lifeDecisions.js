@@ -74,7 +74,7 @@ export const LIFE_DECISIONS = [
         message: "Your parents are getting older and want to move in with you. This means higher monthly expenses but they'll help with childcare.",
         emoji: '👴',
         category: 'dilemma',
-        condition: (s) => s.playerAge >= 30,
+        condition: (s) => s.playerAge >= 30 && !s.dependents?.some(d => d.type === 'parent' && !d.isDead),
         choices: [
             { label: 'MOVE THEM IN', color: '#4ade80', effect: { type: 'add_parents', monthlyCost: 8000, msg: "Parents move in. Living costs go up ₹8K/mo but happiness rises and childcare is sorted.", happiness: 8 } },
             { label: 'SUPPORT FROM AFAR', color: '#fbbf24', effect: { type: 'cash_spend', amount: 5000, recurring: true, months: 60, msg: "You send them ₹5K/mo support. They stay in their home.", happiness: 3 } },

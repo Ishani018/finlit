@@ -416,6 +416,22 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
     const monthsMarried = isSpouse ? Math.max(0, (totalMonthsPlayed || 0) - (dep.monthAdded || 0)) : 0;
     const spouseColor   = (dep.spouseSprite || '').startsWith('groom') ? C.blue : C.pink;
 
+    if (dep.isDead) {
+        return (
+            <View style={{ position: 'absolute', inset: 0, backgroundColor: C.bg, zIndex: 50, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#666' }}>{dep.name}</Text>
+                    <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                        <FontAwesome5 name="times" size={13} color={C.dim} />
+                    </TouchableOpacity>
+                </View>
+                <Image source={GRAVESTONE_IMG} style={{ width: 120, height: 120, opacity: 0.6 }} resizeMode="contain" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#666', marginTop: 16, letterSpacing: 2 }}>DECEASED</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', marginTop: 8 }}>Rest in Peace, {dep.name}</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: C.bg, zIndex: 50 }}>
             <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -560,7 +576,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                         >
                             <View>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.sage, letterSpacing: 1 }}>PLAN FAMILY VACATION</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹5,000/person · +15 happiness · {1 + (dependents?.length || 0)} people</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹5,000/person · +15 happiness · {1 + (dependents?.filter(d => !d.isDead && d.custody !== 'ex').length || 0)} people</Text>
                             </View>
                             <Image source={require('../../assets/ui_comp/vacation.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
                         </TouchableOpacity>
@@ -1160,14 +1176,14 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                 {right ? (
                                     right.type === 'parent' ? (
                                         <PersonCard
-                                            image={right.data.parentType === 'mother' ? DEP_IMAGES.elderly_mother : right.data.parentType === 'father' ? DEP_IMAGES.elderly_father : DEP_IMAGES.elderly_couple}
+                                            image={right.data.isDead ? GRAVESTONE_IMG : (right.data.parentType === 'mother' ? DEP_IMAGES.elderly_mother : right.data.parentType === 'father' ? DEP_IMAGES.elderly_father : DEP_IMAGES.elderly_couple)}
                                             contain
                                             name={right.data.name}
-                                            tag={right.data.parentType === 'mother' ? 'MOTHER' : right.data.parentType === 'father' ? 'FATHER' : 'PARENT'}
-                                            color={C.gold}
-                                            sub1="Under your care"
-                                            sub2="₹15,000/mo"
-                                            hp={right.data.health}
+                                            tag={right.data.isDead ? 'DECEASED' : (right.data.parentType === 'mother' ? 'MOTHER' : right.data.parentType === 'father' ? 'FATHER' : 'PARENT')}
+                                            color={right.data.isDead ? '#666' : C.gold}
+                                            sub1={right.data.isDead ? 'Rest in Peace' : 'Under your care'}
+                                            sub2={right.data.isDead ? '' : '₹15,000/mo'}
+                                            hp={right.data.isDead ? undefined : right.data.health}
                                             onPress={() => setSelectedDep(right.data)}
                                         />
                                     ) : (

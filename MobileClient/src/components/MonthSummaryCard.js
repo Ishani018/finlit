@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions, Image } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
 import { FINANCIAL_TIPS } from './FinancialTip';
+
+const HAPPY_ICON  = require('../../assets/ui_comp/happyicon.png');
+const INVEST_ICON = require('../../assets/ui_comp/investicon.png');
+const HOME_ICON   = require('../../assets/ui_comp/home.png');
+const CAREER_ICON = require('../../assets/ui_comp/career.png');
+const HEALTH_ICON = require('../../assets/ui_comp/healthicon.png');
+const SAVE_ICON   = require('../../assets/ui_comp/saveandearn.png');
+const FAMILY_ICON = require('../../assets/ui_comp/familyicon.png');
+const NEXT_ICON   = require('../../assets/ui_comp/nextbutton.png');
 
 const { height: SH, width: SW } = Dimensions.get('window');
 
@@ -33,10 +41,16 @@ function NetWorthBar({ history }) {
     );
 }
 
-function Row({ label, value, color, icon }) {
+const ROW_ICONS = { Salary: CAREER_ICON, Rental: HOME_ICON, Spouse: FAMILY_ICON, Dividend: INVEST_ICON, Pension: SAVE_ICON, Living: HAPPY_ICON, Housing: HOME_ICON, EMI: SAVE_ICON, Tax: INVEST_ICON, Insurance: HEALTH_ICON, SIP: INVEST_ICON, Tuition: FAMILY_ICON };
+
+function Row({ label, value, color }) {
+    const icon = ROW_ICONS[label];
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-            {icon && <FontAwesome5 name={icon} size={10} color={color} style={{ width: 14 }} />}
+            {icon
+                ? <Image source={icon} style={{ width: 11, height: 11, marginRight: 4, opacity: 0.5 }} resizeMode="contain" />
+                : <View style={{ width: 15 }} />
+            }
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#556080', flex: 1, lineHeight: 16 }}>{label}</Text>
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color, lineHeight: 18 }}>{value}</Text>
         </View>
@@ -85,8 +99,6 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
 
             {/* Card */}
             <View style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: 16, paddingBottom: 28 }}>
-                {/* Header accent line */}
-                <View style={{ height: 2, backgroundColor: flowColor, marginBottom: 0 }} />
 
                 <View style={{ backgroundColor: '#070910', borderWidth: 1, borderTopWidth: 0, borderColor: '#1a2040', padding: 18 }}>
 
@@ -98,7 +110,7 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                         </View>
                         {happinessDelta !== undefined && (
                             <View style={{ alignItems: 'center', gap: 2 }}>
-                                <FontAwesome5 name="smile" size={16} color={happinessDelta >= 0 ? '#fbbf24' : '#f87171'} />
+                                <Image source={HAPPY_ICON} style={{ width: 18, height: 18, opacity: happinessDelta >= 0 ? 1 : 0.5 }} resizeMode="contain" />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: happinessDelta >= 0 ? '#fbbf24' : '#f87171', lineHeight: 18 }}>
                                     {happinessDelta >= 0 ? '+' : ''}{happinessDelta.toFixed(0)}
                                 </Text>
@@ -174,13 +186,10 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                     <TouchableOpacity
                         onPress={onContinue}
                         activeOpacity={0.8}
-                        style={{
-                            borderWidth: 1, borderColor: '#3b82f6',
-                            backgroundColor: '#0a1428',
-                            paddingVertical: 14, alignItems: 'center',
-                        }}
+                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 1, borderColor: '#1a2840', backgroundColor: '#08101e', paddingVertical: 14 }}
                     >
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#60a5fa', letterSpacing: 2, lineHeight: 24 }}>CONTINUE ▶</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 2, lineHeight: 24 }}>CONTINUE</Text>
+                        <Image source={NEXT_ICON} style={{ width: 24, height: 24 }} resizeMode="contain" />
                     </TouchableOpacity>
                 </View>
             </View>

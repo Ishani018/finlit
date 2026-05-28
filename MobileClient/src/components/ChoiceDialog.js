@@ -50,6 +50,7 @@ export default function ChoiceDialog({ event, onChoice }) {
     }, [event, isCustodyDilemma]);
 
     if (!event) return null;
+    if (!event.choices || event.choices.length === 0) return null;
 
     const categoryColors = {
         opportunity: '#4ade80',

@@ -14,7 +14,6 @@ const { width: SW, height: SH } = Dimensions.get('window');
 const PAD = 16;
 const CARD_GAP = 10;
 const CARD_W = Math.min(Math.floor((SW - PAD * 2 - CARD_GAP) / 2), 185);
-const CARD_H = 220;
 const SPRITE_H = 158;
 
 // ─── Sprites ─────────────────────────────────────────────────────────────────
@@ -27,8 +26,19 @@ const SPRITES = [
     { id: 'young_rahul_1',   image: require('../../assets/sprites/young rahul 1.png') },
     { id: 'young_priya_1',   image: require('../../assets/sprites/young priya 1.png') },
     { id: 'young_kav_1',     image: require('../../assets/sprites/young kav 1.png') },
-    { id: 'young_sara_1',    image: require('../../assets/sprites/young sara 1.png') },
 ];
+
+// ─── Trait icons from ui_comp ────────────────────────────────────────────────
+const TRAIT_ICONS = {
+    young_pia_1:     require('../../assets/ui_comp/investicon.png'),
+    young_raj_1:     require('../../assets/ui_comp/career.png'),
+    young_priya_1:   require('../../assets/ui_comp/education.png'),
+    young_rahul_1:   require('../../assets/ui_comp/saveandearn.png'),
+    young_sia_1:     require('../../assets/ui_comp/forsale.png'),
+    young_soms_1:    require('../../assets/ui_comp/happyicon.png'),
+    young_soni_1:    require('../../assets/ui_comp/familyicon.png'),
+    young_kav_1:     require('../../assets/ui_comp/bulb.png'),
+};
 
 // ─── Character traits — each affects gameplay ─────────────────────────────────
 const TRAITS = {
@@ -36,7 +46,6 @@ const TRAITS = {
     young_raj_1:     { name: 'HUSTLER',    color: '#f59e0b', bg: '#1a0e00', effect: 'Salary grows 12% faster',   desc: 'Never stops grinding.' },
     young_priya_1:   { name: 'SCHOLAR',    color: '#818cf8', bg: '#0d0e28', effect: 'Education costs -25%',       desc: 'Knowledge is wealth.' },
     young_rahul_1:   { name: 'RISK TAKER', color: '#ef4444', bg: '#1a0505', effect: 'Stock gains x1.2',           desc: 'Go big or go home.' },
-    young_sara_1:    { name: 'LUCKY',      color: '#a855f7', bg: '#120820', effect: 'Crisis chance -25%',         desc: 'Fortune favours the bold.' },
     young_sia_1:     { name: 'LANDLORD',   color: '#f97316', bg: '#1a0800', effect: 'Rental income +15%',         desc: 'Real estate royalty.' },
     young_soms_1:    { name: 'MINIMALIST', color: '#06b6d4', bg: '#021820', effect: 'Immune to inflation spikes', desc: 'Less is always more.' },
     young_soni_1:    { name: 'CAREGIVER',  color: '#ec4899', bg: '#1a0510', effect: 'Family costs -20%',          desc: 'Family first, always.' },
@@ -66,48 +75,30 @@ function EntryScreen({ onStart, hasSave, onResume }) {
     }, []);
 
     return (
-        <View
-            style={{ flex: 1, backgroundColor: '#06080f', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 36 }}
-        >
-            <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#151e34', letterSpacing: 5 }}>
-                    ━━━━━━━━━━━━━━━━━━━━━
-                </Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#1a2440', letterSpacing: 3, marginTop: 3 }}>
-                    FINANCIAL LIFE SIMULATOR  v1.0
-                </Text>
+        <View style={{ flex: 1, backgroundColor: '#06080f', alignItems: 'center', justifyContent: 'center', paddingVertical: 36, paddingHorizontal: 40 }}>
+
+            {/* Logo + title — centred */}
+            <Animated.View style={{ transform: [{ scale: pulse }], marginBottom: 20, alignItems: 'center' }}>
+                <Image source={require('../../assets/icon.png')} style={{ width: 120, height: 120, borderRadius: 22 }} resizeMode="contain" />
+            </Animated.View>
+
+            <View style={{ alignItems: 'center', marginBottom: 48 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#0b1228', letterSpacing: 6, position: 'absolute', top: 5, left: 5, lineHeight: 82 }}>FINLIT</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#172860', letterSpacing: 6, position: 'absolute', top: 2, left: 2, lineHeight: 82 }}>FINLIT</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#c8d4f0', letterSpacing: 6, lineHeight: 82 }}>FINLIT</Text>
             </View>
 
-            <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#151e34', letterSpacing: 8, marginBottom: 16 }}>
-                    ▓▓▒▒░░ PRESENTS ░░▒▒▓▓
-                </Text>
-
-                <Animated.View style={{ transform: [{ scale: pulse }], marginBottom: 16 }}>
-                    <Image source={require('../../assets/icon.png')} style={{ width: 140, height: 140, borderRadius: 26 }} resizeMode="contain" />
-                </Animated.View>
-
-                <View style={{ alignItems: 'center', height: 88 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#0b1228', letterSpacing: 6, position: 'absolute', top: 5, left: 5, lineHeight: 82 }}>FINLIT</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#172860', letterSpacing: 6, position: 'absolute', top: 2, left: 2, lineHeight: 82 }}>FINLIT</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 82, color: '#c8d4f0', letterSpacing: 6, lineHeight: 82 }}>FINLIT</Text>
-                </View>
-                <View style={{ height: 1, width: 200, backgroundColor: '#111c34', marginTop: 8, marginBottom: 10 }} />
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#2a4070', letterSpacing: 2, textAlign: 'center' }}>
-                    BUILD YOUR WEALTH  •  SHAPE YOUR LIFE
-                </Text>
+            {/* Icon strip */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 40 }}>
+                <Image source={require('../../assets/ui_comp/investicon.png')} style={{ width: 18, height: 18, opacity: 0.45 }} resizeMode="contain" />
+                <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 18, height: 18, opacity: 0.45 }} resizeMode="contain" />
+                <Image source={require('../../assets/ui_comp/home.png')} style={{ width: 18, height: 18, opacity: 0.45 }} resizeMode="contain" />
+                <Image source={require('../../assets/ui_comp/familyicon.png')} style={{ width: 18, height: 18, opacity: 0.45 }} resizeMode="contain" />
+                <Image source={require('../../assets/ui_comp/happyicon.png')} style={{ width: 18, height: 18, opacity: 0.45 }} resizeMode="contain" />
             </View>
 
-            <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#1a2840', letterSpacing: 2 }}>
-                    INVEST  •  EARN  •  RETIRE RICH
-                </Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#111828', letterSpacing: 2, marginTop: 2 }}>
-                    Age 18 → 75  |  A Lifetime of Decisions
-                </Text>
-            </View>
-
-            <View style={{ width: '100%', alignItems: 'center', paddingHorizontal: 40 }}>
+            {/* Buttons */}
+            <View style={{ width: '100%' }}>
                 {hasSave ? (
                     <View style={{ width: '100%' }}>
                         <TouchableOpacity onPress={onResume} style={{ borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#1a2a50', paddingVertical: 14, alignItems: 'center', marginBottom: 12, position: 'relative' }}>
@@ -129,9 +120,6 @@ function EntryScreen({ onStart, hasSave, onResume }) {
                         </TouchableOpacity>
                     </Animated.View>
                 )}
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#111828', marginTop: 12, letterSpacing: 2 }}>
-                    © FINLIT 2024  •  Educational Game
-                </Text>
             </View>
         </View>
     );
@@ -151,7 +139,6 @@ const TRAIT_AGE_FLAVOUR = {
     young_raj_1:     ['Side hustles everywhere',    'Promotions accelerating',  'Peak earning years',        'Legacy income established'],
     young_priya_1:   ['Studying constantly',        'Certs paying off',         'Expert-level knowledge',    'Teaching what she mastered'],
     young_rahul_1:   ['All-in on speculative bets', 'Bigger swings, bigger wins','Portfolio dwarfs peers',   'Legendary risk appetite'],
-    young_sara_1:    ['Lucky breaks early on',      'Dodging crises somehow',   'Charmed financial life',    'Fortune still favouring her'],
     young_sia_1:     ['Renting out first room',     'Property #2 acquired',     'Rental empire growing',     'Passive income like salary'],
     young_soms_1:    ['Minimal needs, max savings', 'Immune to FOMO spending',  'Still lives below means',   'Retired early, stress-free'],
     young_soni_1:    ['Family comes first, always', 'Dependents thrive cheaper','Kids grow up secure',       'Generational care secured'],
@@ -183,15 +170,6 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', letterSpacing: 2, lineHeight: 18 }}>◀  BACK</Text>
                 </TouchableOpacity>
 
-                {/* Trait badge */}
-                <View style={{
-                    position: 'absolute', top: 14, right: 14,
-                    paddingHorizontal: 10, paddingVertical: 4,
-                    borderWidth: 1, borderColor: trait.color + '55',
-                    backgroundColor: trait.bg || '#0a0c18',
-                }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: trait.color, letterSpacing: 3 }}>{trait.name}</Text>
-                </View>
 
                 <Image
                     source={sprite.image}
@@ -208,21 +186,26 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
             >
                 {/* Trait strip */}
                 {!childMode && (
-                    <View style={{ paddingHorizontal: PAD, paddingTop: 12, paddingBottom: 12, borderBottomWidth: 1, borderColor: '#0d1228' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: trait.color, letterSpacing: 2, lineHeight: 30 }}>{trait.name}</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3860', lineHeight: 17 }}>"{trait.desc}"</Text>
-                            <View style={{ width: 3, height: 3, backgroundColor: '#1a2440' }} />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: trait.color + 'cc', lineHeight: 17 }}>{trait.effect}</Text>
+                    <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 14, borderBottomWidth: 1, borderColor: '#0d1228', flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        {TRAIT_ICONS[sprite.id] && (
+                            <View style={{ width: 40, height: 40, backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1a2440', alignItems: 'center', justifyContent: 'center' }}>
+                                <Image source={TRAIT_ICONS[sprite.id]} style={{ width: 22, height: 22, opacity: 0.7 }} resizeMode="contain" />
+                            </View>
+                        )}
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', letterSpacing: 2, lineHeight: 28 }}>{trait.name}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3860', lineHeight: 17 }}>{trait.desc}  ·  <Text style={{ color: '#4a5a80' }}>{trait.effect}</Text></Text>
                         </View>
                     </View>
                 )}
 
                 {/* Life path label */}
-                <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 6, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 6, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 12, height: 12, opacity: 0.45 }} resizeMode="contain" />
                     <View style={{ flex: 1, height: 1, backgroundColor: '#0d1228' }} />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1e2840', letterSpacing: 5 }}>{childMode ? 'GROWTH STAGES' : 'YOUR LIFE PATH'}</Text>
                     <View style={{ flex: 1, height: 1, backgroundColor: '#0d1228' }} />
+                    <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 12, height: 12, opacity: 0.45 }} resizeMode="contain" />
                 </View>
 
                 {/* Timeline horizontal scroll */}
@@ -262,32 +245,24 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
                     })}
                 </ScrollView>
 
-                {/* ── CHOOSE button — inside scroll, right below timeline ── */}
-                <View style={{ paddingHorizontal: PAD, paddingTop: 6 }}>
-                    {/* Decorative label */}
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#1a2440', letterSpacing: 4, textAlign: 'center', marginBottom: 8 }}>
-                        BEGIN YOUR JOURNEY AS
-                    </Text>
+                {/* ── CHOOSE button ── */}
+                <View style={{ paddingHorizontal: PAD, paddingTop: 10 }}>
                     <TouchableOpacity
                         onPress={onSelect}
                         activeOpacity={0.8}
-                        style={{ position: 'relative', overflow: 'hidden' }}
-                    >
-                        {/* Colored top accent line */}
-                        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: trait.color }} />
-                        {/* Dark body */}
-                        <View style={{
-                            backgroundColor: trait.bg || '#0a0c18',
-                            borderWidth: 1, borderTopWidth: 0,
-                            borderColor: trait.color + '60',
-                            paddingVertical: 16,
+                        style={{
+                            backgroundColor: '#08101e',
+                            borderWidth: 1,
+                            borderColor: '#1a2440',
+                            paddingVertical: 14,
                             alignItems: 'center',
-                        }}>
-                            <Corners color={trait.color + '40'} size={7} />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: trait.color, letterSpacing: 3, lineHeight: 26 }}>
-                                CHOOSE  {childMode ? 'THIS LOOK' : trait.name}  ▶
-                            </Text>
-                        </View>
+                            position: 'relative',
+                        }}
+                    >
+                        <Corners color="#2a3a5a" size={5} />
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 3, lineHeight: 24 }}>
+                            {childMode ? 'SELECT THIS LOOK  ▶' : 'BEGIN JOURNEY  ▶'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -344,30 +319,32 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                                 <TouchableOpacity
                                     key={sprite.id}
                                     onPress={() => setDetailIdx(idx)}
-                                    activeOpacity={0.8}
+                                    activeOpacity={0.85}
                                     style={{
-                                        width: CARD_W, height: CARD_H,
+                                        width: CARD_W,
                                         marginRight: colIdx === 0 ? CARD_GAP : 0,
-                                        backgroundColor: isSel ? t.bg : '#06080f',
-                                        borderWidth: isSel ? 2 : 1,
-                                        borderColor: isSel ? t.color : '#111828',
+                                        backgroundColor: isSel ? t.bg || '#0a0c18' : '#06080f',
                                         overflow: 'hidden', position: 'relative',
                                     }}
                                 >
-                                    {isSel && <Corners color={t.color} size={5} />}
                                     {isSel && (
-                                        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.color, opacity: 0.04 }} />
+                                        <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: t.color, zIndex: 5 }} />
                                     )}
                                     <View style={{ height: SPRITE_H, overflow: 'hidden', alignItems: 'center', paddingTop: 6 }}>
                                         <Image source={sprite.image} style={{ width: CARD_W, height: CARD_W * 1.75 }} resizeMode="contain" />
                                     </View>
-                                    <View style={{ height: 1, backgroundColor: isSel ? t.color : '#0d1228', opacity: isSel ? 0.4 : 1 }} />
-                                    <View style={{ flex: 1, paddingHorizontal: 8, paddingTop: 6, justifyContent: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: isSel ? t.color : '#4a5580', letterSpacing: 1, lineHeight: 20 }}>
-                                            {childMode ? 'SELECT' : t.name}
-                                        </Text>
+                                    <View style={{ height: 1, backgroundColor: '#0d1228' }} />
+                                    <View style={{ flex: 1, paddingHorizontal: 8, paddingTop: 6, paddingBottom: 8, justifyContent: 'center' }}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                                            {!childMode && TRAIT_ICONS[sprite.id] && (
+                                                <Image source={TRAIT_ICONS[sprite.id]} style={{ width: 13, height: 13, opacity: isSel ? 0.8 : 0.45 }} resizeMode="contain" />
+                                            )}
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: isSel ? t.color : '#4a5580', letterSpacing: 1, lineHeight: 20 }}>
+                                                {childMode ? 'SELECT' : t.name}
+                                            </Text>
+                                        </View>
                                         {!childMode && (
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: isSel ? '#a0b0d0' : '#222a40', lineHeight: 16, marginTop: 1 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: isSel ? '#a0b0d0' : '#222a40', lineHeight: 15, marginTop: 1 }}>
                                                 {t.effect}
                                             </Text>
                                         )}
@@ -425,32 +402,31 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                 />
             </View>
 
-            {/* Thin divider */}
-            <View style={{ height: 1, backgroundColor: '#0a0f1e' }} />
-
             {/* ── FORM ── */}
-            <View style={{ flex: 1, paddingHorizontal: PAD, paddingTop: 22, paddingBottom: 16 }}>
+            <View style={{ flex: 1, paddingHorizontal: PAD, paddingTop: 20, paddingBottom: 16 }}>
 
-                {/* Section label */}
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1a2440', letterSpacing: 5, lineHeight: 14, marginBottom: 4 }}>
-                    ── NAME YOUR CHARACTER ──
-                </Text>
-
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: '#c8d4f0', letterSpacing: 1, lineHeight: 36, marginBottom: 22 }}>
-                    WHAT'S YOUR{'\n'}NAME?
-                </Text>
+                {/* Label row */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <View style={{ flex: 1, height: 1, backgroundColor: '#0d1228' }} />
+                    <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 12, height: 12, opacity: 0.45 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 4 }}>WHO ARE YOU?</Text>
+                    <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 12, height: 12, opacity: 0.45 }} resizeMode="contain" />
+                    <View style={{ flex: 1, height: 1, backgroundColor: '#0d1228' }} />
+                </View>
 
                 {/* Name input */}
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 5 }}>YOUR NAME</Text>
                 <TextInput
                     value={nameInput}
                     onChangeText={t => { setNameInput(t); setNameError(''); }}
                     placeholder="Enter your name..."
-                    placeholderTextColor="#1a2440"
+                    placeholderTextColor="#1e2a48"
                     style={{
                         fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0',
                         paddingVertical: 12, paddingHorizontal: 14,
-                        borderWidth: 1, borderColor: nameError ? '#f87171' : '#1a2440',
-                        backgroundColor: '#030407',
+                        borderLeftWidth: 3, borderLeftColor: nameError ? '#f87171' : '#3b82f6',
+                        borderTopWidth: 0, borderRightWidth: 0, borderBottomWidth: 0,
+                        backgroundColor: '#080d1a',
                         marginBottom: 4,
                     }}
                     underlineColorAndroid="transparent"
@@ -459,21 +435,23 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     returnKeyType="done"
                 />
                 {nameError
-                    ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', marginBottom: 10, lineHeight: 16 }}>{nameError}</Text>
-                    : <View style={{ height: 10 }} />
+                    ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', marginBottom: 10 }}>{nameError}</Text>
+                    : <View style={{ height: 12 }} />
                 }
 
                 {/* DOB input */}
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 5 }}>DATE OF BIRTH</Text>
                 <TextInput
                     value={bdayInput}
                     onChangeText={t => { setBdayInput(t); setBdayError(''); }}
-                    placeholder="Birthday  DD/MM/YYYY  (required)"
-                    placeholderTextColor="#111828"
+                    placeholder="DD / MM / YYYY"
+                    placeholderTextColor="#1a2440"
                     style={{
-                        fontFamily: 'VT323_400Regular', fontSize: 20, color: '#2a3a5a',
-                        paddingVertical: 10, paddingHorizontal: 14,
-                        borderWidth: 1, borderColor: bdayError ? '#f87171' : '#0d1228',
-                        backgroundColor: '#030407',
+                        fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0',
+                        paddingVertical: 12, paddingHorizontal: 14,
+                        borderLeftWidth: 3, borderLeftColor: bdayError ? '#f87171' : '#1a2840',
+                        borderTopWidth: 0, borderRightWidth: 0, borderBottomWidth: 0,
+                        backgroundColor: '#080d1a',
                         marginBottom: 4,
                     }}
                     underlineColorAndroid="transparent"
@@ -481,25 +459,25 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     maxLength={10}
                 />
                 {bdayError
-                    ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', marginBottom: 12, lineHeight: 16 }}>{bdayError}</Text>
-                    : <View style={{ height: 26 }} />
+                    ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', marginBottom: 10 }}>{bdayError}</Text>
+                    : <View style={{ height: 20 }} />
                 }
 
-                {/* Buttons — neutral palette, no trait colour */}
+                {/* Buttons */}
                 <View style={{ flexDirection: 'row', gap: 10, alignItems: 'stretch' }}>
                     <TouchableOpacity
                         onPress={onBack}
-                        style={{ paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#111828', backgroundColor: '#030407' }}
+                        style={{ paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#080d1a' }}
                     >
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#2a3560', lineHeight: 20 }}>◀ BACK</Text>
+                        <Image source={require('../../assets/ui_comp/nextbutton.png')} style={{ width: 20, height: 20, transform: [{ scaleX: -1 }], opacity: 0.4 }} resizeMode="contain" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleStart}
                         activeOpacity={0.85}
-                        style={{ flex: 1, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#c8d4f0', backgroundColor: '#030407', position: 'relative' }}
+                        style={{ flex: 1, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#080d1a', position: 'relative' }}
                     >
-                        <Corners color="#c8d4f0" size={5} />
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 2, lineHeight: 24 }}>START  ▶</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', letterSpacing: 3, lineHeight: 24 }}>BEGIN</Text>
+                        <Image source={require('../../assets/ui_comp/nextbutton.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -514,7 +492,6 @@ const STARTER_JOBS = {
     young_raj_1:     'code_debugger',
     young_priya_1:   'music_teacher',
     young_rahul_1:   'streamer',
-    young_sara_1:    'dance_teacher',
     young_sia_1:     'photographer',
     young_soms_1:    'govt_job',
     young_soni_1:    'backup_singer',
