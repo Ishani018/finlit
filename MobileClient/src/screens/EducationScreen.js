@@ -6,14 +6,6 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const LOCK_IMG = require('../../assets/ui_comp/lock.png');
 
-const Corners = ({ color = '#6366f1' }) => (
-    <>
-        <View style={{ position: 'absolute', top: 0, left: 0, width: 5, height: 5, backgroundColor: color }} />
-        <View style={{ position: 'absolute', top: 0, right: 0, width: 5, height: 5, backgroundColor: color }} />
-        <View style={{ position: 'absolute', bottom: 0, left: 0, width: 5, height: 5, backgroundColor: color }} />
-        <View style={{ position: 'absolute', bottom: 0, right: 0, width: 5, height: 5, backgroundColor: color }} />
-    </>
-);
 
 const TYPE_META = {
     certification: { label: 'CERT',    color: '#6b7280', accent: '#9ca3af' },
@@ -61,7 +53,7 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                     {/* Back button */}
                     <TouchableOpacity
                         onPress={() => setSelectedCourse(null)}
-                        style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, backgroundColor: 'rgba(0,0,0,0.6)', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}
+                        style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}
                     >
                         <FontAwesome5 name="chevron-left" size={13} color="#8090b8" />
                     </TouchableOpacity>
@@ -125,27 +117,27 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
 
                     {/* CTA */}
                     {isCompleted ? (
-                        <View style={{ padding: 16, borderWidth: 1, borderColor: '#166534', backgroundColor: '#0d1e12', alignItems: 'center', borderRadius: 6 }}>
+                        <View style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: '#0d1e12', alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80', letterSpacing: 2 }}>✓ DEGREE EARNED</Text>
                         </View>
                     ) : isStudying ? (
-                        <View style={{ gap: 10 }}>
-                            <View style={{ padding: 16, borderWidth: 1, borderColor: meta.color + '80', backgroundColor: meta.color + '0c', borderRadius: 6 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: meta.accent, letterSpacing: 1 }}>IN PROGRESS</Text>
+                        <View style={{ gap: 12 }}>
+                            <View style={{ padding: 16, borderRadius: 10, backgroundColor: '#08101e' }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: meta.accent }}>IN PROGRESS</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070' }}>{activeEnrollment.monthsRemaining}mo left</Text>
                                 </View>
                                 <View style={{ height: 4, backgroundColor: '#0d1020', borderRadius: 2 }}>
                                     <View style={{ height: '100%', width: `${Math.max(4, 100 - (activeEnrollment.monthsRemaining / course.duration * 100))}%`, backgroundColor: meta.color, borderRadius: 2 }} />
                                 </View>
                             </View>
-                            <TouchableOpacity onPress={() => { dropOut(); setSelectedCourse(null); }} style={{ padding: 14, borderWidth: 1, borderColor: '#7f1d1d', alignItems: 'center', borderRadius: 6 }}>
+                            <TouchableOpacity onPress={() => { dropOut(); setSelectedCourse(null); }} style={{ paddingVertical: 14, borderRadius: 10, backgroundColor: '#1a0808', alignItems: 'center' }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171', letterSpacing: 1 }}>DROP OUT</Text>
                             </TouchableOpacity>
                         </View>
                     ) : isLocked ? (
-                        <View style={{ padding: 16, borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#1a0808', flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center', borderRadius: 6 }}>
-                            <Image source={LOCK_IMG} style={{ width: 15, height: 15 }} resizeMode="contain" />
+                        <View style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: '#1a0808', flexDirection: 'row', alignItems: 'center', gap: 12, justifyContent: 'center' }}>
+                            <Image source={LOCK_IMG} style={{ width: 22, height: 22 }} resizeMode="contain" />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>Complete prerequisites first</Text>
                         </View>
                     ) : (
@@ -153,19 +145,19 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                             <TouchableOpacity
                                 onPress={() => { onEnroll(course); setSelectedCourse(null); }}
                                 disabled={!!activeEnrollment || !canAfford}
-                                style={{ padding: 16, borderWidth: 1, borderColor: canAfford && !activeEnrollment ? meta.color : '#1e2840', backgroundColor: canAfford && !activeEnrollment ? meta.color + '14' : '#070910', alignItems: 'center', borderRadius: 6, opacity: activeEnrollment ? 0.45 : 1 }}
+                                style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: canAfford && !activeEnrollment ? meta.color + '22' : '#0a0d1a', alignItems: 'center', opacity: activeEnrollment ? 0.45 : 1 }}
                             >
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: canAfford && !activeEnrollment ? meta.accent : '#2a3560', letterSpacing: 1 }}>
-                                    {activeEnrollment ? 'ALREADY STUDYING' : !canAfford ? 'CANT AFFORD FEES' : 'ENROLL — PAY MONTHLY'}
+                                    {activeEnrollment ? 'ALREADY STUDYING' : !canAfford ? 'CANT AFFORD FEES' : 'ENROLL — PAY MONTHLY ›'}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => { onEnrollLoan(course); setSelectedCourse(null); }}
                                 disabled={!!activeEnrollment}
-                                style={{ padding: 16, borderWidth: 1, borderColor: !activeEnrollment ? '#22c55e' : '#1e2840', backgroundColor: !activeEnrollment ? '#0d1e12' : '#070910', alignItems: 'center', borderRadius: 6, opacity: activeEnrollment ? 0.45 : 1 }}
+                                style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: !activeEnrollment ? '#0d1e12' : '#0a0d1a', alignItems: 'center', opacity: activeEnrollment ? 0.45 : 1 }}
                             >
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: !activeEnrollment ? '#4ade80' : '#2a3560', letterSpacing: 1 }}>
-                                    {activeEnrollment ? 'ALREADY STUDYING' : 'EDUCATION LOAN'}
+                                    {activeEnrollment ? 'ALREADY STUDYING' : 'EDUCATION LOAN ›'}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -183,7 +175,7 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', letterSpacing: 4 }}>UNIVERSITY</Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', letterSpacing: 1 }}>Your Education</Text>
                 </View>
-                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
+                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#0a0d1a', alignItems: 'center', justifyContent: 'center' }}>
                     <FontAwesome5 name="times" size={14} color="#445070" />
                 </TouchableOpacity>
             </View>
@@ -195,13 +187,12 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                     const meta = TYPE_META[course?.type] || TYPE_META.degree;
                     const pct = course ? Math.max(5, 100 - (activeEnrollment.monthsRemaining / course.duration * 100)) : 50;
                     return (
-                        <View style={{ borderWidth: 1, borderColor: meta.color + '60', backgroundColor: meta.color + '08', padding: 12, marginBottom: 14, position: 'relative' }}>
-                            <Corners color={meta.color} />
+                        <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14, marginBottom: 14 }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: meta.color, letterSpacing: 3, marginBottom: 2 }}>CURRENTLY STUDYING</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', marginBottom: 2 }}>{activeEnrollment.courseName}</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginBottom: 8 }}>{activeEnrollment.monthsRemaining}mo left · ₹{activeEnrollment.monthlyTuition.toLocaleString()}/mo</Text>
-                            <View style={{ height: 5, backgroundColor: '#070910' }}>
-                                <View style={{ height: '100%', width: `${pct}%`, backgroundColor: meta.color }} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24, marginBottom: 2 }}>{activeEnrollment.courseName}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', marginBottom: 10 }}>{activeEnrollment.monthsRemaining}mo left · ₹{activeEnrollment.monthlyTuition.toLocaleString()}/mo</Text>
+                            <View style={{ height: 5, backgroundColor: '#070910', borderRadius: 3 }}>
+                                <View style={{ height: '100%', width: `${pct}%`, backgroundColor: meta.color, borderRadius: 3 }} />
                             </View>
                         </View>
                     );
@@ -213,7 +204,7 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 6 }}>EARNED ({degrees.length})</Text>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                             {degrees.map(d => (
-                                <View key={d} style={{ backgroundColor: '#0d1e12', borderWidth: 1, borderColor: '#166534', paddingHorizontal: 8, paddingVertical: 3 }}>
+                                <View key={d} style={{ backgroundColor: '#0d1e12', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80' }}>✓ {d}</Text>
                                 </View>
                             ))}
