@@ -3661,7 +3661,6 @@ export const GameProvider = ({ children }) => {
                 }
                 const prevAge = d.childAgeMonths || 0;
                 const newAge = prevAge + CHILD_AGING_RATE;
-                const newAge = prevAge + CHILD_AGING_RATE;
                 // Child turns 18 (216 child-months) — fire career outcome event
                 if (prevAge < 216 && newAge >= 216 && !d.careerOutcome) {
                     const nw = stateRef.current.balance || 0;
