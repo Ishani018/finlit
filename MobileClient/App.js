@@ -1187,8 +1187,9 @@ const GameLayout = ({ onHardReset }) => {
             <FloatingMoneyIndicator flow={activeFlow} />
           )}
 
-          {/* Month Summary Card */}
-          {showSummary && monthlyRecap && (
+          {/* Month Summary Card — hidden while a decision dialog is waiting so the
+               decision shows first; summary reappears once the decision is resolved */}
+          {showSummary && monthlyRecap && !pendingDecision && !dialog.visible && (
             <MonthSummaryCard
               recap={monthlyRecap}
               netWorthHistory={netWorthHistory}

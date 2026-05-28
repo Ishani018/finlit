@@ -3100,7 +3100,7 @@ export const GameProvider = ({ children }) => {
         // ── BIRTHDAY MECHANICS ──
         let bdayMonth = 1; // Default to January if not set or parse fails
         if (playerBirthday && playerBirthday.includes('/')) {
-            bdayMonth = parseInt(playerBirthday.split('/')[1], 10);
+            bdayMonth = parseInt(playerBirthday.split('/')[0], 10); // format is M/D, take [0] for month
         }
 
         const getOrdinal = (n) => {
