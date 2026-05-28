@@ -50,6 +50,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
     } = useGame();
 
     const [tab, setTab] = useState(null); // null=landing | save | borrow | ca | gold | card | retire | childSavings
+    const [tipsOpen, setTipsOpen] = useState(true);
     const [fdAmount, setFdAmount] = useState('50000');
     const [selectedFDOption, setSelectedFDOption] = useState(FD_OPTIONS[2]);
     const [selectedLoanId, setSelectedLoanId] = useState(null);
@@ -183,237 +184,88 @@ export default function BankScreen({ onClose, onShowDialog }) {
                 </View>
             )}
 
-            {/* Landing — two big cards */}
+            {/* Landing cards */}
             {!tab && (
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
-                    {/* SAVE & EARN card */}
-                    <TouchableOpacity onPress={() => setTab('save')} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', marginBottom: 12 }}>
-                        <View style={{ height: 150, backgroundColor: '#0d1a12', flexDirection: 'row', alignItems: 'center' }}>
-                            {/* Pixel art image — contained, not cropped */}
-                            <Image source={require('../../assets/ui_comp/saveandearn.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 4, marginBottom: 2 }}>GROW YOUR SAVINGS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>SAVE & EARN</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Fixed Deposits</Text>
-                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#fbbf24', letterSpacing: 2 }}>OPEN ▶</Text>
-                                </View>
-                            </View>
-                        </View>
-                        {/* Stats strip */}
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>CREDIT</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: creditBand.color, lineHeight: 24 }}>{creditScore}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: creditBand.color }}>{creditBand.label}</Text>
-                            </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>FD VALUE</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24', lineHeight: 24 }}>{totalFDValue > 0 ? `₹${(totalFDValue/1000).toFixed(0)}k` : 'NIL'}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{fds.length} active</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
 
-                    {/* BORROW card */}
-                    <TouchableOpacity onPress={() => {
-                            if (totalMonthsPlayed < 3) {
-                                onShowDialog('Locked', 'Borrowing unlocks in Month 3. Build some history first!', 'error');
-                                return;
-                            }
-                            setTab('borrow');
-                        }} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', opacity: totalMonthsPlayed < 3 ? 0.5 : 1 }}>
-                        <View style={{ height: 150, backgroundColor: '#1a0d0d', flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#f87171', letterSpacing: 4, marginBottom: 2 }}>LOANS & CREDIT</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>BORROW</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Personal · Home · Business</Text>
-                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2 }}>{totalMonthsPlayed < 3 ? 'LOCKED 🔒' : 'OPEN ▶'}</Text>
+                    {/* Primary cards — full width, horizontal layout */}
+                    {[
+                        { onPress: () => setTab('save'), img: require('../../assets/ui_comp/saveandearn.png'), accent: '#fbbf24', label: 'GROW YOUR SAVINGS', name: 'Save & Earn', sub: 'Fixed Deposits', locked: false, stat1L: 'CREDIT', stat1V: String(creditScore), stat1C: creditBand.color, stat2L: 'FD VALUE', stat2V: totalFDValue > 0 ? `₹${(totalFDValue/1000).toFixed(0)}k` : 'NIL', stat2C: '#fbbf24' },
+                        { onPress: () => { if (totalMonthsPlayed < 3) { onShowDialog('Locked', 'Borrowing unlocks in Month 3.', 'error'); return; } setTab('borrow'); }, img: require('../../assets/ui_comp/borrow.png'), accent: '#f87171', label: 'LOANS & CREDIT', name: 'Borrow', sub: 'Personal · Home · Business', locked: totalMonthsPlayed < 3, stat1L: 'ACTIVE LOANS', stat1V: String(loans.length), stat1C: loans.length > 0 ? '#f87171' : '#4ade80', stat2L: 'EMI / MO', stat2V: totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'None', stat2C: totalEMI > 0 ? '#f87171' : '#4ade80' },
+                    ].map((card, i) => (
+                        <TouchableOpacity key={i} onPress={card.onPress} activeOpacity={0.85}
+                            style={{ borderRadius: 10, overflow: 'hidden', opacity: card.locked ? 0.5 : 1, backgroundColor: '#08101e', flexDirection: 'row', height: 110, marginBottom: 10 }}>
+                            <View style={{ width: 110, height: 110, backgroundColor: '#060810', alignItems: 'center', justifyContent: 'center' }}>
+                                <Image source={card.img} style={{ width: 96, height: 96 }} resizeMode="contain" />
+                            </View>
+                            <View style={{ flex: 1, paddingHorizontal: 14, paddingVertical: 12, justifyContent: 'space-between' }}>
+                                <View>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: card.accent, letterSpacing: 3, marginBottom: 1 }}>{card.label}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24 }}>{card.name}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', marginTop: 1 }}>{card.locked ? 'Locked' : card.sub}</Text>
                                 </View>
-                            </View>
-                        </View>
-                        {/* Stats strip */}
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>ACTIVE LOANS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: loans.length > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{loans.length}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{loans.length === 0 ? 'debt free' : 'outstanding'}</Text>
-                            </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>EMI / MO</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>{totalEMI > 0 ? `₹${(totalEMI/1000).toFixed(0)}k` : 'NONE'}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>monthly</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* CA RETAINER card */}
-                    <TouchableOpacity onPress={() => {
-                            if (totalMonthsPlayed < 10) {
-                                onShowDialog('Locked', 'CA Services unlock in Month 10. Start managing your own taxes first.', 'error');
-                                return;
-                            }
-                            setTab('ca');
-                        }} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12, opacity: totalMonthsPlayed < 10 ? 0.5 : 1 }}>
-                        <View style={{ height: 190, backgroundColor: '#0d0d1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={require('../../assets/CA_Office.png')} style={{ width: 170, height: 170 }} resizeMode="contain" />
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 4, marginBottom: 2 }}>TAX & COMPLIANCE</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>TAXES & ITR</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>Self-File · Hire CA · Deductions</Text>
-                                <View style={{ marginTop: 10, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#a78bfa', letterSpacing: 2 }}>{totalMonthsPlayed < 10 ? 'LOCKED 🔒' : 'OPEN ▶'}</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#1a2040' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#1a2040' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>STATUS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: caSubscribed ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{caSubscribed ? 'ACTIVE' : 'INACTIVE'}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>₹2,000/mo</Text>
-                            </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>ITR</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: itrFiled?.[turn?.year] ? '#4ade80' : '#fbbf24', lineHeight: 20, marginTop: 2 }}>
-                                    {itrFiled?.[turn?.year] ? 'FILED' : 'PENDING'}
-                                </Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>this year</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* CREDIT CARD card */}
-                    <TouchableOpacity onPress={() => setTab('card')} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: (activeCreditCards?.length > 0 || creditCard) ? '#60a5fa40' : '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                        <View style={{ height: 150, backgroundColor: '#000d1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center' }}>
-                                <Image source={require('../../assets/ui_comp/cards landing page icon.png')} style={{ width: 130, height: 130 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ flex: 1, padding: 14, paddingLeft: 0 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 4, marginBottom: 2 }}>BUY NOW, PAY LATER</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>CREDIT CARD</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Build credit, get perks</Text>
-                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#60a5fa40', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#60a5fa', letterSpacing: 2 }}>OPEN ▶</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#60a5fa20' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#60a5fa20' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>CARDS HELD</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: (activeCreditCards?.length > 0 || creditCard) ? '#4ade80' : '#445070', lineHeight: 20, marginTop: 2 }}>{(activeCreditCards || (creditCard ? ['standard'] : [])).length}</Text>
-                            </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>OUTSTANDING</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: (creditCard?.balance > 0) ? '#f87171' : '#4ade80', lineHeight: 20, marginTop: 2 }}>
-                                    {creditCard?.balance ? `₹${creditCard.balance.toLocaleString()}` : '—'}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* RETIREMENT BUCKETS card */}
-                    <TouchableOpacity onPress={() => {
-                            if (!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000)) {
-                                onShowDialog('Locked', 'Retirement Planning unlocks at Month 6, or if you reach ₹50,000 net worth.', 'error');
-                                return;
-                            }
-                            setTab('retire');
-                        }} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#818cf840', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12, opacity: !(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) ? 0.5 : 1 }}>
-                        <View style={{ height: 150, backgroundColor: '#0d0a1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', overflow: 'hidden' }}>
-                                <Image source={require('../../assets/ui_comp/retirement_buckets.png')} style={{ width: 150, height: 150 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#818cf8', letterSpacing: 4, marginBottom: 2 }}>RETIREMENT PLANNING</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ffffff', lineHeight: 26 }}>BUCKETS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Now · Soon · Later</Text>
-                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#818cf840', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#818cf8', letterSpacing: 2 }}>
-                                        {!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) ? 'LOCKED 🔒' : (retirementBuckets ? 'ACTIVE ✓' : 'SET UP ▶')}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* CHILD SAVINGS card */}
-                    <TouchableOpacity onPress={() => {
-                            if (!dependents.some(d => d.type === 'child')) {
-                                onShowDialog('Locked', 'You must have a child first before opening a child savings account.', 'error');
-                                return;
-                            }
-                            setTab('childSavings');
-                        }} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#ec489940', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12, opacity: !dependents.some(d => d.type === 'child') ? 0.5 : 1 }}>
-                        <View style={{ height: 150, backgroundColor: '#1a0a1a', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', overflow: 'hidden' }}>
-                                <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 150, height: 150 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#ec4899', letterSpacing: 4, marginBottom: 2 }}>NEXT GENERATION</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ffffff', lineHeight: 26 }}>CHILD SAVINGS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Build their future</Text>
-                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#ec489940', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#ec4899', letterSpacing: 2 }}>
-                                        {!dependents.some(d => d.type === 'child') ? 'LOCKED 🔒' : 'MANAGE ▶'}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* GOLD card */}
-                    <TouchableOpacity onPress={() => setTab('gold')} activeOpacity={0.85}
-                        style={{ borderWidth: 1, borderColor: '#fbbf2440', backgroundColor: '#0a0d1a', overflow: 'hidden', marginTop: 12 }}>
-                        <View style={{ height: 150, backgroundColor: '#150f00', flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', overflow: 'hidden' }}>
-                                <Image source={require('../../assets/ui_comp/gold_vault.png')} style={{ width: 150, height: 150 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ flex: 1, padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 4, marginBottom: 2 }}>SAFE HAVEN ASSET</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#ffffff', lineHeight: 30 }}>GOLD</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }}>Digital · SGB · Jewellery</Text>
-                                <View style={{ marginTop: 8, backgroundColor: '#06080f', borderWidth: 1, borderColor: '#fbbf2440', paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#fbbf24', letterSpacing: 2 }}>OPEN ▶</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#fbbf2430' }}>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center', borderRightWidth: 1, borderColor: '#fbbf2430' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>SPOT PRICE</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24', lineHeight: 22 }}>₹{goldPrice?.toLocaleString()}/g</Text>
-                            </View>
-                            <View style={{ flex: 1, padding: 10, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>HOLDINGS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: totalGoldValue > 0 ? '#fbbf24' : '#445070', lineHeight: 22 }}>
-                                    {totalGoldValue > 0 ? `₹${(totalGoldValue / 1000).toFixed(0)}k` : 'NONE'}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Financial Tips */}
-                    {tips.length > 0 && (
-                        <View style={{ marginTop: 16, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16' }}>
-                            <View style={{ padding: 12, borderBottomWidth: 1, borderColor: '#1a2040', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 18, height: 18 }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#fbbf24', letterSpacing: 3 }}>ADVISOR TIPS</Text>
-                            </View>
-                            {tips.map((tip, i) => (
-                                <View key={i} style={{ padding: 12, borderTopWidth: i > 0 ? 1 : 0, borderColor: '#1a2040', flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
-                                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: tip.color + '20', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                                        <FontAwesome5 name={tip.icon} size={14} color={tip.color} />
+                                <View style={{ flexDirection: 'row', gap: 16 }}>
+                                    <View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 1 }}>{card.stat1L}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: card.stat1C, lineHeight: 19 }}>{card.stat1V}</Text>
                                     </View>
+                                    <View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 1 }}>{card.stat2L}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: card.stat2C, lineHeight: 19 }}>{card.stat2V}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+
+                    {/* Secondary cards — 2-col grid */}
+                    {(() => {
+                        const secondary = [
+                            { onPress: () => { if (totalMonthsPlayed < 10) { onShowDialog('Locked', 'CA Services unlock in Month 10.', 'error'); return; } setTab('ca'); }, img: require('../../assets/CA_Office.png'), accent: '#a78bfa', name: 'Taxes & ITR', sub: caSubscribed ? 'CA Active' : (itrFiled?.[turn?.year] ? 'Filed' : 'Pending'), locked: totalMonthsPlayed < 10 },
+                            { onPress: () => setTab('card'), img: require('../../assets/ui_comp/cards landing page icon.png'), accent: '#60a5fa', name: 'Credit Card', sub: (activeCreditCards?.length > 0 || creditCard) ? 'Active' : 'Build credit', locked: false },
+                            { onPress: () => { if (!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000)) { onShowDialog('Locked', 'Unlocks at Month 6.', 'error'); return; } setTab('retire'); }, img: require('../../assets/ui_comp/retirement_buckets.png'), accent: '#818cf8', name: 'Retirement', sub: ppf?.balance > 0 ? `₹${(ppf.balance/1000).toFixed(0)}k saved` : 'PPF · NPS', locked: !(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) },
+                            { onPress: () => { if (!dependents.some(d => d.type === 'child')) { onShowDialog('Locked', 'Need a child first.', 'error'); return; } setTab('childSavings'); }, img: require('../../assets/ui_comp/saving_for_child.png'), accent: '#ec4899', name: 'Child Savings', sub: 'Build their future', locked: !dependents.some(d => d.type === 'child') },
+                            { onPress: () => setTab('gold'), img: require('../../assets/ui_comp/gold_vault.png'), accent: '#fbbf24', name: 'Gold', sub: totalGoldValue > 0 ? `₹${(totalGoldValue/1000).toFixed(0)}k held` : `₹${goldPrice?.toLocaleString()}/g`, locked: false },
+                        ];
+                        const rows = [];
+                        for (let i = 0; i < secondary.length; i += 2) {
+                            rows.push(
+                                <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+                                    {secondary.slice(i, i + 2).map((card, j) => (
+                                        <TouchableOpacity key={j} onPress={card.onPress} activeOpacity={0.85}
+                                            style={{ flex: 1, borderRadius: 10, overflow: 'hidden', opacity: card.locked ? 0.45 : 1, backgroundColor: '#08101e' }}>
+                                            <View style={{ height: 130, backgroundColor: '#060810', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image source={card.img} style={{ width: 100, height: 100 }} resizeMode="contain" />
+                                            </View>
+                                            <View style={{ padding: 12 }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: card.accent, letterSpacing: 2, marginBottom: 2 }}>{card.locked ? 'LOCKED' : '●'}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24 }}>{card.name}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#2a3860', marginTop: 2 }}>{card.sub}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                    {secondary.slice(i, i + 2).length === 1 && <View style={{ flex: 1 }} />}
+                                </View>
+                            );
+                        }
+                        return rows;
+                    })()}
+
+                    {/* Financial Tips — collapsible */}
+                    {tips.length > 0 && (
+                        <View style={{ marginTop: 16 }}>
+                            <TouchableOpacity onPress={() => setTipsOpen(o => !o)} activeOpacity={0.8}
+                                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: tipsOpen ? 10 : 0 }}>
+                                <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 14, height: 14, opacity: 0.6 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, flex: 1 }}>ADVISOR TIPS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560' }}>{tipsOpen ? '▲' : '▼'}</Text>
+                            </TouchableOpacity>
+                            {tipsOpen && tips.map((tip, i) => (
+                                <View key={i} style={{ paddingVertical: 10, borderTopWidth: i > 0 ? 1 : 0, borderColor: '#0f1525', flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: tip.color, marginTop: 6 }} />
                                     <View style={{ flex: 1 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: tip.color, lineHeight: 17 }}>{tip.title}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 15, marginTop: 3 }}>{tip.body}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#c8d4f0', lineHeight: 19 }}>{tip.title}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 18, marginTop: 2 }}>{tip.body}</Text>
                                     </View>
                                 </View>
                             ))}
@@ -424,149 +276,133 @@ export default function BankScreen({ onClose, onShowDialog }) {
 
             {tab && tab !== 'gold' && tab !== 'card' && tab !== 'retire' && tab !== 'childSavings' && <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
 
-                {/* ── SAVE & EARN (FD + CA) ── */}
+                {/* ── SAVE & EARN ── */}
                 {tab === 'save' && (
-                    <View style={{ gap: 12 }}>
+                    <View style={{ gap: 24 }}>
 
-                        {/* Credit score card */}
-                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', borderRadius: 6, overflow: 'hidden' }}>
-                            <View style={{ flex: 1, padding: 12 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 6 }}>CREDIT SCORE</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginBottom: 8 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 48, color: creditBand.color, lineHeight: 50 }}>{creditScore}</Text>
-                                    <View style={{ paddingBottom: 4 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: creditBand.color, lineHeight: 20 }}>{creditBand.label}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>out of 900</Text>
-                                    </View>
+                        {/* Credit score — no box, just data */}
+                        <View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 3, marginBottom: 8 }}>CREDIT SCORE</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, marginBottom: 12 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 56, color: creditBand.color, lineHeight: 58 }}>{creditScore}</Text>
+                                <View style={{ paddingBottom: 6 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: creditBand.color, lineHeight: 24 }}>{creditBand.label}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070' }}>out of 900</Text>
                                 </View>
-                                {/* Segmented score bar */}
-                                <View style={{ flexDirection: 'row', gap: 2, marginBottom: 6 }}>
-                                    {Array.from({ length: 10 }).map((_, i) => (
-                                        <View key={i} style={{ flex: 1, height: 6, backgroundColor: i < Math.round(creditPct * 10) ? creditBand.color : '#1a2040' }} />
-                                    ))}
-                                </View>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    {['BAD', 'POOR', 'FAIR', 'GOOD', 'EXCELLENT'].map(l => (
-                                        <Text key={l} style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580' }}>{l}</Text>
-                                    ))}
-                                </View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 8 }}>
-                                    {creditScore >= 750 ? 'Best loan rates available to you.' :
-                                     creditScore >= 700 ? 'Good rates. Pay EMIs on time to improve.' :
-                                     creditScore >= 650 ? 'Fair. Avoid missing EMI payments.' :
-                                     'Poor. High interest rates. Pay loans on time.'}
-                                </Text>
                             </View>
+                            <View style={{ flexDirection: 'row', gap: 3, marginBottom: 8 }}>
+                                {Array.from({ length: 10 }).map((_, i) => (
+                                    <View key={i} style={{ flex: 1, height: 5, borderRadius: 2, backgroundColor: i < Math.round(creditPct * 10) ? creditBand.color : '#1a2040' }} />
+                                ))}
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                                {['BAD', 'POOR', 'FAIR', 'GOOD', 'EXCELLENT'].map(l => (
+                                    <Text key={l} style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580' }}>{l}</Text>
+                                ))}
+                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>
+                                {creditScore >= 750 ? 'Best loan rates available to you.' :
+                                 creditScore >= 700 ? 'Good rates. Pay EMIs on time to improve.' :
+                                 creditScore >= 650 ? 'Fair. Avoid missing EMI payments.' :
+                                 'Poor. High interest rates. Pay loans on time.'}
+                            </Text>
                         </View>
 
-                        {/* Create FD */}
-                        <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden' }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fbbf2412', borderBottomWidth: 1, borderColor: '#fbbf2430', paddingHorizontal: 14, paddingVertical: 10 }}>
-                                <View style={{ width: 3, height: 16, backgroundColor: '#fbbf24' }} />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24', letterSpacing: 3 }}>FIXED DEPOSITS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginLeft: 4 }}>guaranteed returns</Text>
-                            </View>
-                            <View style={{ padding: 14 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24', letterSpacing: 3, marginBottom: 12 }}>OPEN NEW FD</Text>
+                        <View style={{ height: 1, backgroundColor: '#0f1525' }} />
 
-                            {/* Amount input */}
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2, marginBottom: 6 }}>AMOUNT</Text>
-                            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-                                <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', paddingHorizontal: 12, paddingVertical: 8}}>
+                        {/* Fixed Deposits */}
+                        <View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 3, marginBottom: 4 }}>FIXED DEPOSITS</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#fbbf24', lineHeight: 30, marginBottom: 18 }}>Lock In Your Savings</Text>
+
+                            {/* Amount */}
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 2, marginBottom: 8 }}>AMOUNT</Text>
+                            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+                                <View style={{ flex: 1, backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10 }}>
                                     <TextInput
                                         value={fdAmount}
                                         onChangeText={setFdAmount}
                                         keyboardType="numeric"
-                                        style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0' }}
+                                        style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}
                                         placeholderTextColor="#2a3560"
                                         placeholder="50000"
                                     />
                                 </View>
                                 {[50000, 100000, 500000].map(amt => (
-                                    <TouchableOpacity key={amt} onPress={() => setFdAmount(String(amt))} style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#070a16', paddingHorizontal: 10, justifyContent: 'center'}}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{(amt / 1000)}K</Text>
+                                    <TouchableOpacity key={amt} onPress={() => setFdAmount(String(amt))}
+                                        style={{ backgroundColor: '#0d1020', borderRadius: 8, paddingHorizontal: 12, justifyContent: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070' }}>₹{amt / 1000}K</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
 
-                            {/* Tenor options */}
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2, marginBottom: 8 }}>TENOR</Text>
-                            <View style={{ gap: 6, marginBottom: 14 }}>
+                            {/* Tenor */}
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 2, marginBottom: 10 }}>TENOR</Text>
+                            <View style={{ gap: 4, marginBottom: 20 }}>
                                 {FD_OPTIONS.map(opt => {
                                     const isSelected = selectedFDOption.id === opt.id;
                                     const amt = parseInt(fdAmount) || 0;
-                                    const maturity = maturityAmount(amt, opt.months, opt.rate);
-                                    const gain = maturity - amt;
+                                    const gain = maturityAmount(amt, opt.months, opt.rate) - amt;
                                     return (
-                                        <TouchableOpacity
-                                            key={opt.id}
-                                            onPress={() => setSelectedFDOption(opt)}
-                                            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, borderWidth: 1, borderColor: isSelected ? '#fbbf24' : '#1a2040', backgroundColor: isSelected ? '#06080f' : '#0d1020'}}
-                                        >
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                                <View style={{ width: 10, height: 10, borderWidth: 2, borderColor: isSelected ? '#fbbf24' : '#2a3560', backgroundColor: isSelected ? '#fbbf24' : 'transparent' }} />
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: isSelected ? '#fbbf24' : '#445070' }}>{opt.label}</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: isSelected ? '#fbbf24' : '#2a3560' }}>{opt.rateLabel}</Text>
+                                        <TouchableOpacity key={opt.id} onPress={() => setSelectedFDOption(opt)}
+                                            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 13, paddingHorizontal: 14, borderRadius: 8, backgroundColor: isSelected ? '#141a2e' : 'transparent' }}>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isSelected ? '#fbbf24' : '#2a3560' }} />
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: isSelected ? '#fbbf24' : '#445070' }}>{opt.label}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: isSelected ? '#fbbf2499' : '#2a3560' }}>{opt.rateLabel}</Text>
                                             </View>
                                             {amt >= 10000 && (
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+₹{gain.toLocaleString()}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80' }}>+₹{gain.toLocaleString()}</Text>
                                             )}
                                         </TouchableOpacity>
                                     );
                                 })}
                             </View>
 
-                            {/* Maturity summary */}
                             {parseInt(fdAmount) >= 10000 && (
-                                <View style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 10, marginBottom: 12, flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>Maturity value</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24' }}>₹{maturityAmount(parseInt(fdAmount), selectedFDOption.months, selectedFDOption.rate).toLocaleString()}</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>Maturity value</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24' }}>₹{maturityAmount(parseInt(fdAmount), selectedFDOption.months, selectedFDOption.rate).toLocaleString()}</Text>
                                 </View>
                             )}
 
-                            <TouchableOpacity
-                                onPress={handleCreateFD}
-                                style={{ padding: 14, borderWidth: 1, borderColor: '#fbbf24', backgroundColor: '#06080f', alignItems: 'center'}}
-                            >
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24', letterSpacing: 2 }}>
-                                    LOCK IN FD — {selectedFDOption.rateLabel}
+                            <TouchableOpacity onPress={handleCreateFD}
+                                style={{ paddingVertical: 16, backgroundColor: '#141a2e', borderRadius: 10, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24', letterSpacing: 2 }}>
+                                    LOCK IN — {selectedFDOption.rateLabel}
                                 </Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Active FDs */}
                         {fds.length > 0 && (
-                            <View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 8 }}>ACTIVE FDs ({fds.length})</Text>
+                            <View style={{ gap: 2 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 3, marginBottom: 10 }}>ACTIVE FDs ({fds.length})</Text>
                                 {fds.map(fd => {
                                     const opt = FD_OPTIONS.find(o => o.id === fd.optionId) || FD_OPTIONS[2];
                                     const pct = 1 - (fd.monthsLeft / fd.totalMonths);
                                     const isMatured = fd.monthsLeft <= 0;
                                     return (
-                                        <View key={fd.id} style={{ borderWidth: 1, borderColor: isMatured ? '#22c55e' : '#fbbf2440', backgroundColor: isMatured ? '#0d1e12' : '#070a16', padding: 12, marginBottom: 8}}>
-                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }}>₹{fd.principal.toLocaleString()}</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24' }}>₹{Math.round(fd.currentValue).toLocaleString()}</Text>
+                                        <View key={fd.id} style={{ paddingVertical: 14, borderTopWidth: 1, borderColor: '#0f1525' }}>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                <View>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', letterSpacing: 1 }}>{isMatured ? 'MATURED' : `${fd.monthsLeft}mo left`} · {opt.rateLabel}</Text>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>₹{fd.principal.toLocaleString()}</Text>
+                                                </View>
+                                                <View style={{ alignItems: 'flex-end' }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', letterSpacing: 1 }}>NOW WORTH</Text>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: isMatured ? '#4ade80' : '#fbbf24' }}>₹{Math.round(fd.currentValue).toLocaleString()}</Text>
+                                                </View>
                                             </View>
-                                            <View style={{ height: 5, backgroundColor: '#06080f', marginBottom: 6}}>
-                                                <View style={{ height: '100%', width: `${pct * 100}%`, backgroundColor: isMatured ? '#22c55e' : '#fbbf24'}} />
+                                            <View style={{ height: 4, backgroundColor: '#0d1020', borderRadius: 2, marginBottom: 10 }}>
+                                                <View style={{ height: '100%', width: `${pct * 100}%`, borderRadius: 2, backgroundColor: isMatured ? '#22c55e' : '#fbbf24' }} />
                                             </View>
-                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070' }}>
-                                                    {isMatured ? 'MATURED' : `${fd.monthsLeft}mo left`} · {opt.rateLabel}
+                                            <TouchableOpacity onPress={() => { const res = breakFD ? breakFD(fd.id) : { success: false, msg: 'Not available' }; onShowDialog(res.success ? 'FD Broken' : 'Failed', res.msg, res.success ? 'warning' : 'error'); }}
+                                                style={{ alignSelf: 'flex-end', paddingHorizontal: 16, paddingVertical: 7, borderRadius: 6, backgroundColor: isMatured ? '#0d2218' : '#1a0a0a' }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isMatured ? '#4ade80' : '#f87171', letterSpacing: 1 }}>
+                                                    {isMatured ? 'COLLECT ›' : 'BREAK'}
                                                 </Text>
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        const res = breakFD ? breakFD(fd.id) : { success: false, msg: 'Not available' };
-                                                        onShowDialog(res.success ? 'FD Broken' : 'Failed', res.msg, res.success ? 'warning' : 'error');
-                                                    }}
-                                                    style={{ borderWidth: 1, borderColor: isMatured ? '#22c55e' : '#7f1d1d', paddingHorizontal: 10, paddingVertical: 3}}
-                                                >
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: isMatured ? '#4ade80' : '#f87171' }}>
-                                                        {isMatured ? 'COLLECT' : 'BREAK'}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
+                                            </TouchableOpacity>
                                         </View>
                                     );
                                 })}
@@ -574,12 +410,10 @@ export default function BankScreen({ onClose, onShowDialog }) {
                         )}
 
                         {fds.length === 0 && (
-                            <View style={{ alignItems: 'center', padding: 30}}>
-                                <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 32, height: 32, tintColor: '#1a2040' }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4a5580', marginTop: 12, textAlign: 'center' }}>No active FDs{'\n'}Lock in your savings above</Text>
+                            <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', textAlign: 'center' }}>No active FDs — lock in your savings above</Text>
                             </View>
                         )}
-                        </View>{/* end FD card */}
                     </View>
                 )}
 
@@ -629,25 +463,18 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                             key={lt.id}
                                                             onPress={() => { setApplyingLoanId(lt.id); setLoanAmount(''); setLoanTenureIdx(1); }}
                                                             activeOpacity={0.8}
-                                                            style={{ flex: 1, borderWidth: 1, borderColor: eligible ? meta.color + '50' : '#1a2040', overflow: 'hidden', backgroundColor: '#0a0d1a' }}
+                                                            style={{ flex: 1, borderRadius: 10, overflow: 'hidden', backgroundColor: '#08101e', opacity: eligible ? 1 : 0.45 }}
                                                         >
                                                             <View style={{ height: CARD_H, position: 'relative' }}>
-                                                                {meta.img && (
-                                                                    <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                                                                )}
-                                                                <View style={{ position: 'absolute', inset: 0, backgroundColor: eligible ? 'rgba(4,6,14,0.48)' : 'rgba(4,6,14,0.72)' }} />
-                                                                {eligible ? (
-                                                                    <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: meta.color, paddingHorizontal: 6, paddingVertical: 2 }}>
-                                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#000', letterSpacing: 1 }}>ELIGIBLE</Text>
+                                                                {meta.img && <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
+                                                                <View style={{ position: 'absolute', inset: 0, backgroundColor: eligible ? 'rgba(4,6,14,0.35)' : 'rgba(4,6,14,0.65)' }} />
+                                                                {!eligible && <View style={{ position: 'absolute', top: 8, right: 8 }}><Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 16, height: 16, opacity: 0.5 }} resizeMode="contain" /></View>}
+                                                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.8)', padding: 8 }}>
+                                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 1 }}>
+                                                                        {eligible && <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: meta.color }} />}
+                                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: eligible ? '#c8d4f0' : '#445070', lineHeight: 19 }} numberOfLines={1}>{meta.name}</Text>
                                                                     </View>
-                                                                ) : (
-                                                                    <View style={{ position: 'absolute', top: 8, right: 8 }}>
-                                                                        <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 16, height: 16, opacity: 0.5 }} resizeMode="contain" />
-                                                                    </View>
-                                                                )}
-                                                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.82)', padding: 8 }}>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: eligible ? '#c8d4f0' : '#445070', lineHeight: 19 }} numberOfLines={1}>{meta.name}</Text>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: eligible ? meta.color : '#2a3560', lineHeight: 15 }}>
+                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 15 }}>
                                                                         {adjRate.toFixed(1)}% · {lt.max_amount ? `₹${(lt.max_amount / 100000).toFixed(0)}L` : 'LTV'}
                                                                     </Text>
                                                                 </View>
@@ -663,23 +490,22 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                 })()}
 
                                 {/* ── Active loans section ── */}
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1a2040', paddingHorizontal: 12, paddingVertical: 10, marginTop: 6, marginBottom: 2 }}>
-                                <View style={{ width: 3, height: 16, backgroundColor: '#f87171' }} />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', letterSpacing: 3 }}>MY ACTIVE LOANS</Text>
-                                {loans.length > 0 && <View style={{ marginLeft: 4, backgroundColor: '#f8717120', borderWidth: 1, borderColor: '#f8717140', paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171' }}>{loans.length}</Text></View>}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, marginTop: 6 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, flex: 1 }}>MY ACTIVE LOANS</Text>
+                                {loans.length > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>{loans.length} active</Text>}
                             </View>
 
                             {loans.length === 0 ? (
-                                <View style={{ alignItems: 'center', padding: 24, borderWidth: 1, borderColor: '#166534', backgroundColor: '#0d1e12'}}>
-                                    <FontAwesome5 name="check-circle" size={28} color="#4ade80" />
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80', marginTop: 10 }}>Debt Free!</Text>
+                                <View style={{ alignItems: 'center', padding: 28, backgroundColor: '#08101e', borderRadius: 10 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80' }}>Debt Free</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a4a3a', marginTop: 4 }}>No outstanding loans</Text>
                                 </View>
                             ) : (
                                 <>
-                                    <View style={{ borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#1a0808', padding: 12,}}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#7f1d1d', letterSpacing: 3, marginBottom: 4 }}>TOTAL DEBT</Text>
+                                    <View style={{ backgroundColor: '#0a0c14', borderRadius: 10, padding: 14, marginBottom: 2 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, marginBottom: 4 }}>TOTAL DEBT</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: '#f87171', lineHeight: 36 }}>₹{totalLoanDebt.toLocaleString()}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#7f1d1d' }}>₹{totalEMI.toLocaleString()}/mo EMI · {loans.length} loan{loans.length !== 1 ? 's' : ''}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{totalEMI.toLocaleString()}/mo EMI · {loans.length} loan{loans.length !== 1 ? 's' : ''}</Text>
                                     </View>
 
                                     {loans.map((loan) => {
@@ -693,10 +519,10 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                         const isExpanded = selectedLoanId === loan.id;
 
                                         return (
-                                            <View key={loan.id} style={{ borderWidth: 1, borderColor: isExpanded ? meta.color + '80' : '#1a2040', backgroundColor: isExpanded ? meta.color + '06' : '#070a16'}}>
-                                                <TouchableOpacity onPress={() => setSelectedLoanId(isExpanded ? null : loan.id)} style={{ padding: 12 }} activeOpacity={0.8}>
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                                                        <View style={{ width: 34, height: 34, backgroundColor: meta.color + '18', borderWidth: 1, borderColor: meta.color + '40', alignItems: 'center', justifyContent: 'center'}}>
+                                            <View key={loan.id} style={{ borderRadius: 10, overflow: 'hidden', backgroundColor: '#08101e', marginBottom: 8 }}>
+                                                <TouchableOpacity onPress={() => setSelectedLoanId(isExpanded ? null : loan.id)} style={{ padding: 14 }} activeOpacity={0.8}>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                                                        <View style={{ width: 32, height: 32, backgroundColor: '#0a0c14', borderRadius: 8, alignItems: 'center', justifyContent: 'center'}}>
                                                             <FontAwesome5 name={meta.icon} size={13} color={meta.color} />
                                                         </View>
                                                         <View style={{ flex: 1 }}>
@@ -718,31 +544,30 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                 </TouchableOpacity>
 
                                                 {isExpanded && (
-                                                    <View style={{ borderTopWidth: 1, borderColor: '#1a2040', padding: 12, gap: 10 }}>
-                                                        <View style={{ flexDirection: 'row', gap: 6 }}>
+                                                    <View style={{ paddingHorizontal: 14, paddingBottom: 14, gap: 10 }}>
+                                                        <View style={{ flexDirection: 'row', gap: 16, marginBottom: 4 }}>
                                                             {[
-                                                                { label: 'THIS MONTH', val: `₹${interestThisMonth.toLocaleString()}`, sub: 'interest', col: '#f87171' },
-                                                                { label: 'INTEREST LEFT', val: `₹${Math.round(totalInterestLeft).toLocaleString()}`, sub: 'to pay', col: '#fb923c' },
-                                                                { label: 'BORROWED', val: `₹${originalPrincipal.toLocaleString()}`, sub: 'originally', col: '#445070' },
+                                                                { label: 'THIS MONTH', val: `₹${interestThisMonth.toLocaleString()}`, col: '#f87171' },
+                                                                { label: 'INTEREST LEFT', val: `₹${Math.round(totalInterestLeft).toLocaleString()}`, col: '#fb923c' },
+                                                                { label: 'BORROWED', val: `₹${originalPrincipal.toLocaleString()}`, col: '#445070' },
                                                             ].map((s, i) => (
-                                                                <View key={i} style={{ flex: 1, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1e2840', padding: 8}}>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 1 }}>{s.label}</Text>
+                                                                <View key={i}>
+                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 1 }}>{s.label}</Text>
                                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: s.col }}>{s.val}</Text>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#445070' }}>{s.sub}</Text>
                                                                 </View>
                                                             ))}
                                                         </View>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2 }}>MAKE A PAYMENT</Text>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 2 }}>MAKE A PAYMENT</Text>
                                                         <View style={{ flexDirection: 'row', gap: 6 }}>
                                                             {[loan.emi, Math.round(loan.emi * 3), Math.round(loan.remainingPrincipal)].map((amt, idx) => (
-                                                                <TouchableOpacity key={idx} onPress={() => setPrepayInput(String(amt))} style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 7, alignItems: 'center'}}>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#445070' }}>{idx === 0 ? '1 EMI' : idx === 1 ? '3 EMIs' : 'FULL'}</Text>
+                                                                <TouchableOpacity key={idx} onPress={() => setPrepayInput(String(amt))} style={{ flex: 1, backgroundColor: '#0a0c14', borderRadius: 6, padding: 8, alignItems: 'center' }}>
+                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>{idx === 0 ? '1 EMI' : idx === 1 ? '3 EMIs' : 'FULL'}</Text>
                                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#c8d4f0' }}>₹{amt.toLocaleString()}</Text>
                                                                 </TouchableOpacity>
                                                             ))}
                                                         </View>
                                                         <View style={{ flexDirection: 'row', gap: 8 }}>
-                                                            <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', paddingHorizontal: 12, paddingVertical: 8}}>
+                                                            <View style={{ flex: 1, backgroundColor: '#0a0c14', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 }}>
                                                                 <TextInput value={prepayInput} onChangeText={setPrepayInput} keyboardType="numeric" placeholder="Custom amount" placeholderTextColor="#2a3560" style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }} />
                                                             </View>
                                                             <TouchableOpacity
@@ -754,9 +579,9 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                                     if (res.success) { setPrepayInput(''); if (amt >= loan.remainingPrincipal) setSelectedLoanId(null); }
                                                                     onShowDialog(res.success ? 'Payment Made' : 'Failed', res.msg, res.success ? 'success' : 'error');
                                                                 }}
-                                                                style={{ backgroundColor: meta.color, paddingHorizontal: 16, justifyContent: 'center'}}
+                                                                style={{ backgroundColor: '#0f2214', borderRadius: 8, paddingHorizontal: 16, justifyContent: 'center' }}
                                                             >
-                                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#000' }}>PAY</Text>
+                                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>PAY</Text>
                                                             </TouchableOpacity>
                                                         </View>
                                                     </View>
@@ -912,201 +737,101 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     const totalFeesPaid = monthsSubscribed * (CA_MONTHLY_FEE || 2000);
                     const inFilingWindow = currentMonth >= 4 && currentMonth <= 7;
                     const selfFilingInProgress = itrSelfFiling && itrSelfFiling.year === currentYear;
+                    const itrColor = itrThisYear ? '#4ade80' : inFilingWindow ? '#fbbf24' : '#445070';
 
                     return (
-                        <View style={{ gap: 12 }}>
+                        <View style={{ gap: 14 }}>
 
-                            {/* ── ITR Status Banner ── */}
-                            <View style={{
-                                borderWidth: 1,
-                                borderColor: itrThisYear ? '#4ade8050' : inFilingWindow ? '#fbbf2460' : '#1a2040',
-                                backgroundColor: itrThisYear ? '#091a0f' : inFilingWindow ? '#120f03' : '#070a16',
-                                padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12,
-                            }}>
-                                <FontAwesome5
-                                    name={itrThisYear ? 'check-circle' : inFilingWindow ? 'exclamation-circle' : 'clock'}
-                                    size={22}
-                                    color={itrThisYear ? '#4ade80' : inFilingWindow ? '#fbbf24' : '#2a3560'}
-                                />
-                                <View style={{ flex: 1 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>
+                            {/* Hero — CA Office image, full focus */}
+                            <View style={{ height: 200, borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
+                                <Image source={require('../../assets/CA_Office.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,18,0.35)' }} />
+                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 16, paddingBottom: 14, paddingTop: 40, backgroundColor: 'rgba(4,6,18,0.72)' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: itrColor, letterSpacing: 3, marginBottom: 2 }}>
                                         ITR — FY {currentYear - 1}-{String(currentYear).slice(2)}
                                     </Text>
-                                    {itrThisYear ? (
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80', lineHeight: 22 }}>
-                                            {itrThisYear === 'ca' ? 'Filed via CA ✓' : itrThisYear === 'self' ? 'Self Filed ✓' : itrThisYear === 'self_wrong_form' ? 'Filed — wrong form risk ⚠️' : 'Skipped — penalty paid'}
-                                        </Text>
-                                    ) : inFilingWindow ? (
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24', lineHeight: 22 }}>
-                                            Due in {monthsToITR} month{monthsToITR !== 1 ? 's' : ''} — Act now
-                                        </Text>
-                                    ) : (
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070', lineHeight: 20 }}>
-                                            {monthsToITR} months until July 31 deadline
-                                        </Text>
-                                    )}
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>
+                                        {itrThisYear ? (itrThisYear === 'ca' ? 'Filed via CA' : itrThisYear === 'self' ? 'Self Filed' : 'Filed') :
+                                         inFilingWindow ? `Due in ${monthsToITR} month${monthsToITR !== 1 ? 's' : ''}` :
+                                         `${monthsToITR}mo until deadline`}
+                                    </Text>
                                 </View>
                             </View>
 
-                            {/* ── HOW DO YOU WANT TO FILE? ── */}
-                            {true && (
-                                <>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4, paddingHorizontal: 2 }}>{itrThisYear ? 'NEXT FILING YEAR — PLAN AHEAD' : 'CHOOSE HOW TO FILE YOUR ITR'}</Text>
+                            {/* Filing options label */}
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3 }}>
+                                {itrThisYear ? 'PLAN AHEAD FOR NEXT YEAR' : 'HOW DO YOU WANT TO FILE?'}
+                            </Text>
 
-                                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                                        {/* CA Option */}
-                                        <View style={{
-                                            flex: 1, borderWidth: caSubscribed ? 2 : 1,
-                                            borderColor: caSubscribed ? '#a78bfa' : '#2a1a5a',
-                                            backgroundColor: caSubscribed ? '#0e0920' : '#090614',
-                                            overflow: 'hidden',
-                                        }}>
-                                            <View style={{ height: 4, backgroundColor: caSubscribed ? '#a78bfa' : '#3a1a7a' }} />
-                                            <View style={{ padding: 12 }}>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: caSubscribed ? '#a78bfa' : '#4a2a9a', letterSpacing: 3 }}>CA RETAINER</Text>
-                                                    {caSubscribed && <FontAwesome5 name="check-circle" size={12} color="#a78bfa" />}
-                                                </View>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 22, marginBottom: 8 }}>Hire a CA</Text>
-                                                {[
-                                                    '₹2,000/month',
-                                                    'Auto-files every July',
-                                                    '+₹25K extra deductions',
-                                                    'Notice protection',
-                                                ].map((pt, i) => (
-                                                    <View key={i} style={{ flexDirection: 'row', gap: 6, marginBottom: 3, alignItems: 'center' }}>
-                                                        <View style={{ width: 5, height: 5, backgroundColor: '#a78bfa', borderRadius: 3 }} />
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', flex: 1 }}>{pt}</Text>
-                                                    </View>
-                                                ))}
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        const res = caSubscribed ? cancelCA() : subscribeCA();
-                                                        onShowDialog(res.success ? (caSubscribed ? 'CA Cancelled' : 'CA Subscribed!') : 'Failed', res.msg, res.success ? (caSubscribed ? 'warning' : 'success') : 'error');
-                                                    }}
-                                                    style={{ marginTop: 10, padding: 10, borderWidth: 1, borderColor: caSubscribed ? '#7f1d1d' : '#a78bfa', backgroundColor: caSubscribed ? '#1a0808' : '#1a0f2e', alignItems: 'center' }}
-                                                >
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: caSubscribed ? '#f87171' : '#a78bfa', letterSpacing: 1 }}>
-                                                        {caSubscribed ? 'CANCEL' : 'SUBSCRIBE'}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
+                            {/* CA Option */}
+                            <TouchableOpacity onPress={() => { const res = caSubscribed ? cancelCA() : subscribeCA(); onShowDialog(res.success ? (caSubscribed ? 'CA Cancelled' : 'CA Subscribed!') : 'Failed', res.msg, res.success ? (caSubscribed ? 'warning' : 'success') : 'error'); }}
+                                style={{ backgroundColor: caSubscribed ? '#0e0a1e' : '#08101e', borderRadius: 10, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 3, marginBottom: 2 }}>CA RETAINER · ₹2,000/mo</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24 }}>Hire a CA</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginTop: 4 }}>Auto-files July · +₹25K deductions · notice cover</Text>
+                                </View>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: caSubscribed ? '#f87171' : '#a78bfa', letterSpacing: 1, marginLeft: 12 }}>
+                                    {caSubscribed ? 'CANCEL ›' : 'HIRE ›'}
+                                </Text>
+                            </TouchableOpacity>
 
-                                        {/* Self-file Option */}
-                                        <View style={{
-                                            flex: 1, borderWidth: selfFilingInProgress ? 2 : 1,
-                                            borderColor: selfFilingInProgress ? '#60a5fa' : '#0a1a3a',
-                                            backgroundColor: selfFilingInProgress ? '#030d1f' : '#040912',
-                                            overflow: 'hidden',
-                                        }}>
-                                            <View style={{ height: 4, backgroundColor: selfFilingInProgress ? '#60a5fa' : '#0a2a5a' }} />
-                                            <View style={{ padding: 12 }}>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: selfFilingInProgress ? '#60a5fa' : '#0a3a7a', letterSpacing: 3 }}>DIY</Text>
-                                                    {selfFilingInProgress && <FontAwesome5 name="spinner" size={12} color="#60a5fa" />}
-                                                </View>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 22, marginBottom: 8 }}>Self File</Text>
-                                                {[
-                                                    'Free — no monthly fee',
-                                                    'Step-by-step wizard',
-                                                    'Learn real tax rules',
-                                                    'Pick form, gather docs',
-                                                ].map((pt, i) => (
-                                                    <View key={i} style={{ flexDirection: 'row', gap: 6, marginBottom: 3, alignItems: 'center' }}>
-                                                        <View style={{ width: 5, height: 5, backgroundColor: '#60a5fa', borderRadius: 3 }} />
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', flex: 1 }}>{pt}</Text>
-                                                    </View>
-                                                ))}
-                                                <TouchableOpacity
-                                                    onPress={itrThisYear ? undefined : startSelfFiling}
-                                                    disabled={!!itrThisYear}
-                                                    style={{ marginTop: 10, padding: 10, borderWidth: 1, borderColor: itrThisYear ? '#1a2040' : '#60a5fa', backgroundColor: '#050f20', alignItems: 'center' }}
-                                                >
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: itrThisYear ? '#2a3560' : '#60a5fa', letterSpacing: 1 }}>
-                                                        {itrThisYear ? 'FILED THIS YEAR ✓' : selfFilingInProgress ? 'RESUME →' : 'START →'}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </>
-                            )}
+                            {/* Self-file Option */}
+                            <TouchableOpacity onPress={itrThisYear ? undefined : startSelfFiling} disabled={!!itrThisYear}
+                                style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', opacity: itrThisYear ? 0.4 : 1 }}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 3, marginBottom: 2 }}>DIY · FREE</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24 }}>Self File</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginTop: 4 }}>Step-by-step wizard · pick form & docs</Text>
+                                </View>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', letterSpacing: 1, marginLeft: 12 }}>
+                                    {itrThisYear ? 'FILED' : selfFilingInProgress ? 'RESUME ›' : 'START ›'}
+                                </Text>
+                            </TouchableOpacity>
 
-                            {/* ── CA Active Details ── */}
+                            {/* CA stats when subscribed */}
                             {caSubscribed && (
-                                <View style={{ borderWidth: 1, borderColor: '#a78bfa40', backgroundColor: '#0a0618', padding: 14, gap: 8 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>YOUR CA — CA SHARMA & ASSOCIATES</Text>
-
-                                    <View style={{ height: 90, position: 'relative', overflow: 'hidden' }}>
-                                        <Image source={require('../../assets/CA_Office.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                                        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,20,0.6)' }} />
-                                        <View style={{ position: 'absolute', bottom: 8, left: 12, flexDirection: 'row', gap: 12 }}>
-                                            <View style={{ backgroundColor: '#a78bfa20', borderWidth: 1, borderColor: '#a78bfa60', paddingHorizontal: 8, paddingVertical: 3 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#a78bfa', letterSpacing: 2 }}>RETAINER ACTIVE</Text>
-                                            </View>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', alignSelf: 'center' }}>{monthsSubscribed} mo · ₹{totalFeesPaid.toLocaleString()} paid</Text>
-                                        </View>
-                                    </View>
-
-                                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                                        {[
-                                            { label: 'MONTHLY', value: '₹2,000', color: '#f87171' },
-                                            { label: 'SAVED', value: '~₹25K/yr', color: '#4ade80' },
-                                            { label: 'ITR', value: 'Auto July', color: '#a78bfa' },
-                                        ].map((s, i) => (
-                                            <View key={i} style={{ flex: 1, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1e2840', padding: 8, alignItems: 'center' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4a5580', letterSpacing: 1 }}>{s.label}</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: s.color }}>{s.value}</Text>
+                                <View style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 14, gap: 10 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3 }}>CA SHARMA & ASSOCIATES</Text>
+                                    <View style={{ flexDirection: 'row', gap: 20 }}>
+                                        {[{ l: 'MONTHLY', v: '₹2,000', c: '#f87171' }, { l: 'SAVED', v: '~₹25K/yr', c: '#4ade80' }, { l: 'ITR', v: 'Auto July', c: '#a78bfa' }].map((s, i) => (
+                                            <View key={i}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 1 }}>{s.l}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: s.c }}>{s.v}</Text>
                                             </View>
                                         ))}
                                     </View>
-
-                                    {[
-                                        { icon: 'file-alt',      color: '#a78bfa', text: 'Automatically files ITR every July with optimised deductions' },
-                                        { icon: 'search-dollar', color: '#4ade80', text: 'Finds ₹25,000+ in extra deductions your employer misses' },
-                                        { icon: 'shield-alt',    color: '#fbbf24', text: 'Handles any IT notices — you don\'t deal with the department' },
-                                        { icon: 'chart-line',    color: '#60a5fa', text: 'Advises on which investments to show under 80C each April' },
-                                    ].map((tip, i) => (
-                                        <View key={i} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
-                                            <FontAwesome5 name={tip.icon} size={12} color={tip.color} style={{ marginTop: 3 }} />
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', flex: 1 }}>{tip.text}</Text>
+                                    {['Auto-files ITR every July with optimised deductions', 'Finds ₹25,000+ extra deductions', 'Handles IT notices — you don\'t deal with the dept', 'Advises on 80C investments each April'].map((t, i) => (
+                                        <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
+                                            <View style={{ width: 4, height: 4, backgroundColor: '#a78bfa', borderRadius: 2, marginTop: 7 }} />
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', flex: 1 }}>{t}</Text>
                                         </View>
                                     ))}
-
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            const res = cancelCA();
-                                            onShowDialog('CA Cancelled', res.msg, 'warning');
-                                        }}
-                                        style={{ borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#1a0808', padding: 10, alignItems: 'center', marginTop: 4 }}
-                                    >
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', letterSpacing: 2 }}>CANCEL RETAINER</Text>
+                                    <TouchableOpacity onPress={() => { const res = cancelCA(); onShowDialog('CA Cancelled', res.msg, 'warning'); }}
+                                        style={{ paddingVertical: 11, backgroundColor: '#2a0a0a', borderRadius: 8, alignItems: 'center', marginTop: 4 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', letterSpacing: 1 }}>CANCEL RETAINER</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
 
-                            {/* ── Self-filing progress (if in progress) ── */}
+                            {/* Self-filing progress */}
                             {selfFilingInProgress && (
-                                <View style={{ borderWidth: 1, borderColor: '#60a5fa50', backgroundColor: '#030d1f', padding: 14 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 6 }}>SELF-FILING IN PROGRESS</Text>
-                                    {['form_select', 'gather_docs', 'everify'].map((s, i) => {
-                                        const labels = ['Pick ITR form', 'Gather documents', 'Compute & e-verify'];
+                                <View style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 10 }}>SELF-FILING IN PROGRESS</Text>
+                                    {[['form_select', 'Pick ITR form'], ['gather_docs', 'Gather documents'], ['everify', 'Compute & e-verify']].map(([s, label], i) => {
                                         const stepIdx = ['form_select', 'gather_docs', 'everify'].indexOf(itrSelfFiling.step);
                                         const done = i < stepIdx;
                                         const active = i === stepIdx;
                                         return (
-                                            <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                                                <FontAwesome5 name={done ? 'check-circle' : active ? 'circle' : 'circle'} size={14} color={done ? '#4ade80' : active ? '#60a5fa' : '#1a2040'} />
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: done ? '#4ade80' : active ? '#60a5fa' : '#2a3560' }}>{labels[i]}</Text>
+                                            <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                                                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: done ? '#4ade80' : active ? '#60a5fa' : '#1a2040' }} />
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: done ? '#4ade80' : active ? '#c8d4f0' : '#2a3560' }}>{label}</Text>
                                             </View>
                                         );
                                     })}
-                                    <TouchableOpacity
-                                        onPress={startSelfFiling}
-                                        style={{ borderWidth: 1, borderColor: '#60a5fa', backgroundColor: '#050f20', padding: 12, alignItems: 'center', marginTop: 8 }}
-                                    >
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', letterSpacing: 2 }}>OPEN WIZARD →</Text>
+                                    <TouchableOpacity onPress={startSelfFiling}
+                                        style={{ paddingVertical: 11, backgroundColor: '#050f20', borderRadius: 8, alignItems: 'center', marginTop: 4 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', letterSpacing: 1 }}>OPEN WIZARD</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}

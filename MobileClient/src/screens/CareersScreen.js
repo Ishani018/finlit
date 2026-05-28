@@ -50,14 +50,14 @@ function TierCard({ tier, unlocked, count, onPress }) {
         <TouchableOpacity
             onPress={onPress}
             activeOpacity={0.8}
-            style={{ flex: 1, height: TIER_H, overflow: 'hidden', position: 'relative', borderWidth: 1, borderColor: C.border }}
+            style={{ height: 160, overflow: 'hidden', position: 'relative', borderRadius: 10, marginBottom: 12 }}
         >
             <Image source={tier.image} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
-            <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(6,8,15,0.85)', borderWidth: 1, borderColor: tier.color + '50', paddingHorizontal: 5, paddingVertical: 2 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: tier.accent }}>{unlocked}/{count}</Text>
-            </View>
-            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.88)', paddingVertical: 6, paddingHorizontal: 8, borderTopWidth: 1, borderColor: tier.color + '30' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: tier.accent, letterSpacing: 2 }}>{tier.label}</Text>
+            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.38)' }} />
+            {/* Bottom info strip */}
+            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.82)', paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', letterSpacing: 1 }}>{tier.label}</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: tier.accent }}>{unlocked}/{count} unlocked</Text>
             </View>
         </TouchableOpacity>
     );
@@ -65,12 +65,11 @@ function TierCard({ tier, unlocked, count, onPress }) {
 
 function JobCard({ job, tier, isCurrent, isOffer, isLocked, isPending, onPress }) {
     const salaryPct = Math.min(job.salary / MAX_SALARY, 1);
-    const borderColor = isCurrent ? C.blue : isOffer ? '#22c55e' : isPending ? '#ca8a04' : C.border;
     return (
         <TouchableOpacity
             onPress={onPress}
             activeOpacity={0.8}
-            style={{ flex: 1, height: JOB_H + 58, overflow: 'hidden', position: 'relative', borderWidth: 1, borderColor, opacity: isLocked ? 0.5 : 1 }}
+            style={{ flex: 1, height: JOB_H + 58, overflow: 'hidden', position: 'relative', borderRadius: 10, opacity: isLocked ? 0.5 : 1 }}
         >
             <View style={{ width: '100%', height: JOB_H, backgroundColor: C.card }}>
                 <Image source={job.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -133,7 +132,7 @@ export default function CareersScreen({ onClose, onApply }) {
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.4)' }} />
                     <TouchableOpacity
                         onPress={() => setSelectedJob(null)}
-                        style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, backgroundColor: 'rgba(6,8,15,0.8)', borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}
+                        style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, backgroundColor: 'rgba(6,8,15,0.8)', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}
                     >
                         <FontAwesome5 name="chevron-left" size={14} color={C.dim} />
                     </TouchableOpacity>
@@ -172,53 +171,42 @@ export default function CareersScreen({ onClose, onApply }) {
 
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, lineHeight: 18, marginBottom: 16 }}>{selectedJob.description}</Text>
 
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>REQUIREMENTS</Text>
-                    <View style={{ marginBottom: 20, gap: 6 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, borderWidth: 1, borderColor: netWorth >= selectedJob.req_net_worth ? '#166534' : '#7f1d1d', backgroundColor: netWorth >= selectedJob.req_net_worth ? '#0d1e12' : '#150508' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: netWorth >= selectedJob.req_net_worth ? '#4ade80' : '#f87171' }}>
-                                Net Worth ≥ ₹{selectedJob.req_net_worth.toLocaleString()}
-                            </Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: netWorth >= selectedJob.req_net_worth ? '#4ade80' : '#f87171' }}>
-                                {netWorth >= selectedJob.req_net_worth ? '✓' : '✕'}
-                            </Text>
-                        </View>
-                        {selectedJob.req_degrees.length === 0 && (
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, borderWidth: 1, borderColor: '#166534', backgroundColor: '#0d1e12' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>No degree required</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>✓</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, letterSpacing: 3, marginBottom: 10 }}>REQUIREMENTS</Text>
+                    <View style={{ marginBottom: 24 }}>
+                        {[
+                            { label: `Net Worth ≥ ₹${selectedJob.req_net_worth.toLocaleString()}`, met: netWorth >= selectedJob.req_net_worth },
+                            ...(selectedJob.req_degrees.length === 0
+                                ? [{ label: 'No degree required', met: true }]
+                                : selectedJob.req_degrees.map(deg => ({ label: deg, met: degrees.includes(deg) }))
+                            ),
+                        ].map((r, i) => (
+                            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: i === 0 ? 0 : 1, borderColor: '#0f1525' }}>
+                                <Image source={r.met ? require('../../assets/ui_comp/nextbutton.png') : require('../../assets/ui_comp/lock.png')} style={{ width: 18, height: 18, tintColor: r.met ? '#4ade80' : '#f87171', opacity: 0.9 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: r.met ? '#c8d4f0' : '#445070', flex: 1 }}>{r.label}</Text>
                             </View>
-                        )}
-                        {selectedJob.req_degrees.map((deg, i) => {
-                            const hasDeg = degrees.includes(deg);
-                            return (
-                                <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, borderWidth: 1, borderColor: hasDeg ? '#166534' : '#7f1d1d', backgroundColor: hasDeg ? '#0d1e12' : '#150508' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: hasDeg ? '#4ade80' : '#f87171' }}>{deg}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: hasDeg ? '#4ade80' : '#f87171' }}>{hasDeg ? '✓' : '✕'}</Text>
-                                </View>
-                            );
-                        })}
+                        ))}
                     </View>
 
                     {isCurrent ? (
-                        <View style={{ padding: 14, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 2 }}>CURRENT JOB ✓</Text>
+                        <View style={{ padding: 16, borderRadius: 10, backgroundColor: '#0d1020', alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, letterSpacing: 2 }}>CURRENT JOB</Text>
                         </View>
                     ) : isLocked ? (
-                        <View style={{ padding: 14, borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#150508', flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-                            <FontAwesome5 name="lock" size={14} color="#f87171" />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171', letterSpacing: 1 }}>{req.reason}</Text>
+                        <View style={{ padding: 16, borderRadius: 10, backgroundColor: '#0d1020', flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 16, height: 16, tintColor: '#f87171' }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#f87171' }}>{req.reason}</Text>
                         </View>
                     ) : pendingApplications.some(a => a.id === selectedJob.id) ? (
-                        <View style={{ padding: 14, borderWidth: 1, borderColor: '#ca8a04', backgroundColor: '#422006', alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#facc15', letterSpacing: 2 }}>APPLICATION PENDING</Text>
+                        <View style={{ padding: 16, borderRadius: 10, backgroundColor: '#1a1000', alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fbbf24', letterSpacing: 2 }}>APPLICATION PENDING</Text>
                         </View>
                     ) : (
                         <TouchableOpacity
                             onPress={() => { onApply(selectedJob); setSelectedJob(null); }}
-                            style={{ padding: 14, borderWidth: 1, borderColor: '#22c55e', backgroundColor: '#0d1e12', alignItems: 'center' }}
+                            style={{ padding: 16, borderRadius: 10, backgroundColor: '#0d1e12', alignItems: 'center' }}
                         >
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80', letterSpacing: 2 }}>
-                                {isOffer ? 'ACCEPT OFFER ✓' : 'APPLY NOW'}
+                                {isOffer ? 'ACCEPT OFFER ›' : 'APPLY NOW ›'}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -232,7 +220,7 @@ export default function CareersScreen({ onClose, onApply }) {
         return (
             <View style={{ flex: 1, backgroundColor: C.bg }}>
                 <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <TouchableOpacity onPress={() => setSelectedTier(null)} style={{ width: 32, height: 32, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => setSelectedTier(null)} style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#0d1020', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="chevron-left" size={13} color={C.dim} />
                     </TouchableOpacity>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: tier.accent, letterSpacing: 2, flex: 1 }}>{tier.label}</Text>
@@ -270,7 +258,7 @@ export default function CareersScreen({ onClose, onApply }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 4 }}>CAREER PORTAL</Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>Find Your Path</Text>
                 </View>
-                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#0d1020', alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.dim }}>✕</Text>
                 </TouchableOpacity>
             </View>
@@ -318,8 +306,8 @@ export default function CareersScreen({ onClose, onApply }) {
                     </View>
                 )}
 
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 10 }}>SELECT TIER</Text>
-                <ItemGrid>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 12 }}>SELECT TIER</Text>
+                <View>
                     {TIERS.map(t => {
                         const count = tierJobs(t.key).length;
                         const unlocked = tierJobs(t.key).filter(j => checkJobRequirements(j).allowed).length;
@@ -333,7 +321,7 @@ export default function CareersScreen({ onClose, onApply }) {
                             />
                         );
                     })}
-                </ItemGrid>
+                </View>
             </ScrollView>
         </View>
     );

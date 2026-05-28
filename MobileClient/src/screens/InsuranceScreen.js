@@ -82,33 +82,33 @@ export default function InsuranceScreen({ onClose }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#556080', lineHeight: 22, marginBottom: 16 }}>{plan.description}</Text>
 
                     <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
-                        <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 2 }}>MONTHLY</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: canAfford ? meta.accent : '#f87171' }}>₹{premium.toLocaleString()}</Text>
+                        <View style={{ flex: 1, borderRadius: 10, backgroundColor: '#0d1020', padding: 14, alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 4 }}>MONTHLY</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: canAfford ? meta.accent : '#f87171' }}>₹{premium.toLocaleString()}</Text>
                         </View>
                         {plan.payout && (
-                            <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 2 }}>PAYOUT</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>₹{plan.payout.toLocaleString()}</Text>
+                            <View style={{ flex: 1, borderRadius: 10, backgroundColor: '#0d1020', padding: 14, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 4 }}>PAYOUT</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0' }}>₹{plan.payout.toLocaleString()}</Text>
                             </View>
                         )}
                         {plan.coverage && (
-                            <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 2 }}>COVERS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: meta.accent }}>{Math.round(coveragePct * 100)}%</Text>
+                            <View style={{ flex: 1, borderRadius: 10, backgroundColor: '#0d1020', padding: 14, alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 4 }}>COVERS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: meta.accent }}>{Math.round(coveragePct * 100)}%</Text>
                             </View>
                         )}
                     </View>
 
-                    <View style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#070910', padding: 14, marginBottom: 20 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 10 }}>PROTECTS AGAINST</Text>
+                    <View style={{ backgroundColor: '#070910', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2, marginBottom: 12 }}>PROTECTS AGAINST</Text>
                         {(plan.type === 'health' ? ['Hospital bills & surgeries', 'Medical emergencies', 'Accident injuries']
                             : plan.type === 'life' ? ['Critical life setbacks', 'Income loss for dependents', 'Family financial safety']
                             : ['Flood & water damage', 'Fire & earthquake damage', 'Structural repair costs']
-                        ).map(item => (
-                            <View key={item} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                                <View style={{ width: 5, height: 5, backgroundColor: meta.color }} />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#6070a0' }}>{item}</Text>
+                        ).map((item, i) => (
+                            <View key={item} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderTopWidth: i === 0 ? 0 : 1, borderColor: '#0f1525' }}>
+                                <Image source={meta.img} style={{ width: 18, height: 18, opacity: 0.6 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#6070a0' }}>{item}</Text>
                             </View>
                         ))}
                         {plan.type === 'property' && properties.length === 0 && (
@@ -120,16 +120,15 @@ export default function InsuranceScreen({ onClose }) {
                     </View>
 
                     {active ? (
-                        <TouchableOpacity onPress={() => { cancelInsurance(plan.id); setSelectedPlan(null); }} style={{ padding: 14, borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#1a0808', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => { cancelInsurance(plan.id); setSelectedPlan(null); }} style={{ padding: 16, borderRadius: 10, backgroundColor: '#1a0808', alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#f87171', letterSpacing: 2 }}>CANCEL COVERAGE</Text>
                         </TouchableOpacity>
                     ) : !canAfford ? (
-                        <View style={{ padding: 14, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#070910', alignItems: 'center' }}>
+                        <View style={{ padding: 16, borderRadius: 10, backgroundColor: '#070910', alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#2a3560', letterSpacing: 1 }}>INSUFFICIENT BALANCE</Text>
                         </View>
                     ) : (
-                        <TouchableOpacity onPress={() => { buyInsurance(plan.id); setSelectedPlan(null); }} style={{ padding: 14, borderWidth: 1, borderColor: meta.color, backgroundColor: meta.bg, alignItems: 'center', position: 'relative' }}>
-                            <Corners color={meta.color} />
+                        <TouchableOpacity onPress={() => { buyInsurance(plan.id); setSelectedPlan(null); }} style={{ padding: 16, borderRadius: 10, backgroundColor: meta.bg, alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: meta.accent, letterSpacing: 2 }}>GET COVERED — ₹{premium.toLocaleString()}/mo</Text>
                         </TouchableOpacity>
                     )}
@@ -149,34 +148,34 @@ export default function InsuranceScreen({ onClose }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 4 }}>PROTECTION</Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0' }}>Insurance</Text>
                 </View>
-                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
+                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#0a0d1a', alignItems: 'center', justifyContent: 'center' }}>
                     <FontAwesome5 name="times" size={14} color="#445070" />
                 </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
                 {/* Status strip */}
-                <View style={{ borderWidth: 1, borderColor: protectionScore === 0 ? '#7f1d1d' : protectionScore === maxScore ? '#166534' : '#1e3a5f', backgroundColor: protectionScore === 0 ? '#1a0808' : protectionScore === maxScore ? '#0d1e12' : '#0d1428', padding: 12, marginBottom: 16, position: 'relative' }}>
-                    <Corners color={protectionScore === 0 ? '#ef4444' : protectionScore === maxScore ? '#22c55e' : '#3b82f6'} />
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3 }}>PROTECTION STATUS</Text>
+                <View style={{ backgroundColor: protectionScore === 0 ? '#1a0808' : protectionScore === maxScore ? '#0d1e12' : '#0d1428', padding: 14, marginBottom: 18, borderRadius: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            {protectionScore === 0 && <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 18, height: 18 }} resizeMode="contain" />}
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: protectionScore === 0 ? '#f87171' : protectionScore === maxScore ? '#4ade80' : '#60a5fa' }}>
-                                {protectionScore === 0 ? 'EXPOSED' : protectionScore === maxScore ? 'FULLY COVERED ✓' : 'PARTIAL COVER'}
-                            </Text>
+                            {protectionScore === 0 && <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />}
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>PROTECTION STATUS</Text>
                         </View>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: protectionScore === 0 ? '#f87171' : protectionScore === maxScore ? '#4ade80' : '#60a5fa' }}>
+                            {protectionScore === 0 ? 'EXPOSED' : protectionScore === maxScore ? 'FULLY COVERED' : 'PARTIAL COVER'}
+                        </Text>
                     </View>
-                    <View style={{ flexDirection: 'row', gap: 6, marginBottom: protectionScore === 0 || totalPremium > 0 ? 8 : 0 }}>
+                    <View style={{ flexDirection: 'row', gap: 4, marginBottom: 8 }}>
                         {Array.from({ length: maxScore }).map((_, i) => (
-                            <View key={i} style={{ flex: 1, height: 4, backgroundColor: i < protectionScore ? '#22c55e' : '#0d1020' }} />
+                            <View key={i} style={{ flex: 1, height: 3, backgroundColor: i < protectionScore ? '#22c55e' : '#1a2040', borderRadius: 2 }} />
                         ))}
                     </View>
-                    {totalPremium > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{totalPremium.toLocaleString()}/mo total premium</Text>}
-                    {protectionScore === 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#ef4444' }}>A single crisis could wipe your savings</Text>}
+                    {totalPremium > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>₹{totalPremium.toLocaleString()}/mo total</Text>}
+                    {protectionScore === 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#ef444499' }}>A single crisis could wipe your savings</Text>}
                 </View>
 
-                {/* Type rows */}
+                {/* Type grid — 2×2 square cards */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                 {['health', 'life', 'property', 'family'].map(type => {
                     const meta = TYPE_META[type];
                     const plans = INSURANCE_PLANS.filter(p => p.type === type);
@@ -184,53 +183,46 @@ export default function InsuranceScreen({ onClose }) {
                     const isExpanded = expandedType === type;
 
                     return (
-                        <View key={type} style={{ marginBottom: 8 }}>
-                            {/* Type row header */}
+                        <View key={type} style={{ width: '47%' }}>
+                            {/* Square card */}
                             <TouchableOpacity
                                 onPress={() => setExpandedType(isExpanded ? null : type)}
                                 activeOpacity={0.85}
-                                style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: activePlans.length > 0 ? meta.color + '60' : '#1a2040', backgroundColor: activePlans.length > 0 ? meta.bg : '#0a0d1a', padding: 12 }}
+                                style={{ backgroundColor: activePlans.length > 0 ? meta.bg : '#0a0d1a', borderRadius: 10, padding: 14, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', gap: 10 }}
                             >
-                                {/* Icon */}
-                                <View style={{ width: 48, height: 48, borderWidth: 1, borderColor: meta.color + '40', backgroundColor: '#06080f', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Image source={meta.img} style={{ width: 34, height: 34 }} resizeMode="contain" />
-                                </View>
-                                <View style={{ flex: 1 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: activePlans.length > 0 ? meta.accent : '#c8d4f0', lineHeight: 22 }}>{meta.label}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: activePlans.length > 0 ? meta.color : '#445070' }}>
-                                        {activePlans.length > 0 ? `${activePlans.length} plan covered` : `${plans.length} plan${plans.length !== 1 ? 's' : ''} available`}
-                                    </Text>
-                                </View>
-                                {activePlans.length > 0 && (
-                                    <View style={{ borderWidth: 1, borderColor: meta.color + '60', paddingHorizontal: 8, paddingVertical: 3 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: meta.accent, letterSpacing: 1 }}>✓ ON</Text>
-                                    </View>
-                                )}
-                                <FontAwesome5 name={isExpanded ? 'chevron-up' : 'chevron-down'} size={10} color="#2a3560" />
+                                <Image source={meta.img} style={{ width: 44, height: 44 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: activePlans.length > 0 ? meta.accent : '#c8d4f0', lineHeight: 20 }}>{meta.label}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: activePlans.length > 0 ? meta.color : '#445070', textAlign: 'center' }}>
+                                    {activePlans.length > 0 ? 'COVERED' : `${plans.length} plan${plans.length !== 1 ? 's' : ''}`}
+                                </Text>
                             </TouchableOpacity>
 
-                            {/* Expanded plan list */}
-                            {isExpanded && plans.map(plan => {
-                                const active = isActive(plan.id);
-                                const premium = getPlanPremium(plan);
-                                return (
-                                    <TouchableOpacity
-                                        key={plan.id}
-                                        onPress={() => setSelectedPlan(plan)}
-                                        style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderTopWidth: 0, borderColor: active ? meta.color + '50' : '#1a2040', backgroundColor: active ? meta.bg : '#070910', paddingVertical: 10, paddingHorizontal: 14, paddingLeft: 74, position: 'relative' }}
-                                    >
-                                        {active && <Corners color={meta.color} />}
-                                        <View style={{ flex: 1 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: active ? '#c8d4f0' : '#556080' }} numberOfLines={1}>{plan.name}</Text>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: active ? meta.accent : '#2a3560' }}>₹{premium.toLocaleString()}/mo</Text>
-                                        </View>
-                                        <FontAwesome5 name="chevron-right" size={10} color={active ? meta.color : '#2a3560'} />
-                                    </TouchableOpacity>
-                                );
-                            })}
+                            {/* Expanded plan list below card */}
+                            {isExpanded && (
+                                <View style={{ marginTop: 6, gap: 4 }}>
+                                {plans.map(plan => {
+                                    const active = isActive(plan.id);
+                                    const premium = getPlanPremium(plan);
+                                    return (
+                                        <TouchableOpacity
+                                            key={plan.id}
+                                            onPress={() => setSelectedPlan(plan)}
+                                            style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: active ? meta.bg : '#070910', borderRadius: 6, paddingVertical: 8, paddingHorizontal: 10 }}
+                                        >
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: active ? '#c8d4f0' : '#556080' }} numberOfLines={1}>{plan.name}</Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: active ? meta.accent : '#4a5580' }}>₹{premium.toLocaleString()}/mo</Text>
+                                            </View>
+                                            <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 12, height: 12, opacity: 0.4 }} resizeMode="contain" />
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                                </View>
+                            )}
                         </View>
                     );
                 })}
+                </View>
             </ScrollView>
         </View>
     );

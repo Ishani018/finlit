@@ -21,7 +21,7 @@ const TYPE_META = {
     degree:        { label: 'DEGREE',   color: '#6366f1', accent: '#a78bfa' },
 };
 
-const CARD_H = 150;
+const CARD_H = 170;
 
 export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
     const { degrees, activeEnrollment, balance, dropOut } = useGame();
@@ -39,96 +39,113 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
         const months = course.duration;
         const durationLabel = months >= 12 ? `${Math.floor(months / 12)}y${months % 12 > 0 ? ` ${months % 12}mo` : ''}` : `${months}mo`;
 
+        const unlocksText =
+            course.type === 'certification' ? 'Trade jobs: Plumber, Carpenter, CAD Engineer' :
+            course.id === 'edu_cs_degree'   ? 'Software Engineer, AR/VR Scientist → MBA path' :
+            course.id === 'edu_mba'         ? 'CEO, CFO, Executive roles' :
+            course.id === 'edu_medical'     ? 'Doctor, Therapist, Vet' :
+            course.id === 'edu_design'      ? 'Interior Designer' :
+            course.id === 'edu_culinary'    ? 'High-End Chef' :
+            course.id === 'edu_science'     ? 'Microbiologist, Forensic Scientist, Horticulturist' : '';
+
         return (
             <View style={{ flex: 1, backgroundColor: '#06080f' }}>
-                {/* Hero */}
-                <View style={{ height: 180, backgroundColor: '#0a0d1a', position: 'relative' }}>
-                    <Image source={course.image} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(6,8,15,0.5)' }} />
+                {/* Full-bleed hero with title overlaid */}
+                <View style={{ height: 240, position: 'relative', backgroundColor: '#0a0d1a' }}>
+                    <Image source={course.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    {/* gradient scrim bottom */}
+                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, backgroundColor: 'transparent' }}
+                        pointerEvents="none"
+                    />
+                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.35)' }} />
+                    {/* Back button */}
                     <TouchableOpacity
                         onPress={() => setSelectedCourse(null)}
-                        style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, backgroundColor: 'rgba(0,0,0,0.6)', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}
                     >
-                        <FontAwesome5 name="chevron-left" size={14} color="#6070a0" />
+                        <FontAwesome5 name="chevron-left" size={13} color="#8090b8" />
                     </TouchableOpacity>
-                    <View style={{ position: 'absolute', bottom: 12, left: 14, backgroundColor: meta.color + '20', borderWidth: 1, borderColor: meta.color + '60', paddingHorizontal: 10, paddingVertical: 3 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.accent, letterSpacing: 2 }}>{meta.label}</Text>
-                    </View>
-                    {isCompleted && (
-                        <View style={{ position: 'absolute', bottom: 12, right: 14, backgroundColor: '#14532d', borderWidth: 1, borderColor: '#22c55e', paddingHorizontal: 10, paddingVertical: 3 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80', letterSpacing: 2 }}>✓ COMPLETED</Text>
+                    {/* Title block bottom-left */}
+                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 16, paddingBottom: 16, paddingTop: 40, backgroundColor: 'rgba(6,8,15,0.72)' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                            <View style={{ width: 3, height: 12, backgroundColor: meta.color }} />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: meta.accent, letterSpacing: 3 }}>{meta.label}</Text>
+                            {isCompleted && (
+                                <View style={{ marginLeft: 'auto', backgroundColor: '#14532d', borderWidth: 1, borderColor: '#22c55e', paddingHorizontal: 8, paddingVertical: 1 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 1 }}>✓ COMPLETED</Text>
+                                </View>
+                            )}
                         </View>
-                    )}
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 32 }}>{course.name}</Text>
+                    </View>
                 </View>
 
                 <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', letterSpacing: 1, marginBottom: 4 }}>{course.name}</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#556080', lineHeight: 22, marginBottom: 16 }}>{course.description}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#556080', lineHeight: 20, marginBottom: 20 }}>{course.description}</Text>
 
-                    <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
-                        <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2, marginBottom: 2 }}>MONTHLY FEE</Text>
+                    {/* Stats row — inline, no boxes */}
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#111828' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2 }}>MONTHLY FEE</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: canAfford ? '#fbbf24' : '#f87171' }}>₹{course.monthly_tuition.toLocaleString()}</Text>
                         </View>
-                        <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2, marginBottom: 2 }}>TOTAL COST</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#111828' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2 }}>TOTAL COST</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>₹{course.total_cost.toLocaleString()}</Text>
                         </View>
-                        <View style={{ flex: 1, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 12, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2, marginBottom: 2 }}>DURATION</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>{durationLabel}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#111828' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2 }}>DURATION</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: meta.accent }}>{durationLabel}</Text>
                         </View>
                     </View>
 
+                    {/* Prerequisites */}
                     {course.req_degrees.length > 0 && (
-                        <View style={{ marginBottom: 16 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a3860', letterSpacing: 3, marginBottom: 8 }}>PREREQUISITES</Text>
+                        <View style={{ marginBottom: 20 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 10 }}>PREREQUISITES</Text>
                             {course.req_degrees.map((deg, i) => {
                                 const has = degrees.includes(deg);
                                 return (
-                                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, borderWidth: 1, borderColor: has ? '#166534' : '#7f1d1d', backgroundColor: has ? '#0d1e12' : '#1a0808', marginBottom: 6 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: has ? '#4ade80' : '#f87171' }}>{deg}</Text>
-                                        <FontAwesome5 name={has ? 'check' : 'times'} size={14} color={has ? '#4ade80' : '#f87171'} />
+                                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderColor: '#111828' }}>
+                                        <FontAwesome5 name={has ? 'check-circle' : 'times-circle'} size={14} color={has ? '#4ade80' : '#f87171'} />
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: has ? '#4ade80' : '#f87171', flex: 1 }}>{deg}</Text>
                                     </View>
                                 );
                             })}
                         </View>
                     )}
 
-                    <View style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#070910', padding: 12, marginBottom: 20 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3860', letterSpacing: 2, marginBottom: 4 }}>UNLOCKS</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>
-                            {course.type === 'certification' && 'Trade jobs: Plumber, Carpenter, CAD Engineer'}
-                            {course.id === 'edu_cs_degree' && 'Software Engineer, AR/VR Scientist → MBA path'}
-                            {course.id === 'edu_mba' && 'CEO, CFO, Executive roles'}
-                            {course.id === 'edu_medical' && 'Doctor, Therapist, Vet'}
-                            {course.id === 'edu_design' && 'Interior Designer'}
-                            {course.id === 'edu_culinary' && 'High-End Chef'}
-                            {course.id === 'edu_science' && 'Microbiologist, Forensic Scientist, Horticulturist'}
-                        </Text>
-                    </View>
+                    {/* Unlocks */}
+                    {unlocksText ? (
+                        <View style={{ marginBottom: 24 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 6 }}>UNLOCKS</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#445070', lineHeight: 20 }}>{unlocksText}</Text>
+                        </View>
+                    ) : null}
 
+                    {/* CTA */}
                     {isCompleted ? (
-                        <View style={{ padding: 14, borderWidth: 1, borderColor: '#166534', backgroundColor: '#0d1e12', alignItems: 'center', position: 'relative' }}>
-                            <Corners color="#22c55e" />
+                        <View style={{ padding: 16, borderWidth: 1, borderColor: '#166534', backgroundColor: '#0d1e12', alignItems: 'center', borderRadius: 6 }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80', letterSpacing: 2 }}>✓ DEGREE EARNED</Text>
                         </View>
                     ) : isStudying ? (
-                        <View>
-                            <View style={{ padding: 14, borderWidth: 1, borderColor: meta.color, backgroundColor: '#0d0d1e', alignItems: 'center', marginBottom: 10, position: 'relative' }}>
-                                <Corners color={meta.color} />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: meta.accent, letterSpacing: 2 }}>STUDYING — {activeEnrollment.monthsRemaining}mo LEFT</Text>
-                                <View style={{ width: '100%', height: 5, backgroundColor: '#0d1020', marginTop: 10 }}>
-                                    <View style={{ height: '100%', width: `${Math.max(5, 100 - (activeEnrollment.monthsRemaining / course.duration * 100))}%`, backgroundColor: meta.color }} />
+                        <View style={{ gap: 10 }}>
+                            <View style={{ padding: 16, borderWidth: 1, borderColor: meta.color + '80', backgroundColor: meta.color + '0c', borderRadius: 6 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: meta.accent, letterSpacing: 1 }}>IN PROGRESS</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070' }}>{activeEnrollment.monthsRemaining}mo left</Text>
+                                </View>
+                                <View style={{ height: 4, backgroundColor: '#0d1020', borderRadius: 2 }}>
+                                    <View style={{ height: '100%', width: `${Math.max(4, 100 - (activeEnrollment.monthsRemaining / course.duration * 100))}%`, backgroundColor: meta.color, borderRadius: 2 }} />
                                 </View>
                             </View>
-                            <TouchableOpacity onPress={() => { dropOut(); setSelectedCourse(null); }} style={{ padding: 12, borderWidth: 1, borderColor: '#7f1d1d', alignItems: 'center' }}>
+                            <TouchableOpacity onPress={() => { dropOut(); setSelectedCourse(null); }} style={{ padding: 14, borderWidth: 1, borderColor: '#7f1d1d', alignItems: 'center', borderRadius: 6 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171', letterSpacing: 1 }}>DROP OUT</Text>
                             </TouchableOpacity>
                         </View>
                     ) : isLocked ? (
-                        <View style={{ padding: 14, borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#1a0808', flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-                            <Image source={LOCK_IMG} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                        <View style={{ padding: 16, borderWidth: 1, borderColor: '#7f1d1d', backgroundColor: '#1a0808', flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center', borderRadius: 6 }}>
+                            <Image source={LOCK_IMG} style={{ width: 15, height: 15 }} resizeMode="contain" />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>Complete prerequisites first</Text>
                         </View>
                     ) : (
@@ -136,20 +153,18 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                             <TouchableOpacity
                                 onPress={() => { onEnroll(course); setSelectedCourse(null); }}
                                 disabled={!!activeEnrollment || !canAfford}
-                                style={{ padding: 14, borderWidth: 1, borderColor: canAfford && !activeEnrollment ? meta.color : '#1e2840', backgroundColor: canAfford && !activeEnrollment ? '#0d0d1e' : '#070910', alignItems: 'center', position: 'relative', opacity: activeEnrollment ? 0.5 : 1 }}
+                                style={{ padding: 16, borderWidth: 1, borderColor: canAfford && !activeEnrollment ? meta.color : '#1e2840', backgroundColor: canAfford && !activeEnrollment ? meta.color + '14' : '#070910', alignItems: 'center', borderRadius: 6, opacity: activeEnrollment ? 0.45 : 1 }}
                             >
-                                {canAfford && !activeEnrollment && <Corners color={meta.color} />}
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: canAfford && !activeEnrollment ? meta.accent : '#2a3560', letterSpacing: 2 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: canAfford && !activeEnrollment ? meta.accent : '#2a3560', letterSpacing: 1 }}>
                                     {activeEnrollment ? 'ALREADY STUDYING' : !canAfford ? 'CANT AFFORD FEES' : 'ENROLL — PAY MONTHLY'}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => { onEnrollLoan(course); setSelectedCourse(null); }}
                                 disabled={!!activeEnrollment}
-                                style={{ padding: 14, borderWidth: 1, borderColor: !activeEnrollment ? '#166534' : '#1e2840', backgroundColor: !activeEnrollment ? '#0d1e12' : '#070910', alignItems: 'center', position: 'relative', opacity: activeEnrollment ? 0.5 : 1 }}
+                                style={{ padding: 16, borderWidth: 1, borderColor: !activeEnrollment ? '#22c55e' : '#1e2840', backgroundColor: !activeEnrollment ? '#0d1e12' : '#070910', alignItems: 'center', borderRadius: 6, opacity: activeEnrollment ? 0.45 : 1 }}
                             >
-                                {!activeEnrollment && <Corners color="#22c55e" />}
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: !activeEnrollment ? '#4ade80' : '#2a3560', letterSpacing: 2 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: !activeEnrollment ? '#4ade80' : '#2a3560', letterSpacing: 1 }}>
                                     {activeEnrollment ? 'ALREADY STUDYING' : 'EDUCATION LOAN'}
                                 </Text>
                             </TouchableOpacity>
@@ -230,40 +245,42 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                                         const months = course.duration;
                                         const durationLabel = months >= 12 ? `${Math.floor(months / 12)}y` : `${months}mo`;
 
+                                        const borderColor = isCompleted ? '#166534' : isStudying ? meta.color : isLocked ? '#1a2040' : '#252d4a';
                                         return (
                                             <TouchableOpacity
                                                 key={course.id}
                                                 onPress={() => setSelectedCourse(course)}
                                                 activeOpacity={0.85}
-                                                style={{ flex: 1, borderWidth: 1, borderColor: isCompleted ? '#166534' : isStudying ? meta.color + '80' : '#1a2040', overflow: 'hidden' }}
+                                                style={{ flex: 1, borderWidth: 1, borderColor, overflow: 'hidden', borderRadius: 6 }}
                                             >
-                                                {/* Image fills card */}
+                                                {/* Image */}
                                                 <View style={{ height: CARD_H, position: 'relative', backgroundColor: '#0a0d1a' }}>
                                                     <Image source={course.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                                                    {/* Scrim */}
-                                                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isLocked ? 'rgba(4,6,14,0.72)' : 'rgba(4,6,14,0.45)' }} />
-                                                    {/* Status badge top-right */}
+                                                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isLocked ? 'rgba(4,6,14,0.65)' : 'rgba(4,6,14,0.25)' }} />
+                                                    {/* Status badge top-left */}
                                                     {isCompleted && (
-                                                        <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: '#22c55e', paddingHorizontal: 6, paddingVertical: 2 }}>
-                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>✓ DONE</Text>
+                                                        <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: '#14532d', borderWidth: 1, borderColor: '#22c55e', paddingHorizontal: 7, paddingVertical: 2 }}>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 1 }}>✓ DONE</Text>
                                                         </View>
                                                     )}
                                                     {isStudying && (
-                                                        <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: meta.color, paddingHorizontal: 6, paddingVertical: 2 }}>
-                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>ACTIVE</Text>
+                                                        <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: meta.color + '22', borderWidth: 1, borderColor: meta.color, paddingHorizontal: 7, paddingVertical: 2 }}>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: meta.accent, letterSpacing: 1 }}>ACTIVE</Text>
                                                         </View>
                                                     )}
                                                     {isLocked && (
                                                         <View style={{ position: 'absolute', top: 8, right: 8 }}>
-                                                            <Image source={LOCK_IMG} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
+                                                            <Image source={LOCK_IMG} style={{ width: 20, height: 20, opacity: 0.6 }} resizeMode="contain" />
                                                         </View>
                                                     )}
-                                                    {/* Info overlay bottom */}
-                                                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 8 }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isLocked ? '#445070' : '#c8d4f0', lineHeight: 17 }} numberOfLines={1}>{course.name}</Text>
-                                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
-                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070' }}>₹{(course.monthly_tuition / 1000).toFixed(0)}k/mo</Text>
-                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: meta.color }}>{durationLabel}</Text>
+                                                </View>
+                                                {/* Info strip */}
+                                                <View style={{ backgroundColor: '#0d1020', paddingHorizontal: 10, paddingVertical: 8, borderTopWidth: 1, borderColor }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: isLocked ? '#445070' : '#c8d4f0', lineHeight: 19, marginBottom: 4 }} numberOfLines={1}>{course.name}</Text>
+                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isLocked ? '#2a3560' : '#4ade80' }}>₹{(course.monthly_tuition / 1000).toFixed(0)}k/mo</Text>
+                                                        <View style={{ backgroundColor: meta.color + '18', borderWidth: 1, borderColor: meta.color + '50', paddingHorizontal: 6, paddingVertical: 1 }}>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.accent }}>{durationLabel}</Text>
                                                         </View>
                                                     </View>
                                                 </View>

@@ -101,47 +101,28 @@ const SectionLabel = ({ label }) => (
     </View>
 );
 
-// ── Square-ish person card (player, spouse, parent) ───────────────────────────
-// flex:1 so they fill a 2-col row evenly
-function PersonCard({ image, headCrop, topCrop, contain, name, tag, color, sub1, sub2, hp, onPress }) {
+// ── Person card ───────────────────────────────────────────────────────────────
+function PersonCard({ image, contain, name, tag, color, sub1, sub2, hp, onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={onPress ? 0.85 : 1}
-            style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+            style={{ flex: 1, backgroundColor: '#08101e', overflow: 'hidden', borderRadius: 10 }}>
 
-            <View style={{ width: '100%', aspectRatio: 0.85, backgroundColor: C.card, overflow: 'hidden', position: 'relative' }}>
+            <View style={{ width: '100%', height: 190, backgroundColor: '#060810', overflow: 'hidden', position: 'relative', alignItems: 'center', justifyContent: 'flex-start' }}>
                 {image ? (
-                    headCrop
-                        ? <Image source={image} style={{ width: '170%', height: '170%', position: 'absolute', top: '8%', left: '-35%' }} resizeMode="contain" />
-                        : topCrop
-                        ? <Image source={image} style={{ width: '100%', height: '200%', position: 'absolute', top: 0 }} resizeMode="contain" />
-                        : contain
-                        ? <Image source={image} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-                        : <Image source={image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <Image source={image} style={{ width: '130%', height: '200%', position: 'absolute', top: '0%', left: '-15%' }} resizeMode="contain" />
                 ) : (
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <FontAwesome5 name="user" size={48} color={color + '50'} />
-                    </View>
+                    <FontAwesome5 name="user" size={48} color={color + '40'} style={{ marginTop: 60 }} />
                 )}
-                {/* Tag badge */}
-                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.82)', borderTopWidth: 1, borderColor: color + '40', paddingVertical: 5, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color, letterSpacing: 2 }}>{tag}</Text>
-                </View>
             </View>
 
-            {/* Info strip */}
-            <View style={{ padding: 10 }}>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: color + 'aa', letterSpacing: 2, marginBottom: 1 }}>{tag}</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, lineHeight: 22 }} numberOfLines={1}>{name}</Text>
-                {sub1 ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color, lineHeight: 17, marginTop: 3 }} numberOfLines={1}>{sub1}</Text> : null}
-                {sub2 ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 2 }} numberOfLines={1}>{sub2}</Text> : null}
+                {sub1 ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginTop: 2 }} numberOfLines={1}>{sub1}</Text> : null}
+                {sub2 ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560', marginTop: 1 }} numberOfLines={1}>{sub2}</Text> : null}
                 {hp !== undefined && (
-                    <View style={{ marginTop: 8 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>HEALTH</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: hpColor(hp) }}>{Math.round(hp)}</Text>
-                        </View>
-                        <View style={{ height: 4, backgroundColor: C.bg }}>
-                            <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp) }} />
-                        </View>
+                    <View style={{ height: 2, backgroundColor: '#0d1020', borderRadius: 1, marginTop: 8 }}>
+                        <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp), borderRadius: 1 }} />
                     </View>
                 )}
             </View>
@@ -153,19 +134,18 @@ function PersonCard({ image, headCrop, topCrop, contain, name, tag, color, sub1,
 function EmptySpouseCard({ onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ flex: 1, borderWidth: 1, borderColor: C.pink + '35', borderStyle: 'dashed', backgroundColor: C.panel, overflow: 'hidden' }}>
-            {/* Banquet hall image */}
+            style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative' }}>
                 <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
-                <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                    <FontAwesome5 name="heart" size={32} color={C.pink + '90'} />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.pink + 'cc', letterSpacing: 2 }}>+ SPOUSE</Text>
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.5)' }} />
+                <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <Image source={require('../../assets/ui_comp/marraige congratulations.png')} style={{ width: 48, height: 48, opacity: 0.85 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.pink + 'cc', letterSpacing: 2 }}>+ SPOUSE</Text>
                 </View>
             </View>
             <View style={{ padding: 10 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.pink + 'aa' }}>Get Married</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark, marginTop: 3 }}>₹5L wedding cost</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>Get Married</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>₹5L wedding cost</Text>
             </View>
         </TouchableOpacity>
     );
@@ -186,27 +166,17 @@ function ChildCard({ child, onPress }) {
 
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ flex: 1, borderWidth: 1, borderColor: isEx ? C.gold + '50' : stage.color + '45', backgroundColor: C.panel, overflow: 'hidden' }}>
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: isEx ? C.gold : stage.color }} />
-            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative' }}>
-                <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.08)' }} />
-                <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: stage.color, paddingHorizontal: 7, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000', letterSpacing: 1 }}>{stage.label}</Text>
+            style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative', backgroundColor: '#060810', alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={img} style={{ width: '75%', height: '85%' }} resizeMode="contain" />
+                <View style={{ position: 'absolute', top: 8, left: 8 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: isEx ? C.gold : stage.color, letterSpacing: 2 }}>{stage.label}</Text>
+                    {isEx && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.gold, letterSpacing: 1 }}>WITH EX</Text>}
                 </View>
-                {isEx && (
-                    <View style={{ position: 'absolute', top: 32, left: 8, backgroundColor: C.gold, paddingHorizontal: 7, paddingVertical: 2 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000', letterSpacing: 1 }}>WITH EX</Text>
-                    </View>
-                )}
-                <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(6,8,15,0.85)', borderWidth: 1, borderColor: (isEx ? C.gold : stage.color) + '50', paddingHorizontal: 6, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: isEx ? C.gold : stage.color }}>{ageYr}yr</Text>
-                </View>
-                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: isEx ? C.gold : stage.color, paddingVertical: 5, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#000', letterSpacing: 1 }}>{relationLabel}</Text>
-                </View>
+                <Text style={{ position: 'absolute', top: 8, right: 8, fontFamily: 'VT323_400Regular', fontSize: 13, color: isEx ? C.gold : stage.color }}>{ageYr}yr</Text>
             </View>
             <View style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: (isEx ? C.gold : stage.color) + 'aa', letterSpacing: 2, marginBottom: 1 }}>{relationLabel}</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, lineHeight: 22 }} numberOfLines={1}>{child.name}</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isEx ? C.gold : stage.color }}>
@@ -215,8 +185,8 @@ function ChildCard({ child, onPress }) {
                     {!isDead && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor(hp) }}>{Math.round(hp)}HP</Text>}
                 </View>
                 {!isDead && (
-                    <View style={{ height: 4, backgroundColor: C.bg, marginTop: 7 }}>
-                        <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp) }} />
+                    <View style={{ height: 3, backgroundColor: C.bg, marginTop: 7, borderRadius: 2 }}>
+                        <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp), borderRadius: 2 }} />
                     </View>
                 )}
             </View>
@@ -228,15 +198,14 @@ function ChildCard({ child, onPress }) {
 function AddChildCard({ onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ flex: 1, borderWidth: 1, borderColor: C.blue + '35', borderStyle: 'dashed', backgroundColor: C.panel, overflow: 'hidden' }}>
-            <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.blue + '06' }}>
-                <View style={{ width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: C.blue + '40', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: C.blue + '70', lineHeight: 34 }}>+</Text>
-                </View>
+            style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.blue + '08' }}>
+                <Image source={require('../../assets/ui_comp/welcomebabyboy.png')} style={{ width: 56, height: 56, opacity: 0.6 }} resizeMode="contain" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.blue + 'cc', letterSpacing: 2 }}>+ CHILD</Text>
             </View>
             <View style={{ padding: 10 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.blue + 'aa' }}>Have a Child</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark, marginTop: 3 }}>9 Months Wait</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>Have a Child</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>9 months wait</Text>
             </View>
         </TouchableOpacity>
     );
@@ -246,8 +215,7 @@ function AddChildCard({ onPress }) {
 function ExpectingChildCard({ data }) {
     const babyImg = data.gender === 'female' ? DEP_IMAGES.baby_daughter : DEP_IMAGES.baby_son;
     return (
-        <View
-            style={{ flex: 1, borderWidth: 1, borderColor: C.pink + '50', backgroundColor: C.panel, overflow: 'hidden' }}>
+        <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', backgroundColor: C.pink + '08' }}>
                 <Image source={babyImg} style={{ width: '80%', height: '80%', opacity: 0.4 }} resizeMode="contain" />
                 <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: C.pink, paddingHorizontal: 7, paddingVertical: 2 }}>
@@ -269,20 +237,18 @@ function ExpectingChildCard({ data }) {
 function AddParentCard({ onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ flex: 1, borderWidth: 1, borderColor: C.gold + '35', borderStyle: 'dashed', backgroundColor: C.panel, overflow: 'hidden' }}>
+            style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative' }}>
                 <Image source={DEP_IMAGES.elderly_couple} style={{ width: '100%', height: '200%', position: 'absolute', top: 0 }} resizeMode="contain" />
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.65)' }} />
-                <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                    <View style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: C.gold + '50', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.gold + '80', lineHeight: 30 }}>+</Text>
-                    </View>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.gold + 'cc', letterSpacing: 2 }}>+ PARENT</Text>
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.6)' }} />
+                <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <Image source={require('../../assets/ui_comp/familyicon.png')} style={{ width: 44, height: 44, opacity: 0.7 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold + 'cc', letterSpacing: 2 }}>+ PARENT</Text>
                 </View>
             </View>
             <View style={{ padding: 10 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.gold + 'aa' }}>Take In Parent</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark, marginTop: 3 }}>₹25k setup · ₹15k/mo</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>Take In Parent</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>₹25k setup · ₹15k/mo</Text>
             </View>
         </TouchableOpacity>
     );
@@ -319,13 +285,11 @@ function AddParentPickModal({ existingParents, onPick, onClose }) {
                 <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 16, gap: 12 }}>
                     {options.map(p => (
                         <TouchableOpacity key={p.id} onPress={() => onPick(p)} activeOpacity={0.85}
-                            style={{ flex: 1, borderWidth: 1.5, borderColor: p.color + '60', backgroundColor: C.panel, overflow: 'hidden' }}>
-                            <View style={{ height: 3, backgroundColor: p.color }} />
-                            {/* Portrait with top-half crop */}
+                            style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
                             <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
                                 <Image source={p.img} style={{ width: '100%', height: '200%', position: 'absolute', top: '8%' }} resizeMode="contain" />
-                                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.18)' }} />
-                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.82)', borderTopWidth: 1, borderColor: p.color + '40', paddingVertical: 5, alignItems: 'center' }}>
+                                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
+                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.78)', paddingVertical: 6, alignItems: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: p.color, letterSpacing: 2 }}>{p.label}</Text>
                                 </View>
                             </View>
@@ -333,7 +297,7 @@ function AddParentPickModal({ existingParents, onPick, onClose }) {
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream }}>{p.name}</Text>
                             </View>
                             <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
-                                <View style={{ borderWidth: 1, borderColor: p.color + '50', backgroundColor: p.color + '12', paddingVertical: 8, alignItems: 'center' }}>
+                                <View style={{ backgroundColor: p.color + '18', borderRadius: 6, paddingVertical: 10, alignItems: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: p.color, letterSpacing: 2 }}>TAKE IN</Text>
                                 </View>
                             </View>
@@ -432,435 +396,276 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
         );
     }
 
+    const accentColor = isSpouse ? spouseColor : stage?.color || C.gold;
+
+    // Reusable action row with optional icon
+    const ActionRow = ({ label, sub, icon, onPress, disabled }) => (
+        <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14, backgroundColor: '#0a0d1a', borderRadius: 8, marginBottom: 8, opacity: disabled ? 0.4 : 1 }}>
+            {icon && <Image source={icon} style={{ width: 22, height: 22, opacity: 0.7 }} resizeMode="contain" />}
+            <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>{label}</Text>
+                {sub ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 1 }}>{sub}</Text> : null}
+            </View>
+        </TouchableOpacity>
+    );
+
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: C.bg, zIndex: 50 }}>
-            <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream }}>{dep.name}</Text>
-                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
-                    <FontAwesome5 name="times" size={13} color={C.dim} />
-                </TouchableOpacity>
+
+            {/* Close button — above sprite, never overlapping content */}
+            <TouchableOpacity onPress={onClose}
+                style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 34, height: 34, backgroundColor: 'rgba(6,8,15,0.65)', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                <FontAwesome5 name="times" size={13} color={C.dim} />
+            </TouchableOpacity>
+
+            {/* Fixed hero — full sprite, nothing starts until below it */}
+            <View style={{ height: 340, backgroundColor: '#060810', alignItems: 'center', justifyContent: 'flex-end' }}>
+                {img && (
+                    isSpouse
+                        ? <Image source={img} style={{ width: '75%', height: '100%' }} resizeMode="contain" />
+                        : <Image source={img} style={{ width: '75%', height: '100%' }} resizeMode="contain" />
+                )}
             </View>
-            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }} showsVerticalScrollIndicator={false}>
 
-                {/* Portrait banner */}
-                <View style={{ height: 220, borderWidth: 1, borderColor: (isSpouse ? spouseColor : stage?.color || C.gold) + '35', overflow: 'hidden', marginBottom: GAP, position: 'relative' }}>
-                    {img && (
-                        isSpouse
-                            ? <Image source={img} style={{ width: '100%', height: '200%', position: 'absolute', top: 0 }} resizeMode="contain" />
-                            : <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-                    )}
-                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
-                    {stage && (
-                        <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: stage.color, paddingHorizontal: 8, paddingVertical: 3 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#000', letterSpacing: 1 }}>{stage.label}</Text>
-                        </View>
-                    )}
-                    {isParent && (
-                        <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: C.gold, paddingHorizontal: 8, paddingVertical: 3 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#000', letterSpacing: 1 }}>PARENT</Text>
-                        </View>
-                    )}
-                    {isSpouse && (
-                        <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: spouseColor, paddingHorizontal: 8, paddingVertical: 3 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#000', letterSpacing: 1 }}>SPOUSE</Text>
-                        </View>
-                    )}
-                </View>
+            {/* Name — fully below sprite */}
+            <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 10, backgroundColor: C.bg }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: accentColor, letterSpacing: 3, marginBottom: 2 }}>
+                    {isSpouse ? 'SPOUSE' : isParent ? 'PARENT' : stage?.label || 'CHILD'}
+                </Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: C.cream, lineHeight: 34 }}>{dep.name}</Text>
+            </View>
 
-                {/* Spouse-specific stat cards */}
+            <ScrollView contentContainerStyle={{ paddingHorizontal: PAD, paddingBottom: 50 }} showsVerticalScrollIndicator={false}>
+
+                {/* ── Big stat blocks ── */}
+                {isChild && (
+                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: hCol, lineHeight: 30 }}>{Math.round(hp)}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>HEALTH</Text>
+                            <View style={{ width: '100%', height: 3, backgroundColor: '#06080f', borderRadius: 2, marginTop: 8 }}>
+                                <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hCol, borderRadius: 2 }} />
+                            </View>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/children_birthday_cake.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: accentColor, lineHeight: 30 }}>{Math.floor((dep.childAgeMonths || 0) / 12)}yr</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>AGE</Text>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            {(() => {
+                                if (dep.custody === 'ex') return <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.gold, lineHeight: 24 }}>₹10k</Text>;
+                                const cam = dep.childAgeMonths || 0;
+                                const base = cam < 60 ? 8000 : cam < 216 ? 12000 : cam < 252 ? 25000 : 0;
+                                const extra = cam >= 12 && cam < 60 ? (PRESCHOOL_TIERS.find(t => t.id === (dep.preschoolTier || 'home'))?.extraCost || 0) : cam >= 60 && cam < 216 ? (SCHOOL_TIERS.find(t => t.id === (dep.schoolTier || 'government'))?.extraCost || 0) : 0;
+                                return <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.red, lineHeight: 24 }}>₹{((base + extra) / 1000).toFixed(0)}k</Text>;
+                            })()}
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>/ MONTH</Text>
+                        </View>
+                    </View>
+                )}
+                {!isChild && !isSpouse && (
+                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: hCol, lineHeight: 30 }}>{Math.round(hp)}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>HEALTH</Text>
+                            <View style={{ width: '100%', height: 3, backgroundColor: '#06080f', borderRadius: 2, marginTop: 8 }}>
+                                <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hCol, borderRadius: 2 }} />
+                            </View>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/saving_for_child.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.red, lineHeight: 24 }}>{dep.caretaker ? '₹23k' : '₹15k'}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>/ MONTH</Text>
+                        </View>
+                    </View>
+                )}
                 {isSpouse && (
-                    <>
-                        <View style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
-                            <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>MARRIED</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: spouseColor, lineHeight: 22 }}>{monthsMarried} <Text style={{ fontSize: 13 }}>mo</Text></Text>
-                            </View>
-                            <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>INCOME</Text>
-                                {dep.isWorking
-                                    ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.sage, lineHeight: 20 }}>+₹{(dep.income || 0).toLocaleString()}</Text>
-                                    : <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, lineHeight: 20 }}>Homemaker</Text>
-                                }
-                            </View>
-                            {dep.marriageNumber > 1 ? (
-                                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 1.5 }}>MARRIAGE</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, lineHeight: 20 }}>
-                                        {dep.marriageNumber === 2 ? '2nd' : dep.marriageNumber === 3 ? '3rd' : `${dep.marriageNumber}th`}
-                                    </Text>
-                                </View>
-                            ) : (
-                                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>COST</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, lineHeight: 20 }}>-₹5k</Text>
-                                </View>
-                            )}
+                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/happyicon.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: hpColor(dep.happiness || 70), lineHeight: 30 }}>{Math.round(dep.happiness || 70)}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>HAPPY</Text>
                         </View>
-
-                        <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: spouseColor + '25', padding: 14, marginBottom: GAP }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, letterSpacing: 2 }}>HAPPINESS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: hpColor(dep.happiness || 70) }}>{Math.round(dep.happiness || 70)}/100</Text>
-                            </View>
-                            <View style={{ height: 6, backgroundColor: C.bg }}>
-                                <View style={{ height: '100%', width: `${Math.round(dep.happiness || 70)}%`, backgroundColor: hpColor(dep.happiness || 70) }} />
-                            </View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 8 }}>
-                                {dep.upskilling
-                                    ? `Studying... ${dep.upskillingMonthsLeft || 0} months left before they start earning.`
-                                    : dep.isWorking ? 'Working and supporting the household.'
-                                    : 'Manages the home and keeps the family together.'}
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: dep.isWorking ? C.sage : C.dim, lineHeight: 24 }}>
+                                {dep.isWorking ? `+₹${(dep.income || 0) >= 1000 ? `${((dep.income || 0)/1000).toFixed(0)}k` : dep.income || 0}` : 'Home'}
                             </Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>INCOME</Text>
                         </View>
-
-                        {/* Insurance status */}
-                        {(() => {
-                            const covered = (activeInsurance || []).some(i => {
-                                const plan = INSURANCE_PLANS.find(p => p.id === i.planId);
-                                return plan?.type === 'health';
-                            });
-                            return (
-                                <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: covered ? C.sage + '40' : C.red + '30', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <View>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2 }}>HEALTH INSURANCE</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: covered ? C.sage : C.red, marginTop: 3 }}>
-                                            {covered ? 'Family covered' : 'Not insured'}
-                                        </Text>
-                                    </View>
-                                    <View style={{ width: 10, height: 10, backgroundColor: covered ? C.sage : C.red }} />
-                                </View>
-                            );
-                        })()}
-
-                        {/* Upskill — only if homemaker and not already studying */}
-                        {!dep.isWorking && !dep.upskilling && (
-                            <TouchableOpacity
-                                onPress={() => showDialog('Upskill Spouse',
-                                    'Enroll your spouse in a 6-month career course for ₹50,000. They will start earning ₹25k–₹45k/mo after.',
-                                    'warning', () => {
-                                        const r = upskillSpouse();
-                                        if (!r.success) showDialog('Cannot Upskill', r.msg, 'info', onClose);
-                                        else onClose();
-                                    }
-                                )}
-                                style={{ borderWidth: 1, borderColor: C.blue + '60', backgroundColor: C.blue + '10', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                            >
-                                <View>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 1 }}>UPSKILL SPOUSE</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹50,000 · 6-month course · earns after</Text>
-                                </View>
-                                <Image source={require('../../assets/ui_comp/grad_cap.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
-                            </TouchableOpacity>
-                        )}
-                        {dep.upskilling && (
-                            <View style={{ borderWidth: 1, borderColor: C.blue + '40', backgroundColor: C.blue + '08', padding: 14, marginBottom: GAP }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue }}>COURSE IN PROGRESS</Text>
-                                <View style={{ height: 4, backgroundColor: C.bg, marginTop: 8 }}>
-                                    <View style={{ height: '100%', width: `${((6 - (dep.upskillingMonthsLeft || 0)) / 6) * 100}%`, backgroundColor: C.blue }} />
-                                </View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 6 }}>{dep.upskillingMonthsLeft || 0} months remaining</Text>
-                            </View>
-                        )}
-
-                        {/* Family vacation */}
-                        <TouchableOpacity
-                            onPress={() => showDialog('Plan Family Vacation',
-                                `Take the whole family on a trip!\nCosts ₹5,000 per person. Boosts happiness by +15.`,
-                                'warning', () => {
-                                    const r = planVacation();
-                                    if (!r.success) showDialog('Cannot Plan', r.msg, 'info', onClose);
-                                    else onClose();
-                                }
-                            )}
-                            style={{ borderWidth: 1, borderColor: C.sage + '50', backgroundColor: C.sage + '08', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                        >
-                            <View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.sage, letterSpacing: 1 }}>PLAN FAMILY VACATION</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹5,000/person · +15 happiness · {1 + (dependents?.filter(d => !d.isDead && d.custody !== 'ex').length || 0)} people</Text>
-                            </View>
-                            <Image source={require('../../assets/ui_comp/vacation.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                        </TouchableOpacity>
-
-                        {/* Divorce */}
-                        <TouchableOpacity
-                            onPress={() => showDialog('File for Divorce',
-                                'This will end the marriage. You will pay ₹2,00,000 in settlement and lose 30 happiness points. This cannot be undone.',
-                                'warning', () => { divorce(); onClose(); },
-                                'YES, FILE', 'CANCEL', null,
-                                { isSprite: false, source: require('../../assets/ui_comp/divorcpopup.png') }
-                            )}
-                            style={{ borderWidth: 1, borderColor: C.red + '40', backgroundColor: C.red + '08', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                        >
-                            <View>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, letterSpacing: 1 }}>FILE FOR DIVORCE</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹2,00,000 settlement · -30 happiness</Text>
-                            </View>
-                            <Image source={require('../../assets/ui_comp/divorce.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                        </TouchableOpacity>
-                    </>
+                        <View style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                            <Image source={require('../../assets/ui_comp/familyicon.png')} style={{ width: 28, height: 28, marginBottom: 6 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: spouseColor, lineHeight: 24 }}>{monthsMarried}mo</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, letterSpacing: 2 }}>MARRIED</Text>
+                        </View>
+                    </View>
                 )}
 
-                {/* Child/parent stat cards */}
-                {!isSpouse && (
+                {/* Status blurb */}
+                {isChild && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', marginBottom: 20 }}>{statusText}</Text>}
+                {isSpouse && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', marginBottom: 20 }}>
+                    {dep.upskilling ? `Studying — ${dep.upskillingMonthsLeft || 0}mo left` : dep.isWorking ? 'Working and supporting the household.' : 'Manages the home and keeps the family together.'}
+                </Text>}
+
+                {/* ── Insurance pill (spouse + parent) ── */}
+                {(isSpouse || isParent) && (() => {
+                    const covered = isSpouse
+                        ? (activeInsurance || []).some(i => { const plan = INSURANCE_PLANS.find(p => p.id === i.planId); return plan?.type === 'health'; })
+                        : (activeInsurance || []).some(i => i.planId?.startsWith('health') || i.type === 'health');
+                    return (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                            <Image source={require('../../assets/ui_comp/healthinsurance.png')} style={{ width: 22, height: 22, opacity: 0.7 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: covered ? C.sage : C.red }}>
+                                {covered ? 'Health insurance active' : 'No health insurance'}
+                            </Text>
+                        </View>
+                    );
+                })()}
+
+                {/* ── Custody note ── */}
+                {isChild && dep.custody === 'ex' && (
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
+                        <Image source={require('../../assets/ui_comp/custody.png')} style={{ width: 22, height: 22, marginTop: 2 }} resizeMode="contain" />
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', flex: 1, lineHeight: 20 }}>
+                            {dep.name} lives with your ex-spouse. You pay ₹10,000/mo in child support until they turn 18.
+                        </Text>
+                    </View>
+                )}
+
+                {/* ── Education fund ── */}
+                {isChild && dep.custody !== 'ex' && (() => {
+                    const fund = (fixedDeposits || []).reduce((t, fd) => t + fd.currentValue, 0) + (ppf?.balance || 0);
+                    return (
+                        <TouchableOpacity onPress={() => {}} activeOpacity={1}
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0a0d1a', borderRadius: 10, padding: 14, marginBottom: 20 }}>
+                            <Image source={require('../../assets/ui_comp/education.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2 }}>EDUCATION FUND</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: fund > 0 ? C.blue : C.dark }}>₹{fund.toLocaleString()}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })()}
+
+                {/* ── School / Preschool — horizontal picker ── */}
+                {isChild && dep.custody !== 'ex' && (dep.childAgeMonths || 0) >= 12 && (dep.childAgeMonths || 0) < 60 && (
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                            <Image source={require('../../assets/ui_comp/education.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 3 }}>PRESCHOOL</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', gap: 8 }}>
+                            {PRESCHOOL_TIERS.map(tier => {
+                                const active = (dep.preschoolTier || 'home') === tier.id;
+                                return (
+                                    <TouchableOpacity key={tier.id} activeOpacity={0.8}
+                                        onPress={() => { if (!active) showDialog(`Switch to ${tier.label}?`, `${tier.desc}\n\nExtra cost: ${tier.extraCost > 0 ? `+₹${tier.extraCost.toLocaleString()}/mo` : 'Free'}\n${tier.outcome}`, 'warning', () => setChildPreschoolTier(dep.id, tier.id)); }}
+                                        style={{ flex: 1, backgroundColor: active ? tier.color + '22' : '#0a0d1a', borderRadius: 8, paddingVertical: 12, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: active ? tier.color : C.dim, textAlign: 'center' }}>{tier.label}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: active ? tier.color + 'aa' : '#2a3560', marginTop: 2 }}>{tier.extraCost > 0 ? `+₹${tier.extraCost/1000}k` : 'Free'}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </View>
+                )}
+                {isChild && dep.custody !== 'ex' && (dep.childAgeMonths || 0) >= 60 && (dep.childAgeMonths || 0) < 216 && (
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                            <Image source={require('../../assets/ui_comp/education.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 3 }}>SCHOOL</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', gap: 8 }}>
+                            {SCHOOL_TIERS.map(tier => {
+                                const active = (dep.schoolTier || 'government') === tier.id;
+                                return (
+                                    <TouchableOpacity key={tier.id} activeOpacity={0.8}
+                                        onPress={() => { if (!active) showDialog(`Switch to ${tier.label}?`, `${tier.desc}\n\nExtra cost: ${tier.extraCost > 0 ? `+₹${tier.extraCost.toLocaleString()}/mo` : 'Free'}\n${tier.outcome}`, 'warning', () => setChildSchoolTier(dep.id, tier.id)); }}
+                                        style={{ flex: 1, backgroundColor: active ? tier.color + '22' : '#0a0d1a', borderRadius: 8, paddingVertical: 12, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: active ? tier.color : C.dim, textAlign: 'center' }}>{tier.label}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: active ? tier.color + 'aa' : '#2a3560', marginTop: 2 }}>{tier.extraCost > 0 ? `+₹${tier.extraCost/1000}k` : 'Free'}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </View>
+                )}
+
+                {/* ── Actions ── */}
+                {isSpouse && !dep.isWorking && !dep.upskilling && (
+                    <ActionRow label="Upskill Spouse" sub="₹50,000 · 6-month course · earns after"
+                        icon={require('../../assets/ui_comp/grad_cap.png')}
+                        onPress={() => showDialog('Upskill Spouse', 'Enroll your spouse in a 6-month career course for ₹50,000. They will start earning ₹25k–₹45k/mo after.', 'warning', () => { const r = upskillSpouse(); if (!r.success) showDialog('Cannot Upskill', r.msg, 'info', onClose); else onClose(); })} />
+                )}
+                {isSpouse && dep.upskilling && (
+                    <View style={{ paddingVertical: 14, paddingHorizontal: 14, backgroundColor: '#0a0d1a', borderRadius: 10, marginBottom: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                            <Image source={require('../../assets/ui_comp/grad_cap.png')} style={{ width: 22, height: 22, opacity: 0.7 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.cream }}>Course in progress — {dep.upskillingMonthsLeft || 0}mo left</Text>
+                        </View>
+                        <View style={{ height: 3, backgroundColor: C.bg, borderRadius: 2 }}>
+                            <View style={{ height: '100%', width: `${((6 - (dep.upskillingMonthsLeft || 0)) / 6) * 100}%`, backgroundColor: C.dim, borderRadius: 2 }} />
+                        </View>
+                    </View>
+                )}
+                {isSpouse && (
+                    <ActionRow label="Plan Family Vacation" sub={`₹5,000/person · +15 happiness · ${1 + (dependents?.filter(d => !d.isDead && d.custody !== 'ex').length || 0)} people`}
+                        icon={require('../../assets/ui_comp/vacation.png')}
+                        onPress={() => showDialog('Plan Family Vacation', `Take the whole family on a trip!\nCosts ₹5,000 per person. Boosts happiness by +15.`, 'warning', () => { const r = planVacation(); if (!r.success) showDialog('Cannot Plan', r.msg, 'info', onClose); else onClose(); })} />
+                )}
+                {isChild && dep.custody !== 'ex' && (
+                    <ActionRow label="Buy a Gift" sub="₹2,000 · +15 HP · +3 happiness"
+                        icon={require('../../assets/ui_comp/children_birthday_cake.png')}
+                        onPress={() => showDialog('Buy a Gift', `Spend ₹2,000 on a gift for ${dep.name}?\nRestores +15 HP and boosts happiness.`, 'warning', () => { const r = giftChild(dep.id); if (!r.success) showDialog('Cannot Gift', r.msg, 'info', onClose); })} />
+                )}
+                {isParent && (
                     <>
-                        <View style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
-                            {isChild && (
-                                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>AGE</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: stage.color, lineHeight: 24 }}>{Math.floor((dep.childAgeMonths || 0) / 12)} <Text style={{ fontSize: 13 }}>yrs</Text></Text>
-                                </View>
-                            )}
-                            <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>HEALTH</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: hCol, lineHeight: 24 }}>{Math.round(hp)} <Text style={{ fontSize: 13 }}>/100</Text></Text>
-                            </View>
-                            <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginBottom: 4, letterSpacing: 2 }}>MONTHLY</Text>
-                                {isChild ? (() => {
-                                    if (dep.custody === 'ex') {
-                                        return <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, lineHeight: 20 }}>₹10k</Text>;
-                                    }
-                                    const cam = dep.childAgeMonths || 0;
-                                    const base = cam < 60 ? 8000 : cam < 216 ? 12000 : cam < 252 ? 25000 : 0;
-                                    const extra = cam >= 12 && cam < 60
-                                        ? (PRESCHOOL_TIERS.find(t => t.id === (dep.preschoolTier || 'home'))?.extraCost || 0)
-                                        : cam >= 60 && cam < 216
-                                        ? (SCHOOL_TIERS.find(t => t.id === (dep.schoolTier || 'government'))?.extraCost || 0)
-                                        : 0;
-                                    return <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, lineHeight: 20 }}>₹{((base + extra) / 1000).toFixed(0)}k</Text>;
-                                })() : <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, lineHeight: 20 }}>{dep.caretaker ? '₹23k' : '₹15k'}</Text>}
-                            </View>
-                        </View>
-
-                        <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: hCol + '30', padding: 14, marginBottom: GAP }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, letterSpacing: 2 }}>WELLBEING</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: hCol }}>{statusText}</Text>
-                            </View>
-                            <View style={{ height: 6, backgroundColor: C.bg }}>
-                                <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hCol }} />
-                            </View>
-                        </View>
-
-                        {/* ── Child-specific actions ── */}
-                        {isChild && dep.custody === 'ex' && (
-                            <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.gold + '40', padding: 14, marginBottom: GAP }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2, marginBottom: 8 }}>CHILD STATUS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.gold, lineHeight: 22 }}>
-                                    {dep.name} lives with your ex-spouse under shared custody arrangements. You pay ₹10,000/mo in child support until they turn 18.
-                                </Text>
-                            </View>
-                        )}
-                        {isChild && dep.custody !== 'ex' && (
-                            <>
-                                {/* Education fund */}
-                                {(() => {
-                                    const fdTotal = (fixedDeposits || []).reduce((t, fd) => t + fd.currentValue, 0);
-                                    const ppfBal  = ppf?.balance || 0;
-                                    const fund    = fdTotal + ppfBal;
-                                    return (
-                                        <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.blue + '30', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            <View>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2 }}>EDUCATION FUND</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: fund > 0 ? C.blue : C.dim, marginTop: 3 }}>
-                                                    ₹{fund.toLocaleString()}
-                                                </Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark }}>PPF + FDs combined</Text>
-                                            </View>
-                                            <FontAwesome5 name="graduation-cap" size={20} color={fund > 0 ? C.blue + '80' : C.dark} />
-                                        </View>
-                                    );
-                                })()}
-
-                                {/* Preschool tier — toddlers aged 1-5 yrs (12-60 months) */}
-                                {(dep.childAgeMonths || 0) >= 12 && (dep.childAgeMonths || 0) < 60 && (
-                                    <View style={{ borderWidth: 1, borderColor: C.pink + '40', backgroundColor: C.card, padding: 14, marginBottom: GAP }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2, marginBottom: 10 }}>PRESCHOOL</Text>
-                                        {PRESCHOOL_TIERS.map(tier => {
-                                            const active = (dep.preschoolTier || 'home') === tier.id;
-                                            return (
-                                                <TouchableOpacity key={tier.id}
-                                                    onPress={() => {
-                                                        if (!active) showDialog(
-                                                            `Switch to ${tier.label}?`,
-                                                            `${tier.desc}\n\nExtra monthly cost: ${tier.extraCost > 0 ? `+₹${tier.extraCost.toLocaleString()}/mo` : 'Free'}\nCareer impact: ${tier.outcome}`,
-                                                            'warning',
-                                                            () => setChildPreschoolTier(dep.id, tier.id)
-                                                        );
-                                                    }}
-                                                    activeOpacity={0.8}
-                                                    style={{ borderWidth: 1, borderColor: active ? tier.color : C.border, backgroundColor: active ? tier.color + '15' : 'transparent', padding: 12, marginBottom: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                                                >
-                                                    <View style={{ flex: 1 }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: active ? tier.color : C.dim, letterSpacing: 1 }}>{tier.label}</Text>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark }}>{tier.extraCost > 0 ? `+₹${tier.extraCost.toLocaleString()}/mo` : 'No extra cost'} · {tier.outcome}</Text>
-                                                    </View>
-                                                    {active && <FontAwesome5 name="check-circle" size={14} color={tier.color} />}
-                                                </TouchableOpacity>
-                                            );
-                                        })}
-                                    </View>
-                                )}
-
-                                {/* School tier — only for school-age children (5-18 yrs = 60-216 months) */}
-                                {(dep.childAgeMonths || 0) >= 60 && (dep.childAgeMonths || 0) < 216 && (
-                                    <View style={{ borderWidth: 1, borderColor: C.blue + '40', backgroundColor: C.card, padding: 14, marginBottom: GAP }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2, marginBottom: 10 }}>SCHOOL TIER</Text>
-                                        {SCHOOL_TIERS.map(tier => {
-                                            const active = (dep.schoolTier || 'government') === tier.id;
-                                            return (
-                                                <TouchableOpacity key={tier.id}
-                                                    onPress={() => {
-                                                        if (!active) showDialog(
-                                                            `Switch to ${tier.label}?`,
-                                                            `${tier.desc}\n\nExtra monthly cost: ${tier.extraCost > 0 ? `+₹${tier.extraCost.toLocaleString()}/mo` : 'Free'}\nCareer outcome: ${tier.outcome}`,
-                                                            'warning',
-                                                            () => setChildSchoolTier(dep.id, tier.id)
-                                                        );
-                                                    }}
-                                                    activeOpacity={0.8}
-                                                    style={{ borderWidth: 1, borderColor: active ? tier.color : C.border, backgroundColor: active ? tier.color + '15' : 'transparent', padding: 12, marginBottom: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                                                >
-                                                    <View style={{ flex: 1 }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: active ? tier.color : C.dim, letterSpacing: 1 }}>{tier.label}</Text>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark }}>{tier.extraCost > 0 ? `+₹${tier.extraCost.toLocaleString()}/mo` : 'No extra cost'} · {tier.outcome}</Text>
-                                                    </View>
-                                                    {active && <FontAwesome5 name="check-circle" size={14} color={tier.color} />}
-                                                </TouchableOpacity>
-                                            );
-                                        })}
-                                    </View>
-                                )}
-
-                                {/* Gift */}
-                                <TouchableOpacity
-                                    onPress={() => showDialog('Buy a Gift',
-                                        `Spend ₹2,000 on a gift for ${dep.name}?\nRestores +15 HP and boosts happiness.`,
-                                        'warning', () => {
-                                            const r = giftChild(dep.id);
-                                            if (!r.success) showDialog('Cannot Gift', r.msg, 'info', onClose);
-                                        }
-                                    )}
-                                    style={{ borderWidth: 1, borderColor: C.pink + '50', backgroundColor: C.pink + '08', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                                >
-                                    <View>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.pink, letterSpacing: 1 }}>BUY A GIFT</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹2,000 · +15 HP · +3 happiness</Text>
-                                    </View>
-                                    <FontAwesome5 name="gift" size={16} color={C.pink + '70'} />
-                                </TouchableOpacity>
-                            </>
-                        )}
-
-                        {/* ── Parent-specific actions ── */}
-                        {isParent && (
-                            <>
-                                {/* Insurance status */}
-                                {(() => {
-                                    const covered = (activeInsurance || []).some(i => i.planId?.startsWith('health') || i.type === 'health');
-                                    return (
-                                        <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: covered ? C.sage + '40' : C.red + '30', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            <View>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2 }}>HEALTH INSURANCE</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: covered ? C.sage : C.red, marginTop: 3 }}>
-                                                    {covered ? 'Family floater covers them' : 'Not insured — get health cover'}
-                                                </Text>
-                                            </View>
-                                            <View style={{ width: 10, height: 10, backgroundColor: covered ? C.sage : C.red }} />
-                                        </View>
-                                    );
-                                })()}
-
-                                {/* Medicine */}
-                                <TouchableOpacity
-                                    onPress={() => showDialog('Buy Medicine',
-                                        `Spend ₹5,000 on medicine for ${dep.name}?\nRestores +20 HP.`,
-                                        'warning', () => {
-                                            const r = buyMedicine(dep.id);
-                                            if (!r.success) showDialog('Cannot Buy', r.msg, 'info', onClose);
-                                        }
-                                    )}
-                                    style={{ borderWidth: 1, borderColor: C.sage + '50', backgroundColor: C.sage + '08', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                                >
-                                    <View>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.sage, letterSpacing: 1 }}>BUY MEDICINE</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>₹5,000 · +20 HP</Text>
-                                    </View>
-                                    <FontAwesome5 name="pills" size={16} color={C.sage + '70'} />
-                                </TouchableOpacity>
-
-                                {/* Caretaker toggle */}
-                                <TouchableOpacity
-                                    onPress={() => showDialog(dep.caretaker ? 'Remove Caretaker' : 'Hire Caretaker',
-                                        dep.caretaker
-                                            ? `Remove the caretaker for ${dep.name}? Health will decay faster without care.`
-                                            : `Hire a full-time caretaker for ${dep.name}?\n+₹8,000/mo but health decays 60% slower.`,
-                                        'warning', () => toggleCaretaker(dep.id)
-                                    )}
-                                    style={{ borderWidth: 1, borderColor: C.gold + (dep.caretaker ? 'aa' : '40'), backgroundColor: dep.caretaker ? C.gold + '15' : C.gold + '08', padding: 14, marginBottom: GAP, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                                >
-                                    <View>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, letterSpacing: 1 }}>
-                                            {dep.caretaker ? 'CARETAKER: ACTIVE' : 'HIRE CARETAKER'}
-                                        </Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>
-                                            {dep.caretaker ? '₹8,000/mo · 60% slower health decay · tap to remove' : '+₹8,000/mo · 60% slower health decay'}
-                                        </Text>
-                                    </View>
-                                    <FontAwesome5 name={dep.caretaker ? 'user-check' : 'user-plus'} size={16} color={C.gold + '80'} />
-                                </TouchableOpacity>
-                            </>
-                        )}
-
-                        {isParent ? (
-                            // Parents don't need manual feeding — caretaker or monthly expense covers them
-                            <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: dep.caretaker ? C.sage + '40' : C.border, padding: 14, marginBottom: GAP }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 2, marginBottom: 4 }}>CARE STATUS</Text>
-                                {dep.caretaker ? (
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.sage, lineHeight: 20 }}>
-                                        Caretaker on duty — feeding, medication, and daily care covered. Health decays at 40% of normal rate.
-                                    </Text>
-                                ) : (
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.gold, lineHeight: 20 }}>
-                                        You cover basic needs via the ₹15,000/mo household expense. Hire a caretaker to slow health decline and provide dedicated care.
-                                    </Text>
-                                )}
-                            </View>
-                        ) : dep.custody === 'ex' ? null : (
-                            <>
-                                <SectionLabel label="FEED FROM PANTRY" />
-                                {pantryItems.length === 0 ? (
-                                    <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 22, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.dim, textAlign: 'center', lineHeight: 22 }}>Pantry is empty.{'\n'}Buy food from the Grocery Store first.</Text>
-                                    </View>
-                                ) : (
-                                    pantryItems.map(entry => {
-                                        const item = GROCERY_ITEMS.find(g => g.id === entry.itemId);
-                                        if (!item) return null;
-                                        return (
-                                            <TouchableOpacity
-                                                key={entry.itemId}
-                                                onPress={() => showDialog(`Feed ${item.name}`,
-                                                    `Give ${item.name} to ${dep.name}?\nRestores +${item.healthRestore} HP.`,
-                                                    'warning', () => onFeed(dep.id, item.healthRestore, entry.itemId)
-                                                )}
-                                                style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 12, marginBottom: 8, gap: 12 }}
-                                            >
-                                                <View style={{ flex: 1 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream, lineHeight: 19 }}>{item.name}</Text>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim }}>×{entry.qty} in pantry</Text>
-                                                </View>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.sage }}>+{item.healthRestore}HP</Text>
-                                                <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.gold + '50', paddingHorizontal: 10, paddingVertical: 6 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.gold }}>FEED</Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        );
-                                    })
-                                )}
-                            </>
-                        )}
+                        <ActionRow label="Buy Medicine" sub="₹5,000 · +20 HP"
+                            icon={require('../../assets/ui_comp/pharmacy.png')}
+                            onPress={() => showDialog('Buy Medicine', `Spend ₹5,000 on medicine for ${dep.name}?\nRestores +20 HP.`, 'warning', () => { const r = buyMedicine(dep.id); if (!r.success) showDialog('Cannot Buy', r.msg, 'info', onClose); })} />
+                        <ActionRow label={dep.caretaker ? 'Caretaker: Active' : 'Hire Caretaker'} sub={dep.caretaker ? '₹8,000/mo · tap to remove' : '+₹8,000/mo · 60% slower health decay'}
+                            icon={require('../../assets/ui_comp/healthicon.png')}
+                            onPress={() => showDialog(dep.caretaker ? 'Remove Caretaker' : 'Hire Caretaker', dep.caretaker ? `Remove the caretaker for ${dep.name}? Health will decay faster without care.` : `Hire a full-time caretaker for ${dep.name}?\n+₹8,000/mo but health decays 60% slower.`, 'warning', () => toggleCaretaker(dep.id))} />
                     </>
+                )}
+                {isSpouse && (
+                    <ActionRow label="File for Divorce" sub="₹2,00,000 settlement · -30 happiness"
+                        icon={require('../../assets/ui_comp/divorce.png')}
+                        onPress={() => showDialog('File for Divorce', 'This will end the marriage. You will pay ₹2,00,000 in settlement and lose 30 happiness points. This cannot be undone.', 'warning', () => { divorce(); onClose(); }, 'YES, FILE', 'CANCEL', null, { isSprite: false, source: require('../../assets/ui_comp/divorcpopup.png') })} />
+                )}
+
+                {/* ── Feed from pantry ── */}
+                {!isParent && dep.custody !== 'ex' && (
+                    <View style={{ marginTop: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                            <Image source={require('../../assets/ui_comp/pantry.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, letterSpacing: 3 }}>FEED FROM PANTRY</Text>
+                        </View>
+                        {pantryItems.length === 0 ? (
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#2a3560' }}>Pantry is empty — buy food from the Grocery Store first.</Text>
+                        ) : (
+                            pantryItems.map(entry => {
+                                const item = GROCERY_ITEMS.find(g => g.id === entry.itemId);
+                                if (!item) return null;
+                                return (
+                                    <TouchableOpacity key={entry.itemId}
+                                        onPress={() => showDialog(`Feed ${item.name}`, `Give ${item.name} to ${dep.name}?\nRestores +${item.healthRestore} HP.`, 'warning', () => onFeed(dep.id, item.healthRestore, entry.itemId))}
+                                        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 13, borderTopWidth: 1, borderColor: '#0f1525', gap: 12 }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.cream }}>{item.name}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>×{entry.qty} in pantry</Text>
+                                        </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.sage }}>+{item.healthRestore}HP ›</Text>
+                                    </TouchableOpacity>
+                                );
+                            })
+                        )}
+                    </View>
                 )}
             </ScrollView>
         </View>
@@ -898,8 +703,8 @@ function MarriagePickModal({ onPick, onClose }) {
                                     Who do you marry?
                                 </Text>
                             </View>
-                            <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
-                                <FontAwesome5 name="times" size={14} color={C.dim} />
+                            <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.dim, lineHeight: 22 }}>✕</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -908,62 +713,72 @@ function MarriagePickModal({ onPick, onClose }) {
                         </Text>
 
                         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' }}>
-                                {candidates.map(v => (
-                                    <TouchableOpacity key={v.id} onPress={() => setSelectedCandidate(v)} activeOpacity={0.85}
-                                        style={{ width: '31%', borderWidth: 1.5, borderColor: v.color + '60', backgroundColor: C.panel, overflow: 'hidden', marginBottom: 12 }}>
-                                        <View style={{ height: 3, backgroundColor: v.color }} />
-                                        <View style={{ aspectRatio: 0.65, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
-                                            <Image
-                                                source={v.image}
-                                                style={{ width: '100%', height: '200%', position: 'absolute', top: v.top, transform: [{ scale: v.scale || 1 }] }}
-                                                resizeMode="contain"
-                                            />
-                                            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, backgroundColor: 'rgba(6,8,15,0.85)' }} />
-                                            <View style={{ position: 'absolute', bottom: 8, left: 0, right: 0, alignItems: 'center' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }}>{v.name}</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
+                            {/* Grooms row */}
+                            {[['Groom', C.blue], ['Bride', C.pink]].map(([type, color]) => (
+                                <View key={type} style={{ marginBottom: 16 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4, marginBottom: 10 }}>{type.toUpperCase()}S</Text>
+                                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                                        {candidates.filter(v => v.type === type).map(v => (
+                                            <TouchableOpacity key={v.id} onPress={() => setSelectedCandidate(v)} activeOpacity={0.85}
+                                                style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
+                                                <View style={{ aspectRatio: 0.65, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                                                    <Image
+                                                        source={v.image}
+                                                        style={{ width: '100%', height: '200%', position: 'absolute', top: v.top, transform: [{ scale: v.scale || 1 }] }}
+                                                        resizeMode="contain"
+                                                    />
+                                                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 44, backgroundColor: 'rgba(6,8,15,0.88)' }} />
+                                                    <View style={{ position: 'absolute', bottom: 8, left: 0, right: 0, alignItems: 'center' }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream }}>{v.name}</Text>
+                                                    </View>
+                                                </View>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
+                            ))}
                         </ScrollView>
                     </>
                 ) : (
-                    <View style={{ padding: 24, flex: 1, justifyContent: 'center' }}>
-                        <View style={{ flexDirection: 'row', gap: 24, marginBottom: 40, alignItems: 'center' }}>
-                            <View style={{ width: 200, height: 380, alignItems: 'center', justifyContent: 'center' }}>
-                                <Image
-                                    source={selectedCandidate.image}
-                                    style={{ width: '100%', height: '100%' }}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            
-                            <View style={{ flex: 1 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, marginBottom: 12 }}>
-                                    A life partner ready to share the journey.
-                                </Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, lineHeight: 24 }}>
-                                    {selectedCandidate.desc}
-                                </Text>
-                                
-                                <View style={{ marginTop: 24, padding: 14, backgroundColor: 'rgba(0,0,0,0.2)', borderWidth: 1, borderColor: C.borderLt }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>• Wedding Cost: ₹5L</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>• Career: Unknown (50% chance)</Text>
-                                </View>
-                            </View>
+                    <View style={{ flex: 1 }}>
+                        {/* Full-width sprite */}
+                        <View style={{ height: 320, backgroundColor: '#060810', alignItems: 'center', justifyContent: 'center' }}>
+                            <Image source={selectedCandidate.image} style={{ width: '55%', height: '100%' }} resizeMode="contain" />
                         </View>
 
-                        <View style={{ flexDirection: 'row', gap: 12, paddingBottom: 10 }}>
-                            <TouchableOpacity onPress={() => setSelectedCandidate(null)}
-                                style={{ flex: 1, borderWidth: 1, borderColor: C.border, paddingVertical: 14, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, letterSpacing: 2 }}>BACK</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => onPick({ id: selectedCandidate.id, name: selectedCandidate.type })}
-                                style={{ flex: 2, backgroundColor: selectedCandidate.color, paddingVertical: 14, alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>MARRY {selectedCandidate.name.toUpperCase()}</Text>
-                            </TouchableOpacity>
+                        {/* Info below */}
+                        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: selectedCandidate.color, letterSpacing: 3, marginBottom: 4 }}>
+                                {selectedCandidate.type.toUpperCase()}
+                            </Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 30, marginBottom: 12 }}>
+                                {selectedCandidate.name}
+                            </Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.dim, lineHeight: 22, marginBottom: 20 }}>
+                                {selectedCandidate.desc}
+                            </Text>
+
+                            <View style={{ flexDirection: 'row', gap: 16, marginBottom: 24 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                    <Image source={require('../../assets/ui_comp/marraige congratulations.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>₹5L wedding</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                    <Image source={require('../../assets/ui_comp/career.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>50% career chance</Text>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', gap: 12 }}>
+                                <TouchableOpacity onPress={() => setSelectedCandidate(null)}
+                                    style={{ flex: 1, backgroundColor: '#0a0d1a', borderRadius: 10, paddingVertical: 16, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, letterSpacing: 2 }}>BACK</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => onPick({ id: selectedCandidate.id, name: selectedCandidate.type })}
+                                    style={{ flex: 2, backgroundColor: selectedCandidate.color + 'cc', borderRadius: 10, paddingVertical: 16, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>MARRY ›</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 )}
@@ -1212,26 +1027,27 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                             const canPrepay = balance >= prepayAmt;
                             const paidPct   = Math.min((1 - loan.remainingPrincipal / (loan.remainingPrincipal + loan.emi * loan.tenureRemaining)) * 100, 100);
                             return (
-                                <View key={loan.id} style={{ borderWidth: 1, borderColor: C.red + '28', backgroundColor: C.panel, padding: 16, marginBottom: GAP }}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, flex: 1, lineHeight: 22 }}>
+                                <View key={loan.id} style={{ backgroundColor: '#0a0d1a', borderRadius: 8, padding: 14, marginBottom: GAP }}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, flex: 1 }}>
                                             {loan.loanTypeId?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || loan.type}
                                         </Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red }}>₹{loan.emi.toLocaleString()}/mo</Text>
                                     </View>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                                        <View style={{ flex: 1, height: 5, backgroundColor: C.bg }}>
-                                            <View style={{ height: '100%', width: `${paidPct}%`, backgroundColor: C.sage }} />
-                                        </View>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim }}>{Math.round(paidPct)}% paid</Text>
+                                    <View style={{ height: 3, backgroundColor: '#0d1020', borderRadius: 2, marginBottom: 6 }}>
+                                        <View style={{ height: '100%', width: `${paidPct}%`, backgroundColor: '#2a4a3a', borderRadius: 2 }} />
+                                    </View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>₹{loan.remainingPrincipal.toLocaleString()} remaining</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a3560' }}>{Math.round(paidPct)}% paid</Text>
                                     </View>
                                     <TouchableOpacity
                                         onPress={() => showDialog('Prepay Loan', `Pay ₹${prepayAmt.toLocaleString()} (6× EMI)?`, 'warning',
                                             () => { const r = prepayLoan(loan.id, prepayAmt); showDialog(r.success ? 'Prepaid!' : 'Failed', r.msg, r.success ? 'success' : 'error'); })}
                                         disabled={!canPrepay}
-                                        style={{ paddingVertical: 10, alignItems: 'center', borderWidth: 1, borderColor: canPrepay ? C.gold + '55' : C.border, backgroundColor: canPrepay ? C.gold + '10' : 'transparent' }}
+                                        style={{ paddingVertical: 11, alignItems: 'center', backgroundColor: canPrepay ? '#141e10' : '#0a0d14', borderRadius: 6, opacity: canPrepay ? 1 : 0.4 }}
                                     >
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: canPrepay ? C.gold : C.dark, letterSpacing: 1 }}>PREPAY ₹{prepayAmt.toLocaleString()}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: canPrepay ? C.sage : C.dark }}>Prepay ₹{prepayAmt.toLocaleString()}</Text>
                                     </TouchableOpacity>
                                 </View>
                             );
@@ -1268,52 +1084,40 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
 
             {/* Marriage Loan Advisory */}
             {showLoanAdvisory && (
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.92)', zIndex: 300, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-                    <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.pink + '60', width: '100%', maxWidth: 380, overflow: 'hidden' }}>
-                        <View style={{ height: 3, backgroundColor: C.pink }} />
-                        <View style={{ padding: 20 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                                <Image source={require('../../assets/ui_comp/familyicon.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.pink, flex: 1 }}>WEDDING ADVISORY</Text>
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.78)', zIndex: 300, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+                    <View style={{ backgroundColor: '#08101e', borderRadius: 12, width: '100%', maxWidth: 380, overflow: 'hidden' }}>
+                        <View style={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 18 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                                <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 28, height: 28, opacity: 0.8 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.pink, letterSpacing: 3 }}>WEDDING ADVISORY</Text>
+                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28, marginBottom: 16 }}>You can't afford this yet</Text>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#0f1525' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', letterSpacing: 1 }}>Wedding cost</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream }}>₹5,00,000</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#0f1525' }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', letterSpacing: 1 }}>Your balance</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream }}>₹{balance.toLocaleString()}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, marginBottom: 18 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', letterSpacing: 1 }}>Shortfall</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.red }}>₹{Math.max(0, 500000 - balance).toLocaleString()}</Text>
                             </View>
 
-                            <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border, padding: 12, marginBottom: 12 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream, lineHeight: 20 }}>
-                                    A wedding costs ₹5,00,000. Your current balance is ₹{balance.toLocaleString()}.
-                                </Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginTop: 6, lineHeight: 18 }}>
-                                    Shortfall: ₹{Math.max(0, 500000 - balance).toLocaleString()}
-                                </Text>
-                            </View>
-
-                            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: '#0d1005', borderWidth: 1, borderColor: '#4ade8040', padding: 12, marginBottom: 16 }}>
-                                <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: 22, height: 22, marginTop: 2 }} resizeMode="contain" />
-                                <View style={{ flex: 1 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4ade80', marginBottom: 3 }}>PERSONAL LOAN OPTION</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, lineHeight: 18 }}>
-                                        Take a Personal Loan from the Bank (MONEY → BORROW). Interest rates start at 12% p.a. — borrow only what you need and repay quickly.
-                                    </Text>
-                                </View>
-                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', lineHeight: 22, marginBottom: 20 }}>
+                                Take a Personal Loan from the Bank. Rates start at 12% p.a. — borrow only what you need.
+                            </Text>
 
                             <View style={{ flexDirection: 'row', gap: 10 }}>
-                                <TouchableOpacity
-                                    onPress={() => { 
-                                        setShowLoanAdvisory(false); 
-                                        if (onGoToBank) onGoToBank();
-                                        else onClose(); 
-                                    }}
-                                    activeOpacity={0.8}
-                                    style={{ flex: 1, borderWidth: 1, borderColor: '#4ade80', backgroundColor: '#050f0a', paddingVertical: 12, alignItems: 'center' }}
-                                >
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80', letterSpacing: 1 }}>GO TO BANK</Text>
+                                <TouchableOpacity onPress={() => { setShowLoanAdvisory(false); if (onGoToBank) onGoToBank(); else onClose(); }} activeOpacity={0.8}
+                                    style={{ flex: 2, backgroundColor: '#166534', borderRadius: 8, paddingVertical: 13, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 1 }}>GO TO BANK</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => setShowLoanAdvisory(false)}
-                                    activeOpacity={0.8}
-                                    style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: 'transparent', paddingVertical: 12, alignItems: 'center' }}
-                                >
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, letterSpacing: 1 }}>NOT NOW</Text>
+                                <TouchableOpacity onPress={() => setShowLoanAdvisory(false)} activeOpacity={0.8}
+                                    style={{ flex: 1, backgroundColor: '#0d1428', borderRadius: 8, paddingVertical: 13, alignItems: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070' }}>NOT NOW</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

@@ -47,25 +47,25 @@ function ShopCard({ item, balance, onBuy }) {
     const canAfford = balance >= item.price;
     const img = ITEM_IMAGES[item.id];
     return (
-        <View style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+        <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
             <View style={{ width: '100%', aspectRatio: 0.78, backgroundColor: C.card }}>
                 {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="contain" />}
-                <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: catColor + 'cc', paddingHorizontal: 5, paddingVertical: 1 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#000', letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
+                <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: 'rgba(6,8,15,0.75)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: catColor, letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
                 </View>
             </View>
-            <View style={{ padding: 8 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream, lineHeight: 16 }} numberOfLines={1}>{item.name}</Text>
-                <View style={{ flexDirection: 'row', gap: 8, marginTop: 3, marginBottom: 6 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
-                    {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}</Text>}
+            <View style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream, lineHeight: 16, marginBottom: 4 }} numberOfLines={1}>{item.name}</Text>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80' }}>+{item.healthRestore}HP</Text>
+                    {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}😊</Text>}
                 </View>
                 <TouchableOpacity
                     onPress={() => canAfford && onBuy(item.id)}
                     activeOpacity={0.75}
-                    style={{ borderWidth: 1, borderColor: canAfford ? C.blue : C.border, backgroundColor: canAfford ? '#050d1e' : 'transparent', paddingVertical: 5, alignItems: 'center', opacity: canAfford ? 1 : 0.4 }}
+                    style={{ borderRadius: 8, backgroundColor: canAfford ? '#0d1a2e' : '#0a0d14', paddingVertical: 7, alignItems: 'center', opacity: canAfford ? 1 : 0.4 }}
                 >
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: canAfford ? '#60a5fa' : C.dark }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: canAfford ? '#60a5fa' : C.dark }}>
                         ₹{item.price.toLocaleString()}
                     </Text>
                 </TouchableOpacity>
@@ -80,25 +80,25 @@ function PantryCard({ entry, onConsume }) {
     const catColor = CATEGORY_COLORS[item.category] || C.dim;
     const img = ITEM_IMAGES[item.id];
     return (
-        <View style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+        <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
             <View style={{ width: '100%', aspectRatio: 0.78, backgroundColor: C.card }}>
                 {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="contain" />}
-                <View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(4,6,14,0.9)', borderWidth: 1, borderColor: catColor, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: catColor }}>x{entry.qty}</Text>
+                <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(4,6,14,0.85)', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: catColor }}>×{entry.qty}</Text>
                 </View>
             </View>
-            <View style={{ padding: 8 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream, lineHeight: 16 }} numberOfLines={1}>{item.name}</Text>
-                <View style={{ flexDirection: 'row', gap: 8, marginTop: 3, marginBottom: 6 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
-                    {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}</Text>}
+            <View style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream, lineHeight: 16, marginBottom: 4 }} numberOfLines={1}>{item.name}</Text>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80' }}>+{item.healthRestore}HP</Text>
+                    {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}😊</Text>}
                 </View>
                 <TouchableOpacity
                     onPress={() => onConsume(entry.itemId)}
                     activeOpacity={0.75}
-                    style={{ borderWidth: 1, borderColor: C.sage, backgroundColor: '#050f0a', paddingVertical: 5, alignItems: 'center' }}
+                    style={{ borderRadius: 8, backgroundColor: '#050f0a', paddingVertical: 7, alignItems: 'center' }}
                 >
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.sage }}>EAT</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4ade80' }}>EAT ›</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -155,7 +155,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
 
                 <View style={{ position: 'absolute', top: 10, left: PAD, right: PAD, flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, letterSpacing: 4, flex: 1 }}>DAILY ESSENTIALS</Text>
-                    <TouchableOpacity onPress={onClose} style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(4,6,14,0.85)' }}>
+                    <TouchableOpacity onPress={onClose} style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,6,14,0.85)', borderRadius: 14 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim }}>✕</Text>
                     </TouchableOpacity>
                 </View>
@@ -164,9 +164,9 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 26, marginBottom: 5 }}>{pantryOnly ? 'YOUR PANTRY' : 'GROCERY STORE'}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                            <FontAwesome5 name="heartbeat" size={11} color={hpColor} />
-                            <View style={{ flex: 1, height: 5, backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                                <View style={{ height: '100%', width: `${hpPct}%`, backgroundColor: hpColor }} />
+                            <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 12, height: 12, opacity: 0.7 }} resizeMode="contain" />
+                            <View style={{ flex: 1, height: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 2 }}>
+                                <View style={{ height: '100%', width: `${hpPct}%`, backgroundColor: hpColor, borderRadius: 2 }} />
                             </View>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor }}>{Math.round(health)}</Text>
                         </View>
@@ -177,22 +177,22 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
 
             {/* Warning banners */}
             {health < CRITICAL_HEALTH_THRESHOLD && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, margin: PAD, marginBottom: 0, backgroundColor: '#150508', borderWidth: 1, borderColor: '#7f1d1d', padding: 10 }}>
-                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: PAD, marginTop: PAD, backgroundColor: '#150508', borderRadius: 8, padding: 12 }}>
+                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 18, height: 18 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.red, flex: 1 }}>CRITICAL — Forced sick leave! Eat now.</Text>
                 </View>
             )}
             {health >= CRITICAL_HEALTH_THRESHOLD && health < SICK_LEAVE_THRESHOLD && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, margin: PAD, marginBottom: 0, backgroundColor: '#0d0c05', borderWidth: 1, borderColor: '#78350f', padding: 10 }}>
-                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: PAD, marginTop: PAD, backgroundColor: '#0d0c05', borderRadius: 8, padding: 12 }}>
+                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.gold, flex: 1 }}>LOW HEALTH — Risk of sick leave.</Text>
                 </View>
             )}
             {totalPantryQty <= 3 && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, margin: PAD, marginBottom: 0, backgroundColor: '#080d15', borderWidth: 1, borderColor: '#1e3a5f', padding: 10 }}>
-                    <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: PAD, marginTop: PAD, backgroundColor: '#080d15', borderRadius: 8, padding: 12 }}>
+                    <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#60a5fa', flex: 1 }}>
-                        {totalPantryQty === 0 ? 'PANTRY EMPTY — Stock up now to avoid health drain.' : `LOW STOCK — Only ${totalPantryQty} item${totalPantryQty === 1 ? '' : 's'} left. Stock up soon.`}
+                        {totalPantryQty === 0 ? 'Pantry empty — stock up to avoid health drain.' : `Low stock — ${totalPantryQty} item${totalPantryQty === 1 ? '' : 's'} left.`}
                     </Text>
                 </View>
             )}
@@ -208,19 +208,19 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
                             <TouchableOpacity
                                 onPress={onOpenShop}
                                 activeOpacity={0.85}
-                                style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}
+                                style={{ borderRadius: 10, backgroundColor: C.panel, overflow: 'hidden' }}
                             >
-                                <Image source={KIRANA_IMG} style={{ width: '100%', height: 120 }} resizeMode="cover" />
-                                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 120, backgroundColor: 'rgba(4,6,14,0.55)' }} />
+                                <Image source={KIRANA_IMG} style={{ width: '100%', height: 130 }} resizeMode="cover" />
+                                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 130, backgroundColor: 'rgba(4,6,14,0.5)' }} />
                                 <View style={{ padding: 16 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, marginBottom: 4 }}>PANTRY EMPTY</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 12 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 14 }}>
                                         No food stocked. Health drains every month without groceries.
                                     </Text>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: C.blue + '60', backgroundColor: '#050d1e', paddingVertical: 10, paddingHorizontal: 14 }}>
+                                    <TouchableOpacity onPress={onOpenShop} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#0a1428', borderRadius: 8, paddingVertical: 12 }}>
                                         <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 1 }}>GO TO GROCERY STORE ▶</Text>
-                                    </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 1 }}>GO TO GROCERY STORE</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </TouchableOpacity>
                         </View>

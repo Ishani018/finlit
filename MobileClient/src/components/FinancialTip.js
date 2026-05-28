@@ -26,42 +26,40 @@ export default function FinancialTip({ tip, onDismiss }) {
             position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 200,
             transform: [{ translateY: slideAnim }],
         }}>
-            <View style={{
-                backgroundColor: '#080c1a', borderTopWidth: 2, borderColor: '#fbbf24',
-                padding: 20, paddingBottom: 32,
-            }}>
+            <View style={{ backgroundColor: '#08101e', borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 22, paddingBottom: 36 }}>
+                {/* Drag handle */}
+                <View style={{ width: 36, height: 4, backgroundColor: '#1e2840', borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
+
                 {/* Header */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <View style={{ width: 32, height: 32, backgroundColor: '#fbbf2420', borderWidth: 1, borderColor: '#fbbf2460', alignItems: 'center', justifyContent: 'center' }}>
-                            <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
-                        </View>
-                        <View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fbbf24', letterSpacing: 3 }}>WHY THIS MATTERS</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0' }}>{tip.title}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                        <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, marginBottom: 2 }}>WHY THIS MATTERS</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', lineHeight: 26 }}>{tip.title}</Text>
                         </View>
                     </View>
-                    <TouchableOpacity onPress={dismiss} style={{ padding: 6, borderWidth: 1, borderColor: '#1e2840' }}>
-                        <FontAwesome5 name="times" size={12} color="#445070" />
+                    <TouchableOpacity onPress={dismiss} style={{ padding: 4, marginLeft: 8 }}>
+                        <FontAwesome5 name="times" size={14} color="#2a3560" />
                     </TouchableOpacity>
                 </View>
 
-                {/* Body */}
-                <View style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0a0d1a', padding: 14, marginBottom: 14 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#8090c0', lineHeight: 22 }}>
-                        {tip.body}
-                    </Text>
-                </View>
+                {/* Body — plain text, no box */}
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#6070a0', lineHeight: 23, marginBottom: 16 }}>
+                    {tip.body}
+                </Text>
 
-                {/* Key stat callout */}
+                {/* Stat — subtle left bar, no border box */}
                 {tip.stat && (
-                    <View style={{ backgroundColor: '#fbbf2408', borderWidth: 1, borderColor: '#fbbf2430', padding: 10, marginBottom: 14 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24' }}>{tip.stat}</Text>
+                    <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+                        <View style={{ width: 3, borderRadius: 2, backgroundColor: '#fbbf24' }} />
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fbbf24', flex: 1, lineHeight: 20 }}>{tip.stat}</Text>
                     </View>
                 )}
 
-                <TouchableOpacity onPress={dismiss} style={{ backgroundColor: '#fbbf24', padding: 12, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#000', letterSpacing: 2 }}>GOT IT</Text>
+                <TouchableOpacity onPress={dismiss} activeOpacity={0.85}
+                    style={{ backgroundColor: '#1a2e56', borderRadius: 10, padding: 14, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', letterSpacing: 2 }}>GOT IT</Text>
                 </TouchableOpacity>
             </View>
         </Animated.View>

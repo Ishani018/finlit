@@ -116,7 +116,7 @@ export default function BottomTabBar({
 
     if (activeTab !== 'home') {
         return (
-            <View style={{ flexDirection: 'row', backgroundColor: '#070910', height: 68, alignItems: 'stretch' }}>
+            <View style={{ flexDirection: 'row', backgroundColor: '#090c18', height: 68, alignItems: 'stretch' }}>
                 {ALT_TABS.map(tab => {
                     const isGoalsActive = showGoals;
                     const isActive = tab.isGoals ? isGoalsActive : (!isGoalsActive && tab.key === activeTab);
@@ -133,7 +133,7 @@ export default function BottomTabBar({
     }
 
     return (
-        <View style={{ flexDirection: 'row', backgroundColor: '#070910', height: 72, alignItems: 'stretch' }}>
+        <View style={{ flexDirection: 'row', backgroundColor: '#090c18', height: 72, alignItems: 'stretch' }}>
             {TABS.map(tab => {
                 if (tab.isCenter) {
                     return (

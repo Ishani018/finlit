@@ -85,64 +85,49 @@ export default function BirthdayCelebrationRoom({
                         
                         {/* ── Main Scene Area ── */}
                         {isBdayMonth && (
-                            <View style={{ margin: PAD, borderWidth: 2, borderColor: roomColor + '55', backgroundColor: '#0d1020', overflow: 'hidden', position: 'relative' }}>
-                                <Image source={roomImg} style={{ width: '100%', height: 280 }} resizeMode="cover" />
-                                <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: roomColor, paddingHorizontal: 10, paddingVertical: 3 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#000', letterSpacing: 2 }}>SCENE</Text>
-                                </View>
-
-                                <View style={{ padding: 16 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', letterSpacing: 1, marginBottom: 8 }}>
-                                        {MONTHS[currentMonth - 1]} Celebrations:
+                            <View style={{ overflow: 'hidden' }}>
+                                <Image source={roomImg} style={{ width: '100%', height: 260 }} resizeMode="cover" />
+                                <View style={{ paddingHorizontal: PAD, paddingTop: 18, paddingBottom: 6 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: roomColor, letterSpacing: 3, marginBottom: 6 }}>
+                                        {MONTHS[currentMonth - 1]} CELEBRATIONS
                                     </Text>
                                     {isPlayerBday && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                            <Image source={HAPPY_ICON} style={{ width: 18, height: 18 }} resizeMode="contain" />
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbcfe8' }}>
-                                                {playerName}'s Birthday
-                                            </Text>
-                                        </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#fbcfe8', lineHeight: 30, marginBottom: 4 }}>
+                                            {playerName}'s Birthday
+                                        </Text>
                                     )}
                                     {bdayDependents.map(d => (
-                                        <View key={d.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                            <Image source={HAPPY_ICON} style={{ width: 18, height: 18 }} resizeMode="contain" />
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbcfe8' }}>
-                                                {d.name}'s Birthday
-                                            </Text>
-                                        </View>
+                                        <Text key={d.id} style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#fbcfe8', lineHeight: 30, marginBottom: 4 }}>
+                                            {d.name}'s Birthday
+                                        </Text>
                                     ))}
                                 </View>
                             </View>
                         )}
 
                         {/* ── Upcoming Birthdays List ── */}
-                        <View style={{ paddingHorizontal: PAD, marginTop: 10 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 3, marginBottom: 12 }}>
+                        <View style={{ paddingHorizontal: PAD, marginTop: isBdayMonth ? 8 : 16 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 3, marginBottom: 16 }}>
                                 UPCOMING BIRTHDAYS
                             </Text>
 
                             {upcoming.length === 0 ? (
-                                <View style={{ alignItems: 'center', paddingVertical: 30, borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070', textAlign: 'center' }}>
-                                        No birthdays tracked yet.
-                                    </Text>
-                                </View>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070' }}>
+                                    No birthdays tracked yet.
+                                </Text>
                             ) : (
-                                <View style={{ gap: 10 }}>
+                                <View>
                                     {upcoming.map((b, i) => (
-                                        <View key={i} style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#0d1020', padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                                <Image source={HAPPY_ICON} style={{ width: 18, height: 18 }} resizeMode="contain" />
-                                                <View>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: b.isPlayer ? '#fbcfe8' : '#c8d4f0' }}>
-                                                        {b.name}{b.isPlayer ? ' (You)' : ''}
-                                                    </Text>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: b.monthsAway === 0 ? '#4ade80' : '#60a5fa' }}>
-                                                        {b.monthsAway === 0 ? 'THIS MONTH' : `in ${b.monthsAway} month${b.monthsAway !== 1 ? 's' : ''}`}
-                                                    </Text>
-                                                </View>
+                                        <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderTopWidth: i === 0 ? 0 : 1, borderColor: '#0f1525' }}>
+                                            <View>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: b.isPlayer ? '#fbcfe8' : '#c8d4f0' }}>
+                                                    {b.name}{b.isPlayer ? ' (You)' : ''}
+                                                </Text>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: b.monthsAway === 0 ? '#4ade80' : '#445070' }}>
+                                                    {b.monthsAway === 0 ? 'this month' : `in ${b.monthsAway} month${b.monthsAway !== 1 ? 's' : ''}`}
+                                                </Text>
                                             </View>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#ec4899' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#ec4899' }}>
                                                 {MONTHS[b.month - 1]}
                                             </Text>
                                         </View>

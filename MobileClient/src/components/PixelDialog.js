@@ -1,21 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Animated, Image } from 'react-native';
 
-const BORDER_COLOR = {
-    info: '#2a3560', success: '#14532d', error: '#7f1d1d',
-    warning: '#78350f', crisis: '#7f1d1d', positive: '#14532d',
-};
-const TITLE_BG = {
-    info: '#0d1730', success: '#071a0e', error: '#1a0808',
-    warning: '#1a0e00', crisis: '#1a0808', positive: '#071a0e',
-};
-const TITLE_COLOR = {
-    info: '#60a5fa', success: '#4ade80', error: '#f87171',
-    warning: '#fbbf24', crisis: '#f87171', positive: '#4ade80',
-};
-const CONFIRM_BG = {
-    info: '#1d4ed8', success: '#166534', error: '#991b1b',
-    warning: '#92400e', crisis: '#991b1b', positive: '#166534',
+const TYPE = {
+    info:     { accent: '#3b82f6', confirmBg: '#1d4ed8', confirmBorder: '#2563eb' },
+    success:  { accent: '#4ade80', confirmBg: '#166534', confirmBorder: '#22c55e' },
+    error:    { accent: '#f87171', confirmBg: '#7f1d1d', confirmBorder: '#ef4444' },
+    warning:  { accent: '#fbbf24', confirmBg: '#92400e', confirmBorder: '#f59e0b' },
+    crisis:   { accent: '#f87171', confirmBg: '#7f1d1d', confirmBorder: '#ef4444' },
+    positive: { accent: '#4ade80', confirmBg: '#166534', confirmBorder: '#22c55e' },
 };
 
 export default function PixelDialog({
@@ -45,126 +37,72 @@ export default function PixelDialog({
 
     if (!visible) return null;
 
-    const borderColor = BORDER_COLOR[type] || BORDER_COLOR.info;
-    const titleBg = TITLE_BG[type] || TITLE_BG.info;
-    const titleColor = TITLE_COLOR[type] || TITLE_COLOR.info;
-    const confirmBg = CONFIRM_BG[type] || CONFIRM_BG.info;
+    const t = TYPE[type] || TYPE.info;
 
     return (
-        // Absolute overlay — stays within the app container, not a full-window Modal
-        <View
-            style={{
-                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                zIndex: 900,
-                justifyContent: 'center', alignItems: 'center',
-                backgroundColor: 'rgba(0,0,0,0.72)',
-            }}
-            pointerEvents="auto"
-        >
-            <Animated.View
-                style={{
-                    opacity: opacityAnim,
-                    transform: [{ scale: scaleAnim }],
-                    marginHorizontal: 16,
-                    maxWidth: 480,
-                    width: '96%',
-                    alignSelf: 'center',
-                    marginTop: image && typeof image === 'object' && image.isSprite ? 50 : 0,
-                    zIndex: 100,
-                }}
-            >
-                {image && typeof image === 'object' && image.isSprite && (
-                    <View style={{ position: 'absolute', top: -56, left: 0, right: 0, alignItems: 'center', zIndex: 100, elevation: 15 }}>
-                        <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: '#0d1730', borderWidth: 3, borderColor, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 10, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 8 }}>
-                            <Image source={image.source} style={{ width: 120 * (image.scale || 1.6), height: 120 * (image.scale || 1.6) }} resizeMode="contain" />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 900, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.75)' }} pointerEvents="auto">
+            <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }], width: '90%', maxWidth: 400, alignSelf: 'center', marginTop: image?.isSprite ? 50 : 0 }}>
+
+                {/* Floating sprite avatar */}
+                {image?.isSprite && (
+                    <View style={{ position: 'absolute', top: -52, left: 0, right: 0, alignItems: 'center', zIndex: 10 }}>
+                        <View style={{ width: 104, height: 104, borderRadius: 52, backgroundColor: '#0a0f1e', borderWidth: 2, borderColor: t.accent + '60', overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8 }}>
+                            <Image source={image.source} style={{ width: 104 * (image.scale || 1.6), height: 104 * (image.scale || 1.6) }} resizeMode="contain" />
                         </View>
                     </View>
                 )}
 
-                <View style={{
-                    borderWidth: 2,
-                    borderColor,
-                    backgroundColor: '#071025',
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    shadowColor: '#000',
-                    shadowOpacity: 0.32,
-                    shadowRadius: 18,
-                    shadowOffset: { width: 0, height: 10 },
-                    elevation: 10,
-                }}>
-                    {/* Pixel corners */}
-                    <View style={{ position: 'absolute', top: 0, left: 0,   width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
-                    <View style={{ position: 'absolute', top: 0, right: 0,  width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
-                    <View style={{ position: 'absolute', bottom: 0, left: 0,  width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
-                    <View style={{ position: 'absolute', bottom: 0, right: 0, width: 6, height: 6, backgroundColor: borderColor, zIndex: 10 }} />
+                <View style={{ backgroundColor: '#08101e', borderRadius: 12, overflow: 'hidden' }}>
 
-                    {/* Title bar */}
-                    <View style={{ backgroundColor: titleBg, paddingHorizontal: 16, paddingBottom: 14, paddingTop: image && typeof image === 'object' && image.isSprite ? 68 : 14, borderBottomWidth: 1, borderColor, alignItems: 'center' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: titleColor, letterSpacing: 1, textAlign: 'center' }}>
-                            {title || 'NOTICE'}
+                    {/* Banner image — full pixel art scene */}
+                    {image?.source && !image?.isSprite && !image?.icon && (
+                        <Image source={image.source} style={{ width: '100%', height: 300 }} resizeMode="cover" />
+                    )}
+                    {/* Icon image — small, centred on dark bg */}
+                    {image?.source && !image?.isSprite && image?.icon && (
+                        <View style={{ alignItems: 'center', paddingTop: 24, paddingBottom: 4, backgroundColor: '#060a14' }}>
+                            <Image source={image.source} style={{ width: 64, height: 64, opacity: 0.9 }} resizeMode="contain" />
+                        </View>
+                    )}
+                    {image && (typeof image === 'number' || typeof image === 'string') && (
+                        <View style={{ alignItems: 'center', paddingTop: 20 }}>
+                            <Image source={typeof image === 'string' ? { uri: image } : image} style={{ width: 90, height: 90 }} resizeMode="contain" />
+                        </View>
+                    )}
+
+                    {/* Title — strip emoji, no divider */}
+                    <View style={{ paddingHorizontal: 20, paddingTop: image?.isSprite ? 58 : image?.icon ? 10 : 20, paddingBottom: 2 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: t.accent, letterSpacing: 1, textAlign: 'center' }}>
+                            {typeof title === 'string' ? title.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, '').trim() : title || 'NOTICE'}
                         </Text>
                     </View>
 
-                    {/* Full-width banner image (non-sprite object with .source) */}
-                    {image && typeof image === 'object' && !image.isSprite && image.source && (
-                        <Image
-                            source={image.source}
-                            style={{ width: '100%', height: 240 }}
-                            resizeMode="cover"
-                        />
-                    )}
-
-                    {/* Body */}
-                    <View style={{ padding: 20 }}>
-                        {/* Legacy: plain require() or URI string shown inline */}
-                        {image && (typeof image === 'number' || typeof image === 'string') && (
-                            <View style={{ alignItems: 'center', marginBottom: 16 }}>
-                                <Image source={typeof image === 'string' ? { uri: image } : image} style={{ width: 100, height: 100 }} resizeMode="contain" />
-                            </View>
-                        )}
-                    <View style={{ backgroundColor: '#08112b', borderRadius: 12, padding: 16, marginBottom: 18 }}>
+                    {/* Message */}
+                    <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 }}>
                         {typeof message === 'string' ? (
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 28 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#6070a0', lineHeight: 24, textAlign: 'center', marginBottom: 20 }}>
                                 {message}
                             </Text>
                         ) : (
-                            message
+                            <View style={{ marginBottom: 20 }}>{message}</View>
                         )}
-                    </View>
 
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                        {cancelText && onCancel && (
+                        {/* Buttons */}
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                            {cancelText && onCancel && (
+                                <TouchableOpacity onPress={onCancel} style={{ flex: 1, paddingVertical: 13, alignItems: 'center', backgroundColor: '#0d1428', borderRadius: 8 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070', letterSpacing: 1 }}>{cancelText}</Text>
+                                </TouchableOpacity>
+                            )}
                             <TouchableOpacity
-                                onPress={onCancel}
-                                style={{
-                                    flex: 1, paddingVertical: 12, alignItems: 'center',
-                                    backgroundColor: '#0f1428', borderWidth: 1, borderColor: '#1e2840', borderRadius: 10,
-                                }}
+                                onPress={onConfirm}
+                                activeOpacity={0.8}
+                                style={{ flex: 1, paddingVertical: 13, alignItems: 'center', backgroundColor: t.confirmBg, borderRadius: 8 }}
                             >
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#6070a0', letterSpacing: 1, textAlign: 'center' }}>
-                                    {cancelText}
-                                </Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 2 }}>{confirmText}</Text>
                             </TouchableOpacity>
-                        )}
-                        <TouchableOpacity
-                            onPress={onConfirm}
-                            style={{
-                                flex: cancelText ? 1 : undefined,
-                                width: cancelText ? undefined : '100%',
-                                paddingVertical: 12, paddingHorizontal: 6, alignItems: 'center', justifyContent: 'center',
-                                backgroundColor: confirmBg,
-                                borderWidth: 1, borderColor,
-                                borderRadius: 10,
-                            }}
-                            activeOpacity={0.8}
-                        >
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2, textAlign: 'center' }}>
-                                {confirmText}
-                            </Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
                 </View>
             </Animated.View>
         </View>

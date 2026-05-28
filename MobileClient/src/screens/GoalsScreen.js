@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { useGame } from '../context/GameContext';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -8,20 +7,7 @@ import { ACHIEVEMENT_IMAGES, GOAL_IMAGES } from '../data/achievementImages';
 const ACH_ICON = require('../../assets/ui_comp/achivements.png');
 
 const PAD = 14;
-const GAP = 8;
 
-const Corners = ({ color }) => (
-    <>
-        {[
-            { top: 0, left: 0, borderTopWidth: 1, borderLeftWidth: 1 },
-            { top: 0, right: 0, borderTopWidth: 1, borderRightWidth: 1 },
-            { bottom: 0, left: 0, borderBottomWidth: 1, borderLeftWidth: 1 },
-            { bottom: 0, right: 0, borderBottomWidth: 1, borderRightWidth: 1 },
-        ].map((s, i) => (
-            <View key={i} style={[{ position: 'absolute', width: 8, height: 8, borderColor: color + '90', zIndex: 2 }, s]} />
-        ))}
-    </>
-);
 
 const LIFE_GOALS = [
     {
@@ -120,56 +106,51 @@ const LIFE_GOALS = [
     },
 ];
 
-// ── Unified long card (goals + achievements) ─────────────────────────────────
-function UnifiedCard({ item, state, unlocked }) {
-    const isGoal = item.type === 'goal';
-
-    const done          = isGoal ? item.check(state) : unlocked;
-    const pct           = isGoal ? item.progress(state) : (unlocked ? 1 : 0);
-    const label         = isGoal ? item.progressLabel(state) : (unlocked ? 'Unlocked!' : 'Not yet unlocked');
-    const img           = isGoal ? (GOAL_IMAGES[item.id] || null) : (ACHIEVEMENT_IMAGES[item.id] || null);
+// ── Goal card — clean image with overlaid name, no strips or bars ─────────────
+function GoalCard({ item, state }) {
+    const done  = item.check(state);
+    const label = item.progressLabel(state);
+    const img   = GOAL_IMAGES[item.id] || null;
     const { color, name, desc } = item;
 
     return (
-        <View style={{ backgroundColor: '#070a16', overflow: 'hidden', position: 'relative', flexDirection: 'row', height: 110, borderRadius: 6 }}>
-            {done && <Corners color={color} />}
-
-            {/* Image */}
-            <View style={{ width: 110, height: '100%', backgroundColor: '#0a0d1a', position: 'relative' }}>
-                {img
-                    ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                    : <View style={{ flex: 1, backgroundColor: color + '10' }} />
-                }
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: done ? 'rgba(6,8,15,0.2)' : 'rgba(6,8,15,0.55)' }} />
-                {/* Type tag — bottom of image */}
-                <View style={{ position: 'absolute', bottom: 6, left: 8 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: color + 'aa', letterSpacing: 2 }}>
-                        {isGoal ? 'GOAL' : 'ACHIEVEMENT'}
-                    </Text>
+        <View style={{ overflow: 'hidden', borderRadius: 8, opacity: done ? 1 : 0.85 }}>
+            <View style={{ height: 110, position: 'relative', backgroundColor: '#080b18' }}>
+                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: done ? 'rgba(6,8,15,0.18)' : 'rgba(6,8,15,0.55)' }} />
+                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 14, paddingBottom: 12, paddingTop: 30, backgroundColor: 'rgba(5,7,14,0.72)' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: done ? color : '#c8d4f0', lineHeight: 26 }}>{name}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: done ? color : '#445070', marginLeft: 10 }}>{label}</Text>
+                    </View>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 1 }}>{desc}</Text>
                 </View>
-            </View>
-
-            {/* Info */}
-            <View style={{ flex: 1, padding: 12, justifyContent: 'center' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: done ? color : '#c8d4f0', lineHeight: 24, flex: 1 }}>{name}</Text>
-                    {done && (
-                        <View style={{ width: 22, height: 22, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
-                            <FontAwesome5 name="check" size={10} color="#000" />
-                        </View>
-                    )}
-                </View>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', marginBottom: 10 }}>{desc}</Text>
-                <View style={{ height: 4, backgroundColor: '#0d1020', marginBottom: 5 }}>
-                    <View style={{ height: '100%', width: `${pct * 100}%`, backgroundColor: done ? color : color + '70' }} />
-                </View>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: done ? color : '#445070' }}>{label}</Text>
             </View>
         </View>
     );
 }
 
-export default function GoalsScreen({ onClose, onShop }) {
+// ── Achievement card — compact horizontal ─────────────────────────────────────
+function AchievementCard({ item, unlocked }) {
+    const img = ACHIEVEMENT_IMAGES[item.id] || null;
+    const { name, desc } = item;
+
+    return (
+        <View style={{ flexDirection: 'row', overflow: 'hidden', borderRadius: 8, height: 68, opacity: unlocked ? 1 : 0.35 }}>
+            {/* Thumb */}
+            <View style={{ width: 68, backgroundColor: '#080b18' }}>
+                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
+            </View>
+            {/* Text */}
+            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 14, backgroundColor: '#0a0d18' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', lineHeight: 20 }} numberOfLines={1}>{name}</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 2 }} numberOfLines={1}>{desc}</Text>
+            </View>
+        </View>
+    );
+}
+
+export default function GoalsScreen({ onClose }) {
     const state = useGame();
     const { playerAge, achievements = [] } = state;
 
@@ -185,8 +166,6 @@ export default function GoalsScreen({ onClose, onShop }) {
         ...ACHIEVEMENTS.filter(a => achievements.includes(a.id)).map(a => ({ ...a, type: 'achievement' })),
         ...ACHIEVEMENTS.filter(a => !achievements.includes(a.id)).map(a => ({ ...a, type: 'achievement' })),
     ];
-    const allItems = [...goalItems, ...achItems];
-
     return (
         <View style={{ flex: 1, backgroundColor: '#06080f' }}>
             {/* Header */}
@@ -219,13 +198,21 @@ export default function GoalsScreen({ onClose, onShop }) {
                     </View>
                 </View>
 
-                {allItems.map((item, i) => (
-                    <View key={item.id} style={{ marginBottom: 14 }}>
-                        <UnifiedCard
-                            item={item}
-                            state={state}
-                            unlocked={achievements.includes(item.id)}
-                        />
+                {goalItems.map((item) => (
+                    <View key={item.id} style={{ marginBottom: 12 }}>
+                        <GoalCard item={item} state={state} />
+                    </View>
+                ))}
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 12 }}>
+                    <View style={{ width: 3, height: 14, backgroundColor: '#fbbf2480' }} />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3 }}>ACHIEVEMENTS</Text>
+                    <View style={{ flex: 1, height: 1, backgroundColor: '#141828' }} />
+                </View>
+
+                {achItems.map((item) => (
+                    <View key={item.id} style={{ marginBottom: 8 }}>
+                        <AchievementCard item={item} unlocked={achievements.includes(item.id)} />
                     </View>
                 ))}
 

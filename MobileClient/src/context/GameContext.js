@@ -120,6 +120,7 @@ export const GameProvider = ({ children }) => {
         maintenance: HOSTEL_MAINTENANCE,
         category: 'rental',
         life_quality: 2,
+        capacity: 4,
         image: require('../../assets/rooms/hostel.png'),
     });
 
@@ -1072,7 +1073,7 @@ export const GameProvider = ({ children }) => {
             setCurrentJob(finalJob);
             const successEvent = {
                 id: `job_acc_${Date.now()}`,
-                name: '🎉 Interview Passed!',
+                name: 'Interview Passed!',
                 message: `${choice.successMsg}\n\nYou start your new role as ${job.name} making ₹${finalSalary.toLocaleString()}/mo.`,
                 category: 'positive',
                 impact: 0,
@@ -1288,8 +1289,8 @@ export const GameProvider = ({ children }) => {
 
     const marry = (spouseName, spouseSprite) => {
         if (dependents.some(d => d.type === 'spouse' && !d.isDead)) return { success: false, msg: 'Already married.' };
-        const houseCapacity = currentHousing.capacity || 2;
-        
+        const houseCapacity = currentHousing.capacity || 4;
+
         // Only living, cohabiting dependents count towards house capacity
         const activeDeps = dependents.filter(d => d.custody !== 'ex' && !d.isDead);
         if (activeDeps.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
@@ -1387,7 +1388,7 @@ export const GameProvider = ({ children }) => {
 
     const PARENT_SETUP_COST = 25000;
     const addParent = (parentType) => {
-        const houseCapacity = currentHousing.capacity || 2;
+        const houseCapacity = currentHousing.capacity || 4;
         const livingDeps = dependents.filter(d => !d.isDead && d.custody !== 'ex');
         if (livingDeps.length + 2 > houseCapacity) return { success: false, msg: `Your house is too small! Capacity is ${houseCapacity}. Upgrade your home first.` };
         const existing = dependents.filter(d => d.type === 'parent');
@@ -3078,7 +3079,7 @@ export const GameProvider = ({ children }) => {
             const newSalary = Math.round(currentJob.salary * (1 + raiseRate));
             setCurrentJob(prev => prev ? { ...prev, salary: newSalary } : prev);
             const raiseEntry = {
-                id: `raise_${totalMonthsPlayed}`, name: '💰 Annual Raise!',
+                id: `raise_${totalMonthsPlayed}`, name: 'Annual Raise!',
                 message: `You got a ${Math.round(raiseRate * 100)}% pay rise at ${currentJob.name}. New salary: ₹${newSalary.toLocaleString()}/mo.`,
                 category: 'positive', impact: (newSalary - currentJob.salary) * 12, month: totalMonthsPlayed, read: false,
             };
@@ -3122,7 +3123,7 @@ export const GameProvider = ({ children }) => {
         // ── BIRTHDAY MECHANICS ──
         let bdayMonth = 1; // Default to January if not set or parse fails
         if (playerBirthday && playerBirthday.includes('/')) {
-            bdayMonth = parseInt(playerBirthday.split('/')[0], 10); // format is M/D, take [0] for month
+            bdayMonth = parseInt(playerBirthday.split('/')[1], 10); // format is DD/MM/YYYY, month is index [1]
         }
 
         const getOrdinal = (n) => {
@@ -3132,7 +3133,7 @@ export const GameProvider = ({ children }) => {
         };
 
         let playerBdayYearToCelebrate = null;
-        if (bdayMonth && totalMonthsPlayed > 0) {
+        if (bdayMonth && totalMonthsPlayed >= 0) {
             const startYear = 2024;
             for (let y = startYear; y <= turn.year; y++) {
                 if (!firedDecisions.includes(`bday_${y}`)) {
@@ -3175,7 +3176,7 @@ export const GameProvider = ({ children }) => {
                 if (giftCash > 0 || parents.length > 0) {
                     if (giftCash > 0) setBalance(prev => prev + giftCash);
                     setEventInbox(prev => [{
-                        id: `bday_gift_${totalMonthsPlayed}`, name: '🎁 Family Birthday Gifts',
+                        id: `bday_gift_${totalMonthsPlayed}`, name: 'Family Birthday Gifts',
                         message: giftMsg.trim(),
                         category: 'positive', impact: giftCash, month: totalMonthsPlayed, read: false,
                     }, ...prev].slice(0, 50));
@@ -3636,7 +3637,7 @@ export const GameProvider = ({ children }) => {
                             </Text>
                         ),
                         category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
-                        image: require('../../assets/ui_comp/home.png')
+                        image: { source: require('../../assets/ui_comp/home.png'), isSprite: false, icon: true }
                     };
                     setEventInbox(prev => {
                         if (prev.some(e => e.id === capacityWarning.id)) return prev;
@@ -3692,7 +3693,7 @@ export const GameProvider = ({ children }) => {
                 if (newHealth <= 21 && newHealth > 0 && !d.healthWarnedAt) {
                     const warnEntry = {
                         id: `child_health_warn_${d.id}_${totalMonthsPlayed}`,
-                        name: `⚠️ ${d.name}'s Health Is Critical!`,
+                        name: `${d.name}'s Health Is Critical!`,
                         message: `${d.name}'s health has dropped to ${Math.round(newHealth)}/100. Without proper nutrition they will not survive much longer. Buy groceries immediately!`,
                         category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
                         image: require('../../assets/ui_comp/healthicon.png'),
@@ -3763,7 +3764,7 @@ export const GameProvider = ({ children }) => {
                 if (newHealth <= (decay * 2) && newHealth > 0 && !d.healthWarnedAt) {
                     const warnEntry = {
                         id: `parent_health_warn_${d.id}_${totalMonthsPlayed}`,
-                        name: `⚠️ ${d.name} Needs Urgent Care!`,
+                        name: `${d.name} Needs Urgent Care!`,
                         message: `${d.name}'s health has deteriorated to ${Math.round(newHealth)}/100. ${d.caretaker ? 'Even with a caretaker, they' : 'Without a caretaker, they'} may not survive much longer. Consider buying them a caretaker from the Family tab.`,
                         category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
                         image: require('../../assets/ui_comp/healthicon.png'),

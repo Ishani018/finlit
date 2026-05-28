@@ -73,18 +73,8 @@ function ScreenHeader({ title, subtitle, onBack, onClose }) {
 function SquareCategoryCard({ title, color, icon, onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ 
-                width: '48%', 
-                aspectRatio: 1, 
-                borderWidth: 1, 
-                borderColor: color + '50', 
-                backgroundColor: C.panel, 
-                marginBottom: GAP,
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 12
-            }}>
-            <Image source={icon} style={{ width: 120, height: 120, marginBottom: 12 }} resizeMode="contain" />
+            style={{ width: '48%', aspectRatio: 1, borderRadius: 12, backgroundColor: C.panel, marginBottom: GAP, alignItems: 'center', justifyContent: 'center', padding: 12, overflow: 'hidden' }}>
+            <Image source={icon} style={{ width: 110, height: 110, marginBottom: 10 }} resizeMode="contain" />
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, textAlign: 'center', lineHeight: 22 }}>{title}</Text>
         </TouchableOpacity>
     );
@@ -133,7 +123,7 @@ function GrocerySection({ onBack, onClose }) {
                                             {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}</Text>}
                                         </View>
                                         <TouchableOpacity onPress={() => handleBuy(item)} disabled={!canAfford}
-                                            style={{ marginTop: 6, borderWidth: 1, borderColor: canAfford ? C.gold + '60' : C.border, backgroundColor: canAfford ? C.gold + '12' : C.card, paddingVertical: 5, alignItems: 'center' }}>
+                                            style={{ marginTop: 6, backgroundColor: canAfford ? C.gold + '18' : C.card, borderRadius: 6, paddingVertical: 7, alignItems: 'center', opacity: canAfford ? 1 : 0.4 }}>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: canAfford ? C.gold : C.dark }}>₹{item.price.toLocaleString()}</Text>
                                         </TouchableOpacity>
                                     </View>
@@ -145,9 +135,10 @@ function GrocerySection({ onBack, onClose }) {
             </ScrollView>
 
             {toast && (
-                <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
-                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: toast.ok ? '#2a7050' : '#aa4040', textAlign: 'center', marginTop: 2 }}>{toast.extra}</Text>}
+                <View style={{ position: 'absolute', bottom: 70, alignSelf: 'center', left: PAD * 2, right: PAD * 2, backgroundColor: 'rgba(8,12,24,0.94)', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: toast.ok ? '#4ade80' : '#f87171' }} />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: toast.ok ? '#c8d4f0' : '#f87171', flex: 1 }}>{toast.msg}</Text>
+                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{toast.extra}</Text>}
                 </View>
             )}
         </View>
@@ -216,9 +207,6 @@ function PharmacySection({ onBack, onClose }) {
                                     <View style={{ height: 180, position: 'relative' }}>
                                         {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.sage + '15' }} />}
                                         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
-                                        <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: C.sage, paddingHorizontal: 5, paddingVertical: 1 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>PHARMACY</Text>
-                                        </View>
                                     </View>
                                     <View style={{ padding: 8 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
@@ -226,7 +214,7 @@ function PharmacySection({ onBack, onClose }) {
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
                                         </View>
                                         <TouchableOpacity onPress={() => handleBuy(item)} disabled={!affordable}
-                                            style={{ marginTop: 6, borderWidth: 1, borderColor: affordable ? C.sage + '60' : C.border, backgroundColor: affordable ? C.sage + '12' : C.card, paddingVertical: 5, alignItems: 'center' }}>
+                                            style={{ marginTop: 6, backgroundColor: affordable ? C.sage + '18' : C.card, borderRadius: 6, paddingVertical: 7, alignItems: 'center', opacity: affordable ? 1 : 0.4 }}>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: affordable ? C.sage : C.dark }}>₹{item.price.toLocaleString()}</Text>
                                         </TouchableOpacity>
                                     </View>
@@ -340,24 +328,36 @@ function ClothesSection({ onBack, onClose }) {
                             const affordable = balance >= item.price;
                             const img = CLOTHES_IMAGES[item.id];
                             return (
-                                <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: affordable ? color + '40' : C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
-                                    <View style={{ height: 6, backgroundColor: color + (affordable ? 'cc' : '30') }} />
+                                <View key={item.id} style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
                                     <View style={{ width: '100%', aspectRatio: 1, backgroundColor: C.card, position: 'relative' }}>
                                         {img ? (
                                             <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                                         ) : (
                                             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                                <FontAwesome5 name="shopping-bag" size={24} color={C.dim} />
+                                                <Image source={require('../../assets/ui_comp/clothing.png')} style={{ width: 40, height: 40, opacity: 0.3 }} resizeMode="contain" />
                                             </View>
                                         )}
                                     </View>
-                                    <View style={{ padding: 12 }}>
+                                    <View style={{ padding: 10 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream, lineHeight: 19 }}>{item.name}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginTop: 2, marginBottom: 8 }}>{item.desc}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: color, marginBottom: 8 }}>+{item.happinessBoost} 😊{item.healthBoost > 0 ? `  +${item.healthBoost} HP` : ''}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, marginTop: 2, marginBottom: 6 }}>{item.desc}</Text>
+                                        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                                            {item.happinessBoost > 0 && (
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                                    <Image source={require('../../assets/ui_comp/happyicon.png')} style={{ width: 12, height: 12, opacity: 0.6 }} resizeMode="contain" />
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happinessBoost}</Text>
+                                                </View>
+                                            )}
+                                            {item.healthBoost > 0 && (
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                                    <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 12, height: 12, opacity: 0.6 }} resizeMode="contain" />
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthBoost}</Text>
+                                                </View>
+                                            )}
+                                        </View>
                                         <TouchableOpacity onPress={() => handleBuy(item)} disabled={!affordable}
-                                            style={{ borderWidth: 1, borderColor: affordable ? color + '60' : C.border, backgroundColor: affordable ? color + '12' : C.card, paddingVertical: 6, alignItems: 'center' }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: affordable ? color : C.dark }}>₹{item.price.toLocaleString()}</Text>
+                                            style={{ backgroundColor: affordable ? '#0a1428' : C.card, borderRadius: 6, paddingVertical: 8, alignItems: 'center', opacity: affordable ? 1 : 0.4 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: affordable ? C.blue : C.dark }}>₹{item.price.toLocaleString()}</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -367,9 +367,10 @@ function ClothesSection({ onBack, onClose }) {
                 ))}
             </ScrollView>
             {toast && (
-                <View style={{ position: 'absolute', bottom: 60, left: PAD, right: PAD, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
-                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: toast.ok ? '#2a7050' : '#aa4040', textAlign: 'center', marginTop: 2 }}>{toast.extra}</Text>}
+                <View style={{ position: 'absolute', bottom: 70, alignSelf: 'center', left: PAD * 2, right: PAD * 2, backgroundColor: 'rgba(8,12,24,0.94)', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: toast.ok ? '#4ade80' : '#f87171' }} />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: toast.ok ? '#c8d4f0' : '#f87171', flex: 1 }}>{toast.msg}</Text>
+                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{toast.extra}</Text>}
                 </View>
             )}
         </View>
@@ -389,19 +390,19 @@ export default function ShopScreen({ onClose }) {
         <View style={{ flex: 1, backgroundColor: C.bg }}>
             <ScreenHeader title="Shop" subtitle="MARKETPLACE" onClose={onClose} />
 
-            {/* Balance + health + happiness strip */}
-            <View style={{ flexDirection: 'row', gap: GAP, padding: PAD, paddingBottom: 0 }}>
-                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 10, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: C.dark, letterSpacing: 2 }}>BALANCE</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold }}>₹{balance >= 100000 ? (balance/100000).toFixed(1)+'L' : balance.toLocaleString()}</Text>
+            {/* Inline stats — no boxes */}
+            <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: PAD, paddingVertical: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <Image source={require('../../assets/ui_comp/investicon.png')} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.gold }}>₹{balance >= 100000 ? (balance/100000).toFixed(1)+'L' : balance.toLocaleString()}</Text>
                 </View>
-                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 10, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: C.dark, letterSpacing: 2 }}>HEALTH</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: health >= 60 ? C.sage : health >= 30 ? C.gold : C.red }}>{Math.round(health)}/100</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <Image source={require('../../assets/ui_comp/healthicon.png')} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: health >= 60 ? C.sage : health >= 30 ? C.gold : C.red }}>{Math.round(health)}</Text>
                 </View>
-                <View style={{ flex: 1, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 10, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: C.dark, letterSpacing: 2 }}>HAPPINESS</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: happiness >= 70 ? C.sage : happiness >= 40 ? C.gold : C.red }}>{Math.round(happiness)}/100</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <Image source={require('../../assets/ui_comp/happyicon.png')} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: happiness >= 70 ? C.sage : happiness >= 40 ? C.gold : C.red }}>{Math.round(happiness)}</Text>
                 </View>
             </View>
 
