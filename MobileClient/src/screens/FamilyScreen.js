@@ -970,7 +970,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
         totalMonthsPlayed,
     } = useGame();
 
-    const [dialog, setDialog]                     = useState({ visible: false, title: '', message: '', type: 'info', onConfirm: null });
+    const [dialog, setDialog]                     = useState({ visible: false, title: '', message: '', type: 'info', onConfirm: null, confirmText: 'OK', cancelText: null, onCancel: null, image: null });
     const [selectedDep, setSelectedDep]           = useState(null);
     const [showMarriagePick, setShowMarriagePick] = useState(false);
     const [showParentPick, setShowParentPick]     = useState(false);
@@ -988,11 +988,13 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
         }
     }, [dependents, showNameBaby]);
 
-    const showDialog = (title, message, type = 'info', onConfirm = null, onCancel = null, cancelText = null) => {
+    const showDialog = (title, message, type = 'info', onConfirm = null, confirmText = 'OK', cancelText = null, onCancel = null, image = null) => {
         const close = () => setDialog(d => ({ ...d, visible: false }));
         setDialog({ visible: true, title, message, type,
             onConfirm: onConfirm ? () => { close(); onConfirm(); } : close,
-            onCancel, cancelText,
+            confirmText, cancelText,
+            onCancel: onCancel ? () => { close(); onCancel(); } : null,
+            image,
         });
     };
     const closeDialog = () => setDialog(d => ({ ...d, visible: false }));
@@ -1361,7 +1363,14 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 </View>
             )}
 
-            <PixelDialog {...dialog} onConfirm={dialog.onConfirm || closeDialog} onCancel={dialog.onCancel || closeDialog} />
+            <PixelDialog
+                {...dialog}
+                confirmText={dialog.confirmText || 'OK'}
+                cancelText={dialog.cancelText || null}
+                onConfirm={dialog.onConfirm || closeDialog}
+                onCancel={dialog.onCancel || null}
+                image={dialog.image || null}
+            />
         </View>
     );
 }
