@@ -3608,6 +3608,12 @@ export const GameProvider = ({ children }) => {
         // Age children + decay dependent health each month
         const nextDependents = [];
         let setGamePaused = false;
+        // Declared here so they're in scope for both dependents.forEach and activeEffects.forEach below
+        let newInboxEvents = [];
+        let latestCrisis = null;
+        let lostFreelanceJob = false;
+        let balanceDelta = 0;
+        const nextEffects = [];
 
         dependents.forEach(d => {
             if (d.isDead) {
@@ -3883,11 +3889,7 @@ export const GameProvider = ({ children }) => {
         });
 
         // Decay effects and apply decision-based consequences
-        const nextEffects = [];
-        let balanceDelta = 0;
-        let newInboxEvents = [];
-        let latestCrisis = null;
-        let lostFreelanceJob = false;
+        // (newInboxEvents, latestCrisis, lostFreelanceJob, balanceDelta, nextEffects declared above)
 
         activeEffects.forEach(effect => {
             const nextRemaining = effect.remainingMonths - 1;

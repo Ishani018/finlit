@@ -445,20 +445,16 @@ const GameLayout = ({ onHardReset }) => {
 
   // ── Next Month guard — prevents firing while any modal is open ──────────────
   const handleAdvanceTime = () => {
-    try {
-      // If a modal is genuinely open, do nothing
-      if (dialog.visible || pendingJobInterview || pendingDecision || majorCrisisFlash || showSummary || pendingFamilyDemand) {
-        return;
-      }
-      // If isPlaying is false but no modal is open, it's a stuck state — clear it
-      if (!isPlaying) {
-        if (lastCrisisEvent) setLastCrisisEvent(null);
-      }
-      monthsPlayedTodayRef.current += 1;
-      nextMonth();
-    } catch (e) {
-      console.error('handleAdvanceTime error:', e);
+    // If a modal is genuinely open, do nothing
+    if (dialog.visible || pendingJobInterview || pendingDecision || majorCrisisFlash || showSummary || pendingFamilyDemand) {
+      return;
     }
+    // If isPlaying is false but no modal is open, it's a stuck state — clear it
+    if (!isPlaying) {
+      if (lastCrisisEvent) setLastCrisisEvent(null);
+    }
+    monthsPlayedTodayRef.current += 1;
+    nextMonth();
   };
 
   const openEventDetail = (event) => {
