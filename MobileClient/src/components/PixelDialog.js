@@ -106,9 +106,19 @@ export default function PixelDialog({
                         </Text>
                     </View>
 
+                    {/* Full-width banner image (non-sprite object with .source) */}
+                    {image && typeof image === 'object' && !image.isSprite && image.source && (
+                        <Image
+                            source={image.source}
+                            style={{ width: '100%', height: 160 }}
+                            resizeMode="cover"
+                        />
+                    )}
+
                     {/* Body */}
                     <View style={{ padding: 20 }}>
-                        {image && !(typeof image === 'object' && image.isSprite) && (
+                        {/* Legacy: plain require() or URI string shown inline */}
+                        {image && (typeof image === 'number' || typeof image === 'string') && (
                             <View style={{ alignItems: 'center', marginBottom: 16 }}>
                                 <Image source={typeof image === 'string' ? { uri: image } : image} style={{ width: 100, height: 100 }} resizeMode="contain" />
                             </View>

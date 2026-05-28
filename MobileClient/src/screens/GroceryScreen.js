@@ -119,8 +119,9 @@ function ItemGrid({ children }) {
     return <View>{rows}</View>;
 }
 
-export default function GroceryScreen({ onClose, initialTab = 'shop' }) {
+export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop }) {
     const { balance, health, pantry, buyGrocery, consumeFood } = useGame();
+    const pantryOnly = initialTab === 'pantry' && !!onOpenShop;
     const [tab, setTab] = useState(initialTab);
     const [toast, setToast] = useState(null);
 
@@ -160,7 +161,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop' }) {
                 </View>
 
                 <View style={{ position: 'absolute', bottom: 10, left: PAD, right: PAD }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 26, marginBottom: 5 }}>GROCERY STORE</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 26, marginBottom: 5 }}>{pantryOnly ? 'YOUR PANTRY' : 'GROCERY STORE'}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
                             <FontAwesome5 name="heartbeat" size={11} color={hpColor} />
@@ -197,40 +198,59 @@ export default function GroceryScreen({ onClose, initialTab = 'shop' }) {
             )}
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: PAD, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-                {/* Tabs */}
-                <View style={{ flexDirection: 'row', marginBottom: 14, borderWidth: 1, borderColor: C.border }}>
-                    {[['shop', 'SHOP'], ['pantry', `PANTRY (${pantryItems.length})`]].map(([key, label]) => (
-                        <TouchableOpacity key={key} onPress={() => setTab(key)}
-                            style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: tab === key ? C.card : C.panel, borderRightWidth: key === 'shop' ? 1 : 0, borderColor: C.border, position: 'relative' }}>
-                            {tab === key && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: C.blue }} />}
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: tab === key ? C.blue : C.dark, letterSpacing: 2 }}>{label}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
 
-                {tab === 'shop' && (
+                {pantryOnly ? (
+                    /* ── Pantry-only mode (opened from home pantry button) ── */
+                    pantryItems.length === 0 ? (
+                        <View style={{ marginTop: 8 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, letterSpacing: 3, marginBottom: 10 }}>YOUR PANTRY</Text>
+                            {/* Empty state — grocery store CTA card */}
+                            <TouchableOpacity
+                                onPress={onOpenShop}
+                                activeOpacity={0.85}
+                                style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}
+                            >
+                                <Image source={KIRANA_IMG} style={{ width: '100%', height: 120 }} resizeMode="cover" />
+                                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 120, backgroundColor: 'rgba(4,6,14,0.55)' }} />
+                                <View style={{ padding: 16 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, marginBottom: 4 }}>PANTRY EMPTY</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 12 }}>
+                                        No food stocked. Health drains every month without groceries.
+                                    </Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: C.blue + '60', backgroundColor: '#050d1e', paddingVertical: 10, paddingHorizontal: 14 }}>
+                                        <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 1 }}>GO TO GROCERY STORE ▶</Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, letterSpacing: 3, marginBottom: 10 }}>YOUR PANTRY</Text>
+                            <ItemGrid>
+                                {pantryItems.map(entry => (
+                                    <PantryCard key={entry.itemId} entry={entry} onConsume={handleConsume} />
+                                ))}
+                            </ItemGrid>
+                            {/* Grocery store link at the bottom */}
+                            <TouchableOpacity
+                                onPress={onOpenShop}
+                                activeOpacity={0.85}
+                                style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 12 }}
+                            >
+                                <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, flex: 1 }}>Need more? Go to Grocery Store</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.blue }}>▶</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )
+                ) : (
+                    /* ── Normal grocery store mode (shop only, pantry removed) ── */
                     <ItemGrid>
                         {GROCERY_ITEMS.map(item => (
                             <ShopCard key={item.id} item={item} balance={balance} onBuy={handleBuy} />
                         ))}
                     </ItemGrid>
-                )}
-
-                {tab === 'pantry' && (
-                    pantryItems.length === 0 ? (
-                        <View style={{ alignItems: 'center', paddingVertical: 48, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel }}>
-                            <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 36, height: 36, marginBottom: 12 }} resizeMode="contain" />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.dim, textAlign: 'center' }}>
-                                Pantry empty.{'\n'}Buy food from the shop.
-                            </Text>
-                        </View>
-                    ) : (
-                        <ItemGrid>
-                            {pantryItems.map(entry => (
-                                <PantryCard key={entry.itemId} entry={entry} onConsume={handleConsume} />
-                            ))}
-                        </ItemGrid>
-                    )
                 )}
             </ScrollView>
 

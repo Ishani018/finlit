@@ -3656,7 +3656,8 @@ export const GameProvider = ({ children }) => {
                         id: `child_death_${d.id}_${Date.now()}`, name: 'Tragic Loss',
                         message: `Your child, ${d.name}, has tragically passed away from neglect. The grief is devastating. Funeral costs ₹30,000. This will be on your record.`,
                         category: 'crisis', impact: -30000, month: totalMonthsPlayed, read: false,
-                        image: require('../../assets/ui_comp/gravestone.png')
+                        image: require('../../assets/ui_comp/gravestone.png'),
+                        depId: d.id, depType: 'child', depGender: d.gender, depChildAgeMonths: d.childAgeMonths,
                     };
                     newInboxEvents.push(deathEntry);
                     latestCrisis = deathEntry;
@@ -3704,6 +3705,7 @@ export const GameProvider = ({ children }) => {
                         id: `child_adult_${d.id}`, name: `${d.name} Turns 18!`,
                         message: `${d.name} has grown up! Based on the opportunities you provided, they pursued ${careerName} and will earn ₹${careerIncome.toLocaleString()}/mo. They'll be independent from next month — no more child expenses.`,
                         category: 'positive', impact: 0, month: totalMonthsPlayed, read: false,
+                        depId: d.id, depType: 'child', depGender: d.gender, depChildAgeMonths: newAge,
                     };
                     newInboxEvents.push(childEntry);
                     latestCrisis = childEntry;
@@ -3722,7 +3724,8 @@ export const GameProvider = ({ children }) => {
                         id: `parent_death_${d.id}_${Date.now()}`, name: 'Loss of a Parent',
                         message: `Your parent, ${d.name}, has passed away. The funeral costs ₹50,000 and your grief will weigh on you for months.`,
                         category: 'crisis', impact: -50000, month: totalMonthsPlayed, read: false,
-                        image: require('../../assets/ui_comp/gravestone.png')
+                        image: require('../../assets/ui_comp/gravestone.png'),
+                        depId: d.id, depType: 'parent', depParentType: d.parentType,
                     };
                     newInboxEvents.push(deathEntry);
                     latestCrisis = deathEntry;

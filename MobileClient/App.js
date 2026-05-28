@@ -550,6 +550,33 @@ const GameLayout = ({ onHardReset }) => {
           </View>
       );
 
+    // Resolve dependent sprite image if event is tied to a specific dependent
+    let eventImage = lastCrisisEvent.image;
+    if (lastCrisisEvent.depId && !eventImage) {
+      const { depType, depGender, depChildAgeMonths, depParentType, depId } = lastCrisisEvent;
+      if (depType === 'child') {
+        const f = (depGender || '').toLowerCase() === 'female';
+        const ageM = depChildAgeMonths || 0;
+        let src;
+        if (ageM < 12) src = f ? require('./assets/dependents/baby daughter.png') : require('./assets/dependents/baby son.png');
+        else if (ageM < 60) src = f ? require('./assets/dependents/toddler daughter.png') : require('./assets/dependents/toddler son.png');
+        else if (ageM < 216) src = f ? require('./assets/dependents/pre schooler daughter.png') : require('./assets/dependents/pre schooler son.png');
+        else src = f ? require('./assets/dependents/teenage daughter.png') : require('./assets/dependents/teenage son.png');
+        if (src) eventImage = { isSprite: true, source: src, scale: 1.1 };
+      } else if (depType === 'spouse') {
+        const sp = dependents.find(d => d.id === depId);
+        if (sp) {
+          const src = getSpriteImage(sp.spouseSprite, playerAge);
+          if (src) eventImage = { isSprite: true, source: src, scale: 1.6 };
+        }
+      } else if (depType === 'parent') {
+        const parentImg = depParentType === 'mother'
+          ? require('./assets/dependents/elderlymother.png')
+          : require('./assets/dependents/elderlyfather.png');
+        eventImage = { isSprite: true, source: parentImg, scale: 1.2 };
+      }
+    }
+
     showDialog(
       lastCrisisEvent.name,
       finalMessage,
@@ -558,7 +585,7 @@ const GameLayout = ({ onHardReset }) => {
       'OK',
       null,
       null,
-      lastCrisisEvent.image
+      eventImage
     );
   }, [lastCrisisEvent]);
 
@@ -587,33 +614,38 @@ const GameLayout = ({ onHardReset }) => {
         }
     }
 
+    const Chip = ({ label, color }) => (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: color + '18', borderWidth: 1, borderColor: color + '40', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' }}>
+        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color, lineHeight: 17 }}>{label}</Text>
+      </View>
+    );
+
     const messageElement = (
-      <View style={{ gap: 18 }}>
-        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 28 }}>
+      <View style={{ gap: 14 }}>
+        {/* Message */}
+        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 26 }}>
           {demand.getMessage(dep)}
         </Text>
 
-        <View style={{ borderTopWidth: 1, borderColor: '#1e2840', paddingTop: 16 }}>
-          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#6070a0', letterSpacing: 2, marginBottom: 12, textTransform: 'uppercase' }}>
-            Impact Preview
-          </Text>
-          
-          <View style={{ flexDirection: 'row', gap: 16, backgroundColor: '#0a0d1a', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#1e2840' }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80', marginBottom: 6 }}>IF ACCEPTED</Text>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>-₹{demand.cost.toLocaleString()}</Text>
-              {demand.accept.happinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+{demand.accept.happinessBoost} Happy (You)</Text> : null}
-              {demand.accept.depHealthBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+{demand.accept.depHealthBoost} HP ({dep?.name})</Text> : null}
-              {demand.accept.depHappinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>+{demand.accept.depHappinessBoost} Happy ({dep?.name})</Text> : null}
-            </View>
-            <View style={{ width: 1, backgroundColor: '#1e2840' }} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171', marginBottom: 6 }}>IF DECLINED</Text>
-              {demand.decline.happinessPenalty ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{demand.decline.happinessPenalty} Happy (You)</Text> : null}
-              {demand.decline.depHealthPenalty ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{demand.decline.depHealthPenalty} HP ({dep?.name})</Text> : null}
-              {demand.decline.depHappinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{demand.decline.depHappinessBoost} Happy ({dep?.name})</Text> : null}
-              {!demand.decline.happinessPenalty && !demand.decline.depHealthPenalty && !demand.decline.depHappinessBoost ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#6070a0' }}>No impact</Text> : null}
-            </View>
+        {/* Impact side-by-side */}
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {/* Accept column */}
+          <View style={{ flex: 1, backgroundColor: '#071a0e', borderWidth: 1, borderColor: '#166534', borderRadius: 10, padding: 10, gap: 5 }}>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80', letterSpacing: 2, marginBottom: 2 }}>✓ SAY YES</Text>
+            <Chip label={`-₹${demand.cost.toLocaleString()}`} color="#f87171" />
+            {demand.accept.happinessBoost ? <Chip label={`+${demand.accept.happinessBoost} 😊 You`} color="#4ade80" /> : null}
+            {demand.accept.depHealthBoost ? <Chip label={`+${demand.accept.depHealthBoost} ❤️ ${dep?.name}`} color="#4ade80" /> : null}
+            {demand.accept.depHappinessBoost ? <Chip label={`+${demand.accept.depHappinessBoost} 😊 ${dep?.name}`} color="#4ade80" /> : null}
+          </View>
+          {/* Decline column */}
+          <View style={{ flex: 1, backgroundColor: '#1a0808', borderWidth: 1, borderColor: '#7f1d1d', borderRadius: 10, padding: 10, gap: 5 }}>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 2, marginBottom: 2 }}>✗ SAY NO</Text>
+            {demand.decline.happinessPenalty ? <Chip label={`${demand.decline.happinessPenalty} 😊 You`} color="#f87171" /> : null}
+            {demand.decline.depHealthPenalty ? <Chip label={`${demand.decline.depHealthPenalty} ❤️ ${dep?.name}`} color="#f87171" /> : null}
+            {demand.decline.depHappinessBoost ? <Chip label={`${demand.decline.depHappinessBoost} 😊 ${dep?.name}`} color="#f87171" /> : null}
+            {!demand.decline.happinessPenalty && !demand.decline.depHealthPenalty && !demand.decline.depHappinessBoost
+              ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>No penalty</Text>
+              : null}
           </View>
         </View>
       </View>
@@ -1101,7 +1133,7 @@ const GameLayout = ({ onHardReset }) => {
             return (
               <View style={{ position: 'absolute', top: 8, left: 12, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => setShowPantry(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
-                  <Image source={require('./assets/ui_comp/pantry.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                  <Image source={require('./assets/ui_comp/pantry.png')} style={{ width: 44, height: 44 }} resizeMode="contain" />
                   {(pantry || []).reduce((s, p) => s + (p.qty || 0), 0) <= 3 && (
                     <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#f87171', borderWidth: 1.5, borderColor: '#06080f' }} />
                   )}
@@ -2296,7 +2328,11 @@ const GameLayout = ({ onHardReset }) => {
 
         {showPantry && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
-            <GroceryScreen onClose={() => setShowPantry(false)} initialTab="pantry" />
+            <GroceryScreen
+              onClose={() => setShowPantry(false)}
+              initialTab="pantry"
+              onOpenShop={() => { setShowPantry(false); setShowGrocery(true); }}
+            />
           </View>
         )}
 
