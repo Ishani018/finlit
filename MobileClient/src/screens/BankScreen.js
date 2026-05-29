@@ -31,7 +31,7 @@ const LOAN_TYPE_META = {
     'Personal Loan':      { name: 'Personal Loan',         icon: 'user',            color: '#f87171', img: require('../../assets/ui_comp/borrow.png') },
 };
 
-export default function BankScreen({ onClose, onShowDialog }) {
+export default function BankScreen({ onClose, onShowDialog, initialTab = null }) {
     const {
         balance, creditScore, netWorth, currentJob,
         loans, getTotalEMI, takeLoan,
@@ -49,7 +49,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
         ppf, nps,
     } = useGame();
 
-    const [tab, setTab] = useState(null); // null=landing | save | borrow | ca | gold | card | retire | childSavings
+    const [tab, setTab] = useState(initialTab); // null=landing | save | borrow | ca | gold | card | retire | childSavings
     const [tipsOpen, setTipsOpen] = useState(true);
     const [fdAmount, setFdAmount] = useState('50000');
     const [selectedFDOption, setSelectedFDOption] = useState(FD_OPTIONS[2]);

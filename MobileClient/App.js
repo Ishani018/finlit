@@ -372,6 +372,7 @@ const GameLayout = ({ onHardReset }) => {
   const [activeTab, setActiveTab] = useState('home');
   const [careerSubTab, setCareerSubTab] = useState(null); // null = landing | jobs | study
   const [moneySubTab, setMoneySubTab] = useState(null);
+  const [bankInitialTab, setBankInitialTab] = useState(null);
   const [showGrocery, setShowGrocery] = useState(false);
   const [showPantry, setShowPantry] = useState(false);
   const [happinessToast, setHappinessToast] = useState(null);
@@ -2257,7 +2258,7 @@ const GameLayout = ({ onHardReset }) => {
                   </StyledView>
               </ScrollView>
             )}
-            {moneySubTab === 'bank' && <BankScreen onClose={() => setActiveTab('home')} onShowDialog={(title, msg, type) => showDialog(title, msg, type)} />}
+            {moneySubTab === 'bank' && <BankScreen onClose={() => { setActiveTab('home'); setBankInitialTab(null); }} onShowDialog={(title, msg, type) => showDialog(title, msg, type)} initialTab={bankInitialTab} />}
             {moneySubTab === 'insure' && <InsuranceScreen onClose={() => setActiveTab('home')} />}
           </View>
         )}
@@ -2331,7 +2332,7 @@ const GameLayout = ({ onHardReset }) => {
             setShowGoals(false);
             setShowPantry(false);
             setActiveTab(tab);
-            if (tab !== 'money') { setInvestCategory(null); setMoneySubTab(null); setSelectedMF(null); }
+            if (tab !== 'money') { setInvestCategory(null); setMoneySubTab(null); setSelectedMF(null); setBankInitialTab(null); }
           }}
           onGrocery={() => { setShowGoals(false); setShowGrocery(true); }}
           onGoals={() => { setShowGrocery(false); setShowGoals(true); }}
@@ -2911,7 +2912,8 @@ const GameLayout = ({ onHardReset }) => {
               <TouchableOpacity onPress={() => {
                 setPendingCreditCardOffer(false);
                 setActiveTab('money');
-                setMoneySubTab('card');
+                setMoneySubTab('bank');
+                setBankInitialTab('card');
               }} style={{ width: '100%', backgroundColor: '#3b82f6', borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 12 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#ffffff', letterSpacing: 1 }}>SEE OFFER & APPLY →</Text>
               </TouchableOpacity>
