@@ -188,6 +188,29 @@ export default function BankScreen({ onClose, onShowDialog }) {
             {!tab && (
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
 
+                    {/* ── EMI Reminder ── */}
+                    {loans.length > 0 && (
+                        <TouchableOpacity onPress={() => setTab('borrow')} activeOpacity={0.85}
+                            style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
+                            {/* loan image banner */}
+                            <Image source={require('../../assets/ui_comp/borrow.png')} style={{ width: '100%', height: 120 }} resizeMode="cover" />
+                            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(20,4,4,0.82)' }} />
+                            <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'space-between' }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                    <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', letterSpacing: 3 }}>LOAN REPAYMENT DUE</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                    <View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 38, color: '#f87171', lineHeight: 40 }}>₹{totalEMI.toLocaleString()}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f8717199' }}>per month · {loans.length} active loan{loans.length !== 1 ? 's' : ''}</Text>
+                                    </View>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#f87171' }}>VIEW ›</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+
                     {/* Primary cards — full width, horizontal layout */}
                     {[
                         { onPress: () => setTab('save'), img: require('../../assets/ui_comp/saveandearn.png'), accent: '#fbbf24', label: 'GROW YOUR SAVINGS', name: 'Save & Earn', sub: 'Fixed Deposits', locked: false, stat1L: 'CREDIT', stat1V: String(creditScore), stat1C: creditBand.color, stat2L: 'FD VALUE', stat2V: totalFDValue > 0 ? `₹${(totalFDValue/1000).toFixed(0)}k` : 'NIL', stat2C: '#fbbf24' },
