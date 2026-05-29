@@ -560,10 +560,10 @@ const GameLayout = ({ onHardReset }) => {
         const f = (depGender || '').toLowerCase() === 'female';
         const ageM = depChildAgeMonths || 0;
         let src;
-        if (ageM < 12) src = f ? require('./assets/dependents/baby daughter.png') : require('./assets/dependents/baby son.png');
-        else if (ageM < 60) src = f ? require('./assets/dependents/toddler daughter.png') : require('./assets/dependents/toddler son.png');
-        else if (ageM < 216) src = f ? require('./assets/dependents/pre schooler daughter.png') : require('./assets/dependents/pre schooler son.png');
-        else src = f ? require('./assets/dependents/teenage daughter.png') : require('./assets/dependents/teenage son.png');
+        if (ageM < 12) src = f ? require('./assets/dependents/baby_daughter.png') : require('./assets/dependents/baby_son.png');
+        else if (ageM < 60) src = f ? require('./assets/dependents/toddler_daughter.png') : require('./assets/dependents/toddler_son.png');
+        else if (ageM < 216) src = f ? require('./assets/dependents/pre_schooler_daughter.png') : require('./assets/dependents/pre_schooler_son.png');
+        else src = f ? require('./assets/dependents/teenage_daughter.png') : require('./assets/dependents/teenage_son.png');
         if (src) eventImage = { isSprite: true, source: src, scale: 1.1 };
       } else if (depType === 'spouse') {
         const sp = dependents.find(d => d.id === depId);
@@ -605,10 +605,10 @@ const GameLayout = ({ onHardReset }) => {
             const f = dep.gender === 'female';
             const ageM = dep.childAgeMonths || 0;
             let src;
-            if (ageM < 12) src = f ? require('./assets/dependents/baby daughter.png') : require('./assets/dependents/baby son.png');
-            else if (ageM < 60) src = f ? require('./assets/dependents/toddler daughter.png') : require('./assets/dependents/toddler son.png');
-            else if (ageM < 216) src = f ? require('./assets/dependents/pre schooler daughter.png') : require('./assets/dependents/pre schooler son.png');
-            else src = f ? require('./assets/dependents/teenage daughter.png') : require('./assets/dependents/teenage son.png');
+            if (ageM < 12) src = f ? require('./assets/dependents/baby_daughter.png') : require('./assets/dependents/baby_son.png');
+            else if (ageM < 60) src = f ? require('./assets/dependents/toddler_daughter.png') : require('./assets/dependents/toddler_son.png');
+            else if (ageM < 216) src = f ? require('./assets/dependents/pre_schooler_daughter.png') : require('./assets/dependents/pre_schooler_son.png');
+            else src = f ? require('./assets/dependents/teenage_daughter.png') : require('./assets/dependents/teenage_son.png');
             if (src) depImage = { isSprite: true, source: src, scale: 1.1 };
         } else if (dep.type === 'parent') {
             const isMother = dep.parentType === 'mother' || dep.name === 'Mother';
@@ -726,7 +726,7 @@ const GameLayout = ({ onHardReset }) => {
             onPress={() => setShowSettings(false)}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0d1428', borderRadius: 10, padding: 16 }}
           >
-            <Image source={require('./assets/ui_comp/play button.png')} style={{ width: 18, height: 18, transform: [{ scaleX: -1 }], opacity: 0.7 }} resizeMode="contain" />
+            <Image source={require('./assets/ui_comp/play_button.png')} style={{ width: 18, height: 18, transform: [{ scaleX: -1 }], opacity: 0.7 }} resizeMode="contain" />
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: CREAM, letterSpacing: 2 }}>BACK TO GAME</Text>
           </TouchableOpacity>
 
@@ -1053,7 +1053,7 @@ const GameLayout = ({ onHardReset }) => {
                   </Text>
                   {step.done
                     ? <Image source={require('./assets/ui_comp/achivements.png')} style={{ width: 14, height: 14, opacity: 0.6 }} resizeMode="contain" />
-                    : <Image source={require('./assets/ui_comp/play button.png')} style={{ width: 14, height: 14, opacity: 0.7 }} resizeMode="contain" />
+                    : <Image source={require('./assets/ui_comp/play_button.png')} style={{ width: 14, height: 14, opacity: 0.7 }} resizeMode="contain" />
                   }
                 </TouchableOpacity>
               ))}
@@ -1195,7 +1195,7 @@ const GameLayout = ({ onHardReset }) => {
                     Tap to buy groceries
                   </Text>
                 </View>
-                <Image source={require('./assets/ui_comp/play button.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
+                <Image source={require('./assets/ui_comp/play_button.png')} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
               </TouchableOpacity>
             );
           })()}
@@ -1428,7 +1428,7 @@ const GameLayout = ({ onHardReset }) => {
                 <TouchableOpacity onPress={() => setMoneySubTab('invest')} activeOpacity={0.85}
                   style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
                   <View style={{ height: 140, position: 'relative' }}>
-                    <Image source={require('./assets/jobs/gold business.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <Image source={require('./assets/jobs/gold_business.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
                     <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 4 }}>GROW YOUR WEALTH</Text>
@@ -1462,7 +1462,7 @@ const GameLayout = ({ onHardReset }) => {
                 <TouchableOpacity onPress={() => setMoneySubTab('insure')} activeOpacity={0.85}
                   style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
                   <View style={{ height: 140, position: 'relative' }}>
-                    <Image source={require('./assets/jobs/chemist drugstore.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <Image source={require('./assets/jobs/chemist_drugstore.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
                     <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, padding: 16, justifyContent: 'flex-end' }}>
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#22c55e', letterSpacing: 4 }}>PROTECTION</Text>
@@ -1494,12 +1494,12 @@ const GameLayout = ({ onHardReset }) => {
                         {(() => {
                           const unlocks = getProductUnlocks();
                           const INVEST_CATS = [
-                            { key: 'stocks',     unlockKey: 'stocks',     tipKey: 'stocks',     label: 'STOCKS',     sub: `${STOCKS.length} Indian stocks`,                          color: '#60a5fa', img: require('./assets/achivements/graphs and stats.png'), onPress: () => setInvestCategory('stocks') },
-                            { key: 'mf',         unlockKey: 'mf',         tipKey: 'mf',         label: 'MUTUAL FUNDS', sub: `${MUTUAL_FUNDS.length} funds • ${sipPlans.length} SIPs`, color: '#818cf8', img: require('./assets/achivements/piggy bank.png'),       onPress: () => setInvestCategory('mf') },
-                            { key: 'retirement', unlockKey: 'ppf',        tipKey: 'ppf',        label: 'RETIREMENT', sub: `PPF / NPS • ₹${(ppf.balance + nps.balance).toLocaleString()}`, color: '#fbbf24', img: require('./assets/achivements/crest with bank.png'), onPress: () => setInvestCategory('retirement') },
+                            { key: 'stocks',     unlockKey: 'stocks',     tipKey: 'stocks',     label: 'STOCKS',     sub: `${STOCKS.length} Indian stocks`,                          color: '#60a5fa', img: require('./assets/achivements/graphs_and_stats.png'), onPress: () => setInvestCategory('stocks') },
+                            { key: 'mf',         unlockKey: 'mf',         tipKey: 'mf',         label: 'MUTUAL FUNDS', sub: `${MUTUAL_FUNDS.length} funds • ${sipPlans.length} SIPs`, color: '#818cf8', img: require('./assets/achivements/piggy_bank.png'),       onPress: () => setInvestCategory('mf') },
+                            { key: 'retirement', unlockKey: 'ppf',        tipKey: 'ppf',        label: 'RETIREMENT', sub: `PPF / NPS • ₹${(ppf.balance + nps.balance).toLocaleString()}`, color: '#fbbf24', img: require('./assets/achivements/crest_with_bank.png'), onPress: () => setInvestCategory('retirement') },
                             { key: 'homes',      unlockKey: 'realestate', tipKey: 'realestate', label: 'BUY HOMES',  sub: `${RESIDENTIAL_PROPERTIES.length} properties`,              color: '#4ade80', img: require('./assets/properties/villa_for_family_of_4-5.png'), onPress: () => { setActiveMenu(null); setShowHomeScreen(true); } },
                             { key: 'commercial', unlockKey: 'realestate', tipKey: 'realestate', label: 'COMMERCIAL', sub: `${COMMERCIAL_PROPERTIES.length} commercial`,               color: '#c084fc', img: require('./assets/properties/commercial_lot.png'),         onPress: () => setInvestCategory('commercial') },
-                            { key: 'assets',     unlockKey: 'stocks',     tipKey: null,         label: 'MY PORTFOLIO', sub: `${properties.length} props • ${Object.keys(portfolio).length} stocks`, color: '#fbbf24', img: require('./assets/achivements/coin stack.png'), onPress: () => setInvestCategory('assets') },
+                            { key: 'assets',     unlockKey: 'stocks',     tipKey: null,         label: 'MY PORTFOLIO', sub: `${properties.length} props • ${Object.keys(portfolio).length} stocks`, color: '#fbbf24', img: require('./assets/achivements/coin_stack.png'), onPress: () => setInvestCategory('assets') },
                           ];
                           return Array.from({ length: Math.ceil(INVEST_CATS.length / 2) }).map((_, rowIdx) => (
                             <View key={rowIdx} style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
@@ -2895,14 +2895,14 @@ const GameLayout = ({ onHardReset }) => {
         </View>
       </ResponsiveModal>
       {/* ── Credit Card Offer Dialog ── */}
-      <ResponsiveModal visible={pendingCreditCardOffer} transparent animationType="fade" onRequestClose={() => setPendingCreditCardOffer(false)}>
+      <ResponsiveModal visible={isPlaying && pendingCreditCardOffer} transparent animationType="fade" onRequestClose={() => setPendingCreditCardOffer(false)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
           <View style={{ width: '100%', maxWidth: 360, backgroundColor: '#070a16', borderRadius: 14, borderWidth: 2, borderColor: '#3b82f6', overflow: 'hidden' }}>
             <View style={{ backgroundColor: '#1e3a8a', paddingVertical: 12, alignItems: 'center' }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#bfdbfe', letterSpacing: 2 }}>CARD PRE-APPROVAL</Text>
             </View>
             <View style={{ padding: 24, alignItems: 'center' }}>
-              <Image source={require('./assets/ui_comp/credit card.png')} style={{ width: 140, height: 140, marginBottom: 20 }} resizeMode="contain" />
+              <Image source={require('./assets/ui_comp/credit_card.png')} style={{ width: 140, height: 140, marginBottom: 20 }} resizeMode="contain" />
               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#60a5fa', marginBottom: 10, textAlign: 'center' }}>CREDIT OFFER UNLOCKED!</Text>
               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', textAlign: 'center', marginBottom: 24, lineHeight: 22 }}>
                 Your CIBIL score has pre-approved you for a new credit card. Use it wisely and pay on time to boost your credit limit and score!

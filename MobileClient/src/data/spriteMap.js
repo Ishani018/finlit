@@ -1,61 +1,61 @@
 export const SPRITE_MAP = {
     // Static spouse variants (for dating app matches)
-    'groom_v1': require('../../assets/sprites/groom normal clothes.png'),
-    'groom_v2': require('../../assets/sprites/groom version 2 normal clothes.png'),
-    'groom_v3': require('../../assets/sprites/groom version 3 normal clothes.png'),
-    'bride_v1': require('../../assets/sprites/bride normal clothes.png'),
-    'bride_v2': require('../../assets/sprites/bride version 2 normal clothes.png'),
-    'bride_v3': require('../../assets/sprites/bride version 3 normal clothes.png'),
+    'groom_v1': require('../../assets/sprites/groom_normal_clothes.png'),
+    'groom_v2': require('../../assets/sprites/groom_version_2_normal_clothes.png'),
+    'groom_v3': require('../../assets/sprites/groom_version_3_normal_clothes.png'),
+    'bride_v1': require('../../assets/sprites/bride_normal_clothes.png'),
+    'bride_v2': require('../../assets/sprites/bride_version_2_normal_clothes.png'),
+    'bride_v3': require('../../assets/sprites/bride_version_3_normal_clothes.png'),
 
     // Young variants (ages 18–24)
-    'young_pia_1':     require('../../assets/sprites/young pia 1.png'),
-    'young_raj_1':     require('../../assets/sprites/young raj 1.png'),
-    'young_soms_1':    require('../../assets/sprites/young soms 1.png'),
-    'young_sia_1':     require('../../assets/sprites/young sia 1.png'),
-    'young_soni_1':    require('../../assets/sprites/young soni 1.png'),
-    'young_priya_1':   require('../../assets/sprites/young priya 1.png'),
-    'young_rahul_1':   require('../../assets/sprites/young rahul 1.png'),
-    'young_kav_1':     require('../../assets/sprites/young kav 1.png'),
+    'young_pia_1':     require('../../assets/sprites/young_pia_1.png'),
+    'young_raj_1':     require('../../assets/sprites/young_raj_1.png'),
+    'young_soms_1':    require('../../assets/sprites/young_soms_1.png'),
+    'young_sia_1':     require('../../assets/sprites/young_sia_1.png'),
+    'young_soni_1':    require('../../assets/sprites/young_soni_1.png'),
+    'young_priya_1':   require('../../assets/sprites/young_priya_1.png'),
+    'young_rahul_1':   require('../../assets/sprites/young_rahul_1.png'),
+    'young_kav_1':     require('../../assets/sprites/young_kav_1.png'),
 
     // Age variants — pia
-    'young_pia_1_mid':    require('../../assets/sprites/pia 25-30.png'),
-    'young_pia_1_older':  require('../../assets/sprites/pia middleage.png'),
-    'young_pia_1_senior': require('../../assets/sprites/pia 50plus.png'),
+    'young_pia_1_mid':    require('../../assets/sprites/pia_25-30.png'),
+    'young_pia_1_older':  require('../../assets/sprites/pia_middleage.png'),
+    'young_pia_1_senior': require('../../assets/sprites/pia_50plus.png'),
 
     // Age variants — raj
-    'young_raj_1_mid':    require('../../assets/sprites/raj 25-30.png'),
-    'young_raj_1_older':  require('../../assets/sprites/raj middleage.png'),
-    'young_raj_1_senior': require('../../assets/sprites/raj 50plus.png'),
+    'young_raj_1_mid':    require('../../assets/sprites/raj_25-30.png'),
+    'young_raj_1_older':  require('../../assets/sprites/raj_middleage.png'),
+    'young_raj_1_senior': require('../../assets/sprites/raj_50plus.png'),
 
     // Age variants — priya
-    'young_priya_1_mid':    require('../../assets/sprites/priya 25-30.png'),
-    'young_priya_1_older':  require('../../assets/sprites/priya middleage.png'),
-    'young_priya_1_senior': require('../../assets/sprites/priya 50plus.png'),
+    'young_priya_1_mid':    require('../../assets/sprites/priya_25-30.png'),
+    'young_priya_1_older':  require('../../assets/sprites/priya_middleage.png'),
+    'young_priya_1_senior': require('../../assets/sprites/priya_50plus.png'),
 
     // Age variants — kav
-    'young_kav_1_mid':    require('../../assets/sprites/kav 25-30.png'),
-    'young_kav_1_older':  require('../../assets/sprites/kav middleage.png'),
-    'young_kav_1_senior': require('../../assets/sprites/kav 50plus.png'),
+    'young_kav_1_mid':    require('../../assets/sprites/kav_25-30.png'),
+    'young_kav_1_older':  require('../../assets/sprites/kav_middleage.png'),
+    'young_kav_1_senior': require('../../assets/sprites/kav_50plus.png'),
 
     // Age variants — soms
-    'young_soms_1_mid':    require('../../assets/sprites/soms 25-30.png'),
-    'young_soms_1_older':  require('../../assets/sprites/soms middleage.png'),
-    'young_soms_1_senior': require('../../assets/sprites/soms 50plus.png'),
+    'young_soms_1_mid':    require('../../assets/sprites/soms_25-30.png'),
+    'young_soms_1_older':  require('../../assets/sprites/soms_middleage.png'),
+    'young_soms_1_senior': require('../../assets/sprites/soms_50plus.png'),
 
     // Age variants — sia
-    'young_sia_1_mid':    require('../../assets/sprites/sia 25-30.png'),
-    'young_sia_1_older':  require('../../assets/sprites/sia middleage.png'),
-    'young_sia_1_senior': require('../../assets/sprites/sia 50plus.png'),
+    'young_sia_1_mid':    require('../../assets/sprites/sia_25-30.png'),
+    'young_sia_1_older':  require('../../assets/sprites/sia_middleage.png'),
+    'young_sia_1_senior': require('../../assets/sprites/sia_50plus.png'),
 
     // Age variants — soni
-    'young_soni_1_mid':    require('../../assets/sprites/soni 25-30.png'),
-    'young_soni_1_older':  require('../../assets/sprites/soni middleage.png'),
-    'young_soni_1_senior': require('../../assets/sprites/soni 50plus.png'),
+    'young_soni_1_mid':    require('../../assets/sprites/soni_25-30.png'),
+    'young_soni_1_older':  require('../../assets/sprites/soni_middleage.png'),
+    'young_soni_1_senior': require('../../assets/sprites/soni_50plus.png'),
 
     // Age variants — rahul
-    'young_rahul_1_mid':    require('../../assets/sprites/rahul 25-30.png'),
-    'young_rahul_1_older':  require('../../assets/sprites/rahul middleage.png'),
-    'young_rahul_1_senior': require('../../assets/sprites/rahul 50plus.png'),
+    'young_rahul_1_mid':    require('../../assets/sprites/rahul_25-30.png'),
+    'young_rahul_1_older':  require('../../assets/sprites/rahul_middleage.png'),
+    'young_rahul_1_senior': require('../../assets/sprites/rahul_50plus.png'),
 
 };
 

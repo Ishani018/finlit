@@ -25,8 +25,8 @@ const C = {
 const TIERS = [
     { key: 'Tier 1', label: 'GIG & FREELANCE', color: '#6b7280', accent: '#9ca3af', icon: 'bolt',     image: require('../../assets/jobs/streamer.png') },
     { key: 'Tier 2', label: 'CAREERS',         color: '#3b82f6', accent: '#93c5fd', icon: 'briefcase', image: require('../../assets/jobs/SDE.png') },
-    { key: 'Tier 3', label: 'BUSINESS',        color: '#4ade80', accent: '#86efac', icon: 'store',     image: require('../../assets/jobs/irani cafe.png') },
-    { key: 'Tier 4', label: 'EXECUTIVE',       color: '#a78bfa', accent: '#c4b5fd', icon: 'crown',     image: require('../../assets/jobs/construction site.png') },
+    { key: 'Tier 3', label: 'BUSINESS',        color: '#4ade80', accent: '#86efac', icon: 'store',     image: require('../../assets/jobs/irani_cafe.png') },
+    { key: 'Tier 4', label: 'EXECUTIVE',       color: '#a78bfa', accent: '#c4b5fd', icon: 'crown',     image: require('../../assets/jobs/construction_site.png') },
 ];
 
 const MAX_SALARY = 1500000;

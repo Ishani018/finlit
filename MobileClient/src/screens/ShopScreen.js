@@ -24,21 +24,21 @@ const C = {
 };
 
 const ITEM_IMAGES = {
-    dal_chawal:       require('../../assets/groceries/dal chawal.png'),
-    bread_eggs:       require('../../assets/groceries/bread and eggs.png'),
-    instant_noodles:  require('../../assets/groceries/cup noodles.png'),
+    dal_chawal:       require('../../assets/groceries/dal_chawal.png'),
+    bread_eggs:       require('../../assets/groceries/bread_and_eggs.png'),
+    instant_noodles:  require('../../assets/groceries/cup_noodles.png'),
     fresh_veggies:    require('../../assets/groceries/veggies.png'),
     fruits:           require('../../assets/groceries/fruits.png'),
-    organic_meal_kit: require('../../assets/groceries/healthy meal box.png'),
-    protein_pack:     require('../../assets/groceries/paneer tofu.png'),
-    snack_box:        require('../../assets/groceries/chips snacks box.png'),
+    organic_meal_kit: require('../../assets/groceries/healthy_meal_box.png'),
+    protein_pack:     require('../../assets/groceries/paneer_tofu.png'),
+    snack_box:        require('../../assets/groceries/chips_snacks_box.png'),
     chai:             require('../../assets/groceries/chai.png'),
     milk:             require('../../assets/groceries/milk.png'),
     paratha:          require('../../assets/groceries/paratha.png'),
-    rajma_rice:       require('../../assets/groceries/rajma rice.png'),
+    rajma_rice:       require('../../assets/groceries/rajma_rice.png'),
     thaali:           require('../../assets/groceries/thaali.png'),
     smoothie:         require('../../assets/groceries/smoothis.png'),
-    mithai_box:       require('../../assets/groceries/mithai box.png'),
+    mithai_box:       require('../../assets/groceries/mithai_box.png'),
 };
 
 // ── Header ────────────────────────────────────────────────────────────────────
@@ -131,29 +131,29 @@ function GrocerySection({ onBack, onClose }) {
 
 const MEDICINE_IMAGES = {
     paracetamol:  require('../../assets/medicine/paracetemol.png'),
-    cough_syrup:  require('../../assets/medicine/cough syrup.png'),
+    cough_syrup:  require('../../assets/medicine/cough_syrup.png'),
     antacid:      require('../../assets/medicine/antacid.png'),
-    vitamin_c:    require('../../assets/medicine/ChatGPT Image May 16, 2026, 05_22_51 PM.png'),
+    vitamin_c:    require('../../assets/medicine/ChatGPT_Image_May_16,_2026,_05_22_51_PM.png'),
     multivitamin: require('../../assets/medicine/mulivitamins.png'),
-    first_aid:    require('../../assets/medicine/first aid.png'),
+    first_aid:    require('../../assets/medicine/first_aid.png'),
     antibiotics:  require('../../assets/medicine/antibiotic.png'),
-    bp_medicine:  require('../../assets/medicine/blood pressure.png'),
+    bp_medicine:  require('../../assets/medicine/blood_pressure.png'),
     ayurvedic:    require('../../assets/medicine/chyawanprash.png'),
-    calcium:      require('../../assets/medicine/ChatGPT Image May 16, 2026, 05_34_49 PM.png'),
+    calcium:      require('../../assets/medicine/ChatGPT_Image_May_16,_2026,_05_34_49_PM.png'),
 };
 
 const CLOTHES_IMAGES = {
-    school_bag:     require('../../assets/clothing and others/schoolbag.png'),
-    school_uniform: require('../../assets/clothing and others/school uniform.png'),
-    kids_books:     require('../../assets/clothing and others/storybooks.png'),
-    sports_kit:     require('../../assets/clothing and others/sports kit.png'),
-    video_game:     require('../../assets/clothing and others/video game.png'),
-    casual_wear:    require('../../assets/clothing and others/daily casual wear.png'),
-    ethnic_set:     require('../../assets/clothing and others/ethnic wear.png'),
-    formal_suit:    require('../../assets/clothing and others/suit.png'),
-    party_outfit:   require('../../assets/clothing and others/fancy party wear.png'),
-    sneakers:       require('../../assets/clothing and others/shoes.png'),
-    jewellery:      require('../../assets/clothing and others/jewellery.png'),
+    school_bag:     require('../../assets/clothing_and_others/schoolbag.png'),
+    school_uniform: require('../../assets/clothing_and_others/school_uniform.png'),
+    kids_books:     require('../../assets/clothing_and_others/storybooks.png'),
+    sports_kit:     require('../../assets/clothing_and_others/sports_kit.png'),
+    video_game:     require('../../assets/clothing_and_others/video_game.png'),
+    casual_wear:    require('../../assets/clothing_and_others/daily_casual_wear.png'),
+    ethnic_set:     require('../../assets/clothing_and_others/ethnic_wear.png'),
+    formal_suit:    require('../../assets/clothing_and_others/suit.png'),
+    party_outfit:   require('../../assets/clothing_and_others/fancy_party_wear.png'),
+    sneakers:       require('../../assets/clothing_and_others/shoes.png'),
+    jewellery:      require('../../assets/clothing_and_others/jewellery.png'),
 };
 
 // ── Pharmacy section ──────────────────────────────────────────────────────────

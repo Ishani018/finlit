@@ -8,9 +8,9 @@ const BDAY_CAKE   = require('../../assets/ui_comp/birthday_cake.png');
 const SPOUSE_CAKE = require('../../assets/ui_comp/spouse_birthday.png');
 const CHILD_CAKE  = require('../../assets/ui_comp/children_birthday_cake.png');
 const HOSPITAL_IMG = require('../../assets/ui_comp/hospital.png');
-const QUIET_IMG   = require('../../assets/ui_comp/quiet dinner.png');
-const PARTY_IMG   = require('../../assets/ui_comp/house party birthday.png');
-const LAVISH_IMG  = require('../../assets/ui_comp/lavish birthday bash.png');
+const QUIET_IMG   = require('../../assets/ui_comp/quiet_dinner.png');
+const PARTY_IMG   = require('../../assets/ui_comp/house_party_birthday.png');
+const LAVISH_IMG  = require('../../assets/ui_comp/lavish_birthday_bash.png');
 const BROKE_IMG   = require('../../assets/ui_comp/brokebirthday.png');
 const WARN_IMG    = require('../../assets/ui_comp/warning.png');
 

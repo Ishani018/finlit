@@ -8,16 +8,16 @@ const CARD_H = 110;
 
 // Static requires — Metro needs all paths at bundle time
 const IMAGES = {
-    work:      require('../../assets/jobs/government job.png'),
-    study:     require('../../assets/jobs/coaching centre.png'),
+    work:      require('../../assets/jobs/government_job.png'),
+    study:     require('../../assets/jobs/coaching_centre.png'),
     invest:    require('../../assets/CA_Office.png'),
     bank:      require('../../assets/bank.png'),
-    insurance: require('../../assets/jobs/chemist drugstore.png'),
+    insurance: require('../../assets/jobs/chemist_drugstore.png'),
     home:      require('../../assets/properties/1bhk_starter_apartment.png'),
     family:    require('../../assets/properties/family_house_with_garden_and_backyard.png'),
-    grocery:   require('../../assets/jobs/kirana store.png'),
+    grocery:   require('../../assets/jobs/kirana_store.png'),
     goals:     require('../../assets/properties/3_floor_apartment_complex_with_penthouse.png'),
-    help:      require('../../assets/jobs/coaching centre.png'),
+    help:      require('../../assets/jobs/coaching_centre.png'),
 };
 
 const SECTIONS = [

@@ -1,9 +1,9 @@
 import { View, Text, Image, TouchableOpacity, ScrollView, Modal, SafeAreaView } from 'react-native';
 
 const BDAY_CAKE   = require('../../assets/ui_comp/birthday_cake.png');
-const QUIET_IMG   = require('../../assets/ui_comp/quiet dinner.png');
-const PARTY_IMG   = require('../../assets/ui_comp/house party birthday.png');
-const LAVISH_IMG  = require('../../assets/ui_comp/lavish birthday bash.png');
+const QUIET_IMG   = require('../../assets/ui_comp/quiet_dinner.png');
+const PARTY_IMG   = require('../../assets/ui_comp/house_party_birthday.png');
+const LAVISH_IMG  = require('../../assets/ui_comp/lavish_birthday_bash.png');
 const HAPPY_ICON  = require('../../assets/ui_comp/happyicon.png');
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

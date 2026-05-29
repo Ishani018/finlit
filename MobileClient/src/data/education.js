@@ -55,7 +55,7 @@ export const EDUCATION = [
         monthly_tuition: 25000,
         total_cost: 300000,
         req_degrees: [],
-        image: require('../../assets/jobs/interior designer.png'),
+        image: require('../../assets/jobs/interior_designer.png'),
         description: '1-year diploma in design. Quick path to creative careers.'
     },
     {
@@ -66,7 +66,7 @@ export const EDUCATION = [
         monthly_tuition: 65000,
         total_cost: 780000,
         req_degrees: [],
-        image: require('../../assets/jobs/chef in high end restaurant.png'),
+        image: require('../../assets/jobs/chef_in_high_end_restaurant.png'),
         description: '1-year intensive culinary school. Learn to cook at a professional level.'
     },
     {
@@ -88,7 +88,7 @@ export const EDUCATION = [
         monthly_tuition: 70000,
         total_cost: 4200000,
         req_degrees: [],
-        image: require('../../assets/jobs/law firm.png'),
+        image: require('../../assets/jobs/law_firm.png'),
         description: '5-year LLB. Gruelling but opens the door to Law Firm Partner — one of the highest-earning careers in the game.'
     }
 ];

@@ -22,24 +22,24 @@ const C = {
     dark:     '#2a3560',
 };
 
-const KIRANA_IMG = require('../../assets/jobs/kirana store.png');
+const KIRANA_IMG = require('../../assets/jobs/kirana_store.png');
 
 const ITEM_IMAGES = {
-    dal_chawal:       require('../../assets/groceries/dal chawal.png'),
-    bread_eggs:       require('../../assets/groceries/bread and eggs.png'),
-    instant_noodles:  require('../../assets/groceries/cup noodles.png'),
+    dal_chawal:       require('../../assets/groceries/dal_chawal.png'),
+    bread_eggs:       require('../../assets/groceries/bread_and_eggs.png'),
+    instant_noodles:  require('../../assets/groceries/cup_noodles.png'),
     fresh_veggies:    require('../../assets/groceries/veggies.png'),
     fruits:           require('../../assets/groceries/fruits.png'),
-    organic_meal_kit: require('../../assets/groceries/healthy meal box.png'),
-    protein_pack:     require('../../assets/groceries/paneer tofu.png'),
-    snack_box:        require('../../assets/groceries/chips snacks box.png'),
+    organic_meal_kit: require('../../assets/groceries/healthy_meal_box.png'),
+    protein_pack:     require('../../assets/groceries/paneer_tofu.png'),
+    snack_box:        require('../../assets/groceries/chips_snacks_box.png'),
     chai:             require('../../assets/groceries/chai.png'),
     milk:             require('../../assets/groceries/milk.png'),
     paratha:          require('../../assets/groceries/paratha.png'),
-    rajma_rice:       require('../../assets/groceries/rajma rice.png'),
+    rajma_rice:       require('../../assets/groceries/rajma_rice.png'),
     thaali:           require('../../assets/groceries/thaali.png'),
     smoothie:         require('../../assets/groceries/smoothis.png'),
-    mithai_box:       require('../../assets/groceries/mithai box.png'),
+    mithai_box:       require('../../assets/groceries/mithai_box.png'),
 };
 
 function ShopCard({ item, balance, onBuy }) {

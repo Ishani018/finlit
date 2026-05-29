@@ -197,7 +197,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 8000000,
         maintenance: 12000,
         rental_income: 45000,
-        image: require('../../assets/properties/investment properties/cow_shed.png'),
+        image: require('../../assets/properties/investment_properties/cow_shed.png'),
         description: 'Small dairy operation. Lease to farmers for milk production. Maintenance includes shed repairs.'
     },
     {
@@ -207,7 +207,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 15000000,
         maintenance: 8000,
         rental_income: 60000,
-        image: require('../../assets/properties/investment properties/small_farm.png'),
+        image: require('../../assets/properties/investment_properties/small_farm.png'),
         description: 'Compact farmland for vegetables/crops. Tenant farms it, you collect lease.'
     },
     {
@@ -217,7 +217,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 25000000,
         maintenance: 15000,
         rental_income: 100000,
-        image: require('../../assets/properties/investment properties/badminton_sports_facility.png'),
+        image: require('../../assets/properties/investment_properties/badminton_sports_facility.png'),
         description: 'Indoor badminton courts. Rent to sports clubs or coaching centers.'
     },
     {
@@ -227,7 +227,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 35000000,
         maintenance: 18000,
         rental_income: 140000,
-        image: require('../../assets/properties/investment properties/basketball_sports_facility.png'),
+        image: require('../../assets/properties/investment_properties/basketball_sports_facility.png'),
         description: 'Outdoor basketball courts with seating. Rent for tournaments and training.'
     },
 
@@ -239,7 +239,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 20000000,
         maintenance: 5000,
         rental_income: 80000,
-        image: require('../../assets/properties/investment properties/commerical_parking_lot.png'),
+        image: require('../../assets/properties/investment_properties/commerical_parking_lot.png'),
         description: 'Paved land in business district. Low maintenance, income depends on city traffic patterns.'
     },
     {
@@ -249,7 +249,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 85000000,
         maintenance: 10000,
         rental_income: 320000,
-        image: require('../../assets/properties/investment properties/commercial_lot.png'),
+        image: require('../../assets/properties/investment_properties/commercial_lot.png'),
         description: 'Retail space with long commercial leases. You pay insurance/compliance, tenant pays interiors.'
     },
     {
@@ -259,7 +259,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 50000000,
         maintenance: 25000,
         rental_income: 200000,
-        image: require('../../assets/properties/investment properties/high_end_gym.png'),
+        image: require('../../assets/properties/investment_properties/high_end_gym.png'),
         description: 'High-end gym with equipment. Lease to fitness franchises or operators.'
     },
     {
@@ -269,7 +269,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 60000000,
         maintenance: 20000,
         rental_income: 250000,
-        image: require('../../assets/properties/investment properties/marraige_banquet_hall.png'),
+        image: require('../../assets/properties/investment_properties/marraige_banquet_hall.png'),
         description: 'Event venue for weddings. High seasonal demand but requires frequent cleaning and repairs.'
     },
 
@@ -281,7 +281,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 80000000,
         maintenance: 30000,
         rental_income: 280000,
-        image: require('../../assets/properties/investment properties/coffee_estate.png'),
+        image: require('../../assets/properties/investment_properties/coffee_estate.png'),
         description: 'Large coffee plantation. Lease to agricultural companies for cultivation.'
     },
     {
@@ -291,7 +291,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 100000000,
         maintenance: 35000,
         rental_income: 350000,
-        image: require('../../assets/properties/investment properties/high_end_farm.png'),
+        image: require('../../assets/properties/investment_properties/high_end_farm.png'),
         description: 'Premium farmland with modern irrigation. Lease for organic farming or agribusiness.'
     },
     {
@@ -313,7 +313,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 200000000,
         maintenance: 40000,
         rental_income: 800000,
-        image: require('../../assets/properties/investment properties/villa_gated_community.png'),
+        image: require('../../assets/properties/investment_properties/villa_gated_community.png'),
         description: 'Entire gated community of luxury villas. Collect rent from multiple high-end tenants.'
     },
     {
@@ -323,7 +323,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 500000000,
         maintenance: 80000,
         rental_income: 2000000,
-        image: require('../../assets/properties/investment properties/mall.png'),
+        image: require('../../assets/properties/investment_properties/mall.png'),
         description: 'Multi-floor shopping complex. Massive rental income from retail tenants but high upkeep costs.'
     },
     {
@@ -333,7 +333,7 @@ export const COMMERCIAL_PROPERTIES = [
         price: 800000000,
         maintenance: 150000,
         rental_income: 3500000,
-        image: require('../../assets/properties/investment properties/5_star_resort.png'),
+        image: require('../../assets/properties/investment_properties/5_star_resort.png'),
         description: 'Ultra-luxury resort property. Lease to hospitality chains for premium returns.'
     }
 ];

@@ -26,46 +26,46 @@ const C = {
     dark:     '#2a3560',
 };
 
-const BANNER_IMG     = require('../../assets/achivements/family portrait.png');
-const BANQUET_IMG    = require('../../assets/properties/investment properties/marraige_banquet_hall.png');
+const BANNER_IMG     = require('../../assets/achivements/family_portrait.png');
+const BANQUET_IMG    = require('../../assets/properties/investment_properties/marraige_banquet_hall.png');
 const GRAVESTONE_IMG = require('../../assets/ui_comp/gravestone.png');
 
 const DEP_IMAGES = {
-    baby_son:           require('../../assets/dependents/baby son.png'),
-    baby_daughter:      require('../../assets/dependents/baby daughter.png'),
-    toddler_son:        require('../../assets/dependents/toddler son.png'),
-    toddler_daughter:   require('../../assets/dependents/toddler daughter.png'),
-    preschool_son:      require('../../assets/dependents/pre schooler son.png'),
-    preschool_daughter: require('../../assets/dependents/pre schooler daughter.png'),
-    teenage_son:        require('../../assets/dependents/teenage son.png'),
-    teenage_daughter:   require('../../assets/dependents/teenage daughter.png'),
-    elderly_parents:    require('../../assets/dependents/elderly parents couple.png'),
+    baby_son:           require('../../assets/dependents/baby_son.png'),
+    baby_daughter:      require('../../assets/dependents/baby_daughter.png'),
+    toddler_son:        require('../../assets/dependents/toddler_son.png'),
+    toddler_daughter:   require('../../assets/dependents/toddler_daughter.png'),
+    preschool_son:      require('../../assets/dependents/pre_schooler_son.png'),
+    preschool_daughter: require('../../assets/dependents/pre_schooler_daughter.png'),
+    teenage_son:        require('../../assets/dependents/teenage_son.png'),
+    teenage_daughter:   require('../../assets/dependents/teenage_daughter.png'),
+    elderly_parents:    require('../../assets/dependents/elderly_parents_couple.png'),
     elderly_mother:     require('../../assets/dependents/elderlymother.png'),
     elderly_father:     require('../../assets/dependents/elderlyfather.png'),
-    elderly_couple:     require('../../assets/dependents/elderly parents couple.png'),
-    adopted_baby:       require('../../assets/dependents/adopted baby.png'),
+    elderly_couple:     require('../../assets/dependents/elderly_parents_couple.png'),
+    adopted_baby:       require('../../assets/dependents/adopted_baby.png'),
 };
 
 const INSURE_COLORS = { health: '#f87171', life: '#3b82f6', home: '#fbbf24' };
 const INSURE_IMAGES = {
-    health: require('../../assets/jobs/chemist drugstore.png'),
+    health: require('../../assets/jobs/chemist_drugstore.png'),
     life:   require('../../assets/bank.png'),
     home:   require('../../assets/properties/1bhk_starter_apartment.png'),
 };
 
 const GROOM_IMG = require('../../assets/sprites/groom.png');
-const GROOM_V2_IMG = require('../../assets/sprites/groom version 2.png');
-const GROOM_V3_IMG = require('../../assets/sprites/groom version 3.png');
+const GROOM_V2_IMG = require('../../assets/sprites/groom_version_2.png');
+const GROOM_V3_IMG = require('../../assets/sprites/groom_version_3.png');
 const BRIDE_IMG = require('../../assets/sprites/bride.png');
-const BRIDE_V2_IMG = require('../../assets/sprites/bride version 2.png');
-const BRIDE_V3_IMG = require('../../assets/sprites/bride version 3.png');
+const BRIDE_V2_IMG = require('../../assets/sprites/bride_version_2.png');
+const BRIDE_V3_IMG = require('../../assets/sprites/bride_version_3.png');
 
-const GROOM_NORMAL_IMG = require('../../assets/sprites/groom normal clothes.png');
-const GROOM_V2_NORMAL_IMG = require('../../assets/sprites/groom version 2 normal clothes.png');
-const GROOM_V3_NORMAL_IMG = require('../../assets/sprites/groom version 3 normal clothes.png');
-const BRIDE_NORMAL_IMG = require('../../assets/sprites/bride normal clothes.png');
-const BRIDE_V2_NORMAL_IMG = require('../../assets/sprites/bride version 2 normal clothes.png');
-const BRIDE_V3_NORMAL_IMG = require('../../assets/sprites/bride version 3 normal clothes.png');
+const GROOM_NORMAL_IMG = require('../../assets/sprites/groom_normal_clothes.png');
+const GROOM_V2_NORMAL_IMG = require('../../assets/sprites/groom_version_2_normal_clothes.png');
+const GROOM_V3_NORMAL_IMG = require('../../assets/sprites/groom_version_3_normal_clothes.png');
+const BRIDE_NORMAL_IMG = require('../../assets/sprites/bride_normal_clothes.png');
+const BRIDE_V2_NORMAL_IMG = require('../../assets/sprites/bride_version_2_normal_clothes.png');
+const BRIDE_V3_NORMAL_IMG = require('../../assets/sprites/bride_version_3_normal_clothes.png');
 
 const SPOUSE_IMAGES = {
     groom: GROOM_NORMAL_IMG, groom_v1: GROOM_NORMAL_IMG, groom_v2: GROOM_V2_NORMAL_IMG, groom_v3: GROOM_V3_NORMAL_IMG,
@@ -139,7 +139,7 @@ function EmptySpouseCard({ onPress }) {
                 <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.5)' }} />
                 <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <Image source={require('../../assets/ui_comp/marraige congratulations.png')} style={{ width: 48, height: 48, opacity: 0.85 }} resizeMode="contain" />
+                    <Image source={require('../../assets/ui_comp/marraige_congratulations.png')} style={{ width: 48, height: 48, opacity: 0.85 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.pink + 'cc', letterSpacing: 2 }}>+ SPOUSE</Text>
                 </View>
             </View>
@@ -744,7 +744,7 @@ function MarriagePickModal({ onPick, onClose }) {
                                     {selectedCandidate.desc}
                                 </Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                    <Image source={require('../../assets/ui_comp/marraige congratulations.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                                    <Image source={require('../../assets/ui_comp/marraige_congratulations.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim }}>₹5L wedding cost</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -1058,7 +1058,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                 r.msg,
                                 r.success ? 'success' : 'error',
                                 null, 'OK', null, null,
-                                r.success ? { isSprite: false, source: require('../../assets/ui_comp/marraige congratulations.png') } : null
+                                r.success ? { isSprite: false, source: require('../../assets/ui_comp/marraige_congratulations.png') } : null
                             );
                         }
                     }}
@@ -1125,7 +1125,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.92)', zIndex: 200, alignItems: 'center', justifyContent: 'center', padding: PAD }}>
                     <View style={{ width: '100%', backgroundColor: C.panel, borderWidth: 1, borderColor: C.pink + '60' }}>
                         <View style={{ backgroundColor: C.pink, paddingVertical: 10, paddingHorizontal: PAD, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                            <Image source={require('../../assets/dependents/baby son.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                            <Image source={require('../../assets/dependents/baby_son.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>NAME YOUR BABY</Text>
                         </View>
                         <View style={{ padding: PAD }}>

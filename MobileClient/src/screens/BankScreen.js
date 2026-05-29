@@ -23,11 +23,11 @@ const FD_OPTIONS = [
 
 const LOAN_TYPE_META = {
     personal_loan:        { name: 'Personal Loan',         icon: 'user',            color: '#f87171', img: require('../../assets/ui_comp/borrow.png') },
-    education_loan:       { name: 'Education Loan',        icon: 'graduation-cap',  color: '#818cf8', img: require('../../assets/jobs/coaching centre.png') },
+    education_loan:       { name: 'Education Loan',        icon: 'graduation-cap',  color: '#818cf8', img: require('../../assets/jobs/coaching_centre.png') },
     home_loan:            { name: 'Home Loan',             icon: 'home',            color: '#4ade80', img: require('../../assets/properties/1bhk_starter_apartment.png') },
     business_loan:        { name: 'Business Loan',         icon: 'briefcase',       color: '#fbbf24', img: require('../../assets/properties/CA_Office.png') },
     loan_against_property:{ name: 'Loan Against Property', icon: 'building',        color: '#c084fc', img: require('../../assets/properties/city_apartment_with_2_beds_and_1_bath.png') },
-    marriage_loan:        { name: 'Marriage Loan',         icon: 'heart',           color: '#ec4899', img: require('../../assets/properties/investment properties/marraige_banquet_hall.png') },
+    marriage_loan:        { name: 'Marriage Loan',         icon: 'heart',           color: '#ec4899', img: require('../../assets/properties/investment_properties/marraige_banquet_hall.png') },
     'Personal Loan':      { name: 'Personal Loan',         icon: 'user',            color: '#f87171', img: require('../../assets/ui_comp/borrow.png') },
 };
 
@@ -77,7 +77,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
         {
             id: 'standard',
             name: 'Standard Credit Card',
-            image: require('../../assets/ui_comp/credit card.png'),
+            image: require('../../assets/ui_comp/credit_card.png'),
             desc: 'Pay for purchases this month, settle the bill next month — interest-free. Miss the due date and you pay 36% APR.',
             criteriaText: 'Need credit score ≥ 600',
             isEligible: creditScore >= 600,
@@ -86,7 +86,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
         {
             id: 'premium',
             name: 'Premium Reserve Card',
-            image: require('../../assets/ui_comp/premium credit card.png'),
+            image: require('../../assets/ui_comp/premium_credit_card.png'),
             desc: 'Exclusive lifestyle perks, airport lounge access, and a massive credit limit. Annual fee of ₹5,000.',
             criteriaText: 'Need score 750+ AND (Net Worth ₹10L OR Salary ₹1L/mo)',
             isEligible: creditScore >= 750 && (netWorth >= 1000000 || (currentJob && currentJob.salary >= 100000)),
@@ -95,7 +95,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
         {
             id: 'minor',
             name: 'Supplementary Minor Card',
-            image: require('../../assets/ui_comp/supplementary minor account credit card.png'),
+            image: require('../../assets/ui_comp/supplementary_minor_account_credit_card.png'),
             desc: "Build your child's credit history early, giving a massive boost to their college prospects and reducing tuition loans later.",
             criteriaText: 'Must have at least one child (dependent)',
             isEligible: dependents.length > 0,
@@ -222,7 +222,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                     {(() => {
                         const secondary = [
                             { onPress: () => { if (totalMonthsPlayed < 10) { onShowDialog('Locked', 'CA Services unlock in Month 10.', 'error'); return; } setTab('ca'); }, img: require('../../assets/CA_Office.png'), accent: '#a78bfa', name: 'Taxes & ITR', sub: caSubscribed ? 'CA Active' : (itrFiled?.[turn?.year] ? 'Filed' : 'Pending'), locked: totalMonthsPlayed < 10 },
-                            { onPress: () => setTab('card'), img: require('../../assets/ui_comp/cards landing page icon.png'), accent: '#60a5fa', name: 'Credit Card', sub: (activeCreditCards?.length > 0 || creditCard) ? 'Active' : 'Build credit', locked: false },
+                            { onPress: () => setTab('card'), img: require('../../assets/ui_comp/cards_landing_page_icon.png'), accent: '#60a5fa', name: 'Credit Card', sub: (activeCreditCards?.length > 0 || creditCard) ? 'Active' : 'Build credit', locked: false },
                             { onPress: () => { if (!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000)) { onShowDialog('Locked', 'Unlocks at Month 6.', 'error'); return; } setTab('retire'); }, img: require('../../assets/ui_comp/retirement_buckets.png'), accent: '#818cf8', name: 'Retirement', sub: ppf?.balance > 0 ? `₹${(ppf.balance/1000).toFixed(0)}k saved` : 'PPF · NPS', locked: !(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) },
                             { onPress: () => { if (!dependents.some(d => d.type === 'child')) { onShowDialog('Locked', 'Need a child first.', 'error'); return; } setTab('childSavings'); }, img: require('../../assets/ui_comp/saving_for_child.png'), accent: '#ec4899', name: 'Child Savings', sub: 'Build their future', locked: !dependents.some(d => d.type === 'child') },
                             { onPress: () => setTab('gold'), img: require('../../assets/ui_comp/gold_vault.png'), accent: '#fbbf24', name: 'Gold', sub: totalGoldValue > 0 ? `₹${(totalGoldValue/1000).toFixed(0)}k held` : `₹${goldPrice?.toLocaleString()}/g`, locked: false },

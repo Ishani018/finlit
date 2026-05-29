@@ -1,0 +1,171 @@
+diff --git a/MobileClient/src/context/GameContext.js b/MobileClient/src/context/GameContext.js
+index e3131a1..4b8a29e 100644
+--- a/MobileClient/src/context/GameContext.js
++++ b/MobileClient/src/context/GameContext.js
+@@ -177,6 +177,7 @@ export const GameProvider = ({ children }) => {
+     const [pendingJobInterview, setPendingJobInterview] = useState(null);
+     const [lastHappiness, setLastHappiness] = useState(50);
+     const [pendingDecision, setPendingDecision] = useState(null);
++    const [pendingDecisionQueue, setPendingDecisionQueue] = useState([]);
+     const [firedDecisions, setFiredDecisions] = useState([]);
+     // Tracks the last birthday party choice for the Celebration Room visual
+     const [lastCelebrationChoice, setLastCelebrationChoice] = useState(null); // { label, who: 'player'|depName }
+@@ -200,7 +201,7 @@ export const GameProvider = ({ children }) => {
+     const stateRef = useRef({});
+     useEffect(() => {
+         stateRef.current = {
+-            balance, currentJob, pendingApplications, pendingDecision, pendingJobInterview, currentHousing, properties, portfolio,
++            balance, currentJob, pendingApplications, pendingDecision, pendingDecisionQueue, pendingJobInterview, currentHousing, properties, portfolio,
+             dependents, loans, activeInsurance, creditScore, activeEffects,
+             marketPrices, degrees, totalMonthsPlayed, turn, gameOver,
+             activeEnrollment, mfPortfolio, mfNavs, sipPlans, ppf, nps,
+@@ -235,6 +236,7 @@ export const GameProvider = ({ children }) => {
+                 currentJob: stateRef.current.currentJob,
+                 pendingApplications: stateRef.current.pendingApplications,
+                 pendingDecision: stateRef.current.pendingDecision,
++                pendingDecisionQueue: stateRef.current.pendingDecisionQueue,
+                 pendingJobInterview: stateRef.current.pendingJobInterview,
+                 currentHousingId: stateRef.current.currentHousing?.id || 'hostel',
+                 playerSprite, playerName, playerBirthday,
+@@ -317,6 +319,7 @@ export const GameProvider = ({ children }) => {
+                     setPendingDecision(null);
+                 } else {
+                     setPendingDecision(s.pendingDecision);
++                if (s.pendingDecisionQueue) setPendingDecisionQueue(s.pendingDecisionQueue);
+                 }
+             }
+             if (s.pendingJobInterview !== undefined) setPendingJobInterview(s.pendingJobInterview);
+@@ -3050,10 +3053,10 @@ export const GameProvider = ({ children }) => {
+         }
+ 
+         // ITR filing deadline — every July (month 7), fired once per game year
+-        if (turn.month === 7 && !pendingDecision && totalMonthsPlayed >= 6) {
++        if (turn.month === 7 && totalMonthsPlayed >= 6) {
+             const gameYear = turn.year;
+             if (!itrFiled[gameYear] && (currentJob || netWorth > 250000)) {
+-                setPendingDecision({
++                decisionsToQueue.push({
+                     id: `itr_${gameYear}`,
+                     name: 'ITR Filing Deadline',
+                     emoji: '📄',
+@@ -3075,10 +3078,10 @@ export const GameProvider = ({ children }) => {
+         }
+ 
+         // Budget Day — every February (month 2), fire a budget choice event
+-        if (turn.month === 2 && !pendingDecision && totalMonthsPlayed >= 2) {
++        if (turn.month === 2 && totalMonthsPlayed >= 2) {
+             const yearIndex = Math.floor(totalMonthsPlayed / 12);
+             const budgetEvent = BUDGET_EVENTS[yearIndex % BUDGET_EVENTS.length];
+-            setPendingDecision({ ...budgetEvent, isBudget: true });
++            decisionsToQueue.push({ ...budgetEvent, isBudget: true });
+             setIsPlaying(false);
+         }
+ 
+@@ -3095,7 +3098,7 @@ export const GameProvider = ({ children }) => {
+         };
+ 
+         let playerBdayYearToCelebrate = null;
+-        if (bdayMonth && totalMonthsPlayed > 0 && !pendingDecision) {
++        if (bdayMonth && totalMonthsPlayed > 0) {
+             const startYear = 2024;
+             for (let y = startYear; y <= turn.year; y++) {
+                 if (!firedDecisions.includes(`bday_${y}`)) {
+@@ -3172,9 +3175,9 @@ export const GameProvider = ({ children }) => {
+                 setHappiness(prev => Math.max(0, prev - 25));
+                 setFiredDecisions(prev => [...prev, bdayDecisionId]);
+                 setIsPlaying(false);
+-            } else if (!pendingDecision) {
++            } else {
+                 // Regular Birthday Party (Forced)
+-                setPendingDecision({
++                decisionsToQueue.push({
+                     id: `bday_${totalMonthsPlayed}`,
+                     name: `Happy ${getOrdinal(currentAge)} Birthday!`,
+                     isHospital: false,
+@@ -3190,7 +3193,9 @@ export const GameProvider = ({ children }) => {
+                 setFiredDecisions(prev => [...prev, bdayDecisionId]);
+                 setIsPlaying(false);
+             }
+-        } else if (!pendingDecision && totalMonthsPlayed > 0) {
++        }
++
++        if (totalMonthsPlayed > 0) {
+             // Dependent Birthdays — check if they missed a past birthday or are due for this year's
+             const bdayDependent = dependents.find(d => {
+                 if (d.bdayMonth === undefined || d.custody === 'ex') return false;
+@@ -3234,7 +3239,7 @@ export const GameProvider = ({ children }) => {
+                 if (balance < 2500) {
+                     choices.push({ label: 'Skip Party (Too Broke)', color: '#445070', effect: { type: 'birthday_celebration', choiceLabel: 'Skip Party', amount: 0, happiness: isSpouse ? -50 : -20, dependentId: bdayDependent.id, msg: 'Your family is severely disappointed.' } });
+                 }
+-                setPendingDecision({
++                decisionsToQueue.push({
+                     id: `dep_bday_${bdayDependent.id}_${totalMonthsPlayed}`,
+                     name: `Happy ${getOrdinal(age)} Birthday, ${bdayDependent.name}!`,
+                     emoji: '🎂',
+@@ -3489,6 +3494,7 @@ export const GameProvider = ({ children }) => {
+             return prev.filter(l => l.missedPayments < 3);
+         });
+ 
++        const nextDependents = [];
+         // Expecting Child logic
+         if (expectingChild) {
+             const activeDeps = dependents.filter(d => d.custody !== 'ex');
+@@ -3517,7 +3523,7 @@ export const GameProvider = ({ children }) => {
+                     : INDIAN_MALE_NAMES[Math.floor(Math.random() * INDIAN_MALE_NAMES.length)]);
+ 
+                 // Add the child (with custody undefined initially)
+-                setDependents(prev => [...prev, {
++                nextDependents.push({
+                     id: `dep_child_${Date.now()}`,
+                     type: 'child',
+                     name: finalChildName,
+@@ -3531,7 +3537,7 @@ export const GameProvider = ({ children }) => {
+                     spouseId: expectingChild.spouseId,
+                     bdayMonth: turn.month,
+                     monthAdded: totalMonthsPlayed,
+-                }]);
++                });
+                 setExpectingChild(null);
+                 
+                 // If divorced from the child's other parent, trigger Custody Dilemma for the newborn
+@@ -3588,7 +3594,6 @@ export const GameProvider = ({ children }) => {
+         }
+ 
+         // Age children + decay dependent health each month
+-        const nextDependents = [];
+         let setGamePaused = false;
+ 
+         dependents.forEach(d => {
+@@ -3605,6 +3610,7 @@ export const GameProvider = ({ children }) => {
+                     latestCrisis = deathEntry;
+                     setHappiness(prev => Math.max(0, prev - 80));
+                     setGamePaused = true;
++                    nextDependents.push({...d, health: 0, isDead: true});
+                     return;
+                 }
+                 const prevAge = d.childAgeMonths || 0;
+@@ -3651,7 +3657,8 @@ export const GameProvider = ({ children }) => {
+                     latestCrisis = deathEntry;
+                     setHappiness(prev => Math.max(0, prev - 50));
+                     setGamePaused = true;
+-                    return; // omit from nextDependents to kill them off
++                    nextDependents.push({...d, health: 0, isDead: true});
++                    return; // mark dead instead of omitting
+                 }
+                 nextDependents.push({ ...d, health: newHealth });
+                 return;
+@@ -3709,6 +3716,14 @@ export const GameProvider = ({ children }) => {
+             }
+         }
+ 
++        // Process Queued Decisions
++        if (decisionsToQueue.length > 0) {
++            setPendingDecision(decisionsToQueue[0]);
++            if (decisionsToQueue.length > 1) {
++                setPendingDecisionQueue(decisionsToQueue.slice(1));
++            }
++        }
++
+         // Credit Card popup offer
+         if (!activeCreditCards.includes('standard') && !activeCreditCards.includes('premium') && creditScore >= 600 && Math.random() < 0.10) {
+             setPendingCreditCardOffer(true);

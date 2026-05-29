@@ -1,0 +1,144 @@
+diff --git a/MobileClient/src/screens/FamilyScreen.js b/MobileClient/src/screens/FamilyScreen.js
+index bf8438c..05d4db8 100644
+--- a/MobileClient/src/screens/FamilyScreen.js
++++ b/MobileClient/src/screens/FamilyScreen.js
+@@ -172,9 +172,10 @@ function EmptySpouseCard({ onPress }) {
+ 
+ // ── Child card (fits in 2-col grid) ──────────────────────────────────────────
+ function ChildCard({ child, onPress }) {
+-    const stage = getChildStage(child.childAgeMonths || 0);
++    const isDead = child.isDead;
++    const stage = isDead ? { label: 'DECEASED', color: '#666', cost: '₹0/mo' } : getChildStage(child.childAgeMonths || 0);
+     const ageYr = Math.floor((child.childAgeMonths || 0) / 12);
+-    const img   = getChildImage(child.gender, child.childAgeMonths || 0);
++    const img   = isDead ? GRAVESTONE_IMG : getChildImage(child.gender, child.childAgeMonths || 0);
+     const hp    = child.health ?? 80;
+     
+     const isEx = child.custody === 'ex';
+@@ -208,13 +209,15 @@ function ChildCard({ child, onPress }) {
+                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, lineHeight: 22 }} numberOfLines={1}>{child.name}</Text>
+                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
+                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isEx ? C.gold : stage.color }}>
+-                        {isEx ? '₹10,000/mo' : stage.cost}
++                        {isDead ? 'Rest in Peace' : (isEx ? '₹10,000/mo' : stage.cost)}
+                     </Text>
+-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor(hp) }}>{Math.round(hp)}HP</Text>
+-                </View>
+-                <View style={{ height: 4, backgroundColor: C.bg, marginTop: 7 }}>
+-                    <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp) }} />
++                    {!isDead && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: hpColor(hp) }}>{Math.round(hp)}HP</Text>}
+                 </View>
++                {!isDead && (
++                    <View style={{ height: 4, backgroundColor: C.bg, marginTop: 7 }}>
++                        <View style={{ height: '100%', width: `${hp}%`, backgroundColor: hpColor(hp) }} />
++                    </View>
++                )}
+             </View>
+         </TouchableOpacity>
+     );
+@@ -1051,99 +1054,14 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
+                 <SectionLabel label="HOUSEHOLD" />
+                 <View style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+                     <PersonCard
+-                        image={spriteImg}
+-                        headCrop
+-                        name={playerName}
+-                        tag="YOU"
+-                        color={C.gold}
+-                        sub1={`Age ${playerAge}`}
+-                        sub2={`₹${balance.toLocaleString()}`}
+-                    />
+-                    {spouse ? (
+-                        <PersonCard
+-                            image={getSpouseImage(spouse.spouseSprite) || BRIDE_IMG}
+-                            headCrop
+-                            name={spouse.name}
+-                            tag={spouse.marriageNumber === 2 ? '2ND SPOUSE' : spouse.marriageNumber === 3 ? '3RD SPOUSE' : spouse.marriageNumber > 3 ? `${spouse.marriageNumber}TH SPOUSE` : 'SPOUSE'}
+-                            color={C.pink}
+-                            sub1={spouse.isWorking ? `+₹${(spouse.income || 0).toLocaleString()}/mo` : 'Homemaker'}
+-                            sub2="₹5,000/mo cost"
+-                            onPress={() => setSelectedDep(spouse)}
+-                        />
+-                    ) : (
+-                        <EmptySpouseCard onPress={() => {
+-                            if (playerAge < 21) {
+-                                showDialog(
+-                                    'You\'re Only ' + playerAge,
+-                                    `Marrying before 21 can limit your career growth and financial independence.\n\nYou may miss years of salary growth, promotions, and savings.\n\nAre you sure you want to proceed?`,
+-                                    'warning',
+-                                    () => { closeDialog(); setShowMarriagePick(true); }
+-                                );
+-                            } else {
+-                                setShowMarriagePick(true);
+-                            }
+-                        }} />
+-                    )}
+-                </View>
+-
+-                {/* Children */}
+-                {(children.length > 0 || spouse) && <SectionLabel label="CHILDREN" />}
+-
+-                {(() => {
+-                    // Build list: children + optional add-child slot
+-                    const slots = [...children.map(c => ({ type: 'child', data: c }))];
+-                    if (expectingChild) slots.push({ type: 'expecting', data: expectingChild });
+-                    const activeChildrenWithCurrentSpouse = children.filter(c => c.custody !== 'ex' && c.spouseId === spouse?.id);
+-                    if (spouse && activeChildrenWithCurrentSpouse.length < 3 && !expectingChild) slots.push({ type: 'add' });
+-
+-                    const rows = [];
+-                    for (let i = 0; i < slots.length; i += 2) {
+-                        const left = slots[i];
+-                        const right = slots[i + 1];
+-                        rows.push(
+-                            <View key={i} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+-                                {left.type === 'child'
+-                                    ? <ChildCard child={left.data} onPress={() => setSelectedDep(left.data)} />
+-                                    : left.type === 'expecting'
+-                                    ? <ExpectingChildCard data={left.data} />
+-                                    : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
+-                                }
+-                                {right ? (
+-                                    right.type === 'child'
+-                                        ? <ChildCard child={right.data} onPress={() => setSelectedDep(right.data)} />
+-                                        : right.type === 'expecting'
+-                                        ? <ExpectingChildCard data={right.data} />
+-                                        : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
+-                                ) : <View style={{ flex: 1 }} />}
+-                            </View>
+-                        );
+-                    }
+-                    return rows;
+-                })()}
+-
+-                {/* Parents */}
+-                <SectionLabel label="PARENTS" />
+-                {(() => {
+-                    const slots = [
+-                        ...parents.map(p => ({ type: 'parent', data: p })),
+-                        ...(parents.length < 2 ? [{ type: 'add' }] : []),
+-                    ];
+-                    const rows = [];
+-                    for (let i = 0; i < slots.length; i += 2) {
+-                        const left  = slots[i];
+-                        const right = slots[i + 1];
+-                        rows.push(
+-                            <View key={i} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+-                                {left.type === 'parent' ? (
+-                                    <PersonCard
+-                                        image={left.data.parentType === 'mother' ? DEP_IMAGES.elderly_mother : left.data.parentType === 'father' ? DEP_IMAGES.elderly_father : DEP_IMAGES.elderly_couple}
++                                        image={left.data.isDead ? GRAVESTONE_IMG : (left.data.parentType === 'mother' ? DEP_IMAGES.elderly_mother : left.data.parentType === 'father' ? DEP_IMAGES.elderly_father : DEP_IMAGES.elderly_couple)}
+                                         contain
+                                         name={left.data.name}
+-                                        tag={left.data.parentType === 'mother' ? 'MOTHER' : left.data.parentType === 'father' ? 'FATHER' : 'PARENT'}
+-                                        color={C.gold}
+-                                        sub1="Under your care"
+-                                        sub2="₹15,000/mo"
+-                                        hp={left.data.health}
++                                        tag={left.data.isDead ? 'DECEASED' : (left.data.parentType === 'mother' ? 'MOTHER' : left.data.parentType === 'father' ? 'FATHER' : 'PARENT')}
++                                        color={left.data.isDead ? '#666' : C.gold}
++                                        sub1={left.data.isDead ? 'Rest in Peace' : "Under your care"}
++                                        sub2={left.data.isDead ? '' : "₹15,000/mo"}
++                                        hp={left.data.isDead ? undefined : left.data.health}
+                                         onPress={() => setSelectedDep(left.data)}
+                                     />
+                                 ) : (

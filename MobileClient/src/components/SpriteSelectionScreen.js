@@ -18,14 +18,14 @@ const SPRITE_H = 158;
 
 // ─── Sprites ─────────────────────────────────────────────────────────────────
 const SPRITES = [
-    { id: 'young_pia_1',     image: require('../../assets/sprites/young pia 1.png') },
-    { id: 'young_raj_1',     image: require('../../assets/sprites/young raj 1.png') },
-    { id: 'young_soms_1',    image: require('../../assets/sprites/young soms 1.png') },
-    { id: 'young_soni_1',    image: require('../../assets/sprites/young soni 1.png') },
-    { id: 'young_sia_1',     image: require('../../assets/sprites/young sia 1.png') },
-    { id: 'young_rahul_1',   image: require('../../assets/sprites/young rahul 1.png') },
-    { id: 'young_priya_1',   image: require('../../assets/sprites/young priya 1.png') },
-    { id: 'young_kav_1',     image: require('../../assets/sprites/young kav 1.png') },
+    { id: 'young_pia_1',     image: require('../../assets/sprites/young_pia_1.png') },
+    { id: 'young_raj_1',     image: require('../../assets/sprites/young_raj_1.png') },
+    { id: 'young_soms_1',    image: require('../../assets/sprites/young_soms_1.png') },
+    { id: 'young_soni_1',    image: require('../../assets/sprites/young_soni_1.png') },
+    { id: 'young_sia_1',     image: require('../../assets/sprites/young_sia_1.png') },
+    { id: 'young_rahul_1',   image: require('../../assets/sprites/young_rahul_1.png') },
+    { id: 'young_priya_1',   image: require('../../assets/sprites/young_priya_1.png') },
+    { id: 'young_kav_1',     image: require('../../assets/sprites/young_kav_1.png') },
 ];
 
 // ─── Trait icons from ui_comp ────────────────────────────────────────────────
@@ -160,7 +160,7 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
                     activeOpacity={0.7}
                     style={{ position: 'absolute', top: 14, left: 14, zIndex: 10, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(4,6,14,0.65)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 }}
                 >
-                    <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 14, height: 14, transform: [{ scaleX: -1 }], opacity: 0.5 }} resizeMode="contain" />
+                    <Image source={require('../../assets/ui_comp/play_button.png')} style={{ width: 14, height: 14, transform: [{ scaleX: -1 }], opacity: 0.5 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', letterSpacing: 2, lineHeight: 18 }}>BACK</Text>
                 </TouchableOpacity>
 
@@ -372,7 +372,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     activeOpacity={0.7}
                     style={{ position: 'absolute', top: 14, left: 14, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(4,6,14,0.7)', paddingHorizontal: 10, paddingVertical: 6 }}
                 >
-                    <Image source={require('../../assets/ui_comp/play button.png')} style={{ width: 14, height: 14, transform: [{ scaleX: -1 }], opacity: 0.6 }} resizeMode="contain" />
+                    <Image source={require('../../assets/ui_comp/play_button.png')} style={{ width: 14, height: 14, transform: [{ scaleX: -1 }], opacity: 0.6 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', letterSpacing: 2 }}>BACK</Text>
                 </TouchableOpacity>
             </View>

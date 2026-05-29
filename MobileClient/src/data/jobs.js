@@ -5,8 +5,8 @@ export const JOBS = [
         name: 'Backup Singer',
         salary: 15000, // Per gig avg
         type: 'Tier 1: Gig',
-        image: require('../../assets/jobs/backup singer.png'),
-        office_image: require('../../assets/jobs/backup singer.png'),
+        image: require('../../assets/jobs/backup_singer.png'),
+        office_image: require('../../assets/jobs/backup_singer.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Gig-based work dependent on tour schedules. Great exposure but unstable pay.'
@@ -16,8 +16,8 @@ export const JOBS = [
         name: 'Voice Artist',
         salary: 25000, // Per project avg
         type: 'Tier 1: Service',
-        image: require('../../assets/jobs/voice artist.png'),
-        office_image: require('../../assets/jobs/voice artist.png'),
+        image: require('../../assets/jobs/voice_artist.png'),
+        office_image: require('../../assets/jobs/voice_artist.png'),
         req_net_worth: 20000, // Mic cost
         req_degrees: [],
         description: 'Paid per project. Requires a good mic and a quiet room. High competition.'
@@ -27,8 +27,8 @@ export const JOBS = [
         name: 'Game Tester',
         salary: 18000,
         type: 'Tier 1: Gig',
-        image: require('../../assets/jobs/game tester.png'),
-        office_image: require('../../assets/jobs/game tester.png'),
+        image: require('../../assets/jobs/game_tester.png'),
+        office_image: require('../../assets/jobs/game_tester.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Play games to find bugs. Fun but repetitive with a low salary ceiling.'
@@ -38,8 +38,8 @@ export const JOBS = [
         name: 'Code Debugger',
         salary: 30000,
         type: 'Tier 1: Freelance',
-        image: require('../../assets/jobs/code debugger.png'),
-        office_image: require('../../assets/jobs/code debugger.png'),
+        image: require('../../assets/jobs/code_debugger.png'),
+        office_image: require('../../assets/jobs/code_debugger.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Fix other people\'s messy code. Pay is per "bug" squashed. High mental drain.'
@@ -49,8 +49,8 @@ export const JOBS = [
         name: 'Home Baker',
         salary: 15000, // Variable
         type: 'Tier 1: Biz',
-        image: require('../../assets/jobs/home baker.png'),
-        office_image: require('../../assets/jobs/home baker.png'),
+        image: require('../../assets/jobs/home_baker.png'),
+        office_image: require('../../assets/jobs/home_baker.png'),
         req_net_worth: 5000, // Ingredients
         req_degrees: [],
         description: 'Low overhead business. Limited by how many cakes you can bake in a single day.'
@@ -60,8 +60,8 @@ export const JOBS = [
         name: 'Etsy Jewellery Maker',
         salary: 10000, // Variable
         type: 'Tier 1: Creative',
-        image: require('../../assets/jobs/etsy jewellery maker.png'),
-        office_image: require('../../assets/jobs/etsy jewellery maker.png'),
+        image: require('../../assets/jobs/etsy_jewellery_maker.png'),
+        office_image: require('../../assets/jobs/etsy_jewellery_maker.png'),
         req_net_worth: 5000,
         req_degrees: [],
         description: 'Creative work. Income depends entirely on finding the right aesthetic niche.'
@@ -82,8 +82,8 @@ export const JOBS = [
         name: 'Comic Book Illustrator',
         salary: 35000,
         type: 'Tier 1: Creative',
-        image: require('../../assets/jobs/comic book illustrator.png'),
-        office_image: require('../../assets/jobs/comic book illustrator.png'),
+        image: require('../../assets/jobs/comic_book_illustrator.png'),
+        office_image: require('../../assets/jobs/comic_book_illustrator.png'),
         req_net_worth: 10000, // Tablet
         req_degrees: [],
         description: 'Niche artistic work. Long hours for passion, paid per page or commission.'
@@ -93,8 +93,8 @@ export const JOBS = [
         name: 'Piano Teacher',
         salary: 40000,
         type: 'Tier 1: Service',
-        image: require('../../assets/jobs/piano teacher.png'),
-        office_image: require('../../assets/jobs/piano teacher.png'),
+        image: require('../../assets/jobs/piano_teacher.png'),
+        office_image: require('../../assets/jobs/piano_teacher.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Skilled labor. Trading hours for cash, but limited by the number of students.'
@@ -104,8 +104,8 @@ export const JOBS = [
         name: 'Music Teacher',
         salary: 42000,
         type: 'Tier 1: Service',
-        image: require('../../assets/jobs/music teacher.png'),
-        office_image: require('../../assets/jobs/music teacher.png'),
+        image: require('../../assets/jobs/music_teacher.png'),
+        office_image: require('../../assets/jobs/music_teacher.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Similar to Piano Teacher, but can do group classes for slightly better leverage.'
@@ -115,8 +115,8 @@ export const JOBS = [
         name: 'Dance Teacher',
         salary: 45000,
         type: 'Tier 1: Service',
-        image: require('../../assets/jobs/dance teacher.png'),
-        office_image: require('../../assets/jobs/dance teacher.png'),
+        image: require('../../assets/jobs/dance_teacher.png'),
+        office_image: require('../../assets/jobs/dance_teacher.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Physically demanding. Paid by the class. High energy required.'
@@ -126,8 +126,8 @@ export const JOBS = [
         name: 'Yoga Teacher',
         salary: 50000,
         type: 'Tier 1: Service',
-        image: require('../../assets/jobs/yoga teacher.png'),
-        office_image: require('../../assets/jobs/yoga teacher.png'),
+        image: require('../../assets/jobs/yoga_teacher.png'),
+        office_image: require('../../assets/jobs/yoga_teacher.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Focus on wellness. Can charge premiums for private sessions.'
@@ -159,8 +159,8 @@ export const JOBS = [
         name: 'Tattoo Artist',
         salary: 80000,
         type: 'Tier 1: Creative',
-        image: require('../../assets/jobs/tattoo artist.png'),
-        office_image: require('../../assets/jobs/tattoo artist.png'),
+        image: require('../../assets/jobs/tattoo_artist.png'),
+        office_image: require('../../assets/jobs/tattoo_artist.png'),
         req_net_worth: 50000, // Kit
         req_degrees: [],
         description: 'High skill and hygiene requirement. Reputation drives higher hourly rates.'
@@ -170,8 +170,8 @@ export const JOBS = [
         name: 'Indie Game Developer',
         salary: 5000, // Until launch
         type: 'Tier 1: Creative',
-        image: require('../../assets/jobs/Indie Game Developer.png'),
-        office_image: require('../../assets/jobs/Indie Game Developer.png'),
+        image: require('../../assets/jobs/Indie_Game_Developer.png'),
+        office_image: require('../../assets/jobs/Indie_Game_Developer.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'High risk, high reward. Years of work for a potential hit or a total flop.'
@@ -194,8 +194,8 @@ export const JOBS = [
         name: 'Forensic Scientist',
         salary: 90000,
         type: 'Tier 2: Science',
-        image: require('../../assets/jobs/forensic scientist.png'),
-        office_image: require('../../assets/jobs/forensic scientist.png'),
+        image: require('../../assets/jobs/forensic_scientist.png'),
+        office_image: require('../../assets/jobs/forensic_scientist.png'),
         req_net_worth: 0,
         req_degrees: ['Science PhD'],
         description: 'Very niche, high stability. Government-backed security with strict procedures.'
@@ -216,8 +216,8 @@ export const JOBS = [
         name: 'AR/VR Scientist',
         salary: 150000,
         type: 'Tier 2: Tech',
-        image: require('../../assets/jobs/arvr scientist.png'),
-        office_image: require('../../assets/jobs/arvr scientist.png'),
+        image: require('../../assets/jobs/arvr_scientist.png'),
+        office_image: require('../../assets/jobs/arvr_scientist.png'),
         req_net_worth: 0,
         req_degrees: ['Computer Science Degree'],
         description: 'Cutting-edge tech role. Very high salary but in a volatile, changing industry.'
@@ -227,8 +227,8 @@ export const JOBS = [
         name: 'CAD Engineer',
         salary: 70000,
         type: 'Tier 2: Eng',
-        image: require('../../assets/jobs/CAD engineer.png'),
-        office_image: require('../../assets/jobs/CAD engineer.png'),
+        image: require('../../assets/jobs/CAD_engineer.png'),
+        office_image: require('../../assets/jobs/CAD_engineer.png'),
         req_net_worth: 0,
         req_degrees: ['Vocational Training'],
         description: 'Essential for construction and design. Steady, reliable corporate work.'
@@ -238,8 +238,8 @@ export const JOBS = [
         name: 'Interior Designer',
         salary: 75000, // + Commission
         type: 'Tier 2: Design',
-        image: require('../../assets/jobs/interior designer.png'),
-        office_image: require('../../assets/jobs/interior designer.png'),
+        image: require('../../assets/jobs/interior_designer.png'),
+        office_image: require('../../assets/jobs/interior_designer.png'),
         req_net_worth: 0,
         req_degrees: ['Design Diploma'],
         description: 'High fees for high-end clients. Reputation is everything.'
@@ -271,8 +271,8 @@ export const JOBS = [
         name: 'Government Job',
         salary: 60000,
         type: 'Tier 2: Stable',
-        image: require('../../assets/jobs/government job.png'),
-        office_image: require('../../assets/jobs/government job.png'),
+        image: require('../../assets/jobs/government_job.png'),
+        office_image: require('../../assets/jobs/government_job.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'The ultimate safety net. Low growth, but zero risk of being fired. Pension benefits.'
@@ -283,8 +283,8 @@ export const JOBS = [
         name: 'Chef (High End)',
         salary: 110000,
         type: 'Tier 2: Service',
-        image: require('../../assets/jobs/chef in high end restaurant.png'),
-        office_image: require('../../assets/jobs/chef in high end restaurant.png'),
+        image: require('../../assets/jobs/chef_in_high_end_restaurant.png'),
+        office_image: require('../../assets/jobs/chef_in_high_end_restaurant.png'),
         req_net_worth: 0,
         req_degrees: ['Culinary Arts Diploma'],
         description: 'High pressure, high prestige. Salary is good, but hours are brutal.'
@@ -294,8 +294,8 @@ export const JOBS = [
         name: 'Commercial Photographer',
         salary: 80000,
         type: 'Tier 2: Creative',
-        image: require('../../assets/jobs/Commercial Photographer.png'),
-        office_image: require('../../assets/jobs/Commercial Photographer.png'),
+        image: require('../../assets/jobs/Commercial_Photographer.png'),
+        office_image: require('../../assets/jobs/Commercial_Photographer.png'),
         req_net_worth: 200000, // Gear
         req_degrees: [], // Portfolio based?
         description: 'Corporate clients pay well for consistency. Gear is expensive.'
@@ -316,8 +316,8 @@ export const JOBS = [
         name: 'Luxury Real Estate Consultant',
         salary: 200000, // Commission heavy
         type: 'Tier 2: Sales',
-        image: require('../../assets/jobs/Luxury Real Estate Consultant.png'),
-        office_image: require('../../assets/jobs/Luxury Real Estate Consultant.png'),
+        image: require('../../assets/jobs/Luxury_Real_Estate_Consultant.png'),
+        office_image: require('../../assets/jobs/Luxury_Real_Estate_Consultant.png'),
         req_net_worth: 0,
         req_degrees: [],
         description: 'Sales role. Low base pay, but massive commissions on a single sale.'
@@ -329,8 +329,8 @@ export const JOBS = [
         name: 'Maggi Cafe Owner',
         salary: 40000, // Profit
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/maggi cafe.png'),
-        office_image: require('../../assets/jobs/maggi cafe.png'),
+        image: require('../../assets/jobs/maggi_cafe.png'),
+        office_image: require('../../assets/jobs/maggi_cafe.png'),
         req_net_worth: 200000, // Setup
         req_degrees: [],
         description: 'Student favorite. Low cost to set up, high volume of cheap sales.'
@@ -340,8 +340,8 @@ export const JOBS = [
         name: 'Irani Cafe Owner',
         salary: 60000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/irani cafe.png'),
-        office_image: require('../../assets/jobs/irani cafe.png'),
+        image: require('../../assets/jobs/irani_cafe.png'),
+        office_image: require('../../assets/jobs/irani_cafe.png'),
         req_net_worth: 500000,
         req_degrees: [],
         description: 'Heritage value. Loyal customer base ensures steady, reliable profit.'
@@ -362,8 +362,8 @@ export const JOBS = [
         name: 'Sandwich Shop Owner',
         salary: 50000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/sandwich shop.png'),
-        office_image: require('../../assets/jobs/sandwich shop.png'),
+        image: require('../../assets/jobs/sandwich_shop.png'),
+        office_image: require('../../assets/jobs/sandwich_shop.png'),
         req_net_worth: 400000,
         req_degrees: [],
         description: 'Lunch rush is your only real income time. Location matters more than food.'
@@ -373,8 +373,8 @@ export const JOBS = [
         name: 'Juice Shop Owner',
         salary: 45000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/juice bar.png'),
-        office_image: require('../../assets/jobs/juice bar.png'),
+        image: require('../../assets/jobs/juice_bar.png'),
+        office_image: require('../../assets/jobs/juice_bar.png'),
         req_net_worth: 200000,
         req_degrees: [],
         description: 'Seasonal spikes. High profit on liquids and ice, low cost of goods.'
@@ -384,8 +384,8 @@ export const JOBS = [
         name: 'Juice Bar (Premium)',
         salary: 70000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/juice bar.png'),
-        office_image: require('../../assets/jobs/juice bar.png'),
+        image: require('../../assets/jobs/juice_bar.png'),
+        office_image: require('../../assets/jobs/juice_bar.png'),
         req_net_worth: 800000,
         req_degrees: [],
         description: 'Similar to juice shop but trendier. Higher prices for "organic" branding.'
@@ -395,8 +395,8 @@ export const JOBS = [
         name: 'Grocery Store Owner',
         salary: 30000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/kirana store.png'),
-        office_image: require('../../assets/jobs/kirana store.png'),
+        image: require('../../assets/jobs/kirana_store.png'),
+        office_image: require('../../assets/jobs/kirana_store.png'),
         req_net_worth: 500000,
         req_degrees: [],
         description: 'Tiny margins, but everyone needs groceries. A volume game with long hours.'
@@ -406,8 +406,8 @@ export const JOBS = [
         name: 'Hardware Shop Owner',
         salary: 55000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/hardware shop.png'),
-        office_image: require('../../assets/jobs/hardware shop.png'),
+        image: require('../../assets/jobs/hardware_shop.png'),
+        office_image: require('../../assets/jobs/hardware_shop.png'),
         req_net_worth: 1000000, // Stock heavy
         req_degrees: [],
         description: 'Selling tools is safer than using them. Steady local demand for repairs.'
@@ -417,8 +417,8 @@ export const JOBS = [
         name: 'Florist',
         salary: 60000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/florist and bouquet shop.png'),
-        office_image: require('../../assets/jobs/florist and bouquet shop.png'),
+        image: require('../../assets/jobs/florist_and_bouquet_shop.png'),
+        office_image: require('../../assets/jobs/florist_and_bouquet_shop.png'),
         req_net_worth: 300000,
         req_degrees: [],
         description: 'High risk inventory (flowers rot). High markup on weddings and holidays.'
@@ -428,8 +428,8 @@ export const JOBS = [
         name: 'Pet Grooming Shop',
         salary: 90000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/pet grooming shop.png'),
-        office_image: require('../../assets/jobs/pet grooming shop.png'),
+        image: require('../../assets/jobs/pet_grooming_shop.png'),
+        office_image: require('../../assets/jobs/pet_grooming_shop.png'),
         req_net_worth: 600000,
         req_degrees: [],
         description: 'Luxury service for pets. Growing market with high customer retention.'
@@ -439,8 +439,8 @@ export const JOBS = [
         name: 'Tailor Business',
         salary: 40000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/tailor business.png'),
-        office_image: require('../../assets/jobs/tailor business.png'),
+        image: require('../../assets/jobs/tailor_business.png'),
+        office_image: require('../../assets/jobs/tailor_business.png'),
         req_net_worth: 200000,
         req_degrees: ['Vocational Training'],
         description: 'Custom fits command higher prices than ready-made clothes.'
@@ -450,8 +450,8 @@ export const JOBS = [
         name: 'Candle Business',
         salary: 20000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/small candle business.png'),
-        office_image: require('../../assets/jobs/small candle business.png'),
+        image: require('../../assets/jobs/small_candle_business.png'),
+        office_image: require('../../assets/jobs/small_candle_business.png'),
         req_net_worth: 50000,
         req_degrees: [],
         description: 'Niche aesthetic product. Great for online sales or gift shops.'
@@ -461,8 +461,8 @@ export const JOBS = [
         name: 'Boots Workshop',
         salary: 50000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/boots workshop.png'),
-        office_image: require('../../assets/jobs/boots workshop.png'),
+        image: require('../../assets/jobs/boots_workshop.png'),
+        office_image: require('../../assets/jobs/boots_workshop.png'),
         req_net_worth: 400000,
         req_degrees: ['Vocational Training'],
         description: 'Specialized leather goods. Durable products justify high prices.'
@@ -472,8 +472,8 @@ export const JOBS = [
         name: 'Print Shop',
         salary: 45000,
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/print shop.png'),
-        office_image: require('../../assets/jobs/print shop.png'),
+        image: require('../../assets/jobs/print_shop.png'),
+        office_image: require('../../assets/jobs/print_shop.png'),
         req_net_worth: 800000, // Printers exp
         req_degrees: [],
         description: 'B2B service. Steady work from local businesses and students.'
@@ -494,8 +494,8 @@ export const JOBS = [
         name: 'Sweet Shop',
         salary: 100000, // High seasonal
         type: 'Tier 3: Biz',
-        image: require('../../assets/jobs/sweet shop.png'),
-        office_image: require('../../assets/jobs/sweet shop.png'),
+        image: require('../../assets/jobs/sweet_shop.png'),
+        office_image: require('../../assets/jobs/sweet_shop.png'),
         req_net_worth: 1000000,
         req_degrees: [],
         description: 'High volume during festivals. Perishable inventory requires careful management.'
@@ -518,8 +518,8 @@ export const JOBS = [
         name: 'Construction Site (Developer)',
         salary: 1000000, // Windfalls
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/construction site.png'),
-        office_image: require('../../assets/jobs/construction site.png'),
+        image: require('../../assets/jobs/construction_site.png'),
+        office_image: require('../../assets/jobs/construction_site.png'),
         req_net_worth: 100000000, // 10 Cr
         req_degrees: [],
         description: 'High capital risk. If completed, developer fees are huge.'
@@ -529,8 +529,8 @@ export const JOBS = [
         name: 'Fine Dining Restaurateur',
         salary: 300000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/fine dining restaurant.png'),
-        office_image: require('../../assets/jobs/fine dining restaurant.png'),
+        image: require('../../assets/jobs/fine_dining_restaurant.png'),
+        office_image: require('../../assets/jobs/fine_dining_restaurant.png'),
         req_net_worth: 20000000, // 2 Cr
         req_degrees: [],
         description: 'High overheads and staff costs. Prestige brings in the elite spenders.'
@@ -540,8 +540,8 @@ export const JOBS = [
         name: 'Gold Business Owner',
         salary: 800000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/gold business.png'),
-        office_image: require('../../assets/jobs/gold business.png'),
+        image: require('../../assets/jobs/gold_business.png'),
+        office_image: require('../../assets/jobs/gold_business.png'),
         req_net_worth: 50000000, // 5 Cr stock
         req_degrees: [],
         description: 'Dealing in high-value commodities. Security is a major cost, but margins are absolute.'
@@ -551,8 +551,8 @@ export const JOBS = [
         name: 'Law Firm Partner',
         salary: 600000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/law firm.png'),
-        office_image: require('../../assets/jobs/law firm.png'),
+        image: require('../../assets/jobs/law_firm.png'),
+        office_image: require('../../assets/jobs/law_firm.png'),
         req_net_worth: 5000000, // Buy in
         req_degrees: ['Law Degree'],
         description: 'You own the partners. They bill hours, you take the profit share.'
@@ -562,8 +562,8 @@ export const JOBS = [
         name: 'Bridal Lehenga Shop',
         salary: 400000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/bridal lehenga shop.png'),
-        office_image: require('../../assets/jobs/bridal lehenga shop.png'),
+        image: require('../../assets/jobs/bridal_lehenga_shop.png'),
+        office_image: require('../../assets/jobs/bridal_lehenga_shop.png'),
         req_net_worth: 10000000, // 1 Cr stock
         req_degrees: [],
         description: 'High ticket items. One sale covers rent for the week. Wedding season is gold.'
@@ -573,8 +573,8 @@ export const JOBS = [
         name: 'Bridal Boutique Owner',
         salary: 450000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/Indian Bridal Boutique Owner.png'),
-        office_image: require('../../assets/jobs/Indian Bridal Boutique Owner.png'),
+        image: require('../../assets/jobs/Indian_Bridal_Boutique_Owner.png'),
+        office_image: require('../../assets/jobs/Indian_Bridal_Boutique_Owner.png'),
         req_net_worth: 15000000, // 1.5 Cr
         req_degrees: [],
         description: 'Similar to Lehenga shop but includes wider variety. High inventory costs.'
@@ -584,8 +584,8 @@ export const JOBS = [
         name: 'Saree Business',
         salary: 350000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/saree business.png'),
-        office_image: require('../../assets/jobs/saree business.png'),
+        image: require('../../assets/jobs/saree_business.png'),
+        office_image: require('../../assets/jobs/saree_business.png'),
         req_net_worth: 8000000, // 80 L
         req_degrees: [],
         description: 'Heritage fabrics. Consistent demand for weddings and festivals.'
@@ -595,8 +595,8 @@ export const JOBS = [
         name: '3D Printing Workshop',
         salary: 250000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/3d printing workshop.png'),
-        office_image: require('../../assets/jobs/3d printing workshop.png'),
+        image: require('../../assets/jobs/3d_printing_workshop.png'),
+        office_image: require('../../assets/jobs/3d_printing_workshop.png'),
         req_net_worth: 5000000, // Machines
         req_degrees: ['Computer Science Degree'],
         description: 'Manufacturing at scale. Serves other businesses (B2B) with rapid prototyping.'
@@ -606,8 +606,8 @@ export const JOBS = [
         name: 'Podcast Studio Owner',
         salary: 150000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/podcast studio.png'),
-        office_image: require('../../assets/jobs/podcast studio.png'),
+        image: require('../../assets/jobs/podcast_studio.png'),
+        office_image: require('../../assets/jobs/podcast_studio.png'),
         req_net_worth: 3000000,
         req_degrees: [],
         description: 'Renting out space and gear to creators. Low maintenance, high hourly rent.'
@@ -617,8 +617,8 @@ export const JOBS = [
         name: 'Coaching Centre Owner',
         salary: 600000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/coaching centre.png'),
-        office_image: require('../../assets/jobs/coaching centre.png'),
+        image: require('../../assets/jobs/coaching_centre.png'),
+        office_image: require('../../assets/jobs/coaching_centre.png'),
         req_net_worth: 5000000,
         req_degrees: [],
         description: 'Incredibly profitable in education-obsessed markets. Scales well with more students.'
@@ -628,8 +628,8 @@ export const JOBS = [
         name: 'Preschool Owner',
         salary: 500000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/preschool educator.png'),
-        office_image: require('../../assets/jobs/preschool educator.png'),
+        image: require('../../assets/jobs/preschool_educator.png'),
+        office_image: require('../../assets/jobs/preschool_educator.png'),
         req_net_worth: 10000000, // Property
         req_degrees: [],
         description: 'If you own the school, it\'s a goldmine. Long-term enrollment fees.'
@@ -639,8 +639,8 @@ export const JOBS = [
         name: 'Dance Studio Owner',
         salary: 200000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/dance studio.png'),
-        office_image: require('../../assets/jobs/dance studio.png'),
+        image: require('../../assets/jobs/dance_studio.png'),
+        office_image: require('../../assets/jobs/dance_studio.png'),
         req_net_worth: 8000000,
         req_degrees: [],
         description: 'Renting space to freelance teachers or running classes. Real estate play.'
@@ -661,8 +661,8 @@ export const JOBS = [
         name: 'Chemist Drugstore',
         salary: 180000,
         type: 'Tier 4: Empire',
-        image: require('../../assets/jobs/chemist drugstore.png'),
-        office_image: require('../../assets/jobs/chemist drugstore.png'),
+        image: require('../../assets/jobs/chemist_drugstore.png'),
+        office_image: require('../../assets/jobs/chemist_drugstore.png'),
         req_net_worth: 6000000,
         req_degrees: ['Medical Degree'], // Pharmacy license usually
         description: 'Essential service. Medicines have fixed margins but guaranteed demand.'

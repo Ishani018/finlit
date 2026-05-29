@@ -1,9 +1,9 @@
-const coinStack     = require('../../assets/achivements/coin stack.png');
-const crestBank     = require('../../assets/achivements/crest with bank.png');
-const familyPortrait = require('../../assets/achivements/family portrait.png');
+const coinStack     = require('../../assets/achivements/coin_stack.png');
+const crestBank     = require('../../assets/achivements/crest_with_bank.png');
+const familyPortrait = require('../../assets/achivements/family_portrait.png');
 const fist          = require('../../assets/achivements/fist.png');
-const graphsStats   = require('../../assets/achivements/graphs and stats.png');
-const piggyBank     = require('../../assets/achivements/piggy bank.png');
+const graphsStats   = require('../../assets/achivements/graphs_and_stats.png');
+const piggyBank     = require('../../assets/achivements/piggy_bank.png');
 
 // Fallbacks for anything not covered by the new set
 const apt1bhk       = require('../../assets/properties/1bhk_starter_apartment.png');
@@ -11,7 +11,7 @@ const apt3floor     = require('../../assets/properties/city_apartment_with_3_flo
 const penthouse     = require('../../assets/properties/3_floor_apartment_complex_with_penthouse.png');
 const beach         = require('../../assets/properties/Beach_house_for_family_of_4-5.png');
 const ceo           = require('../../assets/jobs/CEO.png');
-const coaching      = require('../../assets/jobs/coaching centre.png');
+const coaching      = require('../../assets/jobs/coaching_centre.png');
 
 export const ACHIEVEMENT_IMAGES = {
     // Wealth
