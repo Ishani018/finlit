@@ -24,8 +24,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f1729"
       },
-      "package": "com.finlit.game",
-      "edgeToEdgeEnabled": true
+      "package": "com.finlit.game"
     },
     "web": {
       "favicon": "./assets/favicon.png",
