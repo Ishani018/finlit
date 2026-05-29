@@ -46,6 +46,12 @@ import { useFonts, VT323_400Regular } from '@expo-google-fonts/vt323';
 import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const MUSIC_TRACKS = [
+  require('./assets/music/Crystalline_Caverns.mp3'),
+  require('./assets/music/Digital_Dawn.mp3'),
+  require('./assets/music/Pixel_Payouts.mp3'),
+];
+
 const StyledView = styled(View);
 const RawStyledText = styled(Text);
 const StyledText = React.forwardRef(({ style, className, ...props }, ref) => (
@@ -646,7 +652,7 @@ const GameLayout = ({ onHardReset }) => {
     }
   }, [pendingDeathEvent, deathEventQueue]);
 
-  useBackgroundMusic(isPlaying);
+  useBackgroundMusic(MUSIC_TRACKS);
 
   // Waiting for AsyncStorage load
   if (!saveLoaded) {

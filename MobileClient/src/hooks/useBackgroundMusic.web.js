@@ -1,11 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-const TRACKS = [
-    require('../../assets/music/Crystalline_Caverns.mp3'),
-    require('../../assets/music/Digital_Dawn.mp3'),
-    require('../../assets/music/Pixel_Payouts.mp3'),
-];
-
 // Module-level singleton — only one Audio element ever lives at a time
 let _audio = null;
 
@@ -17,9 +11,9 @@ function stopCurrent() {
     }
 }
 
-function playTrack(index, onFinished) {
+function playTrack(tracks, index, onFinished) {
     stopCurrent();
-    const audio = new Audio(TRACKS[index]);
+    const audio = new Audio(tracks[index]);
     audio.volume = 0.35;
     _audio = audio;
     audio.addEventListener('ended', onFinished, { once: true });
@@ -34,19 +28,19 @@ function playTrack(index, onFinished) {
     });
 }
 
-export const useBackgroundMusic = () => {
-    const trackIndex = useRef(Math.floor(Math.random() * TRACKS.length));
+export const useBackgroundMusic = (tracks) => {
+    const trackIndex = useRef(Math.floor(Math.random() * tracks.length));
 
     const advance = () => {
         let next;
-        do { next = Math.floor(Math.random() * TRACKS.length); }
-        while (next === trackIndex.current && TRACKS.length > 1);
+        do { next = Math.floor(Math.random() * tracks.length); }
+        while (next === trackIndex.current && tracks.length > 1);
         trackIndex.current = next;
-        playTrack(next, advance);
+        playTrack(tracks, next, advance);
     };
 
     useEffect(() => {
-        playTrack(trackIndex.current, advance);
+        playTrack(tracks, trackIndex.current, advance);
         return () => { stopCurrent(); };
     }, []);
 };
