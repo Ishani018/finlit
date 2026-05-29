@@ -158,7 +158,7 @@ export default function InsuranceScreen({ onClose }) {
                 <View style={{ backgroundColor: protectionScore === 0 ? '#1a0808' : protectionScore === maxScore ? '#0d1e12' : '#0d1428', padding: 14, marginBottom: 18, borderRadius: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            {protectionScore === 0 && <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />}
+                            {protectionScore === 0 && <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />}
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>PROTECTION STATUS</Text>
                         </View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: protectionScore === 0 ? '#f87171' : protectionScore === maxScore ? '#4ade80' : '#60a5fa' }}>

@@ -1206,7 +1206,7 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: C.bg, zIndex: 100 }}>
             {/* Header */}
-            <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 10, paddingHorizontal: 14, borderBottomWidth: 1, borderColor: C.border }}>
+            <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 10, paddingHorizontal: 14 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 4 }}>INCOME TAX RETURN — FY {year - 1}-{String(year).slice(2)}</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>Self-Filing Wizard</Text>
                 {/* Step progress */}
@@ -1227,29 +1227,29 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                     const forms = getITRForms();
                     return (
                         <View style={{ gap: 10 }}>
-                            <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12, marginBottom: 4 }}>
+                            <View style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 14, marginBottom: 4 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 4 }}>STEP 1 OF 3</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream }}>Which ITR form applies to you?</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 4 }}>Filing with the wrong form can trigger an IT notice. Read carefully.</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream }}>Which ITR form applies to you?</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, marginTop: 6 }}>Filing with the wrong form can trigger an IT notice. Read carefully.</Text>
                             </View>
                             {forms.map(form => (
                                 <TouchableOpacity key={form.id} onPress={() => selectITRForm(form.id)} activeOpacity={0.85}
-                                    style={{ borderWidth: 1, borderColor: form.correct ? form.color + '80' : C.border, backgroundColor: form.correct ? form.color + '0a' : C.panel, padding: 14 }}>
+                                    style={{ borderRadius: 10, backgroundColor: form.correct ? form.color + '12' : '#08101e', padding: 16 }}>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: form.correct ? form.color : C.cream }}>{form.name}</Text>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: form.correct ? form.color : C.dark, letterSpacing: 2 }}>{form.tag}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: form.correct ? form.color : C.cream }}>{form.name}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: form.correct ? form.color : C.dark, letterSpacing: 2 }}>{form.tag}</Text>
                                         </View>
                                         {form.correct && (
-                                            <View style={{ backgroundColor: form.color + '20', borderWidth: 1, borderColor: form.color + '60', paddingHorizontal: 8, paddingVertical: 2 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: form.color, letterSpacing: 2 }}>✓ APPLICABLE</Text>
+                                            <View style={{ backgroundColor: form.color + '20', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: form.color, letterSpacing: 1 }}>✓ APPLICABLE</Text>
                                             </View>
                                         )}
                                     </View>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, marginBottom: 6 }}>{form.forWhom}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark, lineHeight: 17 }}>{form.why}</Text>
-                                    <View style={{ marginTop: 10, borderWidth: 1, borderColor: form.correct ? form.color + '60' : C.border, padding: 8, alignItems: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: form.correct ? form.color : C.dim, letterSpacing: 1 }}>SELECT {form.id}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 6 }}>{form.forWhom}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dark, lineHeight: 18 }}>{form.why}</Text>
+                                    <View style={{ marginTop: 12, borderRadius: 8, backgroundColor: form.correct ? form.color + '18' : '#0d1020', paddingVertical: 10, alignItems: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: form.correct ? form.color : C.dim, letterSpacing: 1 }}>SELECT {form.id} ›</Text>
                                     </View>
                                 </TouchableOpacity>
                             ))}
@@ -1264,57 +1264,50 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                     const turns = turnsLeftToday();
                     return (
                         <View style={{ gap: 10 }}>
-                            <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12 }}>
+                            <View style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 4 }}>STEP 2 OF 3 — FILING AS {formSelected?.id}</Text>
                                 {wrongForm && (
-                                    <View style={{ backgroundColor: '#7f1d1d', borderWidth: 1, borderColor: '#f87171', padding: 8, marginBottom: 8 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>⚠️ This form may not be correct for your situation. Filing with the wrong form risks an IT notice.</Text>
+                                    <View style={{ backgroundColor: '#1a0808', borderRadius: 8, padding: 10, marginBottom: 10 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f87171' }}>This form may not be correct. Filing wrong risks an IT notice.</Text>
                                     </View>
                                 )}
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream }}>Collect your documents</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 4 }}>Each document costs 1 daily action. {turns} action{turns !== 1 ? 's' : ''} remaining today.</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream }}>Collect your documents</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, marginTop: 6 }}>Each document costs 1 daily action. {turns} action{turns !== 1 ? 's' : ''} remaining today.</Text>
                             </View>
 
                             {docs.map(doc => {
                                 const collected = docsCollected.includes(doc.id);
                                 return (
-                                    <View key={doc.id} style={{ borderWidth: 1, borderColor: collected ? C.sage + '60' : C.border, backgroundColor: collected ? C.sage + '06' : C.panel, padding: 14 }}>
-                                        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
-                                            <FontAwesome5 name={doc.icon} size={14} color={collected ? C.sage : C.dim} style={{ marginTop: 3 }} />
-                                            <View style={{ flex: 1 }}>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: collected ? C.sage : C.cream }}>{doc.name}</Text>
-                                                    {collected && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>✓ COLLECTED</Text>}
-                                                </View>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.purple, letterSpacing: 2, marginBottom: 4 }}>{doc.section}</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, lineHeight: 18, marginBottom: 6 }}>{doc.desc}</Text>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, marginBottom: 8 }}>📍 {doc.source}</Text>
-                                                {!collected && (
-                                                    <TouchableOpacity
-                                                        onPress={async () => {
-                                                            const r = await collectITRDoc(doc.id);
-                                                            if (!r.success) showToast(r.msg, false);
-                                                        }}
-                                                        disabled={turns <= 0}
-                                                        style={{ borderWidth: 1, borderColor: turns > 0 ? C.blue + '80' : C.border, backgroundColor: turns > 0 ? C.blue + '10' : C.card, paddingVertical: 8, alignItems: 'center' }}
-                                                    >
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: turns > 0 ? C.blue : C.dark, letterSpacing: 1 }}>
-                                                            {turns > 0 ? 'COLLECT DOCUMENT — 1 ACTION' : 'NO ACTIONS LEFT TODAY'}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )}
-                                            </View>
+                                    <View key={doc.id} style={{ borderRadius: 10, backgroundColor: collected ? '#0a1a10' : '#08101e', padding: 16 }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: collected ? C.sage : C.cream }}>{doc.name}</Text>
+                                            {collected && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.sage }}>✓</Text>}
                                         </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.purple, letterSpacing: 2, marginBottom: 4 }}>{doc.section}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, lineHeight: 18, marginBottom: 6 }}>{doc.desc}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, marginBottom: collected ? 0 : 12 }}>{doc.source}</Text>
+                                        {!collected && (
+                                            <TouchableOpacity
+                                                onPress={async () => {
+                                                    const r = await collectITRDoc(doc.id);
+                                                    if (!r.success) showToast(r.msg, false);
+                                                }}
+                                                disabled={turns <= 0}
+                                                style={{ borderRadius: 8, backgroundColor: turns > 0 ? C.blue + '18' : '#0d1020', paddingVertical: 10, alignItems: 'center', opacity: turns > 0 ? 1 : 0.5 }}
+                                            >
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: turns > 0 ? C.blue : C.dark, letterSpacing: 1 }}>
+                                                    {turns > 0 ? 'COLLECT — 1 ACTION ›' : 'NO ACTIONS LEFT TODAY'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
                                 );
                             })}
 
                             {allCollected && (
-                                <TouchableOpacity
-                                    onPress={() => computeITRTaxFull()}
-                                    style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: C.gold + '15', padding: 16, alignItems: 'center', marginTop: 4 }}
-                                >
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, letterSpacing: 2 }}>ALL DOCS COLLECTED — COMPUTE TAX →</Text>
+                                <TouchableOpacity onPress={() => computeITRTaxFull()}
+                                    style={{ borderRadius: 10, backgroundColor: C.gold + '18', paddingVertical: 16, alignItems: 'center', marginTop: 4 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, letterSpacing: 2 }}>COMPUTE TAX ›</Text>
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -1327,14 +1320,14 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                     const isRefund = c.netPayable < 0;
                     return (
                         <View style={{ gap: 10 }}>
-                            <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, padding: 12 }}>
+                            <View style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 4 }}>STEP 3 OF 3 — TAX COMPUTATION</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream }}>Your Tax Summary — FY {year - 1}-{String(year).slice(2)}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 4 }}>Review every line before you file. This is exactly how the IT department computes your liability.</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream }}>Your Tax Summary — FY {year - 1}-{String(year).slice(2)}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, marginTop: 6 }}>Review every line before you file.</Text>
                             </View>
 
                             {/* Income breakdown */}
-                            <View style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 14 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>INCOME HEADS</Text>
                                 {c.annualSalary > 0 && row('Gross Salary (annual)', rup(c.annualSalary), C.cream)}
                                 {c.annualSalary > 0 && row('Less: Standard Deduction [Sec 16(ia)]', `−${rup(c.standardDeduction)}`, C.sage, true)}
@@ -1351,7 +1344,7 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                             </View>
 
                             {/* Deductions */}
-                            <View style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 14 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>DEDUCTIONS</Text>
                                 {c.sec80C > 0 && (
                                     <>
@@ -1383,7 +1376,7 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                             </View>
 
                             {/* Tax slabs */}
-                            <View style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 14 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>TAX COMPUTATION (NEW REGIME)</Text>
                                 {[
                                     { range: '₹0 – ₹3,00,000', rate: '0%' },
@@ -1405,13 +1398,13 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                             </View>
 
                             {/* TDS credits */}
-                            <View style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 14 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>TDS ALREADY DEDUCTED (TAX CREDIT)</Text>
                                 {row('TDS on Salary — by employer [Form 16]', `−${rup(c.estimatedSalaryTDS)}`, C.sage)}
                                 {c.bankTDS > 0 && row('TDS on FD Interest — by bank [Form 16A]', `−${rup(c.bankTDS)}`, C.sage)}
                                 {row('Total TDS Credit', `−${rup(c.totalTDS)}`, C.sage)}
                                 <View style={{ height: 2, backgroundColor: C.border, marginVertical: 8 }} />
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: isRefund ? C.sage + '10' : C.red + '10', borderWidth: 1, borderColor: isRefund ? C.sage + '60' : C.red + '60', padding: 10 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: isRefund ? '#0d1e12' : '#1a0808', borderRadius: 8, padding: 12 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: isRefund ? C.sage : C.red }}>
                                         {isRefund ? '✓ REFUND DUE' : 'TAX PAYABLE'}
                                     </Text>
@@ -1432,30 +1425,30 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                             </View>
 
                             {/* E-Verify */}
-                            <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: C.panel, padding: 14 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 6 }}>STEP 4 — E-VERIFY & SUBMIT</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream, marginBottom: 8 }}>Filing is not complete until you e-verify. Unverified returns are treated as not filed.</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.cream, marginBottom: 12 }}>Filing is not complete until you e-verify.</Text>
                                 {[
                                     { method: 'Aadhaar OTP', desc: 'OTP sent to Aadhaar-linked mobile. Fastest and most common.', recommended: true },
                                     { method: 'Net Banking', desc: 'Login to your bank and verify via ITR e-verify option.' },
                                     { method: 'Demat Account', desc: 'Via CDSL/NSDL. Requires active demat linked to PAN.' },
                                 ].map((m, i) => (
-                                    <View key={i} style={{ flexDirection: 'row', gap: 8, marginBottom: 6 }}>
-                                        <FontAwesome5 name={m.recommended ? 'mobile-alt' : 'landmark'} size={12} color={m.recommended ? C.blue : C.dim} style={{ marginTop: 3 }} />
+                                    <View key={i} style={{ flexDirection: 'row', gap: 10, paddingVertical: 8, borderTopWidth: i === 0 ? 0 : 1, borderColor: '#0f1525' }}>
+                                        <Image source={require('../../assets/ui_comp/taxdept.png')} style={{ width: 20, height: 20, opacity: m.recommended ? 1 : 0.4 }} resizeMode="contain" />
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: m.recommended ? C.blue : C.dim }}>{m.method}{m.recommended ? ' (recommended)' : ''}</Text>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark }}>{m.desc}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: m.recommended ? C.blue : C.dim }}>{m.method}{m.recommended ? ' (recommended)' : ''}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dark }}>{m.desc}</Text>
                                         </View>
                                     </View>
                                 ))}
                             </View>
 
                             {wrongForm && (
-                                <View style={{ borderWidth: 1, borderColor: C.red + '60', backgroundColor: '#1a0808', padding: 12 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.red }}>⚠️ Wrong ITR form selected — filing will trigger an IT notice (Sec 139(9) defective return). ₹5,000 penalty will be deducted.</Text>
+                                <View style={{ borderRadius: 10, backgroundColor: '#1a0808', padding: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.red }}>Wrong ITR form selected — filing will trigger an IT notice (Sec 139(9)). ₹5,000 penalty will be deducted.</Text>
                                 </View>
                             )}
-                            <View style={{ borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 12 }}>
+                            <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 6 }}>FILING COSTS</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim }}>Portal convenience fee</Text>
@@ -1487,10 +1480,10 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
                                         onShowDialog('ITR Filed!', `E-verified via Aadhaar OTP. ITR-${formSelected?.id} submitted for FY ${year - 1}-${String(year).slice(2)}. Acknowledgement number generated. Keep it for your records.`, 'success');
                                     }
                                 }}
-                                style={{ borderWidth: 1, borderColor: wrongForm ? C.red : C.sage, backgroundColor: wrongForm ? C.red + '15' : C.sage + '18', padding: 16, alignItems: 'center', marginTop: 4 }}
+                                style={{ borderRadius: 10, backgroundColor: wrongForm ? '#1a0808' : '#0d1e12', paddingVertical: 16, alignItems: 'center', marginTop: 4 }}
                             >
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: wrongForm ? C.red : C.sage, letterSpacing: 2 }}>
-                                    {wrongForm ? 'SUBMIT ANYWAY (RISKY) →' : 'SEND AADHAAR OTP & SUBMIT →'}
+                                    {wrongForm ? 'SUBMIT ANYWAY (RISKY) ›' : 'SEND AADHAAR OTP & SUBMIT ›'}
                                 </Text>
                             </TouchableOpacity>
                         </View>

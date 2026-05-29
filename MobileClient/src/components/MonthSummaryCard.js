@@ -32,8 +32,7 @@ function NetWorthBar({ history }) {
                     <View key={i} style={{
                         flex: 1, height: h,
                         backgroundColor: isLast ? barColor : barColor + '55',
-                        borderTopWidth: 1,
-                        borderTopColor: isLast ? barColor : barColor + '80',
+                        borderRadius: 2,
                     }} />
                 );
             })}
@@ -48,7 +47,7 @@ function Row({ label, value, color }) {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
             {icon
-                ? <Image source={icon} style={{ width: 11, height: 11, marginRight: 4, opacity: 0.5 }} resizeMode="contain" />
+                ? <Image source={icon} style={{ width: 16, height: 16, marginRight: 6 }} resizeMode="contain" />
                 : <View style={{ width: 15 }} />
             }
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#556080', flex: 1, lineHeight: 16 }}>{label}</Text>

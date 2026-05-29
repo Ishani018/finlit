@@ -130,7 +130,7 @@ export default function ChoiceDialog({ event, onChoice }) {
 
                     {/* Header */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 18, paddingBottom: 14 }}>
-                        <Image source={iconImg} style={{ width: 36, height: 36, opacity: 0.8 }} resizeMode="contain" />
+                        <Image source={iconImg} style={{ width: 40, height: 40 }} resizeMode="contain" />
                         <View style={{ flex: 1 }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: accentColor, letterSpacing: 3 }}>
                                 {event.category?.toUpperCase()} EVENT

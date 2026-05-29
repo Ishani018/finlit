@@ -33,7 +33,7 @@ export default function FinancialTip({ tip, onDismiss }) {
                 {/* Header */}
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                        <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
+                        <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                         <View style={{ flex: 1 }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, marginBottom: 2 }}>WHY THIS MATTERS</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', lineHeight: 26 }}>{tip.title}</Text>
