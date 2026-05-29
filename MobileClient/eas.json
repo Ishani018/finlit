@@ -9,7 +9,8 @@
         "buildType": "apk"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
       }
     },
     "production": {
@@ -17,7 +18,8 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
       }
     }
   },
