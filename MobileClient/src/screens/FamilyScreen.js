@@ -616,20 +616,10 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
                         icon={require('../../assets/ui_comp/vacation.png')}
                         onPress={() => showDialog('Plan Family Vacation', `Take the whole family on a trip!\nCosts ₹5,000 per person. Boosts happiness by +15.`, 'warning', () => { const r = planVacation(); if (!r.success) showDialog('Cannot Plan', r.msg, 'info', onClose); else onClose(); })} />
                 )}
-                {isChild && dep.custody !== 'ex' && (
-                    <ActionRow label="Buy a Gift" sub="₹2,000 · +15 HP · +3 happiness"
-                        icon={require('../../assets/ui_comp/children_birthday_cake.png')}
-                        onPress={() => showDialog('Buy a Gift', `Spend ₹2,000 on a gift for ${dep.name}?\nRestores +15 HP and boosts happiness.`, 'warning', () => { const r = giftChild(dep.id); if (!r.success) showDialog('Cannot Gift', r.msg, 'info', onClose); })} />
-                )}
                 {isParent && (
-                    <>
-                        <ActionRow label="Buy Medicine" sub="₹5,000 · +20 HP"
-                            icon={require('../../assets/ui_comp/pharmacy.png')}
-                            onPress={() => showDialog('Buy Medicine', `Spend ₹5,000 on medicine for ${dep.name}?\nRestores +20 HP.`, 'warning', () => { const r = buyMedicine(dep.id); if (!r.success) showDialog('Cannot Buy', r.msg, 'info', onClose); })} />
-                        <ActionRow label={dep.caretaker ? 'Caretaker: Active' : 'Hire Caretaker'} sub={dep.caretaker ? '₹8,000/mo · tap to remove' : '+₹8,000/mo · 60% slower health decay'}
-                            icon={require('../../assets/ui_comp/healthicon.png')}
-                            onPress={() => showDialog(dep.caretaker ? 'Remove Caretaker' : 'Hire Caretaker', dep.caretaker ? `Remove the caretaker for ${dep.name}? Health will decay faster without care.` : `Hire a full-time caretaker for ${dep.name}?\n+₹8,000/mo but health decays 60% slower.`, 'warning', () => toggleCaretaker(dep.id))} />
-                    </>
+                    <ActionRow label={dep.caretaker ? 'Caretaker: Active' : 'Hire Caretaker'} sub={dep.caretaker ? '₹8,000/mo · tap to remove' : '+₹8,000/mo · 60% slower health decay'}
+                        icon={require('../../assets/ui_comp/healthicon.png')}
+                        onPress={() => showDialog(dep.caretaker ? 'Remove Caretaker' : 'Hire Caretaker', dep.caretaker ? `Remove the caretaker for ${dep.name}? Health will decay faster without care.` : `Hire a full-time caretaker for ${dep.name}?\n+₹8,000/mo but health decays 60% slower.`, 'warning', () => toggleCaretaker(dep.id))} />
                 )}
                 {isSpouse && (
                     <ActionRow label="File for Divorce" sub="₹2,00,000 settlement · -30 happiness"

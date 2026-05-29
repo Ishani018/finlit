@@ -1212,6 +1212,8 @@ const GameLayout = ({ onHardReset }) => {
               recap={monthlyRecap}
               netWorthHistory={netWorthHistory}
               currentBalance={balance}
+              loans={loans}
+              totalEMI={getTotalEMI ? getTotalEMI() : 0}
               onContinue={() => setShowSummary(false)}
             />
           )}
