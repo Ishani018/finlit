@@ -150,10 +150,10 @@ export default function BottomTabBar({
                                     activeOpacity={0.8}
                                     style={{ alignItems: 'center', justifyContent: 'center' }}
                                 >
-                                    <Image source={COIN_IMG} style={{ width: 52, height: 52 }} resizeMode="contain" />
+                                    <Image source={COIN_IMG} style={{ width: 62, height: 62 }} resizeMode="contain" />
                                 </TouchableOpacity>
                             </Animated.View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#60a5fa', letterSpacing: 2, lineHeight: 13 }}>NEXT MONTH</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#60a5fa', letterSpacing: 2, lineHeight: 14 }}>NEXT MONTH</Text>
                         </View>
                     );
                 }

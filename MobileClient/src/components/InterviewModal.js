@@ -57,34 +57,18 @@ export default function InterviewModal() {
                                     key={idx}
                                     onPress={() => resolveInterview(choice, job)}
                                     activeOpacity={0.8}
-                                    style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.borderLt, padding: 15 }}
+                                    style={{ backgroundColor: '#08101e', borderRadius: 10, padding: 16 }}
                                 >
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa', marginBottom: 5 }}>
                                         "{choice.label}"
                                     </Text>
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                                        {choice.salaryMultiplier > 1 && (
-                                            <View style={{ backgroundColor: '#14532d30', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 2, borderWidth: 1, borderColor: '#14532d50' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#86efac' }}>
-                                                    +{Math.round((choice.salaryMultiplier - 1) * 100)}% PAY
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {choice.happinessModifier !== 0 && (
-                                            <View style={{ backgroundColor: choice.happinessModifier > 0 ? '#14532d30' : '#7f1d1d30', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 2, borderWidth: 1, borderColor: choice.happinessModifier > 0 ? '#14532d50' : '#7f1d1d50' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: choice.happinessModifier > 0 ? '#86efac' : '#fca5a5' }}>
-                                                    {choice.happinessModifier > 0 ? '+' : ''}{choice.happinessModifier} HAPPINESS
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {choice.healthModifier !== 0 && (
-                                            <View style={{ backgroundColor: '#7f1d1d30', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 2, borderWidth: 1, borderColor: '#7f1d1d50' }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fca5a5' }}>
-                                                    {choice.healthModifier} HEALTH
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 4 }}>
+                                        {[
+                                            choice.salaryMultiplier > 1 && `+${Math.round((choice.salaryMultiplier - 1) * 100)}% pay`,
+                                            choice.happinessModifier !== 0 && `${choice.happinessModifier > 0 ? '+' : ''}${choice.happinessModifier} happiness`,
+                                            choice.healthModifier !== 0 && `${choice.healthModifier} health`,
+                                        ].filter(Boolean).join('  ·  ')}
+                                    </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>

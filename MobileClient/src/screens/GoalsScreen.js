@@ -205,7 +205,7 @@ export default function GoalsScreen({ onClose }) {
                 ))}
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 12 }}>
-                    <View style={{ width: 3, height: 14, backgroundColor: '#fbbf2480' }} />
+                    <Image source={ACH_ICON} style={{ width: 20, height: 20 }} resizeMode="contain" />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3 }}>ACHIEVEMENTS</Text>
                     <View style={{ flex: 1, height: 1, backgroundColor: '#141828' }} />
                 </View>

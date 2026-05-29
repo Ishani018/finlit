@@ -218,9 +218,7 @@ function ExpectingChildCard({ data }) {
         <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', backgroundColor: C.pink + '08' }}>
                 <Image source={babyImg} style={{ width: '80%', height: '80%', opacity: 0.4 }} resizeMode="contain" />
-                <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: C.pink, paddingHorizontal: 7, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#000', letterSpacing: 1 }}>EXPECTING</Text>
-                </View>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.pink, letterSpacing: 2, position: 'absolute', top: 10, left: 10 }}>EXPECTING</Text>
                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.85)', paddingVertical: 5, alignItems: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.cream, letterSpacing: 1 }}>{data.remaining} MONTHS LEFT</Text>
                 </View>

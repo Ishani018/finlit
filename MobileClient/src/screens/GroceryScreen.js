@@ -50,9 +50,6 @@ function ShopCard({ item, balance, onBuy }) {
         <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
             <View style={{ width: '100%', aspectRatio: 0.78, backgroundColor: C.card }}>
                 {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="contain" />}
-                <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: 'rgba(6,8,15,0.75)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: catColor, letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
-                </View>
             </View>
             <View style={{ padding: 10 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.cream, lineHeight: 16, marginBottom: 4 }} numberOfLines={1}>{item.name}</Text>

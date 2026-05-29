@@ -262,7 +262,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                             </TouchableOpacity>
                             {tipsOpen && tips.map((tip, i) => (
                                 <View key={i} style={{ paddingVertical: 10, borderTopWidth: i > 0 ? 1 : 0, borderColor: '#0f1525', flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: tip.color, marginTop: 6 }} />
+                                    <Image source={require('../../assets/ui_comp/bulb.png')} style={{ width: 18, height: 18, marginTop: 2 }} resizeMode="contain" />
                                     <View style={{ flex: 1 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#c8d4f0', lineHeight: 19 }}>{tip.title}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 18, marginTop: 2 }}>{tip.body}</Text>
@@ -470,8 +470,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                                                 <View style={{ position: 'absolute', inset: 0, backgroundColor: eligible ? 'rgba(4,6,14,0.35)' : 'rgba(4,6,14,0.65)' }} />
                                                                 {!eligible && <View style={{ position: 'absolute', top: 8, right: 8 }}><Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 24, height: 24 }} resizeMode="contain" /></View>}
                                                                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.8)', padding: 8 }}>
-                                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 1 }}>
-                                                                        {eligible && <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: meta.color }} />}
+                                                                    <View style={{ marginBottom: 1 }}>
                                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: eligible ? '#c8d4f0' : '#445070', lineHeight: 19 }} numberOfLines={1}>{meta.name}</Text>
                                                                     </View>
                                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 15 }}>
@@ -827,7 +826,7 @@ export default function BankScreen({ onClose, onShowDialog }) {
                                         const active = i === stepIdx;
                                         return (
                                             <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                                                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: done ? '#4ade80' : active ? '#60a5fa' : '#1a2040' }} />
+                                                <Image source={done ? require('../../assets/ui_comp/nextbutton.png') : require('../../assets/ui_comp/lock.png')} style={{ width: 16, height: 16, opacity: active ? 1 : done ? 0.9 : 0.3 }} resizeMode="contain" />
                                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: done ? '#4ade80' : active ? '#c8d4f0' : '#2a3560' }}>{label}</Text>
                                             </View>
                                         );

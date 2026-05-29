@@ -108,13 +108,10 @@ function GrocerySection({ onBack, onClose }) {
                             const canAfford = balance >= item.price;
                             const img = ITEM_IMAGES[item.id];
                             return (
-                                <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+                                <View key={item.id} style={{ flex: 1, borderRadius: 10, backgroundColor: C.panel, overflow: 'hidden' }}>
                                     <View style={{ height: 90, position: 'relative' }}>
                                         {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: catColor + '15' }} />}
                                         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
-                                        <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: catColor, paddingHorizontal: 5, paddingVertical: 1 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 9, color: '#000', letterSpacing: 1 }}>{item.category.toUpperCase()}</Text>
-                                        </View>
                                     </View>
                                     <View style={{ padding: 8 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
@@ -203,7 +200,7 @@ function PharmacySection({ onBack, onClose }) {
                             const affordable = canAfford(item);
                             const img = MEDICINE_IMAGES[item.id];
                             return (
-                                <View key={item.id} style={{ flex: 1, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+                                <View key={item.id} style={{ flex: 1, borderRadius: 10, backgroundColor: C.panel, overflow: 'hidden' }}>
                                     <View style={{ height: 180, position: 'relative' }}>
                                         {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.sage + '15' }} />}
                                         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />

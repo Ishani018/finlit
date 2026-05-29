@@ -175,11 +175,11 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
                                         {/* Image */}
                                         <View style={{ position: 'relative' }}>
                                             <Image source={prop.image} style={{ width: '100%', height: 150 }} resizeMode="cover" />
-                                            <View style={{ position: 'absolute', top: 10, right: 10, backgroundColor: qualColor, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 5 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#000' }}>{prop.life_quality}/10</Text>
+                                            <View style={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(4,6,14,0.82)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: qualColor }}>{prop.life_quality}/10</Text>
                                             </View>
                                             {canAfford && (
-                                                <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: '#052318cc', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 5 }}>
+                                                <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: 'rgba(5,35,24,0.82)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.sage }}>CAN AFFORD</Text>
                                                 </View>
                                             )}

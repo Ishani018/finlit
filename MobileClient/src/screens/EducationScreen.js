@@ -63,9 +63,7 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                             <View style={{ width: 3, height: 12, backgroundColor: meta.color }} />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: meta.accent, letterSpacing: 3 }}>{meta.label}</Text>
                             {isCompleted && (
-                                <View style={{ marginLeft: 'auto', backgroundColor: '#14532d', borderWidth: 1, borderColor: '#22c55e', paddingHorizontal: 8, paddingVertical: 1 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 1 }}>✓ COMPLETED</Text>
-                                </View>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4ade80', marginLeft: 'auto' }}>✓ DONE</Text>
                             )}
                         </View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 32 }}>{course.name}</Text>
@@ -220,7 +218,6 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                         <View key={type} style={{ marginBottom: 16 }}>
                             {/* Section label */}
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                <View style={{ width: 3, height: 14, backgroundColor: meta.color }} />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.accent, letterSpacing: 3 }}>{meta.label}S</Text>
                                 <View style={{ flex: 1, height: 1, backgroundColor: meta.color + '30' }} />
                             </View>
@@ -250,29 +247,27 @@ export default function EducationScreen({ onClose, onEnroll, onEnrollLoan }) {
                                                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isLocked ? 'rgba(4,6,14,0.65)' : 'rgba(4,6,14,0.25)' }} />
                                                     {/* Status badge top-left */}
                                                     {isCompleted && (
-                                                        <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: '#14532d', borderWidth: 1, borderColor: '#22c55e', paddingHorizontal: 7, paddingVertical: 2 }}>
+                                                        <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(13,30,18,0.88)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
                                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 1 }}>✓ DONE</Text>
                                                         </View>
                                                     )}
                                                     {isStudying && (
-                                                        <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: meta.color + '22', borderWidth: 1, borderColor: meta.color, paddingHorizontal: 7, paddingVertical: 2 }}>
+                                                        <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(0,0,0,0.7)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
                                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: meta.accent, letterSpacing: 1 }}>ACTIVE</Text>
                                                         </View>
                                                     )}
                                                     {isLocked && (
                                                         <View style={{ position: 'absolute', top: 8, right: 8 }}>
-                                                            <Image source={LOCK_IMG} style={{ width: 20, height: 20, opacity: 0.6 }} resizeMode="contain" />
+                                                            <Image source={LOCK_IMG} style={{ width: 22, height: 22 }} resizeMode="contain" />
                                                         </View>
                                                     )}
                                                 </View>
                                                 {/* Info strip */}
-                                                <View style={{ backgroundColor: '#0d1020', paddingHorizontal: 10, paddingVertical: 8, borderTopWidth: 1, borderColor }}>
+                                                <View style={{ backgroundColor: '#0d1020', paddingHorizontal: 10, paddingVertical: 8 }}>
                                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: isLocked ? '#445070' : '#c8d4f0', lineHeight: 19, marginBottom: 4 }} numberOfLines={1}>{course.name}</Text>
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: isLocked ? '#2a3560' : '#4ade80' }}>₹{(course.monthly_tuition / 1000).toFixed(0)}k/mo</Text>
-                                                        <View style={{ backgroundColor: meta.color + '18', borderWidth: 1, borderColor: meta.color + '50', paddingHorizontal: 6, paddingVertical: 1 }}>
-                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.accent }}>{durationLabel}</Text>
-                                                        </View>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.accent }}>{durationLabel}</Text>
                                                     </View>
                                                 </View>
                                             </TouchableOpacity>

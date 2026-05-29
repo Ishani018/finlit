@@ -80,18 +80,18 @@ function JobCard({ job, tier, isCurrent, isOffer, isLocked, isPending, onPress }
                     </View>
                 )}
                 {isCurrent && (
-                    <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: '#050d1e', borderWidth: 1, borderColor: C.blue, paddingHorizontal: 5, paddingVertical: 1 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#60a5fa', letterSpacing: 1 }}>CURRENT</Text>
+                    <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(5,13,30,0.85)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 1 }}>CURRENT</Text>
                     </View>
                 )}
                 {isOffer && (
-                    <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: '#0d1e12', borderWidth: 1, borderColor: '#22c55e', paddingHorizontal: 5, paddingVertical: 1 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#4ade80', letterSpacing: 1 }}>OFFER</Text>
+                    <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(13,30,18,0.85)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 1 }}>OFFER</Text>
                     </View>
                 )}
                 {isPending && !isCurrent && (
-                    <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: '#422006', borderWidth: 1, borderColor: '#ca8a04', paddingHorizontal: 5, paddingVertical: 1 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#facc15', letterSpacing: 1 }}>PENDING</Text>
+                    <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(66,32,6,0.85)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#facc15', letterSpacing: 1 }}>PENDING</Text>
                     </View>
                 )}
             </View>

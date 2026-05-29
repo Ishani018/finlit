@@ -4,14 +4,6 @@ import { useGame } from '../context/GameContext';
 import { INSURANCE_PLANS } from '../data/insurance';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-const Corners = ({ color }) => (
-    <>
-        <View style={{ position: 'absolute', top: 0, left: 0, width: 5, height: 5, backgroundColor: color }} />
-        <View style={{ position: 'absolute', top: 0, right: 0, width: 5, height: 5, backgroundColor: color }} />
-        <View style={{ position: 'absolute', bottom: 0, left: 0, width: 5, height: 5, backgroundColor: color }} />
-        <View style={{ position: 'absolute', bottom: 0, right: 0, width: 5, height: 5, backgroundColor: color }} />
-    </>
-);
 
 const TYPE_META = {
     health:   { label: 'HEALTH',   color: '#22c55e', accent: '#4ade80', bg: '#0d1e12', img: require('../../assets/ui_comp/healthinsurance.png') },
