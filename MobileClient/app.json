@@ -25,9 +25,7 @@
         "backgroundColor": "#0f1729"
       },
       "package": "com.finlit.game",
-      "edgeToEdgeEnabled": true,
-      "enableProguardInReleaseBuilds": true,
-      "enableShrinkResourcesInReleaseBuilds": true
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -41,7 +39,9 @@
         {
           "android": {
             "usesCleartextTraffic": true,
-            "networkSecurityConfig": "./network_security_config.xml"
+            "networkSecurityConfig": "./network_security_config.xml",
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
           }
         }
       ]
