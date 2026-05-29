@@ -25,7 +25,9 @@
         "backgroundColor": "#0f1729"
       },
       "package": "com.finlit.game",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "enableProguardInReleaseBuilds": true,
+      "enableShrinkResourcesInReleaseBuilds": true
     },
     "web": {
       "favicon": "./assets/favicon.png",
