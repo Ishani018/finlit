@@ -218,7 +218,7 @@ export const GameProvider = ({ children }) => {
             playerSprite, playerName, playerBirthday,
             timesMarried,
             playerAge: STARTING_AGE + Math.floor(totalMonthsPlayed / 12),
-            netWorth: balance + Object.keys(portfolio).reduce((t, id) => t + (portfolio[id]?.qty || 0) * (marketPrices[id] || 0), 0),
+            netWorth: balance + Object.keys(portfolio).reduce((t, id) => t + (portfolio[id]?.qty || 0) * (marketPrices[id] || 0), 0) + Object.entries(goldHoldings).reduce((t, [assetId, h]) => { if (!h || h.grams <= 0) return t; const asset = GOLD_ASSETS.find(a => a.id === assetId); return t + Math.round(h.grams * goldPrice * (asset?.purity || 1)); }, 0),
         };
     });
 
@@ -977,6 +977,7 @@ export const GameProvider = ({ children }) => {
         const linkedLoans = loans.filter(l => l.linkedAsset === propertyId);
         const loanRepayment = linkedLoans.reduce((sum, l) => sum + l.remainingPrincipal, 0);
         const netSale = salePrice - loanRepayment;
+        if (netSale < 0) return { success: false, msg: `Outstanding loan (₹${loanRepayment.toLocaleString()}) exceeds sale price (₹${salePrice.toLocaleString()}). Repay the loan first.` };
         setBalance(prev => prev + netSale);
         setProperties(prev => prev.filter(id => id !== propertyId));
         setPropertyBuyMonths(prev => { const { [propertyId]: _, ...rest } = prev; return rest; });
@@ -1263,13 +1264,13 @@ export const GameProvider = ({ children }) => {
         return { success: true, msg: `${item.name} added to pantry!` };
     };
 
-    const consumeFood = (itemId) => {
+    const consumeFood = (itemId, forDependent = false) => {
         const entry = stateRef.current.pantry.find(p => p.itemId === itemId);
         if (!entry || entry.qty < 1) return { success: false, msg: 'Nothing left in pantry.' };
         const item = GROCERY_ITEMS.find(g => g.id === itemId);
         if (!item) return { success: false, msg: 'Unknown item.' };
         setPantry(prev => prev.map(p => p.itemId === itemId ? { ...p, qty: p.qty - 1 } : p).filter(p => p.qty > 0));
-        setHealth(prev => Math.min(100, prev + item.healthRestore));
+        if (!forDependent) setHealth(prev => Math.min(100, prev + item.healthRestore));
         setHappiness(prev => Math.min(100, prev + (item.happiness || 0)));
         return { success: true, msg: `+${item.healthRestore} health!`, item };
     };
@@ -1368,7 +1369,7 @@ export const GameProvider = ({ children }) => {
     };
 
     const haveChild = () => {
-        const spouse = dependents.find(d => d.type === 'spouse');
+        const spouse = dependents.find(d => d.type === 'spouse' && !d.isDead);
         if (!spouse) return { success: false, msg: 'Must be married first.' };
         if (expectingChild) return { success: false, msg: 'You are already expecting a child!' };
         const activeChildrenWithCurrentSpouse = dependents.filter(d => d.type === 'child' && d.custody !== 'ex' && d.spouseId === spouse.id).length;
@@ -1447,10 +1448,10 @@ export const GameProvider = ({ children }) => {
     const giftChild = (depId) => {
         if (balance < GIFT_CHILD_COST) return { success: false, msg: `Need ₹${GIFT_CHILD_COST.toLocaleString()} to buy a gift.` };
         setBalance(prev => prev - GIFT_CHILD_COST);
-        setDependents(prev => prev.map(d => d.id === depId ? { ...d, health: Math.min(100, (d.health ?? 80) + 5) } : d));
-        setHappiness(prev => Math.min(100, prev + 2));
+        setDependents(prev => prev.map(d => d.id === depId ? { ...d, health: Math.min(100, (d.health ?? 80) + 10) } : d));
+        setHappiness(prev => Math.min(100, prev + 5));
         addHistory('Bought gift for child', -GIFT_CHILD_COST, 'expense');
-        return { success: true, msg: 'Child is very happy! Health and your happiness increased.' };
+        return { success: true, msg: 'Child is very happy! Their health improved and your happiness increased.' };
     };
 
     const transferToChildSavings = (childId, amount) => {
@@ -1792,7 +1793,7 @@ export const GameProvider = ({ children }) => {
     const UPSKILL_COST = 50000;
     const UPSKILL_MONTHS = 6;
     const upskillSpouse = () => {
-        const spouse = dependents.find(d => d.type === 'spouse');
+        const spouse = dependents.find(d => d.type === 'spouse' && !d.isDead);
         if (!spouse) return { success: false, msg: 'Not married.' };
         if (spouse.isWorking) return { success: false, msg: 'Spouse is already working.' };
         if (spouse.upskilling) return { success: false, msg: 'Spouse is already enrolled in a course.' };
@@ -2074,12 +2075,13 @@ export const GameProvider = ({ children }) => {
                 msg = "Not enough balance to throw this party.";
             }
         } else if (eff.type === 'ppf_boost') {
-            // Boost all stock prices by pct
-            setMarketPrices(prev => {
-                const next = { ...prev };
-                STOCKS.forEach(s => { next[s.id] = (prev[s.id] || s.price) * (1 + (eff.pct || 0.1)); });
-                return next;
-            });
+            // Deposit into PPF and deduct from balance
+            const ppfAmount = eff.amount || 50000;
+            if (balance >= ppfAmount) {
+                setBalance(prev => prev - ppfAmount);
+                setPpf(prev => ({ ...prev, balance: prev.balance + ppfAmount, contributionsThisYear: (prev.contributionsThisYear || 0) + ppfAmount }));
+                addHistory('PPF Top-up (Budget)', -ppfAmount, 'expense');
+            }
         } else if (eff.type === 'market_dip_buy') {
             const amount = Math.min(eff.amount || 50000, balance);
             if (amount > 0) {
@@ -2194,8 +2196,12 @@ export const GameProvider = ({ children }) => {
             setLastCrisisEvent(entry);
             if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
         } else if (eff.type === 'add_parents') {
-            if (!dependents.some(d => d.type === 'parent')) {
-                setDependents(prev => [...prev, { id: `parent_${Date.now()}`, type: 'parent', name: 'Aging Parent', monthAdded: totalMonthsPlayed, health: 70 }]);
+            const hasMother = dependents.some(d => d.type === 'parent' && d.parentType === 'mother');
+            const hasFather = dependents.some(d => d.type === 'parent' && d.parentType === 'father');
+            if (!hasMother || !hasFather) {
+                const parentType = !hasMother ? 'mother' : 'father';
+                const parentName = !hasMother ? 'Mother' : 'Father';
+                setDependents(prev => [...prev, { id: `parent_${Date.now()}`, type: 'parent', parentType, name: `Aging ${parentName}`, monthAdded: totalMonthsPlayed, health: 70 }]);
             } else {
                 msg = 'Your parent is already living with you.';
             }
@@ -2269,7 +2275,7 @@ export const GameProvider = ({ children }) => {
             }
         } else if (eff.type === 'emi_purchase') {
             const emi = Math.round(eff.amount / eff.months);
-            const newLoan = { id: `loan_decision_${Date.now()}`, type: 'Personal Loan', remainingPrincipal: eff.amount, totalPrincipal: eff.amount, emi, monthlyRate: 0, monthsLeft: eff.months, tenureRemaining: eff.months };
+            const newLoan = { id: `loan_decision_${Date.now()}`, type: 'Personal Loan', loanTypeId: 'personal_loan', remainingPrincipal: eff.amount, totalPrincipal: eff.amount, emi, monthlyRate: 0, tenureRemaining: eff.months, missedPayments: 0 };
             setLoans(prev => [...prev, newLoan]);
             if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
         } else if (eff.type === 'itr_ca') {
@@ -3157,10 +3163,10 @@ export const GameProvider = ({ children }) => {
                 if (parents.length > 0) {
                     const goldGrams = parents.length * 1;
                     setGoldHoldings(prev => {
-                        const existing = prev['gold_24k'] || { grams: 0, avgBuyPrice: goldPrice, buyMonth: totalMonthsPlayed, interestAccrued: 0 };
-                        return { ...prev, ['gold_24k']: { ...existing, grams: existing.grams + goldGrams } };
+                        const existing = prev['digital_gold'] || { grams: 0, avgBuyPrice: goldPrice, buyMonth: totalMonthsPlayed, interestAccrued: 0 };
+                        return { ...prev, ['digital_gold']: { ...existing, grams: existing.grams + goldGrams } };
                     });
-                    giftMsg += `Your parents blessed you with ${goldGrams}g of 24K Gold! `;
+                    giftMsg += `Your parents blessed you with ${goldGrams}g of Gold! `;
                 }
 
                 if (giftCash > 0 || parents.length > 0) {
@@ -3218,7 +3224,7 @@ export const GameProvider = ({ children }) => {
                         : [
                             { label: 'Quiet Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Dinner', amount: 1500, happiness: 15, health: 15, msg: 'A peaceful, restorative evening.' } },
                             { label: 'House Party', color: '#4ade80', effect: { type: 'birthday_celebration', choiceLabel: 'House Party', amount: 10000, happiness: 25, salaryBonusPct: 0.05, msg: 'You networked with friends! Small 5% salary bump!' } },
-                            { label: 'Lavish Bash', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Bash', amount: 40000, happiness: 50, creditScore: 40, health: -10, msg: 'A wild party! Huge status boost but you feel hungover.' } },
+                            { label: 'Lavish Bash', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Bash', amount: 40000, happiness: 50, health: -10, msg: 'A wild party! Great happiness boost but you feel hungover.' } },
                           ],
                 });
                 setFiredDecisions(prev => prev.includes(bdayDecisionId) ? prev : [...prev, bdayDecisionId]);
@@ -3242,7 +3248,7 @@ export const GameProvider = ({ children }) => {
                 let choices = [
                     { label: 'Quiet Family Dinner', color: '#60a5fa', effect: { type: 'birthday_celebration', choiceLabel: 'Quiet Family Dinner', amount: 2500, happiness: 20, health: 10, dependentId: bdayDependent.id, msg: 'A lovely, peaceful family dinner.' } },
                     { label: 'Big House Party', color: '#4ade80', effect: { type: 'birthday_celebration', choiceLabel: 'Big House Party', amount: 12000, happiness: 30, spouseIncomeBoost: isSpouse ? 0.10 : 0, childSavingsBoost: isSpouse ? 0 : 10000, dependentId: bdayDependent.id, msg: isSpouse ? 'Great party! Spouse got a 10% raise!' : 'Fun kids party! You also put ₹10,000 into their savings.' } },
-                    { label: 'Lavish Celebration', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Celebration', amount: 45000, happiness: 60, creditScore: 25, spouseIncomeBoost: isSpouse ? 0.20 : 0, childSavingsBoost: isSpouse ? 0 : 25000, dependentId: bdayDependent.id, msg: 'An unforgettable bash! Huge happiness and status boost.' } }
+                    { label: 'Lavish Celebration', color: '#f87171', effect: { type: 'birthday_celebration', choiceLabel: 'Lavish Celebration', amount: 45000, happiness: 60, spouseIncomeBoost: isSpouse ? 0.20 : 0, childSavingsBoost: isSpouse ? 0 : 25000, dependentId: bdayDependent.id, msg: 'An unforgettable bash! Huge happiness boost.' } }
                 ];
 
                 let message = `How do you want to celebrate?`;
@@ -3849,9 +3855,22 @@ export const GameProvider = ({ children }) => {
             setNps(prev => ({ ...prev, balance: Math.round(prev.balance * (1 + monthlyReturn)) }));
         }
 
-        // FD monthly interest accrual
+        // FD monthly interest accrual + auto-collect on maturity
+        const maturedFDs = [];
+        setFixedDeposits(prev => prev.filter(fd => {
+            if (fd.monthsLeft <= 1) { maturedFDs.push(fd); return false; }
+            return true;
+        }));
+        if (maturedFDs.length > 0) {
+            const totalMatured = maturedFDs.reduce((s, fd) => {
+                const monthlyRate = fd.rate / 12;
+                return s + Math.round(fd.currentValue * (1 + monthlyRate));
+            }, 0);
+            setBalance(prev => prev + totalMatured);
+            maturedFDs.forEach(fd => addHistory(`FD Matured (₹${fd.principal.toLocaleString()})`, Math.round(fd.currentValue), 'income'));
+            newInboxEvents.push({ id: `fd_mature_${Date.now()}`, name: 'FD Matured', message: `${maturedFDs.length} FD${maturedFDs.length > 1 ? 's' : ''} matured. ₹${totalMatured.toLocaleString()} credited to your account.`, category: 'positive', impact: totalMatured, month: totalMonthsPlayed, read: false });
+        }
         setFixedDeposits(prev => prev.map(fd => {
-            if (fd.monthsLeft <= 0) return fd;
             const monthlyRate = fd.rate / 12;
             return { ...fd, currentValue: Math.round(fd.currentValue * (1 + monthlyRate)), monthsLeft: fd.monthsLeft - 1 };
         }));
@@ -4006,7 +4025,7 @@ export const GameProvider = ({ children }) => {
 
             if (effect.type === 'freelance_contract') {
                 let nextEffect = { ...effect, remainingMonths: nextRemaining };
-                if (!effect.riskChecked && effect.remainingMonths === effect.initialMonths) {
+                if (!effect.riskChecked && nextRemaining === effect.initialMonths - 1) {
                     const survived = Math.random() >= (effect.risk ?? 0.25);
                     if (!survived) {
                         lostFreelanceJob = true;

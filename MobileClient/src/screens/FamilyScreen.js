@@ -823,7 +823,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
     const hapColor    = (happiness || 50) >= 70 ? C.sage : (happiness || 50) >= 40 ? C.gold : C.red;
 
     const handleFeed = (depId, healthAmt, itemId) => {
-        consumeFood(itemId);
+        consumeFood(itemId, true);
         feedDependent(depId, healthAmt);
         closeDialog();
     };
