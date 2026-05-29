@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions, Image, ScrollView } from 'react-native';
-import { FINANCIAL_TIPS } from './FinancialTip';
 
 const HAPPY_ICON  = require('../../assets/ui_comp/happyicon.png');
 const INVEST_ICON = require('../../assets/ui_comp/investicon.png');
@@ -61,10 +60,6 @@ function Row({ label, value, color }) {
 
 export default function MonthSummaryCard({ recap, netWorthHistory, currentBalance, loans = [], totalEMI = 0, onContinue }) {
     const slideAnim = useRef(new Animated.Value(SH)).current;
-    const [tip] = useState(() => {
-        const tips = Object.values(FINANCIAL_TIPS);
-        return tips[Math.floor(Math.random() * tips.length)];
-    });
 
     useEffect(() => {
         slideAnim.setValue(SH);
@@ -179,19 +174,6 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f8717188', marginTop: 2 }}>
                                     {loans.length} active loan{loans.length !== 1 ? 's' : ''} · pay on time to protect your CIBIL
                                 </Text>
-                            </View>
-                        </View>
-                    )}
-
-                    {/* ── Uncle Fin tip ── */}
-                    {tip && (
-                        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 20, backgroundColor: '#070a14', borderRadius: 10, padding: 14 }}>
-                            <View style={{ width: 44, height: 44, borderRadius: 22, overflow: 'hidden' }}>
-                                <Image source={require('../../assets/ui_comp/uncle_fin.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 2, marginBottom: 3 }}>UNCLE FIN SAYS</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#a8b8d8', lineHeight: 18 }}>{tip.stat || tip.body || tip.title}</Text>
                             </View>
                         </View>
                     )}
