@@ -24,7 +24,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f1729"
       },
-      "package": "com.finlit.game"
+      "package": "com.finlit.game",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -40,15 +44,17 @@
             "usesCleartextTraffic": true,
             "networkSecurityConfig": "./network_security_config.xml",
             "enableProguardInReleaseBuilds": true,
-            "enableShrinkResourcesInReleaseBuilds": true
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableMinifyInReleaseBuilds": true
           }
         }
       ]
     ],
     "extra": {
       "eas": {
-        "projectId": "11b63934-e4d3-4207-b441-31ba6892d15d"
+        "projectId": "b2c18606-50ec-4ec2-b913-f518469427a2"
       }
-    }
+    },
+    "owner": "ishani18"
   }
 }
