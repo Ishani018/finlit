@@ -335,21 +335,19 @@ export default function ShopScreen({ onClose }) {
                 </View>
             </View>
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
-                {[
-                    { key: 'grocery',  label: 'Grocery Store',   sub: 'FOOD & PANTRY',     img: require('../../assets/ui_comp/food_grocery.png'), color: C.gold },
-                    { key: 'pharmacy', label: 'Pharmacy',         sub: 'HEALTH & MEDICINE', img: require('../../assets/ui_comp/pharmacy.png'),     color: C.sage },
-                    { key: 'clothes',  label: 'Clothes & Toys',  sub: 'SHOPPING',          img: require('../../assets/ui_comp/clothing.png'),     color: C.pink },
-                ].map(cat => (
-                    <TouchableOpacity key={cat.key} onPress={() => setSection(cat.key)} activeOpacity={0.85}
-                        style={{ borderRadius: 12, backgroundColor: C.panel, marginBottom: 12, flexDirection: 'row', alignItems: 'center', padding: 16, gap: 16 }}>
-                        <Image source={cat.img} style={{ width: 56, height: 56 }} resizeMode="contain" />
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: cat.color, letterSpacing: 3, marginBottom: 2 }}>{cat.sub}</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 26 }}>{cat.label}</Text>
-                        </View>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.dim }}>›</Text>
-                    </TouchableOpacity>
-                ))}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GAP, justifyContent: 'space-between' }}>
+                    {[
+                        { key: 'grocery',  label: 'Grocery Store',  sub: 'FOOD & PANTRY',     img: require('../../assets/ui_comp/food_grocery.png'), color: C.gold },
+                        { key: 'pharmacy', label: 'Pharmacy',        sub: 'HEALTH & MEDICINE', img: require('../../assets/ui_comp/pharmacy.png'),     color: C.sage },
+                        { key: 'clothes',  label: 'Clothes & Toys', sub: 'SHOPPING',          img: require('../../assets/ui_comp/clothing.png'),     color: C.pink },
+                    ].map(cat => (
+                        <TouchableOpacity key={cat.key} onPress={() => setSection(cat.key)} activeOpacity={0.85}
+                            style={{ width: '48%', aspectRatio: 1, borderRadius: 12, backgroundColor: C.panel, marginBottom: GAP, alignItems: 'center', justifyContent: 'center', padding: 12, overflow: 'hidden' }}>
+                            <Image source={cat.img} style={{ width: 110, height: 110, marginBottom: 10 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.cream, textAlign: 'center', lineHeight: 22 }}>{cat.label}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </ScrollView>
         </View>
     );
