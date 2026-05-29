@@ -4272,6 +4272,7 @@ export const GameProvider = ({ children }) => {
 
         // Credit card
         creditCard, activeCreditCards, openCreditCard, chargeToCard, payCreditCardBill, closeCreditCard,
+        pendingCreditCardOffer, setPendingCreditCardOffer,
 
         // Financial tips
         getFinancialTips,

@@ -47,8 +47,6 @@ import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MUSIC_TRACKS = [
-  require('./assets/music/Crystalline_Caverns.mp3'),
-  require('./assets/music/Digital_Dawn.mp3'),
   require('./assets/music/Pixel_Payouts.mp3'),
 ];
 
