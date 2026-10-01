@@ -15,7 +15,7 @@ import { GROCERY_ITEMS, MONTHLY_HEALTH_DRAIN, SICK_LEAVE_THRESHOLD, CRITICAL_HEA
 import { FAMILY_DEMANDS } from '../data/familyDemands';
 import { getSpriteImage } from '../data/spriteMap';
 import { GOLD_ASSETS, GOLD_PRICE_PER_GRAM_BASE } from '../data/gold';
-import { Platform, Text, Image } from 'react-native';
+import { Platform, Text, Image, AppState } from 'react-native';
 import Constants from 'expo-constants';
 
 const REAL_ESTATE = [...RESIDENTIAL_PROPERTIES, ...COMMERCIAL_PROPERTIES];
@@ -306,7 +306,14 @@ export const GameProvider = ({ children }) => {
         try {
             const raw = await AsyncStorage.getItem(SAVE_KEY);
             if (!raw) return false;
-            const s = JSON.parse(raw);
+            let s;
+            try {
+                s = JSON.parse(raw);
+            } catch (parseErr) {
+                // Corrupt save: keep a copy so it is never silently overwritten by a fresh game
+                await AsyncStorage.setItem(SAVE_KEY + '_corrupt_backup', raw).catch(() => {});
+                throw parseErr;
+            }
 
             if (s.balance !== undefined) setBalance(s.balance);
             if (s.turn) setTurn(s.turn);
@@ -414,6 +421,29 @@ export const GameProvider = ({ children }) => {
         if (!saveLoaded || totalMonthsPlayed === 0) return;
         saveGame();
     }, [totalMonthsPlayed, saveLoaded]);
+
+    // Always call the latest saveGame (it closes over several state values)
+    const saveGameRef = useRef(saveGame);
+    useEffect(() => { saveGameRef.current = saveGame; }, [saveGame]);
+
+    // Save when the app goes to background / is about to be killed, so mid-month actions
+    // (buying stocks, property, etc.) are not lost.
+    useEffect(() => {
+        const sub = AppState.addEventListener('change', (state) => {
+            if (state === 'background' || state === 'inactive') {
+                const st = stateRef.current;
+                if (saveLoaded && st.totalMonthsPlayed > 0 && st.playerSprite) saveGameRef.current();
+            }
+        });
+        return () => sub.remove();
+    }, [saveLoaded]);
+
+    // Debounced save on key changes within a month
+    useEffect(() => {
+        if (!saveLoaded || totalMonthsPlayed === 0 || !playerSprite) return;
+        const t = setTimeout(() => saveGameRef.current(), 1500);
+        return () => clearTimeout(t);
+    }, [balance, portfolio, properties, loans, fixedDeposits, mfPortfolio, sipPlans, goldHoldings, pantry, activeInsurance, dependents, currentJob, saveLoaded]);
 
     // --- DERIVED VALUES ---
     let playerAge = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
@@ -3134,18 +3164,23 @@ export const GameProvider = ({ children }) => {
             return n + (s[(v - 20) % 10] || s[v] || s[0]);
         };
 
+        // nextMonth() processes the current turn and THEN advances it, so birthdays must be
+        // matched against the month we are entering, otherwise the popup shows up a month late.
+        const enterMonth = turn.month === 12 ? 1 : turn.month + 1;
+        const enterYear = turn.month === 12 ? turn.year + 1 : turn.year;
+
         let playerBdayYearToCelebrate = null;
-        if (bdayMonth && turn.month === bdayMonth) {
-            const key = `bday_${turn.year}`;
+        if (bdayMonth && enterMonth === bdayMonth) {
+            const key = `bday_${enterYear}`;
             if (!firedDecisions.includes(key)) {
-                playerBdayYearToCelebrate = turn.year;
+                playerBdayYearToCelebrate = enterYear;
             }
         }
 
         if (playerBdayYearToCelebrate !== null) {
             const bdayDecisionId = `bday_${playerBdayYearToCelebrate}`;
-            let currentAge = 18 + Math.floor(totalMonthsPlayed / 12);
-            if (bdayMonth <= turn.month) currentAge += 1;
+            let currentAge = 18 + Math.floor((totalMonthsPlayed + 1) / 12);
+            if (bdayMonth <= enterMonth) currentAge += 1;
 
             // Family Gift logic on Player's Birthday
             if (dependents.length > 0) {
@@ -3236,12 +3271,12 @@ export const GameProvider = ({ children }) => {
             // Dependent Birthdays — collect ALL dependents due this month (filter, not find)
             const bdayDependents = dependents.filter(d => {
                 if (d.isDead || d.bdayMonth === undefined || d.custody === 'ex') return false;
-                const lastCel = d.lastCelebratedYear || (turn.year - 1);
-                return lastCel === turn.year - 1 && turn.month === d.bdayMonth;
+                const lastCel = d.lastCelebratedYear || (enterYear - 1);
+                return lastCel === enterYear - 1 && enterMonth === d.bdayMonth;
             });
 
             bdayDependents.forEach(bdayDependent => {
-                const yearToCelebrate = (bdayDependent.lastCelebratedYear || (turn.year - 1)) + 1;
+                const yearToCelebrate = (bdayDependent.lastCelebratedYear || (enterYear - 1)) + 1;
                 const isSpouse = bdayDependent.type === 'spouse';
                 const age = Math.floor((totalMonthsPlayed - bdayDependent.monthAdded) / 12) + (isSpouse ? 25 : 1);
 

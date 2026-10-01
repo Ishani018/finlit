@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
 import { Audio } from 'expo-av';
 
 let _sound = null;
@@ -20,7 +21,7 @@ async function playTrack(tracks, index, onFinished) {
         await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, staysActiveInBackground: false });
         const { sound } = await Audio.Sound.createAsync(
             tracks[index],
-            { shouldPlay: true, isLooping: false, volume: 0.35 }
+            { shouldPlay: true, isLooping: tracks.length === 1, volume: 0.35 }
         );
         _sound = sound;
         sound.setOnPlaybackStatusUpdate((status) => {
@@ -48,6 +49,12 @@ export const useBackgroundMusic = (tracks) => {
 
     useEffect(() => {
         playTrack(tracks, trackIndex.current, advance);
-        return () => { stopCurrent(); };
+        // Pause when the app is backgrounded, resume when it comes back
+        const sub = AppState.addEventListener('change', (state) => {
+            if (!_sound) return;
+            if (state === 'active') _sound.playAsync().catch(() => {});
+            else _sound.pauseAsync().catch(() => {});
+        });
+        return () => { sub.remove(); stopCurrent(); };
     }, []);
 };

@@ -3,7 +3,6 @@ import {
     View, Text, TouchableOpacity, Image, TextInput, ScrollView,
     Animated, Dimensions, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { Audio } from 'expo-av';
 import { useGame } from '../context/GameContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { JOBS } from '../data/jobs';
@@ -455,27 +454,8 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
     const { setPlayerSprite, setPlayerName, setPlayerBirthday, applyForJob, startNextGeneration, resetGame } = useGame();
     const [step, setStep]           = useState(childMode ? 1 : 0);
     const [selectedIdx, setSelectedIdx] = useState(null);
-    const soundRef = useRef(null);
-
-    // Music starts immediately when this screen mounts (first thing user sees)
-    useEffect(() => {
-        (async () => {
-            try {
-                await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-                const { sound } = await Audio.Sound.createAsync(
-                    require('../../assets/music/Pixel_Payouts.mp3'),
-                    { isLooping: true, volume: 0.5 }
-                );
-                soundRef.current = sound;
-                await sound.playAsync();
-            } catch (_) {}
-        })();
-        return () => { if (soundRef.current) soundRef.current.unloadAsync(); };
-    }, []);
 
     const handleConfirm = (name, bday) => {
-        if (soundRef.current) soundRef.current.stopAsync();
-        
         if (childMode) {
             startNextGeneration(selectedIdx);
             if (onStart) onStart();
