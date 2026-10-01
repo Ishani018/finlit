@@ -463,7 +463,7 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
             try {
                 await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
                 const { sound } = await Audio.Sound.createAsync(
-                    require('../../assets/music/Digital_Dawn.mp3'),
+                    require('../../assets/music/Pixel_Payouts.mp3'),
                     { isLooping: true, volume: 0.5 }
                 );
                 soundRef.current = sound;

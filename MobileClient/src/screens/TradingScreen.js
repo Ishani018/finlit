@@ -42,6 +42,8 @@ export default function TradingScreen({ onClose }) {
     const { balance } = useGame();
 
     const [activeTab, setActiveTab] = useState('Watchlist'); // Watchlist, Portfolio, Orders, News, Advisor
+    const [connectionFailed, setConnectionFailed] = useState(false);
+    const failCountRef = React.useRef(0);
 
     // Market Data State
     const [quotes, setQuotes] = useState([]);
@@ -59,6 +61,7 @@ export default function TradingScreen({ onClose }) {
 
     // Poll for Market Quotes
     useEffect(() => {
+        if (connectionFailed) return;
         fetchQuotes(); // Initial fetch
         if (activeTab === 'Portfolio') fetchPortfolio();
         if (activeTab === 'Orders') fetchOrders();
@@ -67,6 +70,7 @@ export default function TradingScreen({ onClose }) {
 
         // Set up polling string
         const interval = setInterval(() => {
+            if (connectionFailed) return;
             fetchQuotes();
             if (activeTab === 'Portfolio') fetchPortfolio();
             if (activeTab === 'Orders') fetchOrders();
@@ -74,13 +78,14 @@ export default function TradingScreen({ onClose }) {
         }, POLL_INTERVAL_MS);
 
         return () => clearInterval(interval);
-    }, [activeTab]);
+    }, [activeTab, connectionFailed]);
 
     const fetchQuotes = async () => {
         try {
             const res = await fetch(`${API_BASE}/market/quotes`);
             const json = await res.json();
             setQuotes(json.data || []);
+            failCountRef.current = 0;
 
             // Update selected stock price live if viewing a modal
             if (selectedStock) {
@@ -88,6 +93,8 @@ export default function TradingScreen({ onClose }) {
                 if (updated) setSelectedStock(updated);
             }
         } catch (e) {
+            failCountRef.current += 1;
+            if (failCountRef.current >= 2) setConnectionFailed(true);
             console.warn("Could not fetch quotes: ", e);
         }
     };
@@ -467,6 +474,21 @@ export default function TradingScreen({ onClose }) {
             </StyledView>
 
             <StyledView className="flex-1 p-4">
+                {connectionFailed ? (
+                    <StyledView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+                        <MaterialIcons name="wifi-off" size={64} color="#4B5563" />
+                        <StyledText style={{ color: '#d4942a', fontSize: 22, fontWeight: 'bold', marginTop: 16, textAlign: 'center' }}>
+                            Live Trading — Coming Soon
+                        </StyledText>
+                        <StyledText style={{ color: '#9CA3AF', fontSize: 14, marginTop: 12, textAlign: 'center', lineHeight: 22 }}>
+                            The live stock market simulator requires a server connection and is not available in this version. Stay tuned for a future update!
+                        </StyledText>
+                        <StyledTouchableOpacity onPress={onClose} style={{ marginTop: 32, backgroundColor: '#d4942a', paddingVertical: 12, paddingHorizontal: 32, borderRadius: 12 }}>
+                            <StyledText style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Go Back</StyledText>
+                        </StyledTouchableOpacity>
+                    </StyledView>
+                ) : (
+                <>
                 {renderTabHeader()}
 
                 {activeTab === 'Watchlist' && renderWatchlist()}
@@ -474,6 +496,8 @@ export default function TradingScreen({ onClose }) {
                 {activeTab === 'Orders' && renderOrders()}
                 {activeTab === 'News' && renderNews()}
                 {activeTab === 'Advisor' && renderAdvisor()}
+                </>
+                )}
             </StyledView>
 
             {/* STOCK DETAIL MODAL OVERLAY */}

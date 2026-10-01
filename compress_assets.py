@@ -9,7 +9,7 @@ from PIL import Image
 
 ASSET_DIR = Path("MobileClient/assets")
 # Folders containing large generated images
-TARGET_FOLDERS = ["jobs", "properties", "groceries", "medicine", "achivements", "dependents"]
+TARGET_FOLDERS = ["jobs", "properties", "groceries", "medicine", "achivements", "dependents", "sprites", "ui_comp", "rooms", "clothing_and_others"]
 MAX_SIDE = 1024  # px — sufficient for any phone screen at 2x
 
 def compress_image(path: Path):
@@ -38,7 +38,7 @@ for folder in TARGET_FOLDERS:
     if not folder_path.exists():
         continue
 
-    pngs = list(folder_path.glob("*.png")) + list(folder_path.glob("*.PNG"))
+    pngs = list(folder_path.rglob("*.png")) + list(folder_path.rglob("*.PNG"))
     folder_saved = 0
     for png in pngs:
         try:
