@@ -295,8 +295,8 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                                         overflow: 'hidden', borderRadius: 12, position: 'relative',
                                     }}
                                 >
-                                    <View style={{ height: SPRITE_H, overflow: 'hidden', borderRadius: 12, alignItems: 'center', paddingTop: 6 }}>
-                                        <Image source={sprite.image} style={{ width: CARD_W, height: CARD_W * 1.75 }} resizeMode="contain" />
+                                    <View style={{ height: SPRITE_H, overflow: 'hidden', borderRadius: 12, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 4 }}>
+                                        <Image source={sprite.image} style={{ width: CARD_W, height: SPRITE_H * 1.55 }} resizeMode="contain" />
                                     </View>
                                     <View style={{ height: 1, backgroundColor: '#0d1228' }} />
                                     <View style={{ flex: 1, paddingHorizontal: 8, paddingTop: 6, paddingBottom: 8, justifyContent: 'center' }}>

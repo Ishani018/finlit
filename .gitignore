@@ -36,7 +36,9 @@ ios/Pods/
 dist/
 web-build/
 
-images/
+# Build archives & tools
+MobileClient/finlit-itch.zip
+shots_tool/node_modules/
 
 # Local / generated
 .claude/

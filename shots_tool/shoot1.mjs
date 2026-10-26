@@ -1,0 +1,13 @@
+import { chromium } from 'playwright';
+import fs from 'fs';
+const out = '/Users/ishani/Desktop/finlit/shots_tool/raw';
+fs.mkdirSync(out, { recursive: true });
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 430, height: 860 }, deviceScaleFactor: 2 });
+p.on('console', m => m.type() === 'error' && console.log('ERR', m.text().slice(0, 200)));
+p.on('pageerror', e => console.log('PAGEERR', e.message.slice(0, 200)));
+await p.goto('http://localhost:4173');
+await p.waitForTimeout(6000);
+await p.screenshot({ path: out + '/01_entry.png' });
+console.log((await p.innerText('body')).slice(0, 400));
+await b.close();
