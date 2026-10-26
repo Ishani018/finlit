@@ -107,7 +107,7 @@ function PersonCard({ image, contain, name, tag, color, sub1, sub2, hp, onPress 
         <TouchableOpacity onPress={onPress} activeOpacity={onPress ? 0.85 : 1}
             style={{ flex: 1, backgroundColor: '#08101e', overflow: 'hidden', borderRadius: 10 }}>
 
-            <View style={{ width: '100%', height: 190, backgroundColor: '#060810', overflow: 'hidden', position: 'relative', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <View style={{ width: '100%', height: 190, backgroundColor: '#060810', overflow: 'hidden', borderRadius: 12, position: 'relative', alignItems: 'center', justifyContent: 'flex-start' }}>
                 {image ? (
                     <Image source={image} style={{ width: '130%', height: '200%', position: 'absolute', top: '0%', left: '-15%' }} resizeMode="contain" />
                 ) : (
@@ -135,7 +135,7 @@ function EmptySpouseCard({ onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
             style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
-            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative' }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', borderRadius: 12, position: 'relative' }}>
                 <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.5)' }} />
                 <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -167,7 +167,7 @@ function ChildCard({ child, onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
             style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
-            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative', backgroundColor: '#060810', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', borderRadius: 12, position: 'relative', backgroundColor: '#060810', alignItems: 'center', justifyContent: 'center' }}>
                 <Image source={img} style={{ width: '75%', height: '85%' }} resizeMode="contain" />
                 <View style={{ position: 'absolute', top: 8, left: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: isEx ? C.gold : stage.color, letterSpacing: 2 }}>{stage.label}</Text>
@@ -236,7 +236,7 @@ function AddParentCard({ onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
             style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
-            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative' }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', borderRadius: 12, position: 'relative' }}>
                 <Image source={DEP_IMAGES.elderly_couple} style={{ width: '100%', height: '200%', position: 'absolute', top: 0 }} resizeMode="contain" />
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.6)' }} />
                 <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -263,15 +263,15 @@ function AddParentPickModal({ existingParents, onPick, onClose }) {
 
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ width: '92%', maxWidth: 380, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.bg, overflow: 'hidden' }}>
-                <View style={{ height: 110, overflow: 'hidden', position: 'relative' }}>
+            <View style={{ width: '92%', maxWidth: 380, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.bg, overflow: 'hidden', borderRadius: 12 }}>
+                <View style={{ height: 110, overflow: 'hidden', borderRadius: 12, position: 'relative' }}>
                     <Image source={DEP_IMAGES.elderly_parents} style={{ width: '100%', height: '220%', position: 'absolute', top: 0 }} resizeMode="contain" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.6)' }} />
                     <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 14 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.gold, letterSpacing: 4 }}>LIFE EVENT</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: C.cream, lineHeight: 28 }}>Who moves in?</Text>
                     </View>
-                    <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderWidth: 1, borderRadius: 10, borderColor: C.border, backgroundColor: 'rgba(6,8,15,0.8)', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="times" size={12} color={C.dim} />
                     </TouchableOpacity>
                 </View>
@@ -284,7 +284,7 @@ function AddParentPickModal({ existingParents, onPick, onClose }) {
                     {options.map(p => (
                         <TouchableOpacity key={p.id} onPress={() => onPick(p)} activeOpacity={0.85}
                             style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
-                            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                            <View style={{ width: '100%', aspectRatio: 0.85, overflow: 'hidden', borderRadius: 12, position: 'relative', backgroundColor: C.card }}>
                                 <Image source={p.img} style={{ width: '100%', height: '200%', position: 'absolute', top: '8%' }} resizeMode="contain" />
                                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
                                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.78)', paddingVertical: 6, alignItems: 'center' }}>
@@ -316,9 +316,9 @@ function InsuranceTile({ plan, isActive, onPress }) {
     const img   = INSURE_IMAGES[plan.type];
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
-            style={{ flex: 1, borderWidth: 1, borderColor: isActive ? color + '80' : C.border, backgroundColor: C.panel, overflow: 'hidden' }}>
+            style={{ flex: 1, borderWidth: 1, borderColor: isActive ? color + '80' : C.border, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 12 }}>
             {isActive && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 2, backgroundColor: color }} />}
-            <View style={{ height: 100, overflow: 'hidden' }}>
+            <View style={{ height: 100, overflow: 'hidden', borderRadius: 12 }}>
                 {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                      : <View style={{ flex: 1, backgroundColor: color + '15' }} />}
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: isActive ? 'rgba(6,8,15,0.3)' : 'rgba(6,8,15,0.65)' }} />
@@ -383,7 +383,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
             <View style={{ position: 'absolute', inset: 0, backgroundColor: C.bg, zIndex: 50, justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#666' }}>{dep.name}</Text>
-                    <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderRadius: 10, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="times" size={13} color={C.dim} />
                     </TouchableOpacity>
                 </View>
@@ -678,11 +678,11 @@ function MarriagePickModal({ onPick, onClose }) {
 
     return (
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)', zIndex: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden' }}>
+            <View style={{ width: '100%', height: '100%', backgroundColor: C.bg, overflow: 'hidden', borderRadius: 12 }}>
                 {!selectedCandidate ? (
                     <>
                         {/* Banquet hall banner */}
-                        <View style={{ height: 120, overflow: 'hidden', position: 'relative' }}>
+                        <View style={{ height: 120, overflow: 'hidden', borderRadius: 12, position: 'relative' }}>
                             <Image source={BANQUET_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                             <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.55)' }} />
                             <View style={{ position: 'absolute', inset: 0, justifyContent: 'flex-end', padding: 20 }}>
@@ -709,7 +709,7 @@ function MarriagePickModal({ onPick, onClose }) {
                                         {candidates.filter(v => v.type === type).map(v => (
                                             <TouchableOpacity key={v.id} onPress={() => setSelectedCandidate(v)} activeOpacity={0.85}
                                                 style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
-                                                <View style={{ aspectRatio: 0.65, overflow: 'hidden', position: 'relative', backgroundColor: C.card }}>
+                                                <View style={{ aspectRatio: 0.65, overflow: 'hidden', borderRadius: 12, position: 'relative', backgroundColor: C.card }}>
                                                     <Image
                                                         source={v.image}
                                                         style={{ width: '100%', height: '200%', position: 'absolute', top: v.top, transform: [{ scale: v.scale || 1 }] }}
@@ -834,7 +834,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
         <View style={{ flex: 1, backgroundColor: C.bg }}>
 
             {/* Banner — family house */}
-            <View style={{ height: 130, overflow: 'hidden', position: 'relative' }}>
+            <View style={{ height: 130, overflow: 'hidden', borderRadius: 12, position: 'relative' }}>
                 <Image source={BANNER_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.48)' }} />
                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 70, backgroundColor: 'rgba(6,8,15,0.75)' }} />
@@ -844,7 +844,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 30 }}>{playerName}  ·  {playerAge}</Text>
                     </View>
                     {monthlyCost > 0 && (
-                        <View style={{ backgroundColor: 'rgba(6,8,15,0.9)', borderWidth: 1, borderColor: C.red + '40', paddingHorizontal: 12, paddingVertical: 6 }}>
+                        <View style={{ backgroundColor: 'rgba(6,8,15,0.9)', borderWidth: 1, borderRadius: 10, borderColor: C.red + '40', paddingHorizontal: 12, paddingVertical: 6 }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, letterSpacing: 2 }}>FAMILY COST</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.red }}>-₹{monthlyCost.toLocaleString()}/mo</Text>
                         </View>
@@ -1123,7 +1123,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
             {/* Name Your Baby modal */}
             {showNameBaby && (
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.92)', zIndex: 200, alignItems: 'center', justifyContent: 'center', padding: PAD }}>
-                    <View style={{ width: '100%', backgroundColor: C.panel, borderWidth: 1, borderColor: C.pink + '60' }}>
+                    <View style={{ width: '100%', backgroundColor: C.panel, borderWidth: 1, borderRadius: 10, borderColor: C.pink + '60' }}>
                         <View style={{ backgroundColor: C.pink, paddingVertical: 10, paddingHorizontal: PAD, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                             <Image source={require('../../assets/dependents/baby_son.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>NAME YOUR BABY</Text>
@@ -1138,7 +1138,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                 placeholder="Enter baby's name..."
                                 placeholderTextColor={C.dark}
                                 maxLength={20}
-                                style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.pink + '50', color: C.cream, fontFamily: 'VT323_400Regular', fontSize: 22, padding: 12, marginBottom: 14 }}
+                                style={{ backgroundColor: C.card, borderWidth: 1, borderRadius: 10, borderColor: C.pink + '50', color: C.cream, fontFamily: 'VT323_400Regular', fontSize: 22, padding: 12, marginBottom: 14 }}
                                 autoFocus
                             />
                             <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -1153,7 +1153,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                         renameDependent(childToName, randomName);
                                         setShowNameBaby(false);
                                     }}
-                                    style={{ flex: 1, borderWidth: 1, borderColor: C.border, paddingVertical: 12, alignItems: 'center' }}>
+                                    style={{ flex: 1, borderWidth: 1, borderRadius: 10, borderColor: C.border, paddingVertical: 12, alignItems: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, letterSpacing: 2 }}>CANCEL</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity

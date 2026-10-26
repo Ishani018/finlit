@@ -136,7 +136,7 @@ export default function CareersScreen({ onClose, onApply }) {
                     >
                         <FontAwesome5 name="chevron-left" size={14} color={C.dim} />
                     </TouchableOpacity>
-                    <View style={{ position: 'absolute', bottom: 12, left: 14, backgroundColor: tierInfo.color + '22', borderWidth: 1, borderColor: tierInfo.color + '60', paddingHorizontal: 10, paddingVertical: 3 }}>
+                    <View style={{ position: 'absolute', bottom: 12, left: 14, backgroundColor: tierInfo.color + '22', borderWidth: 1, borderRadius: 10, borderColor: tierInfo.color + '60', paddingHorizontal: 10, paddingVertical: 3 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: tierInfo.accent, letterSpacing: 2 }}>{selectedJob.type.toUpperCase()}</Text>
                     </View>
                 </View>
@@ -265,7 +265,7 @@ export default function CareersScreen({ onClose, onApply }) {
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
                 {currentJob && (
-                    <View style={{ marginBottom: 20, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.panel, overflow: 'hidden' }}>
+                    <View style={{ marginBottom: 20, borderWidth: 1, borderColor: C.borderLt, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 12 }}>
                         <View style={{ height: 80, backgroundColor: C.card }}>
                             <Image source={currentJob.office_image || currentJob.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                             <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.5)' }} />
@@ -290,7 +290,7 @@ export default function CareersScreen({ onClose, onApply }) {
                 )}
 
                 {pendingApplications.length > 0 && (
-                    <View style={{ marginBottom: 20, borderWidth: 1, borderColor: '#ca8a04', backgroundColor: '#422006', padding: 10 }}>
+                    <View style={{ marginBottom: 20, borderWidth: 1, borderRadius: 10, borderColor: '#ca8a04', backgroundColor: '#422006', padding: 10 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#facc15', letterSpacing: 2, marginBottom: 6 }}>PENDING APPLICATIONS</Text>
                         <View style={{ gap: 4 }}>
                             {pendingApplications.map((app, i) => (

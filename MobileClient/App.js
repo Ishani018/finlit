@@ -191,7 +191,7 @@ const MiniChart = ({ history, height = 28, width = 80 }) => {
   const isUp = history[history.length - 1] >= history[0];
   const chartColor = isUp ? '#4ade80' : '#f87171';
   return (
-    <View style={{ width, height, overflow: 'hidden' }}>
+    <View style={{ width, height, overflow: 'hidden', borderRadius: 12 }}>
       <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, top: 0 }}>
         {pts.slice(1).map((pt, i) => {
           const prev = pts[i].split(',');
@@ -887,13 +887,13 @@ const GameLayout = ({ onHardReset }) => {
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1a2440', letterSpacing: 5 }}>━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4a5580', letterSpacing: 4, marginTop: 4 }}>AGE 75  •  END OF JOURNEY</Text>
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 48, color: '#c8d4f0', letterSpacing: 3, lineHeight: 52, marginTop: 6 }}>YOUR LEGACY</Text>
-            <View style={{ paddingHorizontal: 20, paddingVertical: 6, borderWidth: 1, borderColor: rankColor + '88', backgroundColor: rankColor + '11', marginTop: 8 }}>
+            <View style={{ paddingHorizontal: 20, paddingVertical: 6, borderWidth: 1, borderRadius: 10, borderColor: rankColor + '88', backgroundColor: rankColor + '11', marginTop: 8 }}>
               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: rankColor, letterSpacing: 2 }}>{finalScore.rank}</Text>
             </View>
           </View>
 
           {/* Wealth number */}
-          <View style={{ alignItems: 'center', borderWidth: 1, borderColor: '#0d1830', backgroundColor: '#060a16', padding: 20, marginBottom: 14, position: 'relative' }}>
+          <View style={{ alignItems: 'center', borderWidth: 1, borderRadius: 10, borderColor: '#0d1830', backgroundColor: '#060a16', padding: 20, marginBottom: 14, position: 'relative' }}>
             <View style={{ position: 'absolute', top: 0, left: 0, width: 6, height: 6, backgroundColor: rankColor }} />
             <View style={{ position: 'absolute', top: 0, right: 0, width: 6, height: 6, backgroundColor: rankColor }} />
             <View style={{ position: 'absolute', bottom: 0, left: 0, width: 6, height: 6, backgroundColor: rankColor }} />
@@ -920,7 +920,7 @@ const GameLayout = ({ onHardReset }) => {
 
           {/* Wealth journey chart */}
           {netWorthHistory.length > 2 && (
-            <View style={{ marginTop: 20, borderWidth: 1, borderColor: '#0d1830', backgroundColor: '#060a16', padding: 14 }}>
+            <View style={{ marginTop: 20, borderWidth: 1, borderRadius: 10, borderColor: '#0d1830', backgroundColor: '#060a16', padding: 14 }}>
               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#1e2a48', letterSpacing: 3, marginBottom: 10 }}>WEALTH JOURNEY</Text>
               <View style={{ height: 80, flexDirection: 'row', alignItems: 'flex-end' }}>
                 {(() => {
@@ -1067,11 +1067,11 @@ const GameLayout = ({ onHardReset }) => {
         })()}
 
         {/* ===== CONTENT AREA (switches by tab) ===== */}
-        <View style={{ flex: 1, overflow: 'hidden' }}>
+        <View style={{ flex: 1, overflow: 'hidden', borderRadius: 12 }}>
 
         {/* HOME TAB */}
         {activeTab === 'home' && (
-        <View style={{ flex: 1, position: 'relative', backgroundColor: '#0d1020', overflow: 'hidden' }}>
+        <View style={{ flex: 1, position: 'relative', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12 }}>
           {/* Room background */}
           <Image
             key={`${activeMenu}-${viewMode}`}
@@ -1225,7 +1225,7 @@ const GameLayout = ({ onHardReset }) => {
 
           {/* News ticker with badge */}
           {activeMenu !== 'advisor' && stockNews.length > 0 && (
-            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#070910', borderTopWidth: 1, borderColor: '#141a30', flexDirection: 'row', alignItems: 'center', height: 26, zIndex: 15, overflow: 'hidden' }}>
+            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#070910', borderTopWidth: 1, borderColor: '#141a30', flexDirection: 'row', alignItems: 'center', height: 26, zIndex: 15, overflow: 'hidden', borderRadius: 12 }}>
               <View style={{ backgroundColor: '#0a1628', paddingHorizontal: 8, height: '100%', justifyContent: 'center', borderRightWidth: 1, borderRightColor: '#e2b33a40' }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#e2b33a', letterSpacing: 1, lineHeight: 16 }}>NEWS</Text>
               </View>
@@ -1246,7 +1246,7 @@ const GameLayout = ({ onHardReset }) => {
               <View style={{ backgroundColor: '#080c1a', borderTopWidth: 2, borderColor: '#fbbf24', padding: 20, paddingBottom: 36 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <View style={{ width: 32, height: 32, backgroundColor: '#fbbf2420', borderWidth: 1, borderColor: '#fbbf2460', alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ width: 32, height: 32, backgroundColor: '#fbbf2420', borderWidth: 1, borderRadius: 10, borderColor: '#fbbf2460', alignItems: 'center', justifyContent: 'center' }}>
                       <FontAwesome5 name="question" size={14} color="#fbbf24" />
                     </View>
                     <View>
@@ -1254,7 +1254,7 @@ const GameLayout = ({ onHardReset }) => {
                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>Getting Started</Text>
                     </View>
                   </View>
-                  <TouchableOpacity onPress={() => setShowHelp(false)} style={{ padding: 6, borderWidth: 1, borderColor: '#1e2840' }}>
+                  <TouchableOpacity onPress={() => setShowHelp(false)} style={{ padding: 6, borderWidth: 1, borderRadius: 10, borderColor: '#1e2840' }}>
                     <FontAwesome5 name="times" size={12} color="#445070" />
                   </TouchableOpacity>
                 </View>
@@ -1271,8 +1271,8 @@ const GameLayout = ({ onHardReset }) => {
                   { done: activeInsurance.length > 0,                     label: 'Get insured',           sub: 'Tap MONEY → INSURE for health + term cover', onPress: () => { setShowHelp(false); setActiveTab('money'); setMoneySubTab('insure'); } },
                 ].map((step, i) => (
                   <TouchableOpacity key={i} onPress={step.onPress || undefined} disabled={!step.onPress} activeOpacity={step.onPress ? 0.7 : 1} style={{ marginBottom: 10 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderWidth: 1, borderColor: step.done ? '#4ade8030' : (step.onPress ? '#fbbf2430' : '#1e2840'), backgroundColor: step.done ? '#0d1e12' : '#0a0d1a' }}>
-                      <View style={{ width: 22, height: 22, borderWidth: 1, borderColor: step.done ? '#4ade80' : '#2a3560', backgroundColor: step.done ? '#4ade8020' : 'transparent', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderWidth: 1, borderRadius: 10, borderColor: step.done ? '#4ade8030' : (step.onPress ? '#fbbf2430' : '#1e2840'), backgroundColor: step.done ? '#0d1e12' : '#0a0d1a' }}>
+                      <View style={{ width: 22, height: 22, borderWidth: 1, borderRadius: 10, borderColor: step.done ? '#4ade80' : '#2a3560', backgroundColor: step.done ? '#4ade8020' : 'transparent', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {step.done && <FontAwesome5 name="check" size={9} color="#4ade80" />}
                         {!step.done && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4a5580' }}>{i + 1}</Text>}
                       </View>
@@ -1351,7 +1351,7 @@ const GameLayout = ({ onHardReset }) => {
 
                 {/* Current job — full image card */}
                 {currentJob && (
-                  <View style={{ height: 120, overflow: 'hidden', marginBottom: 14, position: 'relative' }}>
+                  <View style={{ height: 120, overflow: 'hidden', borderRadius: 12, marginBottom: 14, position: 'relative' }}>
                     <Image source={currentJob.office_image || currentJob.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
                     <View style={{ position: 'absolute', inset: 0, padding: 14, justifyContent: 'space-between' }}>
@@ -1366,7 +1366,7 @@ const GameLayout = ({ onHardReset }) => {
 
                 {/* JOBS card */}
                 <TouchableOpacity onPress={() => setCareerSubTab('jobs')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', marginBottom: 12 }}>
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', borderRadius: 12, marginBottom: 12 }}>
                   <View style={{ height: 160, position: 'relative' }}>
                     <Image source={require('./assets/jobs/SDE.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
@@ -1383,7 +1383,7 @@ const GameLayout = ({ onHardReset }) => {
 
                 {/* STUDY card */}
                 <TouchableOpacity onPress={() => setCareerSubTab('study')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden' }}>
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0a0d1a', overflow: 'hidden', borderRadius: 12 }}>
                   <View style={{ height: 160, position: 'relative' }}>
                     <Image source={require('./assets/ui_comp/education.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.55)' }} />
@@ -1431,7 +1431,7 @@ const GameLayout = ({ onHardReset }) => {
 
                 {/* INVEST card — full width */}
                 <TouchableOpacity onPress={() => setMoneySubTab('invest')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12, marginBottom: 10 }}>
                   <View style={{ height: 140, position: 'relative' }}>
                     <Image source={require('./assets/jobs/gold_business.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
@@ -1448,7 +1448,7 @@ const GameLayout = ({ onHardReset }) => {
 
                 {/* BANK card */}
                 <TouchableOpacity onPress={() => setMoneySubTab('bank')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12, marginBottom: 10 }}>
                   <View style={{ height: 140, position: 'relative' }}>
                     <Image source={require('./assets/bank.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
@@ -1465,7 +1465,7 @@ const GameLayout = ({ onHardReset }) => {
 
                 {/* INSURE card */}
                 <TouchableOpacity onPress={() => setMoneySubTab('insure')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', marginBottom: 10 }}>
+                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12, marginBottom: 10 }}>
                   <View style={{ height: 140, position: 'relative' }}>
                     <Image source={require('./assets/jobs/chemist_drugstore.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
@@ -1592,7 +1592,7 @@ const GameLayout = ({ onHardReset }) => {
                               };
                               if (stockNews.length === 0) {
                                 return (
-                                  <View style={{ alignItems: 'center', paddingVertical: 40, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020' }}>
+                                  <View style={{ alignItems: 'center', paddingVertical: 40, borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', backgroundColor: '#0d1020' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4a5580', textAlign: 'center' }}>
                                       No news yet.{'\n'}Advance a few months to see market events.
                                     </Text>
@@ -1607,9 +1607,9 @@ const GameLayout = ({ onHardReset }) => {
                                   ? 'Sectors: consider adding positions'
                                   : 'Sectors: review exposure, possible dip';
                                 return (
-                                  <View key={idx} style={{ borderWidth: 1, borderColor: isPositive ? '#4ade8030' : '#f8717130', backgroundColor: isPositive ? '#050f0a' : '#0f0508', marginBottom: 8, padding: 12 }}>
+                                  <View key={idx} style={{ borderWidth: 1, borderRadius: 10, borderColor: isPositive ? '#4ade8030' : '#f8717130', backgroundColor: isPositive ? '#050f0a' : '#0f0508', marginBottom: 8, padding: 12 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                      <View style={{ backgroundColor: secColor + '22', borderWidth: 1, borderColor: secColor + '55', paddingHorizontal: 6, paddingVertical: 1 }}>
+                                      <View style={{ backgroundColor: secColor + '22', borderWidth: 1, borderRadius: 10, borderColor: secColor + '55', paddingHorizontal: 6, paddingVertical: 1 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: secColor, letterSpacing: 1 }}>{(item.sector || 'MARKET').toUpperCase()}</Text>
                                       </View>
                                       {trendPct && (
@@ -1645,14 +1645,14 @@ const GameLayout = ({ onHardReset }) => {
                                       key={stock.id}
                                       onPress={() => { setSelectedStock(stock); setTradeQty('1'); setTradeTab('BUY'); }}
                                       activeOpacity={0.8}
-                                      style={{ flex: 1, borderWidth: 1, borderColor: cardColor + '40', overflow: 'hidden', backgroundColor: '#070a16' }}
+                                      style={{ flex: 1, borderWidth: 1, borderColor: cardColor + '40', overflow: 'hidden', borderRadius: 12, backgroundColor: '#070a16' }}
                                     >
                                       {/* Coloured header */}
                                       <View style={{ backgroundColor: cardColor + '12', borderBottomWidth: 1, borderColor: cardColor + '25', padding: 10, paddingBottom: 6, position: 'relative' }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: cardColor, letterSpacing: 2 }}>{stock.ticker}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: cardColor + 'aa', letterSpacing: 1 }}>{stock.sector.toUpperCase()}</Text>
                                         {holding && holding.qty > 0 && (
-                                          <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: '#0d1e30', borderWidth: 1, borderColor: '#3b82f6', paddingHorizontal: 4, paddingVertical: 1 }}>
+                                          <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: '#0d1e30', borderWidth: 1, borderRadius: 10, borderColor: '#3b82f6', paddingHorizontal: 4, paddingVertical: 1 }}>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa' }}>x{holding.qty}</Text>
                                           </View>
                                         )}
@@ -1692,7 +1692,7 @@ const GameLayout = ({ onHardReset }) => {
                               </StyledTouchableOpacity>
 
                               {/* Stock header */}
-                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 16, marginBottom: 12 }}>
+                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 16, marginBottom: 12 }}>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                                   <View style={{ flex: 1 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 1 }}>{stock.name}</Text>
@@ -1700,7 +1700,7 @@ const GameLayout = ({ onHardReset }) => {
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{stock.ticker}</Text>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4a5580' }}>|</Text>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{stock.sector}</Text>
-                                      <View style={{ borderWidth: 1, borderColor: (riskColors[stock.riskLevel] || '#fbbf24') + '50', paddingHorizontal: 5 }}>
+                                      <View style={{ borderWidth: 1, borderRadius: 10, borderColor: (riskColors[stock.riskLevel] || '#fbbf24') + '50', paddingHorizontal: 5 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: riskColors[stock.riskLevel] || '#fbbf24' }}>{stock.riskLevel} Risk</Text>
                                       </View>
                                     </View>
@@ -1744,9 +1744,9 @@ const GameLayout = ({ onHardReset }) => {
                               </View>
 
                               {/* Trade panel */}
-                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 16 }}>
+                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 16 }}>
                                 {/* BUY / SELL tabs */}
-                                <View style={{ flexDirection: 'row', marginBottom: 14, borderWidth: 1, borderColor: '#1e2840' }}>
+                                <View style={{ flexDirection: 'row', marginBottom: 14, borderWidth: 1, borderRadius: 10, borderColor: '#1e2840' }}>
                                   {['BUY', 'SELL'].map(tab => (
                                     <TouchableOpacity key={tab} onPress={() => setTradeTab(tab)} style={{
                                       flex: 1, paddingVertical: 10, alignItems: 'center',
@@ -1759,16 +1759,16 @@ const GameLayout = ({ onHardReset }) => {
 
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 4 }}>QUANTITY</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                                  <TouchableOpacity onPress={() => setTradeQty(q => String(Math.max(1, parseInt(q || '1') - 1)))} style={{ width: 36, height: 36, backgroundColor: '#111828', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
+                                  <TouchableOpacity onPress={() => setTradeQty(q => String(Math.max(1, parseInt(q || '1') - 1)))} style={{ width: 36, height: 36, backgroundColor: '#111828', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#6070a0' }}>-</Text>
                                   </TouchableOpacity>
                                   <TextInput
                                     value={tradeQty}
                                     onChangeText={setTradeQty}
                                     keyboardType="number-pad"
-                                    style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderColor: '#1e2840', textAlign: 'center', paddingVertical: 8 }}
+                                    style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', textAlign: 'center', paddingVertical: 8 }}
                                   />
-                                  <TouchableOpacity onPress={() => setTradeQty(q => String(parseInt(q || '1') + 1))} style={{ width: 36, height: 36, backgroundColor: '#111828', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
+                                  <TouchableOpacity onPress={() => setTradeQty(q => String(parseInt(q || '1') + 1))} style={{ width: 36, height: 36, backgroundColor: '#111828', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#6070a0' }}>+</Text>
                                   </TouchableOpacity>
                                 </View>
@@ -1784,7 +1784,7 @@ const GameLayout = ({ onHardReset }) => {
 
                                 <TouchableOpacity
                                   onPress={() => handleTrade(stock, tradeQty, tradeTab)}
-                                  style={{ backgroundColor: tradeTab === 'BUY' ? '#166534' : '#7f1d1d', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: tradeTab === 'BUY' ? '#22c55e' : '#ef4444', position: 'relative', overflow: 'hidden' }}
+                                  style={{ backgroundColor: tradeTab === 'BUY' ? '#166534' : '#7f1d1d', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: tradeTab === 'BUY' ? '#22c55e' : '#ef4444', position: 'relative', overflow: 'hidden', borderRadius: 12 }}
                                   activeOpacity={0.85}
                                 >
                                   <View style={{ position: 'absolute', top: 0, left: 0, width: 6, height: 6, backgroundColor: tradeTab === 'BUY' ? '#22c55e' : '#ef4444' }} />
@@ -1799,7 +1799,7 @@ const GameLayout = ({ onHardReset }) => {
                                 {/* SIP for stocks */}
                                 <TouchableOpacity
                                   onPress={() => { const res = addSIP('stock', stock.id, Math.round(currentPrice)); showDialog(res.success ? 'SIP Started' : 'SIP Failed', res.msg, res.success ? 'success' : 'error'); }}
-                                  style={{ marginTop: 10, paddingVertical: 10, alignItems: 'center', borderWidth: 1, borderColor: '#2a3560', backgroundColor: 'transparent' }}
+                                  style={{ marginTop: 10, paddingVertical: 10, alignItems: 'center', borderWidth: 1, borderRadius: 10, borderColor: '#2a3560', backgroundColor: 'transparent' }}
                                 >
                                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#6070a0' }}>
                                     Start SIP — Auto-buy every month
@@ -1818,7 +1818,7 @@ const GameLayout = ({ onHardReset }) => {
 
                             {/* Active SIPs */}
                             {sipPlans.filter(s => s.type === 'mf').length > 0 && (
-                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 12, marginBottom: 14 }}>
+                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 12, marginBottom: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#6070a0', letterSpacing: 2, marginBottom: 8 }}>ACTIVE SIPS</Text>
                                 {sipPlans.filter(s => s.type === 'mf').map(sip => {
                                   const mf = MUTUAL_FUNDS.find(m => m.id === sip.assetId);
@@ -1828,7 +1828,7 @@ const GameLayout = ({ onHardReset }) => {
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>{mf?.name || sip.assetId}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{sip.amount.toLocaleString()}/mo • Total: ₹{(sip.totalInvested || 0).toLocaleString()}</Text>
                                       </View>
-                                      <TouchableOpacity onPress={() => { cancelSIP(sip.id); }} style={{ borderWidth: 1, borderColor: '#7f1d1d', paddingHorizontal: 10, paddingVertical: 4 }}>
+                                      <TouchableOpacity onPress={() => { cancelSIP(sip.id); }} style={{ borderWidth: 1, borderRadius: 10, borderColor: '#7f1d1d', paddingHorizontal: 10, paddingVertical: 4 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>CANCEL</Text>
                                       </TouchableOpacity>
                                     </View>
@@ -1851,14 +1851,14 @@ const GameLayout = ({ onHardReset }) => {
                                       key={mf.id}
                                       onPress={() => { setSelectedMF(mf); setMfAmount('5000'); setMfTab('LUMPSUM'); }}
                                       activeOpacity={0.8}
-                                      style={{ flex: 1, borderWidth: 1, borderColor: cardColor + '40', overflow: 'hidden', backgroundColor: '#070a16' }}
+                                      style={{ flex: 1, borderWidth: 1, borderColor: cardColor + '40', overflow: 'hidden', borderRadius: 12, backgroundColor: '#070a16' }}
                                     >
                                       {/* Coloured header */}
                                       <View style={{ backgroundColor: cardColor + '12', borderBottomWidth: 1, borderColor: cardColor + '25', padding: 10, paddingBottom: 8, position: 'relative' }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: cardColor, letterSpacing: 2 }}>{mf.category.toUpperCase()}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 1 }}>{mf.amc}</Text>
                                         {hasSIP && (
-                                          <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: '#1e1b4b', borderWidth: 1, borderColor: '#312e81', paddingHorizontal: 4, paddingVertical: 1 }}>
+                                          <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: '#1e1b4b', borderWidth: 1, borderRadius: 10, borderColor: '#312e81', paddingHorizontal: 4, paddingVertical: 1 }}>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#818cf8' }}>SIP</Text>
                                           </View>
                                         )}
@@ -1908,7 +1908,7 @@ const GameLayout = ({ onHardReset }) => {
                                 <StyledText className="text-gray-500 text-sm">All Funds</StyledText>
                               </StyledTouchableOpacity>
 
-                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 16, marginBottom: 12 }}>
+                              <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 16, marginBottom: 12 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', marginBottom: 4 }}>{mf.name}</Text>
                                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{mf.amc}  •  {mf.category}</Text>
@@ -1930,7 +1930,7 @@ const GameLayout = ({ onHardReset }) => {
                               </View>
 
                               {/* Tabs */}
-                              <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#1e2840', marginBottom: 12 }}>
+                              <View style={{ flexDirection: 'row', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', marginBottom: 12 }}>
                                 {['LUMPSUM', 'SIP'].map(tab => (
                                   <TouchableOpacity key={tab} onPress={() => setMfTab(tab)} style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: mfTab === tab ? '#1d4ed8' : 'transparent' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: mfTab === tab ? '#fff' : '#445070' }}>{tab}</Text>
@@ -1943,7 +1943,7 @@ const GameLayout = ({ onHardReset }) => {
                               </Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#60a5fa' }}>₹</Text>
-                                <TextInput value={mfAmount} onChangeText={setMfAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderColor: '#1e2840', paddingHorizontal: 12, paddingVertical: 8 }} />
+                                <TextInput value={mfAmount} onChangeText={setMfAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', paddingHorizontal: 12, paddingVertical: 8 }} />
                               </View>
                               {mfTab === 'LUMPSUM' && (
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', marginBottom: 14 }}>
@@ -1953,7 +1953,7 @@ const GameLayout = ({ onHardReset }) => {
 
                               <TouchableOpacity
                                 onPress={() => handleBuyMF(mf, mfAmount, mfTab === 'SIP')}
-                                style={{ backgroundColor: '#1d4ed8', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#3b82f6', position: 'relative', overflow: 'hidden' }}
+                                style={{ backgroundColor: '#1d4ed8', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#3b82f6', position: 'relative', overflow: 'hidden', borderRadius: 12 }}
                                 activeOpacity={0.85}
                               >
                                 <View style={{ position: 'absolute', top: 0, left: 0, width: 6, height: 6, backgroundColor: '#3b82f6' }} />
@@ -1975,7 +1975,7 @@ const GameLayout = ({ onHardReset }) => {
                             <StyledText className="text-gray-500 text-sm mb-4">Tax-advantaged accounts. Locked till retirement age.</StyledText>
 
                             {/* PPF */}
-                            <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#78350f', padding: 16, marginBottom: 16 }}>
+                            <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#78350f', padding: 16, marginBottom: 16 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                 <View>
                                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24', letterSpacing: 1 }}>PPF</Text>
@@ -1994,15 +1994,15 @@ const GameLayout = ({ onHardReset }) => {
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 12 }}>CONTRIBUTE AMOUNT</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24' }}>₹</Text>
-                                <TextInput value={ppfAmount} onChangeText={setPpfAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderColor: '#78350f', paddingHorizontal: 12, paddingVertical: 8 }} />
+                                <TextInput value={ppfAmount} onChangeText={setPpfAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderRadius: 10, borderColor: '#78350f', paddingHorizontal: 12, paddingVertical: 8 }} />
                               </View>
-                              <TouchableOpacity onPress={handleContributePPF} style={{ backgroundColor: '#92400e', paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: '#fbbf24' }}>
+                              <TouchableOpacity onPress={handleContributePPF} style={{ backgroundColor: '#92400e', paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderRadius: 10, borderColor: '#fbbf24' }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>CONTRIBUTE TO PPF</Text>
                               </TouchableOpacity>
                             </View>
 
                             {/* NPS */}
-                            <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e3a5f', padding: 16, marginBottom: 16 }}>
+                            <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e3a5f', padding: 16, marginBottom: 16 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                 <View>
                                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#60a5fa', letterSpacing: 1 }}>NPS</Text>
@@ -2020,7 +2020,7 @@ const GameLayout = ({ onHardReset }) => {
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 8 }}>EQUITY % (higher = more growth + risk)</Text>
                               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                                 {['25', '50', '75'].map(pct => (
-                                  <TouchableOpacity key={pct} onPress={() => setNpsEquity(pct)} style={{ flex: 1, paddingVertical: 8, alignItems: 'center', borderWidth: 1, borderColor: npsEquity === pct ? '#60a5fa' : '#1e2840', backgroundColor: npsEquity === pct ? '#0d2040' : 'transparent' }}>
+                                  <TouchableOpacity key={pct} onPress={() => setNpsEquity(pct)} style={{ flex: 1, paddingVertical: 8, alignItems: 'center', borderWidth: 1, borderRadius: 10, borderColor: npsEquity === pct ? '#60a5fa' : '#1e2840', backgroundColor: npsEquity === pct ? '#0d2040' : 'transparent' }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: npsEquity === pct ? '#60a5fa' : '#445070' }}>{pct}%</Text>
                                   </TouchableOpacity>
                                 ))}
@@ -2028,14 +2028,14 @@ const GameLayout = ({ onHardReset }) => {
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 8 }}>AMOUNT</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#60a5fa' }}>₹</Text>
-                                <TextInput value={npsAmount} onChangeText={setNpsAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderColor: '#1e3a5f', paddingHorizontal: 12, paddingVertical: 8 }} />
+                                <TextInput value={npsAmount} onChangeText={setNpsAmount} keyboardType="number-pad" style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', backgroundColor: '#060810', borderWidth: 1, borderRadius: 10, borderColor: '#1e3a5f', paddingHorizontal: 12, paddingVertical: 8 }} />
                               </View>
-                              <TouchableOpacity onPress={handleContributeNPS} style={{ backgroundColor: '#1e3a5f', paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: '#60a5fa' }}>
+                              <TouchableOpacity onPress={handleContributeNPS} style={{ backgroundColor: '#1e3a5f', paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderRadius: 10, borderColor: '#60a5fa' }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#fff', letterSpacing: 2 }}>CONTRIBUTE TO NPS</Text>
                               </TouchableOpacity>
                             </View>
 
-                            <View style={{ backgroundColor: '#060810', borderWidth: 1, borderColor: '#1a2040', padding: 12 }}>
+                            <View style={{ backgroundColor: '#060810', borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', padding: 12 }}>
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', lineHeight: 22 }}>
                                 PPF: Guaranteed 7.1%, tax-free maturity, 15-year lock-in. Max 80C deduction.{'\n'}
                                 NPS: Market-linked, 60% lump sum at 60, 40% annuity. Extra ₹50K deduction under 80CCD.
@@ -2080,7 +2080,7 @@ const GameLayout = ({ onHardReset }) => {
                             <StyledText className="text-xl font-bold text-white mb-2 uppercase tracking-wider">My Portfolio</StyledText>
 
                             {/* Summary */}
-                            <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 14, marginBottom: 16 }}>
+                            <View style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 14, marginBottom: 16 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                                 {[
                                   { label: 'Stocks', value: `₹${Math.round(Object.keys(portfolio).reduce((t, id) => { const h = portfolio[id]; return t + (h.qty || 0) * (marketPrices[id] || 0); }, 0)).toLocaleString()}` },
@@ -2107,7 +2107,7 @@ const GameLayout = ({ onHardReset }) => {
                                   const value = holding.qty * currentPrice;
                                   const pl = (currentPrice - holding.avgPrice) * holding.qty;
                                   return (
-                                    <View key={stockId} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <View key={stockId} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
                                       <View>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#c8d4f0' }}>{stock?.ticker || stockId}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{holding.qty} shares @ ₹{Math.round(holding.avgPrice).toLocaleString()}</Text>
@@ -2135,7 +2135,7 @@ const GameLayout = ({ onHardReset }) => {
                                   const value = holding.units * currentNav;
                                   const pl = (currentNav - holding.avgNav) * holding.units;
                                   return (
-                                    <View key={mfId} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <View key={mfId} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
                                       <View style={{ flex: 1, marginRight: 8 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>{mf?.name || mfId}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>{holding.units.toFixed(3)} units @ ₹{holding.avgNav.toFixed(2)}</Text>
@@ -2161,14 +2161,14 @@ const GameLayout = ({ onHardReset }) => {
                               if (!prop) return null;
                               const isCurrentHome = currentHousing?.id === prop.id;
                               return (
-                                <View key={prop.id} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', marginBottom: 10, flexDirection: 'row', overflow: 'hidden' }}>
+                                <View key={prop.id} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', marginBottom: 10, flexDirection: 'row', overflow: 'hidden', borderRadius: 12 }}>
                                   <StyledImage source={prop.image} style={{ width: 80, height: 80 }} resizeMode="cover" />
                                   <View style={{ flex: 1, padding: 10, justifyContent: 'space-between' }}>
                                     <View>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#c8d4f0', lineHeight: 19 }}>{prop.name}</Text>
                                       <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 1 }}>{prop.category.toUpperCase()}</Text>
                                       {isCurrentHome && (
-                                        <View style={{ borderWidth: 1, borderColor: '#166534', paddingHorizontal: 6, paddingVertical: 1, alignSelf: 'flex-start', marginTop: 2 }}>
+                                        <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#166534', paddingHorizontal: 6, paddingVertical: 1, alignSelf: 'flex-start', marginTop: 2 }}>
                                           <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4ade80' }}>LIVING HERE</Text>
                                         </View>
                                       )}
@@ -2186,7 +2186,7 @@ const GameLayout = ({ onHardReset }) => {
                                             'SELL', 'Cancel', closeDialog
                                           );
                                         }}
-                                        style={{ paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: isCurrentHome ? '#1e2840' : '#7f1d1d', backgroundColor: isCurrentHome ? 'transparent' : '#1a0505' }}
+                                        style={{ paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderRadius: 10, borderColor: isCurrentHome ? '#1e2840' : '#7f1d1d', backgroundColor: isCurrentHome ? 'transparent' : '#1a0505' }}
                                       >
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: isCurrentHome ? '#2a3560' : '#f87171' }}>SELL</Text>
                                       </TouchableOpacity>
@@ -2203,7 +2203,7 @@ const GameLayout = ({ onHardReset }) => {
                                 return t + (p?.rental_income || 0);
                               }, 0);
                               return totalRental > 0 ? (
-                                <View style={{ backgroundColor: '#061410', borderWidth: 1, borderColor: '#14532d', padding: 12, marginBottom: 12, marginTop: 4, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <View style={{ backgroundColor: '#061410', borderWidth: 1, borderRadius: 10, borderColor: '#14532d', padding: 12, marginBottom: 12, marginTop: 4, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                   <View>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#14532d', letterSpacing: 3 }}>PASSIVE INCOME</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80' }}>₹{totalRental.toLocaleString()}<Text style={{ fontSize: 14, color: '#166534' }}>/mo rental</Text></Text>
@@ -2222,7 +2222,7 @@ const GameLayout = ({ onHardReset }) => {
                                     'RETIRE NOW', 'Not Yet', closeDialog
                                   );
                                 }}
-                                style={{ borderWidth: 1, borderColor: '#f59e0b80', backgroundColor: '#1a1200', padding: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                                style={{ borderWidth: 1, borderRadius: 10, borderColor: '#f59e0b80', backgroundColor: '#1a1200', padding: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
                               >
                                 <Text style={{ fontSize: 24 }}>🌴</Text>
                                 <View style={{ flex: 1 }}>
@@ -2242,12 +2242,12 @@ const GameLayout = ({ onHardReset }) => {
                                   const mf = MUTUAL_FUNDS.find(m => m.id === sip.assetId);
                                   const name = stock?.name || mf?.name || sip.assetId;
                                   return (
-                                    <View key={sip.id} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderColor: '#1e2840', padding: 10, marginBottom: 6, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <View key={sip.id} style={{ backgroundColor: '#0a0d1a', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 10, marginBottom: 6, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                       <View>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>{name}</Text>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>₹{sip.amount.toLocaleString()}/mo • Invested: ₹{(sip.totalInvested || 0).toLocaleString()}</Text>
                                       </View>
-                                      <TouchableOpacity onPress={() => cancelSIP(sip.id)} style={{ borderWidth: 1, borderColor: '#7f1d1d', paddingHorizontal: 8, paddingVertical: 3 }}>
+                                      <TouchableOpacity onPress={() => cancelSIP(sip.id)} style={{ borderWidth: 1, borderRadius: 10, borderColor: '#7f1d1d', paddingHorizontal: 8, paddingVertical: 3 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>STOP</Text>
                                       </TouchableOpacity>
                                     </View>
@@ -2773,7 +2773,7 @@ const GameLayout = ({ onHardReset }) => {
       <ResponsiveModal visible={showEventsInbox} transparent animationType="slide" onRequestClose={() => setShowEventsInbox(false)}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)' }} activeOpacity={1} onPress={() => setShowEventsInbox(false)} />
-          <View style={{ maxHeight: '94%', backgroundColor: '#070910', borderTopLeftRadius: 14, borderTopRightRadius: 14, overflow: 'hidden' }}>
+          <View style={{ maxHeight: '94%', backgroundColor: '#070910', borderTopLeftRadius: 14, borderTopRightRadius: 14, overflow: 'hidden', borderRadius: 12 }}>
             {/* Header */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingTop: 16, paddingBottom: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>

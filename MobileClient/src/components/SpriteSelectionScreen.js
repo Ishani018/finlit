@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
     View, Text, TouchableOpacity, Image, TextInput, ScrollView,
-    Animated, Dimensions, KeyboardAvoidingView, Platform,
+    Animated, Dimensions, KeyboardAvoidingView, Platform, Modal, Keyboard,
 } from 'react-native';
 import { useGame } from '../context/GameContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -153,7 +153,7 @@ function CharacterDetailView({ sprite, trait, childMode, onBack, onSelect }) {
         <View style={{ flex: 1, backgroundColor: '#06080f' }}>
 
             {/* ── HERO ── */}
-            <View style={{ height: heroH, backgroundColor: '#04060d', overflow: 'hidden' }}>
+            <View style={{ height: heroH, backgroundColor: '#04060d', overflow: 'hidden', borderRadius: 12 }}>
                 <TouchableOpacity
                     onPress={onBack}
                     activeOpacity={0.7}
@@ -292,10 +292,10 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                                         width: CARD_W,
                                         marginRight: colIdx === 0 ? CARD_GAP : 0,
                                         backgroundColor: isSel ? t.bg || '#0a0c18' : '#06080f',
-                                        overflow: 'hidden', position: 'relative',
+                                        overflow: 'hidden', borderRadius: 12, position: 'relative',
                                     }}
                                 >
-                                    <View style={{ height: SPRITE_H, overflow: 'hidden', alignItems: 'center', paddingTop: 6 }}>
+                                    <View style={{ height: SPRITE_H, overflow: 'hidden', borderRadius: 12, alignItems: 'center', paddingTop: 6 }}>
                                         <Image source={sprite.image} style={{ width: CARD_W, height: CARD_W * 1.75 }} resizeMode="contain" />
                                     </View>
                                     <View style={{ height: 1, backgroundColor: '#0d1228' }} />
@@ -332,11 +332,60 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
 }
 
 // ─── Step 2: Enter name ───────────────────────────────────────────────────────
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function DropdownField({ label, value, options, onSelect, flex = 1, error }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <View style={{ flex }}>
+            <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => { Keyboard.dismiss(); setOpen(true); }}
+                style={{
+                    paddingVertical: 13, paddingHorizontal: 12, backgroundColor: '#0d1428', borderRadius: 8,
+                    borderWidth: 1, borderColor: error ? '#f87171' : '#1e2e50',
+                    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+                }}
+            >
+                <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: value ? '#c8d4f0' : '#2a3860', flexShrink: 1 }}>
+                    {value ? value.label : label}
+                </Text>
+                <Text style={{ color: '#445070', fontSize: 12, marginLeft: 4 }}>▼</Text>
+            </TouchableOpacity>
+            <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setOpen(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 30 }}>
+                    <View style={{ maxHeight: SH * 0.55, backgroundColor: '#0d1428', borderRadius: 10, borderWidth: 1, borderColor: '#1e2e50', overflow: 'hidden' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070', letterSpacing: 3, padding: 12 }}>{label.toUpperCase()}</Text>
+                        <ScrollView>
+                            {options.map(o => (
+                                <TouchableOpacity key={o.value} onPress={() => { onSelect(o.value); setOpen(false); }}
+                                    style={{ paddingVertical: 12, paddingHorizontal: 16, backgroundColor: value && value.value === o.value ? '#1a2e56' : 'transparent' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0' }}>{o.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+        </View>
+    );
+}
+
 function NameScreen({ selectedIdx, onBack, onConfirm }) {
     const [nameInput, setNameInput] = useState('');
-    const [bdayInput, setBdayInput] = useState('');
+    const [bDay, setBDay] = useState(null);
+    const [bMonth, setBMonth] = useState(null);
+    const [bYear, setBYear] = useState(null);
     const [nameError, setNameError] = useState('');
     const [bdayError, setBdayError] = useState('');
+
+    const thisYear = new Date().getFullYear();
+    const yearOptions = Array.from({ length: 100 }, (_, i) => ({ value: thisYear - i, label: String(thisYear - i) }));
+    const monthOptions = MONTH_NAMES.map((m, i) => ({ value: i + 1, label: m.slice(0, 3) + ' (' + String(i + 1).padStart(2, '0') + ')' }));
+    const daysInMonth = bMonth && bYear ? new Date(bYear, bMonth, 0).getDate() : 31;
+    const dayOptions = Array.from({ length: daysInMonth }, (_, i) => ({ value: i + 1, label: String(i + 1) }));
+    const pad = n => String(n).padStart(2, '0');
+    const find = (opts, v) => (v == null ? null : opts.find(o => o.value === v) || null);
 
     const selected = SPRITES[selectedIdx];
     const heroH    = SH * 0.42;
@@ -345,18 +394,21 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
         const trimmedName = nameInput.trim();
         if (trimmedName.length < 2) { setNameError('Name must be at least 2 characters.'); return; }
         
-        const trimmedBday = bdayInput.trim();
-        const bdayRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-        if (!bdayRegex.test(trimmedBday)) {
-            setBdayError('Enter a valid birthday in DD/MM/YYYY format.');
+        if (!bDay || !bMonth || !bYear) {
+            setBdayError('Please select your day, month and year of birth.');
+            return;
+        }
+        if (bDay > new Date(bYear, bMonth, 0).getDate()) {
+            setBdayError('That date does not exist.');
             return;
         }
 
-        onConfirm(trimmedName, trimmedBday);
+        onConfirm(trimmedName, `${pad(bDay)}/${pad(bMonth)}/${bYear}`);
     };
 
     return (
-        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#06080f' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#06080f' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
             {/* ── HERO — full character visible ── */}
             <View style={{ height: heroH, backgroundColor: '#030407', alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -377,7 +429,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
             </View>
 
             {/* ── FORM ── */}
-            <View style={{ backgroundColor: '#08101e', paddingHorizontal: PAD, paddingTop: 22, paddingBottom: 20, flex: 1 }}>
+            <View style={{ backgroundColor: '#08101e', paddingHorizontal: PAD, paddingTop: 22, paddingBottom: 40, flex: 1 }}>
 
                 {/* Name input */}
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 3, marginBottom: 8 }}>YOUR NAME</Text>
@@ -397,31 +449,17 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     }}
                     underlineColorAndroid="transparent"
                     maxLength={20}
-                    autoFocus
                     returnKeyType="next"
                 />
                 {nameError && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', marginBottom: 12 }}>{nameError}</Text>}
 
                 {/* DOB input */}
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 3, marginBottom: 8 }}>DATE OF BIRTH</Text>
-                <TextInput
-                    value={bdayInput}
-                    onChangeText={t => { setBdayInput(t); setBdayError(''); }}
-                    placeholder="DD / MM / YYYY"
-                    placeholderTextColor="#2a3860"
-                    style={{
-                        fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0',
-                        paddingVertical: 13, paddingHorizontal: 16,
-                        backgroundColor: '#0d1428',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: bdayError ? '#f87171' : '#1e2e50',
-                        marginBottom: bdayError ? 4 : 20,
-                    }}
-                    underlineColorAndroid="transparent"
-                    keyboardType="numbers-and-punctuation"
-                    maxLength={10}
-                />
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: bdayError ? 4 : 20 }}>
+                    <DropdownField label="Day" flex={1} error={bdayError} value={find(dayOptions, bDay)} options={dayOptions} onSelect={v => { setBDay(v); setBdayError(''); }} />
+                    <DropdownField label="Month" flex={1.4} error={bdayError} value={find(monthOptions, bMonth)} options={monthOptions} onSelect={v => { setBMonth(v); setBdayError(''); }} />
+                    <DropdownField label="Year" flex={1.2} error={bdayError} value={find(yearOptions, bYear)} options={yearOptions} onSelect={v => { setBYear(v); setBdayError(''); }} />
+                </View>
                 {bdayError && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#f87171', marginBottom: 16 }}>{bdayError}</Text>}
 
                 {/* Begin button */}
@@ -433,6 +471,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 4 }}>BEGIN</Text>
                 </TouchableOpacity>
             </View>
+            </ScrollView>
         </KeyboardAvoidingView>
     );
 }

@@ -24,7 +24,7 @@ export default function LegacyScreen() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#06080f' }}>
             <View style={{ flex: 1, padding: 24, justifyContent: 'center' }}>
-                <View style={{ borderWidth: 1, borderColor: '#f87171', backgroundColor: '#f8717111', padding: 20, alignItems: 'center' }}>
+                <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#f87171', backgroundColor: '#f8717111', padding: 20, alignItems: 'center' }}>
                     <Image source={require('../../assets/ui_comp/warning.png')} style={{ width: 40, height: 40, marginBottom: 10, tintColor: '#f87171' }} />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: '#f87171', letterSpacing: 2 }}>END OF AN ERA</Text>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', textAlign: 'center', marginTop: 8 }}>
@@ -61,7 +61,7 @@ export default function LegacyScreen() {
                         </Text>
                     </View>
 
-                    <View style={{ backgroundColor: '#111828', padding: 16, borderWidth: 1, borderColor: '#1a2440' }}>
+                    <View style={{ backgroundColor: '#111828', padding: 16, borderWidth: 1, borderRadius: 10, borderColor: '#1a2440' }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', marginBottom: 12 }}>NEXT GENERATION: {eldestChild ? eldestChild.name.toUpperCase() : 'YOUR HEIR'}</Text>
                         
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>

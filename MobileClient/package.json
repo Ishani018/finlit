@@ -7,6 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "build:itch": "expo export -p web && sed -i '' 's#=\"/_expo#=\"./_expo#g; s#=\"/favicon#=\"./favicon#g' dist/index.html && cd dist && rm -f ../finlit-itch.zip && zip -r ../finlit-itch.zip . -x '.DS_Store'",
     "test": "echo 'No tests configured'"
   },
   "dependencies": {
@@ -19,11 +20,11 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "babel-preset-expo": "~54.0.10",
     "clsx": "^2.1.1",
-    "expo": "54.0.35",
+    "expo": "~54.0.37",
     "expo-av": "~16.0.8",
     "expo-blur": "~15.0.8",
     "expo-build-properties": "~1.0.10",
-    "expo-constants": "~18.0.13",
+    "expo-constants": "~18.0.14",
     "expo-font": "14.0.12",
     "expo-linear-gradient": "~15.0.8",
     "expo-status-bar": "~3.0.9",

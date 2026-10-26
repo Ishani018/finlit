@@ -47,7 +47,7 @@ function ScreenHeader({ title, subtitle, onBack, onClose }) {
         <View style={{ backgroundColor: C.panel, paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                 {onBack && (
-                    <TouchableOpacity onPress={onBack} style={{ width: 30, height: 30, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center', marginRight: 4 }}>
+                    <TouchableOpacity onPress={onBack} style={{ width: 30, height: 30, borderWidth: 1, borderRadius: 10, borderColor: C.border, alignItems: 'center', justifyContent: 'center', marginRight: 4 }}>
                         <FontAwesome5 name="chevron-left" size={11} color={C.dim} />
                     </TouchableOpacity>
                 )}
@@ -57,7 +57,7 @@ function ScreenHeader({ title, subtitle, onBack, onClose }) {
                 </View>
             </View>
             {onClose && (
-                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderRadius: 10, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
                     <FontAwesome5 name="times" size={14} color={C.dim} />
                 </TouchableOpacity>
             )}

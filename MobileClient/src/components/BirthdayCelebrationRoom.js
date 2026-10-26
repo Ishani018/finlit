@@ -85,7 +85,7 @@ export default function BirthdayCelebrationRoom({
                         
                         {/* ── Main Scene Area ── */}
                         {isBdayMonth && (
-                            <View style={{ overflow: 'hidden' }}>
+                            <View style={{ overflow: 'hidden', borderRadius: 12 }}>
                                 <Image source={roomImg} style={{ width: '100%', height: 260 }} resizeMode="cover" />
                                 <View style={{ paddingHorizontal: PAD, paddingTop: 18, paddingBottom: 6 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: roomColor, letterSpacing: 3, marginBottom: 6 }}>

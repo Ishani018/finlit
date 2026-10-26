@@ -176,7 +176,7 @@ export default function GoalsScreen({ onClose }) {
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 
-                    <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="times" size={14} color="#445070" />
                     </TouchableOpacity>
                 </View>

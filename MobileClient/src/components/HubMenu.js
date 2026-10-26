@@ -63,7 +63,7 @@ function HubCard({ item, color, badge, urgent, onPress }) {
         <TouchableOpacity
             onPress={onPress}
             activeOpacity={0.8}
-            style={{ flex: 1, height: CARD_H, overflow: 'hidden', position: 'relative', borderWidth: 1, borderColor: urgent ? color + '90' : color + '35' }}
+            style={{ flex: 1, height: CARD_H, overflow: 'hidden', borderRadius: 12, position: 'relative', borderWidth: 1, borderColor: urgent ? color + '90' : color + '35' }}
         >
             {/* Background image */}
             <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -116,7 +116,7 @@ export default function HubMenu({ onClose, onAction, badges = {} }) {
                 </View>
                 <TouchableOpacity
                     onPress={onClose}
-                    style={{ width: 34, height: 34, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: 34, height: 34, backgroundColor: '#0d1020', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}
                     activeOpacity={0.75}
                 >
                     <FontAwesome5 name="times" size={13} color="#445070" />

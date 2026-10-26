@@ -237,7 +237,7 @@ export default function CrisisSimulator({ visible, gameState, onClose }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#f87171', letterSpacing: 4 }}>WHAT IF?</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', lineHeight: 26 }}>CRISIS SIMULATOR</Text>
                     </View>
-                    <TouchableOpacity onPress={onClose} style={{ borderWidth: 1, borderColor: '#1e2840', padding: 8 }}>
+                    <TouchableOpacity onPress={onClose} style={{ borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', padding: 8 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>✕ CLOSE</Text>
                     </TouchableOpacity>
                 </View>
@@ -262,7 +262,7 @@ export default function CrisisSimulator({ visible, gameState, onClose }) {
                                         flexDirection: 'row', alignItems: 'center', gap: 14,
                                     }}
                                 >
-                                    <View style={{ width: 42, height: 42, backgroundColor: sc.color + '15', borderWidth: 1, borderColor: sc.color + '50', alignItems: 'center', justifyContent: 'center' }}>
+                                    <View style={{ width: 42, height: 42, backgroundColor: sc.color + '15', borderWidth: 1, borderRadius: 10, borderColor: sc.color + '50', alignItems: 'center', justifyContent: 'center' }}>
                                         <Image source={WARN_IMG} style={{ width: 24, height: 24 }} resizeMode="contain" />
                                     </View>
                                     <View style={{ flex: 1 }}>
@@ -289,19 +289,19 @@ export default function CrisisSimulator({ visible, gameState, onClose }) {
                             </View>
 
                             {/* Your defences */}
-                            <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 12, marginBottom: 14 }}>
+                            <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 12, marginBottom: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 8 }}>YOUR DEFENCES</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#c8d4f0', lineHeight: 20 }}>{result.defence}</Text>
                             </View>
 
                             {/* Number breakdown */}
-                            <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 14, marginBottom: 14 }}>
+                            <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 14, marginBottom: 14 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3, marginBottom: 10 }}>BREAKDOWN</Text>
                                 {result.rows.map((row, i) => <ResultRow key={i} {...row} />)}
                             </View>
 
                             {/* Tip */}
-                            <View style={{ borderWidth: 1, borderColor: '#fbbf2430', backgroundColor: '#fbbf2408', padding: 14, marginBottom: 20, flexDirection: 'row', gap: 10 }}>
+                            <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#fbbf2430', backgroundColor: '#fbbf2408', padding: 14, marginBottom: 20, flexDirection: 'row', gap: 10 }}>
                                 <Image source={BULB_IMG} style={{ width: 20, height: 20, marginTop: 1 }} resizeMode="contain" />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#8090c0', flex: 1, lineHeight: 20 }}>{result.tip}</Text>
                             </View>
@@ -309,7 +309,7 @@ export default function CrisisSimulator({ visible, gameState, onClose }) {
                             {/* Try another */}
                             <TouchableOpacity
                                 onPress={() => { setSelected(null); setResult(null); }}
-                                style={{ borderWidth: 1, borderColor: '#3b82f6', backgroundColor: '#0a1428', paddingVertical: 14, alignItems: 'center' }}
+                                style={{ borderWidth: 1, borderRadius: 10, borderColor: '#3b82f6', backgroundColor: '#0a1428', paddingVertical: 14, alignItems: 'center' }}
                                 activeOpacity={0.8}
                             >
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#60a5fa', letterSpacing: 2, lineHeight: 22 }}>◀ TRY ANOTHER</Text>

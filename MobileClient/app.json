@@ -20,13 +20,16 @@
       }
     },
     "android": {
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f1729"
       },
       "package": "com.finlit.game",
-      "permissions": []
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -49,9 +52,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "b2c18606-50ec-4ec2-b913-f518469427a2"
+        "projectId": "11b63934-e4d3-4207-b441-31ba6892d15d"
       }
     },
-    "owner": "ishani18"
+    "owner": "ishani018"
   }
 }

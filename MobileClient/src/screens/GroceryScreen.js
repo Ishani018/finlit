@@ -145,7 +145,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
     return (
         <View style={{ flex: 1, backgroundColor: C.bg }}>
             {/* Banner */}
-            <View style={{ height: 130, overflow: 'hidden', position: 'relative' }}>
+            <View style={{ height: 130, overflow: 'hidden', borderRadius: 12, position: 'relative' }}>
                 <Image source={KIRANA_IMG} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.35)' }} />
                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 70, backgroundColor: 'rgba(4,6,14,0.78)' }} />
@@ -233,7 +233,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
                             <TouchableOpacity
                                 onPress={onOpenShop}
                                 activeOpacity={0.85}
-                                style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: C.border, backgroundColor: C.panel, padding: 12 }}
+                                style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 10, borderColor: C.border, backgroundColor: C.panel, padding: 12 }}
                             >
                                 <Image source={require('../../assets/ui_comp/groceryshop.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, flex: 1 }}>Need more? Go to Grocery Store</Text>
@@ -252,7 +252,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
             </ScrollView>
 
             {toast && (
-                <View style={{ position: 'absolute', bottom: 24, left: PAD, right: PAD, backgroundColor: C.panel, borderWidth: 1, borderColor: toast.color + '60', padding: 12, alignItems: 'center' }}>
+                <View style={{ position: 'absolute', bottom: 24, left: PAD, right: PAD, backgroundColor: C.panel, borderWidth: 1, borderRadius: 10, borderColor: toast.color + '60', padding: 12, alignItems: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: toast.color }}>{toast.msg}</Text>
                 </View>
             )}

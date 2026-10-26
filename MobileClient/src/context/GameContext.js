@@ -1198,6 +1198,12 @@ export const GameProvider = ({ children }) => {
     const takeLoan = (loanTypeId, amount, tenureMonths, linkedAsset = null) => {
         const loanType = LOAN_TYPES.find(l => l.id === loanTypeId);
         if (!loanType) return { success: false, msg: 'Invalid loan type.' };
+        amount = Math.floor(Number(amount));
+        tenureMonths = Math.floor(Number(tenureMonths));
+        if (!Number.isFinite(amount) || amount <= 0 || amount > 1e10)
+            return { success: false, msg: 'Invalid loan amount.' };
+        if (!Number.isFinite(tenureMonths) || tenureMonths <= 0 || tenureMonths > (loanType.max_tenure || 360))
+            return { success: false, msg: 'Invalid loan tenure.' };
         if (creditScore < loanType.min_credit_score)
             return { success: false, msg: `Credit score too low. Need ${loanType.min_credit_score}, you have ${creditScore}.` };
         if (loanType.min_income > 0) {
@@ -1237,7 +1243,7 @@ export const GameProvider = ({ children }) => {
         }]);
         if (loanTypeId !== 'home_loan') setBalance(prev => prev + amount);
         addHistory(`Loan Approved: ₹${amount.toLocaleString()} @ ${adjustedRate.toFixed(1)}% (EMI: ₹${emi.toLocaleString()})`, amount, 'info');
-        return { success: true, emi, loanId };
+        return { success: true, emi, loanId, msg: `Your loan of ₹${amount.toLocaleString()} is approved. EMI: ₹${emi.toLocaleString()}/mo.` };
     };
 
     const prepayLoan = (loanId, amount) => {

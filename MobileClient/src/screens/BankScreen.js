@@ -540,6 +540,11 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070' }}>EMI ₹{loan.emi.toLocaleString()}/mo · {monthsLeft}mo left</Text>
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.color }}>{Math.round(paidPct * 100)}% paid</Text>
                                                     </View>
+                                                    {!isExpanded && (
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 1, marginTop: 6, textAlign: 'right' }}>
+                                                            TAP TO PAY / MANAGE ▾
+                                                        </Text>
+                                                    )}
                                                 </TouchableOpacity>
 
                                                 {isExpanded && (
@@ -713,8 +718,10 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                     <TouchableOpacity
                                         onPress={() => {
                                             if (!amt || amt < 10000) { onShowDialog('Invalid Amount', 'Minimum loan amount is ₹10,000.', 'error'); return; }
-                                            const res = takeLoan(lt.id, amt, selTenure);
-                                            onShowDialog(res.success ? 'Loan Approved!' : 'Application Rejected', res.msg, res.success ? 'success' : 'error');
+                                            let res;
+                                            try { res = takeLoan(lt.id, amt, selTenure); }
+                                            catch (e) { res = { success: false, msg: 'Something went wrong. Please try again.' }; }
+                                            onShowDialog(res.success ? 'Loan Approved!' : 'Application Rejected', res.msg || (res.success ? 'Loan approved.' : 'Application failed.'), res.success ? 'success' : 'error');
                                             if (res.success) { setApplyingLoanId(null); setLoanAmount(''); }
                                         }}
                                         style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: meta.color + '22', alignItems: 'center' }}
@@ -1493,7 +1500,7 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
             </ScrollView>
 
             {toast && (
-                <View style={{ position: 'absolute', bottom: 16, left: 14, right: 14, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
+                <View style={{ position: 'absolute', bottom: 16, left: 14, right: 14, backgroundColor: toast.ok ? '#166534' : '#7f1d1d', padding: 12, borderWidth: 1, borderRadius: 10, borderColor: toast.ok ? '#4ade80' : '#f87171' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: toast.ok ? '#4ade80' : '#f87171', textAlign: 'center' }}>{toast.msg}</Text>
                 </View>
             )}

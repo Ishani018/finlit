@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     webModalOverlay: {
         ...StyleSheet.absoluteFillObject,
         zIndex: 1000,
-        overflow: 'hidden',
+        overflow: 'hidden', borderRadius: 12,
         // Ensure it sits on top of everything else in the "phone" container
     },
     webModalContent: {

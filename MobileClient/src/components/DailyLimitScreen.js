@@ -65,11 +65,11 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
                 {/* Red accent top */}
                 <View style={{ height: 2, backgroundColor: '#f87171' }} />
 
-                <View style={{ backgroundColor: '#070910', borderWidth: 1, borderTopWidth: 0, borderColor: '#1a2040', padding: 20 }}>
+                <View style={{ backgroundColor: '#070910', borderWidth: 1, borderRadius: 10, borderTopWidth: 0, borderColor: '#1a2040', padding: 20 }}>
 
                     {/* Header */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-                        <View style={{ width: 44, height: 44, backgroundColor: '#f8717115', borderWidth: 1, borderColor: '#f8717160', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ width: 44, height: 44, backgroundColor: '#f8717115', borderWidth: 1, borderRadius: 10, borderColor: '#f8717160', alignItems: 'center', justifyContent: 'center' }}>
                             <Image source={WARN_IMG} style={{ width: 26, height: 26 }} resizeMode="contain" />
                         </View>
                         <View>
@@ -80,18 +80,18 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
 
                     {/* Stats row */}
                     <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
-                        <View style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 12, alignItems: 'center' }}>
+                        <View style={{ flex: 1, borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 12, alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2 }}>TURNS USED</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: '#fbbf24', lineHeight: 34 }}>{turnsUsed}/{dailyLimit}</Text>
                         </View>
-                        <View style={{ flex: 1, borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 12, alignItems: 'center' }}>
+                        <View style={{ flex: 1, borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', backgroundColor: '#06080f', padding: 12, alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 2 }}>MONTHS SIMULATED</Text>
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 32, color: '#4ade80', lineHeight: 34 }}>{monthsPlayedToday}</Text>
                         </View>
                     </View>
 
                     {/* Countdown */}
-                    <View style={{ borderWidth: 1, borderColor: '#fbbf2430', backgroundColor: '#fbbf2408', padding: 14, marginBottom: 16, alignItems: 'center' }}>
+                    <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#fbbf2430', backgroundColor: '#fbbf2408', padding: 14, marginBottom: 16, alignItems: 'center' }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#664400', letterSpacing: 3, marginBottom: 4 }}>RESETS AT MIDNIGHT IN</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 38, color: '#fbbf24', lineHeight: 40, letterSpacing: 4 }}>
                             {formatCountdown(countdown)}
@@ -99,7 +99,7 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
                     </View>
 
                     {/* Tip */}
-                    <View style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#070a16', padding: 12, marginBottom: 18, flexDirection: 'row', gap: 8 }}>
+                    <View style={{ borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', backgroundColor: '#070a16', padding: 12, marginBottom: 18, flexDirection: 'row', gap: 8 }}>
                         <Image source={BULB_IMG} style={{ width: 20, height: 20, opacity: 0.7 }} resizeMode="contain" />
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#556080', flex: 1, lineHeight: 18 }}>{tip}</Text>
                     </View>
@@ -108,7 +108,7 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
                     <TouchableOpacity
                         onPress={onCrisisSimulator}
                         activeOpacity={0.8}
-                        style={{ borderWidth: 1, borderColor: '#f8717160', backgroundColor: '#f8717108', paddingVertical: 14, alignItems: 'center', marginBottom: 10 }}
+                        style={{ borderWidth: 1, borderRadius: 10, borderColor: '#f8717160', backgroundColor: '#f8717108', paddingVertical: 14, alignItems: 'center', marginBottom: 10 }}
                     >
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#f87171', letterSpacing: 2, lineHeight: 22 }}>⚡ CRISIS SIMULATOR</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#445070', letterSpacing: 1 }}>CAN YOUR FINANCES SURVIVE?</Text>
@@ -117,7 +117,7 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
                     <TouchableOpacity
                         onPress={onDismiss}
                         activeOpacity={0.8}
-                        style={{ borderWidth: 1, borderColor: '#1e2840', backgroundColor: '#06080f', paddingVertical: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 10 }}
+                        style={{ borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', backgroundColor: '#06080f', paddingVertical: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 10 }}
                     >
                         <Image source={HOME_IMG} style={{ width: 18, height: 18, opacity: 0.5 }} resizeMode="contain" />
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070', letterSpacing: 2, lineHeight: 20 }}>BACK HOME</Text>

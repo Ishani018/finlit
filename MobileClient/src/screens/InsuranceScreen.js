@@ -53,19 +53,19 @@ export default function InsuranceScreen({ onClose }) {
             <View style={{ flex: 1, backgroundColor: '#06080f' }}>
                 {/* Hero */}
                 <View style={{ backgroundColor: meta.bg, borderBottomWidth: 1, borderColor: meta.color + '30', padding: 20, flexDirection: 'row', alignItems: 'center', gap: 16, position: 'relative' }}>
-                    <View style={{ width: 64, height: 64, backgroundColor: '#06080f', borderWidth: 1, borderColor: meta.color + '40', alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ width: 64, height: 64, backgroundColor: '#06080f', borderWidth: 1, borderRadius: 10, borderColor: meta.color + '40', alignItems: 'center', justifyContent: 'center' }}>
                         <Image source={meta.img} style={{ width: 44, height: 44 }} resizeMode="contain" />
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: meta.color, letterSpacing: 4, marginBottom: 2 }}>{meta.label} INSURANCE</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24 }}>{plan.name}</Text>
                         {active && (
-                            <View style={{ marginTop: 4, alignSelf: 'flex-start', backgroundColor: meta.color + '20', borderWidth: 1, borderColor: meta.color, paddingHorizontal: 10, paddingVertical: 2 }}>
+                            <View style={{ marginTop: 4, alignSelf: 'flex-start', backgroundColor: meta.color + '20', borderWidth: 1, borderRadius: 10, borderColor: meta.color, paddingHorizontal: 10, paddingVertical: 2 }}>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: meta.accent, letterSpacing: 2 }}>✓ ACTIVE</Text>
                             </View>
                         )}
                     </View>
-                    <TouchableOpacity onPress={() => setSelectedPlan(null)} style={{ width: 32, height: 32, backgroundColor: 'rgba(0,0,0,0.4)', borderWidth: 1, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => setSelectedPlan(null)} style={{ width: 32, height: 32, backgroundColor: 'rgba(0,0,0,0.4)', borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
                         <FontAwesome5 name="chevron-left" size={13} color="#6070a0" />
                     </TouchableOpacity>
                 </View>
