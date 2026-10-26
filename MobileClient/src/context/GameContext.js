@@ -418,7 +418,7 @@ export const GameProvider = ({ children }) => {
 
     // Auto-save whenever totalMonthsPlayed increments (after all state settles)
     useEffect(() => {
-        if (!saveLoaded || totalMonthsPlayed === 0) return;
+        if (!saveLoaded || !playerSprite) return;
         saveGame();
     }, [totalMonthsPlayed, saveLoaded]);
 
@@ -427,12 +427,15 @@ export const GameProvider = ({ children }) => {
     useEffect(() => { saveGameRef.current = saveGame; }, [saveGame]);
 
     // Save when the app goes to background / is about to be killed, so mid-month actions
-    // (buying stocks, property, etc.) are not lost.
+    // (buying stocks, property, etc.) are not lost. Note: a player can take plenty of
+    // actions before ever advancing past month 1 (totalMonthsPlayed stays 0 until they
+    // press Next Month), so this must NOT require totalMonthsPlayed > 0 — gating on it
+    // meant nothing saved for an entire first session.
     useEffect(() => {
         const sub = AppState.addEventListener('change', (state) => {
             if (state === 'background' || state === 'inactive') {
                 const st = stateRef.current;
-                if (saveLoaded && st.totalMonthsPlayed > 0 && st.playerSprite) saveGameRef.current();
+                if (saveLoaded && st.playerSprite) saveGameRef.current();
             }
         });
         return () => sub.remove();
@@ -440,10 +443,10 @@ export const GameProvider = ({ children }) => {
 
     // Debounced save on key changes within a month
     useEffect(() => {
-        if (!saveLoaded || totalMonthsPlayed === 0 || !playerSprite) return;
+        if (!saveLoaded || !playerSprite) return;
         const t = setTimeout(() => saveGameRef.current(), 1500);
         return () => clearTimeout(t);
-    }, [balance, portfolio, properties, loans, fixedDeposits, mfPortfolio, sipPlans, goldHoldings, pantry, activeInsurance, dependents, currentJob, saveLoaded]);
+    }, [balance, portfolio, properties, loans, fixedDeposits, mfPortfolio, sipPlans, goldHoldings, pantry, activeInsurance, dependents, currentJob, playerSprite, saveLoaded]);
 
     // --- DERIVED VALUES ---
     let playerAge = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
