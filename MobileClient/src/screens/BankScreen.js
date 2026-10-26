@@ -4,6 +4,7 @@ import { useGame } from '../context/GameContext';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
 import { GOLD_ASSETS } from '../data/gold';
+import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES } from '../data/businesses';
 
 const CREDIT_BANDS = [
     { min: 750, label: 'EXCELLENT', color: '#4ade80' },
@@ -47,9 +48,12 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
         dependents, childSavings, transferToChildSavings,
         retirementBuckets, setupRetirementBuckets, isRetired,
         ppf, nps,
+        ownedBusinesses, getBusinessEligibility, startBusiness, closeBusiness,
     } = useGame();
 
-    const [tab, setTab] = useState(initialTab); // null=landing | save | borrow | ca | gold | card | retire | childSavings
+    const [tab, setTab] = useState(initialTab); // null=landing | save | borrow | business | ca | gold | card | retire | childSavings
+    const [applyingBusinessId, setApplyingBusinessId] = useState(null);
+    const [selectedBusinessOwnedId, setSelectedBusinessOwnedId] = useState(null);
     const [tipsOpen, setTipsOpen] = useState(true);
     const [fdAmount, setFdAmount] = useState('50000');
     const [selectedFDOption, setSelectedFDOption] = useState(FD_OPTIONS[2]);
@@ -179,7 +183,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                     </TouchableOpacity>
                     <View style={{ width: 1, height: 14, backgroundColor: '#1a2040' }} />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0', letterSpacing: 2 }}>
-                        {tab === 'save' ? 'SAVE & EARN' : tab === 'ca' ? 'TAXES & ITR' : tab === 'gold' ? 'GOLD' : tab === 'card' ? 'CREDIT CARD' : tab === 'retire' ? 'RETIREMENT BUCKETS' : tab === 'childSavings' ? 'CHILD SAVINGS' : applyingLoanId ? (LOAN_TYPE_META[applyingLoanId]?.name || 'LOAN') : 'BORROW'}
+                        {tab === 'save' ? 'SAVE & EARN' : tab === 'ca' ? 'TAXES & ITR' : tab === 'gold' ? 'GOLD' : tab === 'card' ? 'CREDIT CARD' : tab === 'retire' ? 'RETIREMENT BUCKETS' : tab === 'childSavings' ? 'CHILD SAVINGS' : tab === 'business' ? (applyingBusinessId ? (BUSINESS_TYPES.find(b => b.id === applyingBusinessId)?.name || 'BUSINESS') : 'SIDE HUSTLES') : applyingLoanId ? (LOAN_TYPE_META[applyingLoanId]?.name || 'LOAN') : 'BORROW'}
                     </Text>
                 </View>
             )}
@@ -226,6 +230,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                             { onPress: () => { if (!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000)) { onShowDialog('Locked', 'Unlocks at Month 6.', 'error'); return; } setTab('retire'); }, img: require('../../assets/ui_comp/retirement_buckets.png'), accent: '#818cf8', name: 'Retirement', sub: ppf?.balance > 0 ? `₹${(ppf.balance/1000).toFixed(0)}k saved` : 'PPF · NPS', locked: !(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) },
                             { onPress: () => { if (!dependents.some(d => d.type === 'child')) { onShowDialog('Locked', 'Need a child first.', 'error'); return; } setTab('childSavings'); }, img: require('../../assets/ui_comp/saving_for_child.png'), accent: '#ec4899', name: 'Child Savings', sub: 'Build their future', locked: !dependents.some(d => d.type === 'child') },
                             { onPress: () => setTab('gold'), img: require('../../assets/ui_comp/gold_vault.png'), accent: '#fbbf24', name: 'Gold', sub: totalGoldValue > 0 ? `₹${(totalGoldValue/1000).toFixed(0)}k held` : `₹${goldPrice?.toLocaleString()}/g`, locked: false },
+                            { onPress: () => { if (totalMonthsPlayed < 12) { onShowDialog('Locked', 'Side Hustles unlock in Month 12.', 'error'); return; } setTab('business'); }, img: require('../../assets/jobs/irani_cafe.png'), accent: '#4ade80', name: 'Side Hustles', sub: ownedBusinesses.length > 0 ? `${ownedBusinesses.length} owned` : 'Own a business', locked: totalMonthsPlayed < 12 },
                         ];
                         const rows = [];
                         for (let i = 0; i < secondary.length; i += 2) {
@@ -736,6 +741,157 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                     );
                 })()}
 
+                {/* ── SIDE HUSTLES / BUSINESSES ── */}
+                {tab === 'business' && (() => {
+                    // ── Business detail / apply view ──
+                    if (applyingBusinessId) {
+                        const biz = BUSINESS_TYPES.find(b => b.id === applyingBusinessId);
+                        if (!biz) return null;
+                        const issues = getBusinessEligibility(biz);
+                        const eligible = issues.length === 0;
+                        return (
+                            <View style={{ gap: 10 }}>
+                                <TouchableOpacity onPress={() => setApplyingBusinessId(null)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }} activeOpacity={0.7}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#445070' }}>‹</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>ALL BUSINESSES</Text>
+                                </TouchableOpacity>
+
+                                <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, gap: 10 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>{biz.name}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', lineHeight: 19 }}>{biz.description}</Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingTop: 6, borderTopWidth: 1, borderColor: '#111830' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>Upfront cost</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>₹{biz.cost.toLocaleString()}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>Monthly revenue (est.)</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>₹{biz.revenue_range[0].toLocaleString()}–₹{biz.revenue_range[1].toLocaleString()}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>Running cost</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#fb923c' }}>₹{biz.running_cost.toLocaleString()}/mo</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>Monthly failure risk</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171' }}>{(biz.failure_chance * 100).toFixed(1)}%</Text>
+                                    </View>
+                                </View>
+
+                                {!eligible ? (
+                                    <View style={{ backgroundColor: '#1a0808', borderRadius: 10, padding: 14 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#f87171', marginBottom: 8 }}>You don't qualify yet:</Text>
+                                        {issues.map((iss, i) => (
+                                            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                                                <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 18, height: 18, tintColor: '#f87171' }} resizeMode="contain" />
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f8717190', flex: 1 }}>{iss}</Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            let res;
+                                            try { res = startBusiness(biz.id); }
+                                            catch (e) { res = { success: false, msg: 'Something went wrong. Please try again.' }; }
+                                            onShowDialog(res.success ? 'Business Started!' : 'Could Not Start', res.msg || (res.success ? 'Business started.' : 'Failed to start business.'), res.success ? 'success' : 'error');
+                                            if (res.success) setApplyingBusinessId(null);
+                                        }}
+                                        style={{ paddingVertical: 16, borderRadius: 10, backgroundColor: '#4ade8022', alignItems: 'center' }}
+                                    >
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80', letterSpacing: 1 }}>START BUSINESS — ₹{biz.cost.toLocaleString()}</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        );
+                    }
+
+                    // ── Business landing: owned + available ──
+                    return (
+                        <View style={{ gap: 10 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 4 }}>
+                                {ownedBusinesses.length}/{MAX_CONCURRENT_BUSINESSES} BUSINESSES OWNED
+                            </Text>
+
+                            {ownedBusinesses.length > 0 && (
+                                <View style={{ gap: 8, marginBottom: 6 }}>
+                                    {ownedBusinesses.map(owned => {
+                                        const biz = BUSINESS_TYPES.find(b => b.id === owned.businessId);
+                                        if (!biz) return null;
+                                        const isExpanded = selectedBusinessOwnedId === owned.id;
+                                        const profitable = owned.totalProfit >= 0;
+                                        return (
+                                            <View key={owned.id} style={{ borderRadius: 10, overflow: 'hidden', backgroundColor: '#08101e' }}>
+                                                <TouchableOpacity onPress={() => setSelectedBusinessOwnedId(isExpanded ? null : owned.id)} style={{ padding: 14 }} activeOpacity={0.8}>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                                        <View style={{ width: 32, height: 32, backgroundColor: '#0a0c14', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
+                                                            <FontAwesome5 name="store" size={13} color="#4ade80" />
+                                                        </View>
+                                                        <View style={{ flex: 1 }}>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }}>{biz.name}</Text>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>{owned.monthsOwned}mo owned</Text>
+                                                        </View>
+                                                        <View style={{ alignItems: 'flex-end' }}>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: profitable ? '#4ade80' : '#f87171' }}>₹{owned.totalProfit.toLocaleString()}</Text>
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070' }}>net profit</Text>
+                                                        </View>
+                                                    </View>
+                                                    {!isExpanded && (
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3560', letterSpacing: 1, marginTop: 6, textAlign: 'right' }}>
+                                                            TAP TO MANAGE ▾
+                                                        </Text>
+                                                    )}
+                                                </TouchableOpacity>
+                                                {isExpanded && (
+                                                    <View style={{ paddingHorizontal: 14, paddingBottom: 14, gap: 10 }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 18 }}>
+                                                            Revenue ₹{biz.revenue_range[0].toLocaleString()}–₹{biz.revenue_range[1].toLocaleString()}/mo · Running cost ₹{biz.running_cost.toLocaleString()}/mo · {(biz.failure_chance * 100).toFixed(1)}% monthly failure risk
+                                                        </Text>
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                const res = closeBusiness(owned.id);
+                                                                onShowDialog(res.success ? 'Business Sold' : 'Failed', res.msg, res.success ? 'success' : 'error');
+                                                                if (res.success) setSelectedBusinessOwnedId(null);
+                                                            }}
+                                                            style={{ paddingVertical: 12, borderRadius: 8, backgroundColor: '#1a0808', alignItems: 'center' }}
+                                                        >
+                                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f87171', letterSpacing: 1 }}>SELL BUSINESS (SALVAGE ₹{Math.round(biz.cost * biz.salvage_pct).toLocaleString()})</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                            )}
+
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, marginTop: 6, marginBottom: 2 }}>AVAILABLE TO START</Text>
+                            {BUSINESS_TYPES.map(biz => {
+                                const issues = getBusinessEligibility(biz);
+                                const eligible = issues.length === 0;
+                                const alreadyOwned = ownedBusinesses.some(b => b.businessId === biz.id);
+                                return (
+                                    <TouchableOpacity
+                                        key={biz.id}
+                                        onPress={() => setApplyingBusinessId(biz.id)}
+                                        activeOpacity={0.85}
+                                        style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14, opacity: eligible || alreadyOwned ? 1 : 0.5, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                                    >
+                                        <View style={{ width: 36, height: 36, backgroundColor: '#0a0c14', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
+                                            <FontAwesome5 name="store" size={14} color={eligible ? '#4ade80' : '#445070'} />
+                                        </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: eligible ? '#c8d4f0' : '#445070' }}>{biz.name}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>₹{(biz.cost / 1000).toFixed(0)}k · ₹{(biz.revenue_range[0]/1000).toFixed(0)}k–₹{(biz.revenue_range[1]/1000).toFixed(0)}k/mo</Text>
+                                        </View>
+                                        {alreadyOwned && <FontAwesome5 name="check-circle" size={16} color="#4ade80" />}
+                                        {!eligible && !alreadyOwned && <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 16, height: 16, tintColor: '#445070' }} resizeMode="contain" />}
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    );
+                })()}
+
                 {/* ── TAX & COMPLIANCE ── */}
                 {tab === 'ca' && (() => {
                     const currentMonth = turn?.month || 1;
@@ -859,7 +1015,6 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                 collectITRDoc={collectITRDoc}
                 computeITRTaxFull={computeITRTaxFull}
                 submitITR={submitITR}
-                onShowDialog={showDialog}
                 onShowDialog={onShowDialog}
             />}
 

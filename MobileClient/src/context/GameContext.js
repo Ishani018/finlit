@@ -7,6 +7,7 @@ import { MUTUAL_FUNDS } from '../data/mutualFunds';
 import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from '../data/realEstate';
 import { INSURANCE_PLANS } from '../data/insurance';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
+import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, rollBusinessRevenue } from '../data/businesses';
 import { calculateIncomeTax, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
 import { CRISIS_EVENTS, CRISIS_WEIGHTS } from '../data/crisisEvents';
 import { LIFE_DECISIONS, BUDGET_EVENTS } from '../data/lifeDecisions';
@@ -158,6 +159,8 @@ export const GameProvider = ({ children }) => {
     const [expectingChild, setExpectingChild] = useState(null);
     const [timesMarried, setTimesMarried] = useState(0);
     const [loans, setLoans] = useState([]);
+    // ownedBusinesses: [{ id, businessId, startMonth, totalInvested, totalProfit, monthsOwned }]
+    const [ownedBusinesses, setOwnedBusinesses] = useState([]);
     const [activeInsurance, setActiveInsurance] = useState([]);
     const [creditScore, setCreditScore] = useState(STARTING_CREDIT_SCORE);
     const [activeEffects, setActiveEffects] = useState([]);
@@ -204,7 +207,7 @@ export const GameProvider = ({ children }) => {
     useEffect(() => {
         stateRef.current = {
             balance, currentJob, pendingApplications, pendingDecision, pendingDecisionQueue, pendingJobInterview, currentHousing, properties, portfolio,
-            dependents, loans, activeInsurance, creditScore, activeEffects,
+            dependents, loans, ownedBusinesses, activeInsurance, creditScore, activeEffects,
             marketPrices, degrees, totalMonthsPlayed, turn, gameOver,
             activeEnrollment, mfPortfolio, mfNavs, sipPlans, ppf, nps,
             marketCycle, priceHistory, fixedDeposits,
@@ -261,6 +264,7 @@ export const GameProvider = ({ children }) => {
                 activeCreditCards: stateRef.current.activeCreditCards,
                 dependents: stateRef.current.dependents,
                 loans: stateRef.current.loans,
+                ownedBusinesses: stateRef.current.ownedBusinesses,
                 activeInsurance: stateRef.current.activeInsurance,
                 creditScore: stateRef.current.creditScore,
                 activeEffects: stateRef.current.activeEffects,
@@ -355,6 +359,7 @@ export const GameProvider = ({ children }) => {
             if (s.activeCreditCards) setActiveCreditCards(s.activeCreditCards);
             if (s.dependents) setDependents(s.dependents);
             if (s.loans) setLoans(s.loans);
+            if (s.ownedBusinesses) setOwnedBusinesses(s.ownedBusinesses);
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
             if (s.creditScore !== undefined) setCreditScore(s.creditScore);
             if (s.activeEffects) setActiveEffects(s.activeEffects);
@@ -446,7 +451,7 @@ export const GameProvider = ({ children }) => {
         if (!saveLoaded || !playerSprite) return;
         const t = setTimeout(() => saveGameRef.current(), 1500);
         return () => clearTimeout(t);
-    }, [balance, portfolio, properties, loans, fixedDeposits, mfPortfolio, sipPlans, goldHoldings, pantry, activeInsurance, dependents, currentJob, playerSprite, saveLoaded]);
+    }, [balance, portfolio, properties, loans, ownedBusinesses, fixedDeposits, mfPortfolio, sipPlans, goldHoldings, pantry, activeInsurance, dependents, currentJob, playerSprite, saveLoaded]);
 
     // --- DERIVED VALUES ---
     let playerAge = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
@@ -1151,6 +1156,7 @@ export const GameProvider = ({ children }) => {
         setExpectingChild(null);
         setTimesMarried(0);
         setLoans([]);
+        setOwnedBusinesses([]);
         setActiveInsurance([]);
         setCreditScore(600);
         setActiveEffects([]);
@@ -1264,6 +1270,47 @@ export const GameProvider = ({ children }) => {
         }).filter(Boolean));
         addHistory(`Prepaid ₹${actualPayment.toLocaleString()} on loan`, -actualPayment, 'expense');
         return { success: true, msg: `Prepaid ₹${actualPayment.toLocaleString()}.` };
+    };
+
+    // =========================================================================
+    // SIDE HUSTLES / BUSINESS OWNERSHIP
+    // =========================================================================
+
+    const getBusinessEligibility = (business) => {
+        const issues = [];
+        if (ownedBusinesses.length >= MAX_CONCURRENT_BUSINESSES) issues.push(`Max ${MAX_CONCURRENT_BUSINESSES} businesses at once`);
+        if (ownedBusinesses.some(b => b.businessId === business.id)) issues.push('You already own this business');
+        if (creditScore < business.min_credit_score) issues.push(`Credit ${business.min_credit_score}+ needed (you: ${creditScore})`);
+        if (netWorth < business.min_net_worth) issues.push(`₹${(business.min_net_worth / 1000).toFixed(0)}k net worth needed`);
+        if (balance < business.cost) issues.push(`₹${business.cost.toLocaleString()} needed to start`);
+        return issues;
+    };
+
+    const startBusiness = (businessId) => {
+        const business = BUSINESS_TYPES.find(b => b.id === businessId);
+        if (!business) return { success: false, msg: 'Invalid business type.' };
+        const issues = getBusinessEligibility(business);
+        if (issues.length > 0) return { success: false, msg: issues[0] };
+
+        setBalance(prev => prev - business.cost);
+        setOwnedBusinesses(prev => [...prev, {
+            id: `biz_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            businessId, startMonth: totalMonthsPlayed, totalInvested: business.cost,
+            totalProfit: 0, monthsOwned: 0,
+        }]);
+        addHistory(`Started business: ${business.name} (₹${business.cost.toLocaleString()})`, -business.cost, 'expense');
+        return { success: true, msg: `You now own ${business.name}.` };
+    };
+
+    const closeBusiness = (ownedId) => {
+        const owned = ownedBusinesses.find(b => b.id === ownedId);
+        if (!owned) return { success: false, msg: 'Business not found.' };
+        const business = BUSINESS_TYPES.find(b => b.id === owned.businessId);
+        const salvage = business ? Math.round(business.cost * business.salvage_pct) : 0;
+        setBalance(prev => prev + salvage);
+        setOwnedBusinesses(prev => prev.filter(b => b.id !== ownedId));
+        addHistory(`Sold business: ${business?.name || owned.businessId} (salvage ₹${salvage.toLocaleString()})`, salvage, 'income');
+        return { success: true, msg: `Sold for ₹${salvage.toLocaleString()} salvage value.` };
     };
 
     // =========================================================================
@@ -2608,6 +2655,7 @@ export const GameProvider = ({ children }) => {
         setExpectingChild(null);
         setTimesMarried(0);
         setLoans([]);
+        setOwnedBusinesses([]);
         setActiveInsurance([]);
         setCreditScore(startsWithGoodCredit ? 750 : 600);
         setActiveEffects([]);
@@ -2896,6 +2944,15 @@ export const GameProvider = ({ children }) => {
             const monthly = Math.round(corpus * 0.04 / 12); // 4% safe withdrawal rate
             setPensionIncome(monthly);
             setCorpusDrawdown(monthly);
+            // Businesses don't run themselves — cash out at salvage value on retirement
+            if (ownedBusinesses.length > 0) {
+                const salvageTotal = ownedBusinesses.reduce((sum, owned) => {
+                    const business = BUSINESS_TYPES.find(b => b.id === owned.businessId);
+                    return sum + (business ? Math.round(business.cost * business.salvage_pct) : 0);
+                }, 0);
+                if (salvageTotal > 0) setBalance(prev => prev + salvageTotal);
+                setOwnedBusinesses([]);
+            }
             setLastCrisisEvent({
                 id: 'retirement_trigger',
                 name: 'YOU HAVE RETIRED',
@@ -3108,9 +3165,39 @@ export const GameProvider = ({ children }) => {
             return updated;
         });
 
+        // --- PROCESS OWNED BUSINESSES — revenue roll, running cost, failure risk ---
+        let businessIncome = 0;
+        let businessRunningCost = 0;
+        const failedBusinesses = [];
+        const nextOwnedBusinesses = ownedBusinesses.map(owned => {
+            const business = BUSINESS_TYPES.find(b => b.id === owned.businessId);
+            if (!business) return owned;
+            const revenue = rollBusinessRevenue(business);
+            businessIncome += revenue;
+            businessRunningCost += business.running_cost;
+            if (Math.random() < business.failure_chance) {
+                failedBusinesses.push(business);
+                return null;
+            }
+            return { ...owned, monthsOwned: owned.monthsOwned + 1, totalProfit: owned.totalProfit + (revenue - business.running_cost) };
+        }).filter(Boolean);
+        if (nextOwnedBusinesses.length !== ownedBusinesses.length || businessIncome > 0) {
+            setOwnedBusinesses(nextOwnedBusinesses);
+        }
+        if (failedBusinesses.length > 0) {
+            failedBusinesses.forEach(business => {
+                const failEntry = {
+                    id: `biz_fail_${business.id}_${Date.now()}`, name: 'Business Failed',
+                    message: `Your ${business.name} shut down this month — no salvage value recovered. That's the risk of running a business.`,
+                    category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false,
+                };
+                setEventInbox(prev => [failEntry, ...prev].slice(0, 50));
+            });
+        }
+
         const caFee = caSubscribed ? 2000 : 0;
-        const totalIncome = effectiveSalary + realEstateIncome + spouseIncome;
-        const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee;
+        const totalIncome = effectiveSalary + realEstateIncome + spouseIncome + businessIncome;
+        const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee + businessRunningCost;
         const netFlow = totalIncome - totalExpenses;
 
         // Annual salary raise (3–7% base, HUSTLER gets extra 12%)
@@ -4333,6 +4420,9 @@ export const GameProvider = ({ children }) => {
         // Loans
         loans, creditScore, totalLoanOutstanding,
         takeLoan, prepayLoan, buyPropertyWithLoan,
+
+        // Side hustles / businesses
+        ownedBusinesses, getBusinessEligibility, startBusiness, closeBusiness,
 
         // Insurance
         activeInsurance, buyInsurance, cancelInsurance,
