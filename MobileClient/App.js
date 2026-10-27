@@ -1400,7 +1400,7 @@ const GameLayout = ({ onHardReset }) => {
               </ScrollView>
             )}
 
-            {careerSubTab === 'jobs' && <CareersScreen onClose={() => setCareerSubTab(null)} onApply={(job) => handleApply(job)} />}
+            {careerSubTab === 'jobs' && <CareersScreen onClose={() => setCareerSubTab(null)} onApply={(job) => handleApply(job)} onShowDialog={(title, msg, type) => showDialog(title, msg, type)} />}
             {careerSubTab === 'study' && <EducationScreen onClose={() => setCareerSubTab(null)} onEnroll={handleEnroll} onEnrollLoan={(course) => { const r = enrollWithLoan(course); showDialog(r.success ? 'Edu Loan Approved' : 'Loan Failed', r.msg, r.success ? 'success' : 'error'); }} />}
           </View>
         )}

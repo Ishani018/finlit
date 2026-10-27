@@ -7,7 +7,7 @@ import { MUTUAL_FUNDS } from '../data/mutualFunds';
 import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from '../data/realEstate';
 import { INSURANCE_PLANS } from '../data/insurance';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
-import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, rollBusinessRevenue } from '../data/businesses';
+import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, MAX_WORKERS_PER_BUSINESS, rollBusinessRevenue, generateStaffCandidates, getStaffedEconomics } from '../data/businesses';
 import { calculateIncomeTax, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
 import { CRISIS_EVENTS, CRISIS_WEIGHTS } from '../data/crisisEvents';
 import { LIFE_DECISIONS, BUDGET_EVENTS } from '../data/lifeDecisions';
@@ -1298,10 +1298,10 @@ export const GameProvider = ({ children }) => {
         setOwnedBusinesses(prev => [...prev, {
             id: `biz_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
             businessId, startMonth: totalMonthsPlayed, totalInvested: business.cost,
-            totalProfit: 0, monthsOwned: 0,
+            totalProfit: 0, monthsOwned: 0, manager: null, workers: [],
         }]);
         addHistory(`Started business: ${business.name} (₹${business.cost.toLocaleString()})`, -business.cost, 'expense');
-        return { success: true, msg: `You now own ${business.name}.` };
+        return { success: true, msg: `You now own ${business.name}. Running it solo costs you happiness and health — hire a manager to fix that.` };
     };
 
     const closeBusiness = (ownedId) => {
@@ -1313,6 +1313,43 @@ export const GameProvider = ({ children }) => {
         setOwnedBusinesses(prev => prev.filter(b => b.id !== ownedId));
         addHistory(`Sold business: ${business?.name || owned.businessId} (salvage ₹${salvage.toLocaleString()})`, salvage, 'income');
         return { success: true, msg: `Sold for ₹${salvage.toLocaleString()} salvage value.` };
+    };
+
+    // Staffing — hire/fire a manager or worker on an owned business. Candidates
+    // are generated fresh by the UI (generateStaffCandidates) and passed in here.
+    const hireManager = (ownedId, candidate) => {
+        const owned = ownedBusinesses.find(b => b.id === ownedId);
+        if (!owned) return { success: false, msg: 'Business not found.' };
+        if (owned.manager) return { success: false, msg: 'Already has a manager — fire them first.' };
+        setOwnedBusinesses(prev => prev.map(b => b.id === ownedId ? { ...b, manager: candidate } : b));
+        addHistory(`Hired ${candidate.name} as manager (₹${candidate.wage.toLocaleString()}/mo)`, 0, 'info');
+        return { success: true, msg: `${candidate.name} is now managing this business.` };
+    };
+
+    const fireManager = (ownedId) => {
+        const owned = ownedBusinesses.find(b => b.id === ownedId);
+        if (!owned || !owned.manager) return { success: false, msg: 'No manager to fire.' };
+        const name = owned.manager.name;
+        setOwnedBusinesses(prev => prev.map(b => b.id === ownedId ? { ...b, manager: null } : b));
+        addHistory(`Fired manager ${name}`, 0, 'info');
+        return { success: true, msg: `${name} no longer manages this business.` };
+    };
+
+    const hireWorker = (ownedId, candidate) => {
+        const owned = ownedBusinesses.find(b => b.id === ownedId);
+        if (!owned) return { success: false, msg: 'Business not found.' };
+        if ((owned.workers || []).length >= MAX_WORKERS_PER_BUSINESS) return { success: false, msg: `Max ${MAX_WORKERS_PER_BUSINESS} workers per business.` };
+        setOwnedBusinesses(prev => prev.map(b => b.id === ownedId ? { ...b, workers: [...(b.workers || []), candidate] } : b));
+        addHistory(`Hired ${candidate.name} as worker (₹${candidate.wage.toLocaleString()}/mo)`, 0, 'info');
+        return { success: true, msg: `${candidate.name} joins the team.` };
+    };
+
+    const fireWorker = (ownedId, workerId) => {
+        const owned = ownedBusinesses.find(b => b.id === ownedId);
+        if (!owned) return { success: false, msg: 'Business not found.' };
+        const worker = (owned.workers || []).find(w => w.id === workerId);
+        setOwnedBusinesses(prev => prev.map(b => b.id === ownedId ? { ...b, workers: (b.workers || []).filter(w => w.id !== workerId) } : b));
+        return { success: true, msg: `${worker?.name || 'Worker'} let go.` };
     };
 
     // =========================================================================
@@ -3168,20 +3205,26 @@ export const GameProvider = ({ children }) => {
         });
 
         // --- PROCESS OWNED BUSINESSES — revenue roll, running cost, failure risk ---
+        // Staffing matters: unstaffed (no manager), a business earns less, fails
+        // more often, and running it solo on top of a real job costs happiness
+        // and health each month. A manager removes all three penalties.
         let businessIncome = 0;
         let businessRunningCost = 0;
+        let unstaffedBusinessCount = 0;
         const failedBusinesses = [];
         const nextOwnedBusinesses = ownedBusinesses.map(owned => {
             const business = BUSINESS_TYPES.find(b => b.id === owned.businessId);
             if (!business) return owned;
-            const revenue = rollBusinessRevenue(business);
+            const econ = getStaffedEconomics(business, owned);
+            if (econ.isUnstaffed) unstaffedBusinessCount += 1;
+            const revenue = Math.round(rollBusinessRevenue(business) * econ.revenueMultiplier);
             businessIncome += revenue;
-            businessRunningCost += business.running_cost;
-            if (Math.random() < business.failure_chance) {
+            businessRunningCost += business.running_cost + econ.wageCost;
+            if (Math.random() < business.failure_chance * econ.failureMultiplier) {
                 failedBusinesses.push(business);
                 return null;
             }
-            return { ...owned, monthsOwned: owned.monthsOwned + 1, totalProfit: owned.totalProfit + (revenue - business.running_cost) };
+            return { ...owned, monthsOwned: owned.monthsOwned + 1, totalProfit: owned.totalProfit + (revenue - business.running_cost - econ.wageCost) };
         }).filter(Boolean);
         if (nextOwnedBusinesses.length !== ownedBusinesses.length || businessIncome > 0) {
             setOwnedBusinesses(nextOwnedBusinesses);
@@ -3509,7 +3552,8 @@ export const GameProvider = ({ children }) => {
         const financeStress  = netFlow < 0 ? -0.5 : 0.1;
         const neglectEffect = activeEffects.find(e => e.type === 'parent_neglect');
         const neglectStress = neglectEffect ? -1.0 : 0;
-        const happinessDelta = Math.round((housingEffect + debtStress + familyWarmth + jobSatisfaction + financeStress + neglectStress) * 10) / 10;
+        const businessStress = -unstaffedBusinessCount * 0.6; // grinding a business solo on top of a job
+        const happinessDelta = Math.round((housingEffect + debtStress + familyWarmth + jobSatisfaction + financeStress + neglectStress + businessStress) * 10) / 10;
         setLastHappiness(happiness);
         const newHappiness = Math.max(0, Math.min(100, happiness + happinessDelta));
         setHappiness(newHappiness);
@@ -3549,7 +3593,8 @@ export const GameProvider = ({ children }) => {
 
         // ── HEALTH DRAIN & SICK LEAVE ──────────────────────────────────────────
         const currentHealth = stateRef.current.health ?? 80;
-        const newHealth = Math.max(0, currentHealth - MONTHLY_HEALTH_DRAIN);
+        const businessHealthDrain = unstaffedBusinessCount * 1.2;
+        const newHealth = Math.max(0, currentHealth - MONTHLY_HEALTH_DRAIN - businessHealthDrain);
         setHealth(newHealth);
 
         if (newHealth < 5) {
@@ -4425,6 +4470,7 @@ export const GameProvider = ({ children }) => {
 
         // Side hustles / businesses
         ownedBusinesses, getBusinessEligibility, startBusiness, closeBusiness,
+        hireManager, fireManager, hireWorker, fireWorker,
 
         // Insurance
         activeInsurance, buyInsurance, cancelInsurance,

@@ -260,3 +260,68 @@ export const rollBusinessRevenue = (business) => {
     const [lo, hi] = business.revenue_range;
     return Math.round(lo + Math.random() * (hi - lo));
 };
+
+// =============================================================================
+// STAFFING — hire workers and a manager so a business doesn't have to be
+// grinded solo on top of a real job. Unstaffed (no manager), a business earns
+// less and fails more often, and the strain costs the player happiness/health
+// each month. A manager removes the strain and the penalties; workers add a
+// skill-scaled revenue bonus, but only really pay off once there's a manager
+// to direct them.
+// =============================================================================
+
+export const MAX_WORKERS_PER_BUSINESS = 3;
+
+const STAFF_FIRST_NAMES = [
+    'Aarav', 'Vihaan', 'Aditya', 'Rohan', 'Kabir', 'Ishaan', 'Arjun', 'Dev',
+    'Karan', 'Nikhil', 'Ananya', 'Diya', 'Ishita', 'Meera', 'Priya', 'Riya',
+    'Sneha', 'Tanya', 'Zoya', 'Kavya',
+];
+const STAFF_LAST_NAMES = [
+    'Sharma', 'Verma', 'Gupta', 'Iyer', 'Nair', 'Patel', 'Reddy', 'Singh',
+    'Mehta', 'Joshi', 'Khan', 'Das', 'Rao', 'Kapoor', 'Bansal',
+];
+
+const randomStaffName = () => {
+    const f = STAFF_FIRST_NAMES[Math.floor(Math.random() * STAFF_FIRST_NAMES.length)];
+    const l = STAFF_LAST_NAMES[Math.floor(Math.random() * STAFF_LAST_NAMES.length)];
+    return `${f} ${l}`;
+};
+
+// Generates a fresh batch of generic candidates for a role on a given business.
+// Not persisted — regenerated each time the hiring panel is opened.
+export const generateStaffCandidates = (business, role, count = 3) => {
+    const baseWage = role === 'manager'
+        ? Math.round(business.running_cost * 1.1)
+        : Math.round(business.running_cost * 0.45);
+    return Array.from({ length: count }, () => {
+        const skill = 1 + Math.floor(Math.random() * 5); // 1-5 stars
+        const wage = Math.round(baseWage * (0.75 + skill * 0.1));
+        return {
+            id: `cand_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+            name: randomStaffName(),
+            role, skill, wage,
+        };
+    });
+};
+
+// Monthly economics for one owned business, given its current staffing.
+export const getStaffedEconomics = (business, owned) => {
+    const manager = owned.manager || null;
+    const workers = owned.workers || [];
+    const workerSkillSum = workers.reduce((s, w) => s + w.skill, 0);
+    const wageCost = (manager?.wage || 0) + workers.reduce((s, w) => s + w.wage, 0);
+
+    const revenueMultiplier = manager
+        ? 1 + workerSkillSum * 0.03   // workers pay off once there's a manager directing them
+        : 1 - Math.min(0.5, workerSkillSum * 0.01); // mostly wasted without oversight
+    const soloMultiplier = manager ? 1 : 0.75;       // running it solo on top of a job hurts output
+    const failureMultiplier = manager ? 0.7 : 1.5;
+
+    return {
+        wageCost,
+        revenueMultiplier: revenueMultiplier * soloMultiplier,
+        failureMultiplier,
+        isUnstaffed: !manager,
+    };
+};
