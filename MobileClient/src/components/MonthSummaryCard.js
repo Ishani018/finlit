@@ -83,9 +83,19 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
 
     return (
         <Animated.View style={{ position: 'absolute', inset: 0, zIndex: 600, transform: [{ translateY: slideAnim }] }}>
-            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)' }} />
+            <TouchableOpacity activeOpacity={1} onPress={onContinue} style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.97)' }} />
 
-            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+            {/* Always-visible close button — the card can be long enough to need
+                 scrolling, so don't make the only exit a button at the bottom */}
+            <TouchableOpacity
+                onPress={onContinue}
+                activeOpacity={0.7}
+                style={{ position: 'absolute', top: 16, right: 16, zIndex: 1, width: 34, height: 34, borderRadius: 17, backgroundColor: '#0d1428', alignItems: 'center', justifyContent: 'center' }}
+            >
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4a5580' }}>✕</Text>
+            </TouchableOpacity>
+
+            <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
                 <ScrollView
                     contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 28, paddingTop: 20 }}
                     showsVerticalScrollIndicator={false}
@@ -184,7 +194,7 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                         activeOpacity={0.8}
                         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14, backgroundColor: '#0d1428', paddingVertical: 18, borderRadius: 12 }}
                     >
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 2 }}>NEXT MONTH</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 2 }}>CONTINUE</Text>
                         <Image source={NEXT_ICON} style={{ width: 28, height: 28 }} resizeMode="contain" />
                     </TouchableOpacity>
                 </ScrollView>
