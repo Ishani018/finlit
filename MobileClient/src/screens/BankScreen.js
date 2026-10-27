@@ -756,6 +756,13 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', letterSpacing: 2 }}>ALL BUSINESSES</Text>
                                 </TouchableOpacity>
 
+                                {biz.image && (
+                                    <View style={{ height: 150, borderRadius: 10, overflow: 'hidden', position: 'relative' }}>
+                                        <Image source={biz.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.15)' }} />
+                                    </View>
+                                )}
+
                                 <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 16, gap: 10 }}>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>{biz.name}</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', lineHeight: 19 }}>{biz.description}</Text>
@@ -823,8 +830,11 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                             <View key={owned.id} style={{ borderRadius: 10, overflow: 'hidden', backgroundColor: '#08101e' }}>
                                                 <TouchableOpacity onPress={() => setSelectedBusinessOwnedId(isExpanded ? null : owned.id)} style={{ padding: 14 }} activeOpacity={0.8}>
                                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                                                        <View style={{ width: 32, height: 32, backgroundColor: '#0a0c14', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
-                                                            <FontAwesome5 name="store" size={13} color="#4ade80" />
+                                                        <View style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden', backgroundColor: '#0a0c14' }}>
+                                                            {biz.image
+                                                                ? <Image source={biz.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                                                : <FontAwesome5 name="store" size={13} color="#4ade80" style={{ margin: 'auto' }} />
+                                                            }
                                                         </View>
                                                         <View style={{ flex: 1 }}>
                                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }}>{biz.name}</Text>
@@ -843,6 +853,14 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                                 </TouchableOpacity>
                                                 {isExpanded && (
                                                     <View style={{ paddingHorizontal: 14, paddingBottom: 14, gap: 10 }}>
+                                                        {biz.image && (
+                                                            <View style={{ height: 110, borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
+                                                                <Image source={biz.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.75)', paddingVertical: 4, alignItems: 'center' }}>
+                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#8fa0c8', letterSpacing: 2 }}>VISITING {biz.name.toUpperCase()}</Text>
+                                                                </View>
+                                                            </View>
+                                                        )}
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070', lineHeight: 18 }}>
                                                             Revenue ₹{biz.revenue_range[0].toLocaleString()}–₹{biz.revenue_range[1].toLocaleString()}/mo · Running cost ₹{biz.running_cost.toLocaleString()}/mo · {(biz.failure_chance * 100).toFixed(1)}% monthly failure risk
                                                         </Text>
@@ -876,8 +894,11 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                         activeOpacity={0.85}
                                         style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14, opacity: eligible || alreadyOwned ? 1 : 0.5, flexDirection: 'row', alignItems: 'center', gap: 12 }}
                                     >
-                                        <View style={{ width: 36, height: 36, backgroundColor: '#0a0c14', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
-                                            <FontAwesome5 name="store" size={14} color={eligible ? '#4ade80' : '#445070'} />
+                                        <View style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', backgroundColor: '#0a0c14' }}>
+                                            {biz.image
+                                                ? <Image source={biz.image} style={{ width: '100%', height: '100%', opacity: eligible ? 1 : 0.5 }} resizeMode="cover" />
+                                                : <FontAwesome5 name="store" size={14} color={eligible ? '#4ade80' : '#445070'} style={{ margin: 'auto' }} />
+                                            }
                                         </View>
                                         <View style={{ flex: 1 }}>
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: eligible ? '#c8d4f0' : '#445070' }}>{biz.name}</Text>

@@ -231,7 +231,7 @@ export const CRISIS_EVENTS = [
         severity: 'major',
         cost: 300000,
         getMessage: () => 'A customer is suing your business. Lawyer retainer + court fees.',
-        condition: (state) => state.currentJob && state.currentJob.type.includes('Tier 3'),
+        condition: (state) => (state.ownedBusinesses || []).length > 0,
     },
     {
         id: 'theft',

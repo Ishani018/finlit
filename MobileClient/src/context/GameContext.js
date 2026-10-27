@@ -1282,6 +1282,8 @@ export const GameProvider = ({ children }) => {
         if (ownedBusinesses.some(b => b.businessId === business.id)) issues.push('You already own this business');
         if (creditScore < business.min_credit_score) issues.push(`Credit ${business.min_credit_score}+ needed (you: ${creditScore})`);
         if (netWorth < business.min_net_worth) issues.push(`₹${(business.min_net_worth / 1000).toFixed(0)}k net worth needed`);
+        const missingDegrees = (business.req_degrees || []).filter(d => !degrees.includes(d));
+        if (missingDegrees.length > 0) issues.push(`Missing: ${missingDegrees.join(', ')}`);
         if (balance < business.cost) issues.push(`₹${business.cost.toLocaleString()} needed to start`);
         return issues;
     };
