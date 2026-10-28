@@ -40,6 +40,13 @@ const ITEM_IMAGES = {
     thaali:           require('../../assets/groceries/thaali.png'),
     smoothie:         require('../../assets/groceries/smoothis.png'),
     mithai_box:       require('../../assets/groceries/mithai_box.png'),
+    chicken_biryani:  require('../../assets/groceries/chicken_biryani.png'),
+    butter_chicken:   require('../../assets/groceries/butter_chicken.png'),
+    mutton_rogan_josh: require('../../assets/groceries/mutton_rogan_josh.png'),
+    fish_fry:         require('../../assets/groceries/fish_fry.png'),
+    prawn_masala:     require('../../assets/groceries/prawn_masala.png'),
+    tandoori_chicken: require('../../assets/groceries/tandoori_chicken.png'),
+    seekh_kebab:      require('../../assets/groceries/seekh_kebab.png'),
 };
 
 function ShopCard({ item, balance, onBuy }) {
