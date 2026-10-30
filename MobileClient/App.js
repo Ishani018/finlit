@@ -34,6 +34,7 @@ import FinancialTip, { FINANCIAL_TIPS } from './src/components/FinancialTip';
 import PixelDialog from './src/components/PixelDialog';
 import BottomTabBar from './src/components/BottomTabBar';
 import MonthSummaryCard from './src/components/MonthSummaryCard';
+import MonthPreviewSheet from './src/components/MonthPreviewSheet';
 import DailyLimitScreen from './src/components/DailyLimitScreen';
 import BirthdayCelebrationRoom from './src/components/BirthdayCelebrationRoom';
 import CrisisSimulator from './src/components/CrisisSimulator';
@@ -331,7 +332,7 @@ const GameLayout = ({ onHardReset }) => {
     currentJob, currentHousing, isPlaying, setIsPlaying,
     gameSpeed, setGameSpeed,
     degrees, portfolio, properties, marketPrices, priceHistory,
-    enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice,
+    enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice, getMonthPreview,
     playerSprite, setPlayerSprite, playerName,
     playerAge, totalMonthsPlayed, gameOver, finalScore, RETIREMENT_MONTH, GAME_END_MONTH,
     netWorthHistory, lastMonthFlow, monthlyRecap,
@@ -453,6 +454,9 @@ const GameLayout = ({ onHardReset }) => {
   // Month summary card
   const [showSummary, setShowSummary] = useState(false);
 
+  // End-month preview sheet — shown before NEXT MONTH actually runs
+  const [showMonthPreview, setShowMonthPreview] = useState(false);
+
   const showDialog = (title, message, type = 'info', onConfirm = null, confirmText = 'OK', cancelText = null, onCancel = null, image = null) => {
     setDialog({ visible: true, title, message, type, onConfirm: onConfirm || (() => setDialog(d => ({ ...d, visible: false }))), confirmText, cancelText, onCancel, image });
   };
@@ -467,6 +471,14 @@ const GameLayout = ({ onHardReset }) => {
     if (!isPlaying) setIsPlaying(true);
     monthsPlayedTodayRef.current += 1;
     nextMonth();
+  };
+
+  // NEXT MONTH now opens a preview first. The sheet's END button calls handleAdvanceTime.
+  const requestNextMonth = () => {
+    if (dialog.visible || pendingJobInterview || pendingDecision || majorCrisisFlash || showSummary || pendingFamilyDemand || familyDemandResult || pendingDeathEvent) {
+      return;
+    }
+    setShowMonthPreview(true);
   };
 
   const openEventDetail = (event) => {
@@ -1038,7 +1050,7 @@ const GameLayout = ({ onHardReset }) => {
                 <TouchableOpacity
                   key={step.id}
                   onPress={() => {
-                    if (step.action?.isAdvanceTime) { handleAdvanceTime(); return; }
+                    if (step.action?.isAdvanceTime) { requestNextMonth(); return; }
                     if (step.action?.tab) setActiveTab(step.action.tab);
                     if (step.action?.subTab === 'shop') setShowGrocery(true);
                     if (step.action?.subTab && step.action.tab === 'money') setMoneySubTab(step.action.subTab);
@@ -2328,6 +2340,19 @@ const GameLayout = ({ onHardReset }) => {
           onClose={() => setShowCrisisSimulator(false)}
         />
 
+        <MonthPreviewSheet
+          visible={showMonthPreview}
+          preview={showMonthPreview ? getMonthPreview() : null}
+          monthLabel={['January','February','March','April','May','June','July','August','September','October','November','December'][(turn.month - 1) % 12]}
+          onCancel={() => setShowMonthPreview(false)}
+          onConfirm={() => { setShowMonthPreview(false); handleAdvanceTime(); }}
+          onAction={(action) => {
+            setShowMonthPreview(false);
+            if (action === 'grocery') { setShowGoals(false); setShowGrocery(true); }
+            if (action === 'insure') { setShowGrocery(false); setShowGoals(false); setActiveTab('money'); setMoneySubTab('insure'); }
+          }}
+        />
+
         <View style={{ zIndex: 500 }}>
         <BottomTabBar
           activeTab={activeTab}
@@ -2342,7 +2367,7 @@ const GameLayout = ({ onHardReset }) => {
           onGoals={() => { setShowGrocery(false); setShowGoals(true); }}
           showGrocery={showGrocery}
           showGoals={showGoals}
-          onNextMonth={handleAdvanceTime}
+          onNextMonth={requestNextMonth}
           turnsLeft={turnsLeftToday()}
           dailyLimit={DAILY_TURN_LIMIT}
           badges={{

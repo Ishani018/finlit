@@ -2065,6 +2065,74 @@ export const GameProvider = ({ children }) => {
     };
 
     // =========================================================================
+    // END-MONTH PREVIEW — what happens if the player presses NEXT MONTH now.
+    // Mirrors the deterministic parts of nextMonth(); random events and business
+    // revenue are not included, so this is an estimate.
+    // =========================================================================
+
+    const getMonthPreview = () => {
+        const salary = currentJob ? currentJob.salary : 0;
+        const salaryCutEffect = activeEffects.find(e => e.type === 'salary_cut');
+        const effectiveSalary = salaryCutEffect ? Math.round(salary * (1 - salaryCutEffect.pct)) : salary;
+        let rental = 0;
+        properties.forEach(id => {
+            const prop = REAL_ESTATE.find(p => p.id === id);
+            if (!prop || !prop.rental_income) return;
+            const noRent = activeEffects.find(e => e.type === 'no_rent' && e.propertyId === id);
+            if (!noRent) rental += Math.round(prop.rental_income * (1 + (trait.rentalBonus || 0)));
+        });
+        const spouse = getSpouseIncome();
+
+        const housing = properties.includes(currentHousing.id)
+            ? (currentHousing.maintenance || 0)
+            : (currentHousing.rental_income || currentHousing.maintenance || 0);
+        let investMaint = 0;
+        properties.forEach(id => {
+            const prop = REAL_ESTATE.find(p => p.id === id);
+            if (prop && prop.id !== currentHousing.id) investMaint += (prop.maintenance || 0);
+        });
+        const inflation = Math.pow(1.025, Math.floor(totalMonthsPlayed / 12));
+        let living = Math.round(LIVING_COSTS_BASE * inflation) + getDependentCosts();
+        if (trait.familyCostDiscount) living = Math.round(living * (1 - trait.familyCostDiscount));
+        if (trait.livingCostDiscount) living = Math.round(living * (1 - trait.livingCostDiscount));
+        const inflationEffect = activeEffects.find(e => e.type === 'living_cost_increase');
+        if (inflationEffect && !trait.inflationImmune) living = Math.round(living * (1 + inflationEffect.pct));
+        const emi = getTotalEMI();
+        const insurance = getInsurancePremiums();
+        const tax = getMonthlyTax();
+        const rawTuition = activeEnrollment ? (activeEnrollment.monthlyTuition || 0) : 0;
+        const tuition = trait.tuitionDiscount ? Math.round(rawTuition * (1 - trait.tuitionDiscount)) : rawTuition;
+        const sip = sipPlans.reduce((n, p) => n + (p.amount || 0), 0);
+        const ca = caSubscribed ? 2000 : 0;
+
+        const income = { salary: effectiveSalary, rental, spouse };
+        const expenses = { housing: housing + investMaint, living, emi, insurance, tax, tuition, sip, ca };
+        const totalIncome = effectiveSalary + rental + spouse;
+        const totalExpenses = Object.values(expenses).reduce((n, v) => n + v, 0);
+        const net = totalIncome - totalExpenses;
+        const healthAfter = Math.max(0, health - MONTHLY_HEALTH_DRAIN);
+        const pantryQty = (pantry || []).reduce((n, p) => n + (p.qty || 0), 0);
+
+        const warnings = [];
+        if (healthAfter < CRITICAL_HEALTH_THRESHOLD) {
+            warnings.push({ id: 'health', level: 'bad', title: `Health will drop from ${Math.round(health)} to ${Math.round(healthAfter)}`, body: 'Under 15 you are sent on forced sick leave and lose part of your pay.', action: 'grocery', actionLabel: 'Buy groceries first' });
+        } else if (healthAfter < SICK_LEAVE_THRESHOLD) {
+            warnings.push({ id: 'health', level: 'warn', title: `Health will drop from ${Math.round(health)} to ${Math.round(healthAfter)}`, body: 'Under 30 you can be sent on sick leave and lose part of your pay.', action: 'grocery', actionLabel: 'Buy groceries first' });
+        }
+        if (balance + net < 0) {
+            warnings.push({ id: 'cash', level: 'bad', title: 'You will run out of cash', body: `Cash would be ₹${(balance + net).toLocaleString()} after this month. Loans or missed bills hurt your credit score.`, action: null });
+        }
+        if (dependents.length > 0 && activeInsurance.length === 0) {
+            warnings.push({ id: 'insurance', level: 'warn', title: 'Your family has no insurance', body: 'One hospital bill could wipe out your savings.', action: 'insure', actionLabel: 'See insurance' });
+        }
+        if (pantryQty === 0 && health < 70 && !warnings.some(w => w.id === 'health')) {
+            warnings.push({ id: 'pantry', level: 'info', title: 'Pantry is empty', body: 'Health drops every month without food.', action: 'grocery', actionLabel: 'Open the store' });
+        }
+
+        return { income, expenses, totalIncome, totalExpenses, net, balanceAfter: balance + net, healthBefore: health, healthAfter, warnings };
+    };
+
+    // =========================================================================
     // CRISIS ENGINE
     // =========================================================================
 
@@ -4432,7 +4500,7 @@ export const GameProvider = ({ children }) => {
         // Actions
         enrollInCourse, enrollWithLoan, dropOut, activeEnrollment,
         tradeStock, buyProperty, buyAndMoveIn, moveIn, rentProperty, applyForJob,
-        checkJobRequirements, getCAAdvice, nextMonth, sellProperty,
+        checkJobRequirements, getCAAdvice, getMonthPreview, nextMonth, sellProperty,
         stockNews,
 
         // Mutual Funds
