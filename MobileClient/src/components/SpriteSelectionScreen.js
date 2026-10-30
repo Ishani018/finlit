@@ -221,14 +221,21 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
 
                 {!childMode && (
                     <View style={{ marginTop: 12, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', borderRadius: 12, padding: 10 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4 }}>LIFE PATH</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0' }}>{AGE_STAGES.map(a => a.label[0] + a.label.slice(1).toLowerCase()).join(' · ')}</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row', gap: 4 }}>
-                            {AGE_STAGES.map((a, i) => (
-                                <TouchableOpacity key={a.label} onPress={() => setStage(i)} activeOpacity={0.8} style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: i <= stage ? '#818cf8' : '#1e2840' }} />
-                            ))}
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, marginBottom: 8 }}>LIFE PATH · TAP TO PREVIEW</Text>
+                        <View style={{ flexDirection: 'row', gap: 6 }}>
+                            {AGE_STAGES.map((a, i) => {
+                                const img = SPRITE_MAP[sprite.id + a.suffix] || (a.suffix === '' ? sprite.image : null);
+                                const on = i === stage;
+                                return (
+                                    <TouchableOpacity key={a.label} onPress={() => setStage(i)} activeOpacity={0.8} style={{ flex: 1, alignItems: 'center' }}>
+                                        <View style={{ width: '100%', height: 92, borderRadius: 8, overflow: 'hidden', backgroundColor: on ? '#141b36' : '#0a0d1a', borderWidth: 1, borderColor: on ? trait.color : '#1a2040', opacity: on ? 1 : 0.42 }}>
+                                            {img ? <Image source={img} style={{ position: 'absolute', top: 2, left: '-30%', width: '160%', height: 220 }} resizeMode="contain" /> : null}
+                                        </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: on ? trait.color : '#5a6890', lineHeight: 16, marginTop: 4 }}>{a.label}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', lineHeight: 12 }}>{a.age}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', marginTop: 8 }}>{AGE_STAGES[stage].age}: {flavour[stage] || ''}</Text>
                     </View>
@@ -246,8 +253,7 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
 }
 
 // ─── Step 1: Browse characters (card grid). Tapping a card opens its profile. ─────────────────────────
-function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, childName }) {
-    const [detailIdx, setDetailIdx] = useState(null);
+function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, childName, detailIdx, setDetailIdx }) {
 
     if (detailIdx !== null) {
         return (
@@ -501,6 +507,7 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
     const { setPlayerSprite, setPlayerName, setPlayerBirthday, setPlayerLook, applyForJob, startNextGeneration, resetGame } = useGame();
     const [step, setStep]           = useState(childMode ? 1 : 0);
     const [selectedIdx, setSelectedIdx] = useState(null);
+    const [detailIdx, setDetailIdx] = useState(null);   // which profile is open; kept so Back from the name step returns to it
 
     const handleConfirm = (name, bday, look) => {
         if (childMode) {
@@ -530,6 +537,8 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
                     selectedIdx={selectedIdx}
                     setSelectedIdx={setSelectedIdx}
                     onNext={() => setStep(2)}
+                    detailIdx={detailIdx}
+                    setDetailIdx={setDetailIdx}
                     childMode={childMode}
                     childName={childName}
                 />
