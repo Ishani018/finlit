@@ -1217,6 +1217,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
 
 // ── ITR Self-Filing Wizard ────────────────────────────────────────────────────
 function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectITRForm, collectITRDoc, computeITRTaxFull, submitITR, onShowDialog }) {
+    const { turnsLeftToday } = useGame();
     const { step, formSelected, docsCollected, computation, wrongForm, year } = filing;
     const [toast, setToast] = useState(null);
     const showToast = (msg, ok) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 2800); };

@@ -2834,7 +2834,8 @@ export const GameProvider = ({ children }) => {
 
     const startNextGeneration = (newSpriteIdx) => {
         if (!legacySummary) return;
-        const newSpriteId = SPRITES[newSpriteIdx].id;
+        const SPRITE_IDS = ['young_pia_1', 'young_raj_1', 'young_soms_1', 'young_soni_1', 'young_sia_1', 'young_rahul_1', 'young_priya_1', 'young_kav_1']; // same order as the character picker
+        const newSpriteId = SPRITE_IDS[newSpriteIdx] || SPRITE_IDS[0];
         
         // Check eldest child education & credit score buff
         let startsWithDegree = null;
@@ -2844,7 +2845,7 @@ export const GameProvider = ({ children }) => {
                 startsWithDegree = { id: 'business_admin', name: 'Business Administration', cost: 1000000, duration: 36 };
             }
             // Check if Gen 1 had supplementary cards
-            startsWithGoodCredit = activeCreditCards.some(cc => CREDIT_CARDS.find(c => c.id === cc.cardId)?.isMinor);
+            startsWithGoodCredit = activeCreditCards.some(cc => cc === 'minor' || cc?.type === 'minor' || cc?.id === 'minor');
         }
 
         // Full Reset of State (except generation logic)
