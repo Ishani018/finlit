@@ -15,20 +15,23 @@ const IMAGES = {
     family:    require('../../assets/properties/family_house_with_garden_and_backyard.png'),
     grocery:   require('../../assets/jobs/kirana_store.png'),
     cars:      require('../../assets/cars/honda_city.png'),
+    pantry:    require('../../assets/ui_comp/pantry.png'),
+    birthday:  require('../../assets/ui_comp/birthday_cake.png'),
 };
+const ICON_TILES = ['cars', 'pantry', 'birthday']; // painted icons, drawn on a plain panel instead of cropped scene art
 const GOALS_ICON = require('../../assets/ui_comp/achivements.png');
 const HELP_ICON = require('../../assets/ui_comp/bulb.png');
 const COIN = require('../../assets/ui_comp/nextbutton.png');
 
 const LABELS = {
     work: 'WORK', study: 'STUDY', invest: 'INVEST', bank: 'BANK',
-    insurance: 'INSURE', home: 'HOME', family: 'FAMILY', grocery: 'SHOP', cars: 'CARS',
+    insurance: 'INSURE', home: 'HOME', family: 'FAMILY', grocery: 'SHOP', cars: 'CARS', pantry: 'PANTRY', birthday: 'PARTY',
 };
 
 const SECTIONS = [
     { label: 'CAREER',     color: '#e2b33a', keys: ['work', 'study'] },
     { label: 'FINANCES',   color: '#38b2ac', keys: ['invest', 'bank', 'insurance'] },
-    { label: 'DAILY LIFE', color: '#ec4899', keys: ['home', 'family', 'grocery', 'cars'] },
+    { label: 'DAILY LIFE', color: '#ec4899', keys: ['home', 'family', 'grocery', 'cars', 'pantry', 'birthday'] },
 ];
 
 const RED = '#f87171';
@@ -51,8 +54,8 @@ function HubTile({ id, color, height, status, urgent, badge, onPress }) {
             activeOpacity={0.8}
             style={{ flex: 1, height, overflow: 'hidden', borderRadius: 12, borderWidth: 1, borderColor: urgent ? RED + 'b0' : color + '55' }}
         >
-            {id === 'cars' ? <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0a0e22' }} /> : null}
-            <Image source={IMAGES[id]} style={id === 'cars' ? { width: '100%', height: '78%', marginTop: 6 } : { width: '100%', height: '100%' }} resizeMode={id === 'cars' ? 'contain' : 'cover'} />
+            {ICON_TILES.includes(id) ? <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0a0e22' }} /> : null}
+            <Image source={IMAGES[id]} style={ICON_TILES.includes(id) ? { width: '100%', height: '70%', marginTop: 10 } : { width: '100%', height: '100%' }} resizeMode={ICON_TILES.includes(id) ? 'contain' : 'cover'} />
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: urgent ? 'rgba(6,8,15,0.40)' : 'rgba(6,8,15,0.58)' }} />
             <Corners color={urgent ? RED : color} />
             <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.84)', paddingVertical: 5, paddingHorizontal: 6, borderTopWidth: 1, borderColor: 'rgba(200,212,240,0.1)', alignItems: 'center' }}>
@@ -139,17 +142,23 @@ export default function HubMenu({ onClose, onAction, profile = {}, statuses = {}
                     </View>
                 )}
 
-                {SECTIONS.map(section => (
-                    <View key={section.label} style={{ marginBottom: 16 }}>
-                        <SectionLabel text={section.label} color={section.color} />
-                        <View style={{ flexDirection: 'row', gap: GAP }}>
-                            {section.keys.map(key => (
-                                <HubTile key={key} id={key} color={section.color} height={96} status={statuses[key]} badge={badges[key] || null} onPress={() => go(key)} />
+                {SECTIONS.map(section => {
+                    const rows = [];
+                    for (let i = 0; i < section.keys.length; i += 3) rows.push(section.keys.slice(i, i + 3));
+                    return (
+                        <View key={section.label} style={{ marginBottom: 16 }}>
+                            <SectionLabel text={section.label} color={section.color} />
+                            {rows.map((row, ri) => (
+                                <View key={ri} style={{ flexDirection: 'row', gap: GAP, marginBottom: ri < rows.length - 1 ? GAP : 0 }}>
+                                    {row.map(key => (
+                                        <HubTile key={key} id={key} color={section.color} height={96} status={statuses[key]} badge={badges[key] || null} onPress={() => go(key)} />
+                                    ))}
+                                    {Array.from({ length: 3 - row.length }).map((_, i) => <View key={i} style={{ flex: 1 }} />)}
+                                </View>
                             ))}
-                            {Array.from({ length: Math.max(0, 3 - section.keys.length) }).map((_, i) => <View key={i} style={{ flex: 1 }} />)}
                         </View>
-                    </View>
-                ))}
+                    );
+                })}
             </ScrollView>
 
             {onNextMonth ? (

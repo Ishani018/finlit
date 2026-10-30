@@ -999,6 +999,8 @@ const GameLayout = ({ onHardReset }) => {
       family: dependents.length > 0 ? `${dependents.length} dependent${dependents.length === 1 ? '' : 's'}` : 'Just you',
       grocery: pantryQty === 0 ? 'Pantry empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'} left`,
       cars: cars.length === 0 ? 'No car yet' : `${cars.length} in garage`,
+      pantry: pantryQty === 0 ? 'Empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'}`,
+      birthday: 'Celebrate',
     };
     const attention = [];
     const attentionStatuses = {};
@@ -1019,6 +1021,8 @@ const GameLayout = ({ onHardReset }) => {
     if (key === 'family')    { setActiveTab('family'); }
     if (key === 'grocery')   { setShopInitial('grocery'); setShowGrocery(true); }
     if (key === 'cars')      { setShopInitial('cars'); setShowGrocery(true); }
+    if (key === 'pantry')    { setActiveTab('home'); setShowPantry(true); }
+    if (key === 'birthday')  { setActiveTab('home'); setShowBirthdayRoom(true); }
     if (key === 'goals')     { setShowGoals(true); }
     if (key === 'help')      { setActiveTab('home'); setShowHelp(true); }
   };
@@ -1181,39 +1185,22 @@ const GameLayout = ({ onHardReset }) => {
             </TouchableOpacity>
           )}
 
-          {/* For sale icon — top-left, home view only */}
+          {/* Command Centre — one control-panel button holds every shortcut that used to crowd this row */}
           {activeMenu !== 'advisor' && viewMode === 'home' && (() => {
-            // Compute birthday info
             let playerBdayMonth = null;
             if (playerBirthday && playerBirthday.includes('/')) playerBdayMonth = parseInt(playerBirthday.split('/')[1], 10);
             const currentMonth = (totalMonthsPlayed % 12) + 1;
-            const isPlayerBday = playerBdayMonth === currentMonth;
-            const bdayDep = dependents.find(d => d.bdayMonth === currentMonth);
-            const isBdayMonth = isPlayerBday || !!bdayDep;
+            const isBdayMonth = playerBdayMonth === currentMonth || !!dependents.find(d => d.bdayMonth === currentMonth);
+            const todo = buildHubData().attention.length + (isBdayMonth ? 1 : 0);
             return (
-              <View style={{ position: 'absolute', top: 8, left: 10, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <TouchableOpacity onPress={() => setShowHub(true)} activeOpacity={0.8}>
-                  <Image source={require('./assets/ui_comp/menu_compass.png')} style={{ width: 38, height: 38 }} resizeMode="contain" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setShowPantry(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
-                  <Image source={require('./assets/ui_comp/pantry.png')} style={{ width: 38, height: 38 }} resizeMode="contain" />
-                  {(pantry || []).reduce((s, p) => s + (p.qty || 0), 0) <= 3 && (
-                    <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#f87171', borderWidth: 1.5, borderColor: '#06080f' }} />
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setShowHomeScreen(true)} activeOpacity={0.8}>
-                  <Image source={require('./assets/ui_comp/forsale.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setShopInitial('cars'); setShowGrocery(true); }} activeOpacity={0.8}>
-                  <Image source={(CAR_BY_ID[(cars.find(c => c.uid === activeCarUid) || cars[0])?.id] || CAR_BY_ID.honda_city).image} style={{ width: 40, height: 32, opacity: cars.length ? 1 : 0.45 }} resizeMode="contain" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setShowBirthdayRoom(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
-                  <Image source={require('./assets/ui_comp/birthday_cake.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                  {isBdayMonth && (
-                    <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#ec4899', borderWidth: 1.5, borderColor: '#06080f' }} />
-                  )}
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity onPress={() => setShowHub(true)} activeOpacity={0.8} style={{ position: 'absolute', top: 8, left: 10, zIndex: 20 }}>
+                <Image source={require('./assets/ui_comp/menu_dashboard.png')} style={{ width: 54, height: 42 }} resizeMode="contain" />
+                {todo > 0 && (
+                  <View style={{ position: 'absolute', top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: '#f87171', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, borderWidth: 1.5, borderColor: '#06080f' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#fff', lineHeight: 14 }}>{todo}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
             );
           })()}
 
@@ -1226,19 +1213,13 @@ const GameLayout = ({ onHardReset }) => {
                   <TouchableOpacity onPress={() => switchViewMode(viewMode === 'home' ? 'work' : 'home')} activeOpacity={0.8}>
                     <Image
                       source={viewMode === 'home' ? require('./assets/ui_comp/currentjob.png') : require('./assets/ui_comp/home.png')}
-                      style={{ width: 32, height: 32 }}
+                      style={{ width: 38, height: 38 }}
                       resizeMode="contain"
                     />
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity onPress={() => setShowGrocery(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
-                  <Image source={require('./assets/ui_comp/groceryshop.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                  {health < 30 && (
-                    <View style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: 4, backgroundColor: '#f87171', borderWidth: 1, borderColor: '#06080f' }} />
-                  )}
-                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowEventsInbox(true); markAllEventsRead(); }} style={{ position: 'relative' }}>
-                  <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
+                  <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 38, height: 38 }} resizeMode="contain" />
                   {unread > 0 && (
                     <View style={{ position: 'absolute', top: -4, right: -4, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: '#a855f7', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3, borderWidth: 1, borderColor: '#06080f' }}>
                       <Text style={{ fontSize: 9, color: '#fff', fontWeight: 'bold' }}>{unread > 9 ? '9+' : unread}</Text>
