@@ -9,7 +9,7 @@ import { INSURANCE_PLANS } from '../data/insurance';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
 import { CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_TYPE, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, PARKED_COST_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
 import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, MAX_WORKERS_PER_BUSINESS, rollBusinessRevenue, generateStaffCandidates, getStaffedEconomics } from '../data/businesses';
-import { calculateIncomeTax, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
+import { calculateIncomeTax, calculateTaxByRegime, STANDARD_DEDUCTION, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
 import { CRISIS_EVENTS, CRISIS_WEIGHTS } from '../data/crisisEvents';
 import { LIFE_DECISIONS, BUDGET_EVENTS } from '../data/lifeDecisions';
 import { ACHIEVEMENTS, NET_WORTH_MILESTONES } from '../data/achievements';
@@ -115,6 +115,7 @@ export const GameProvider = ({ children }) => {
     const [portfolio, setPortfolio] = useState({});
     const [properties, setProperties] = useState([]);
     const [propertyBuyMonths, setPropertyBuyMonths] = useState({});
+    const [taxRegime, setTaxRegime] = useState('new');   // 'new' | 'old'
     const [cars, setCars] = useState([]);              // [{ uid, id, used, boughtMonth, paid, loanId }]
     const [activeCarUid, setActiveCarUid] = useState(null);
 
@@ -252,7 +253,7 @@ export const GameProvider = ({ children }) => {
                 degrees: stateRef.current.degrees,
                 portfolio: stateRef.current.portfolio,
                 properties: stateRef.current.properties,
-                propertyBuyMonths, cars, activeCarUid,
+                propertyBuyMonths, cars, activeCarUid, taxRegime,
                 marketPrices: stateRef.current.marketPrices,
                 priceHistory: stateRef.current.priceHistory,
                 marketCycle: stateRef.current.marketCycle,
@@ -306,7 +307,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -349,6 +350,7 @@ export const GameProvider = ({ children }) => {
             if (s.portfolio) setPortfolio(s.portfolio);
             if (s.properties) setProperties(s.properties);
             if (s.propertyBuyMonths) setPropertyBuyMonths(s.propertyBuyMonths);
+            if (s.taxRegime === 'old' || s.taxRegime === 'new') setTaxRegime(s.taxRegime);
             if (Array.isArray(s.cars)) setCars(s.cars);
             if (s.activeCarUid) setActiveCarUid(s.activeCarUid);
             if (s.marketPrices) setMarketPrices(s.marketPrices);
@@ -594,7 +596,8 @@ export const GameProvider = ({ children }) => {
 
     const getTotalEMI = () => loans.reduce((sum, l) => sum + l.emi, 0);
 
-    const getMonthlyTax = () => {
+    // Yearly tax on the income you earn from salary, rent and a working spouse, under one regime.
+    const computeAnnualTax = (regime) => {
         const salary = currentJob ? currentJob.salary : 0;
         let realEstateIncome = 0;
         properties.forEach(id => {
@@ -603,49 +606,44 @@ export const GameProvider = ({ children }) => {
         });
         const spouseIncome = getSpouseIncome();
         const annualIncome = (salary + realEstateIncome + spouseIncome) * 12;
+        // Standard deduction applies to salary income in both regimes
+        let deductions = Math.min((salary + spouseIncome) * 12, STANDARD_DEDUCTION[regime]);
 
-        let deductions = 0;
-
-        const homeLoans = loans.filter(l => l.loanTypeId === 'home_loan');
-        if (homeLoans.length > 0) {
-            const annualHomeLoanInterest = homeLoans.reduce((sum, l) => sum + (l.remainingPrincipal * l.monthlyRate * 12), 0);
-            deductions += Math.min(annualHomeLoanInterest, TAX_DEDUCTIONS.home_loan_interest);
+        if (regime === 'old') {
+            const homeLoans = loans.filter(l => l.loanTypeId === 'home_loan');
+            if (homeLoans.length > 0) {
+                const annualHomeLoanInterest = homeLoans.reduce((sum, l) => sum + (l.remainingPrincipal * l.monthlyRate * 12), 0);
+                deductions += Math.min(annualHomeLoanInterest, TAX_DEDUCTIONS.home_loan_interest);
+            }
+            const eduLoans = loans.filter(l => l.loanTypeId === 'education_loan');
+            if (eduLoans.length > 0) {
+                const annualEduInterest = eduLoans.reduce((sum, l) => sum + (l.remainingPrincipal * l.monthlyRate * 12), 0);
+                deductions += Math.min(annualEduInterest, TAX_DEDUCTIONS.education_loan_interest);
+            }
+            // Section 80C bucket (life insurance + PPF), capped together at ₹1.5L
+            const lifeIns = activeInsurance.filter(i => INSURANCE_PLANS.find(p => p.id === i.planId)?.type === 'life');
+            const annualLifePremium = lifeIns.reduce((sum, ins) => sum + (INSURANCE_PLANS.find(p => p.id === ins.planId)?.premium || 0) * 12, 0);
+            deductions += Math.min(annualLifePremium + (ppf.contributionsThisYear || 0), TAX_DEDUCTIONS.life_insurance_premium);
+            // NPS 80CCD(1B), extra ₹50K
+            if (nps.balance > 0 && nps.contributionsThisYear > 0) deductions += Math.min(nps.contributionsThisYear, 50000);
+            // Health insurance, Sec 80D up to ₹25K
+            const healthPrem = activeInsurance.reduce((sum, i) => { const pl = INSURANCE_PLANS.find(p => p.id === i.planId); return pl?.type === 'health' ? sum + pl.premium * 12 : sum; }, 0);
+            deductions += Math.min(healthPrem, 25000);
+            if (caSubscribed) deductions += 25000;
         }
+        return calculateTaxByRegime(Math.max(0, annualIncome - deductions), regime);
+    };
 
-        const eduLoans = loans.filter(l => l.loanTypeId === 'education_loan');
-        if (eduLoans.length > 0) {
-            const annualEduInterest = eduLoans.reduce((sum, l) => sum + (l.remainingPrincipal * l.monthlyRate * 12), 0);
-            deductions += Math.min(annualEduInterest, TAX_DEDUCTIONS.education_loan_interest);
-        }
+    // Both regimes side by side, so the Bank screen can show which one is cheaper for you right now.
+    const getRegimeComparison = () => {
+        const newTax = computeAnnualTax('new'), oldTax = computeAnnualTax('old');
+        return { newTax, oldTax, better: oldTax < newTax ? 'old' : 'new', saving: Math.abs(oldTax - newTax) };
+    };
 
-        const lifeIns = activeInsurance.filter(i => {
-            const plan = INSURANCE_PLANS.find(p => p.id === i.planId);
-            return plan && plan.type === 'life';
-        });
-        if (lifeIns.length > 0) {
-            const annualLifePremium = lifeIns.reduce((sum, ins) => {
-                const plan = INSURANCE_PLANS.find(p => p.id === ins.planId);
-                return sum + (plan ? plan.premium * 12 : 0);
-            }, 0);
-            deductions += Math.min(annualLifePremium, TAX_DEDUCTIONS.life_insurance_premium);
-        }
-
-        // PPF deduction (Section 80C, max 1.5L/year)
-        if (ppf.contributionsThisYear > 0) {
-            deductions += Math.min(ppf.contributionsThisYear, 150000);
-        }
-
-        // NPS deduction (Section 80CCD, max 50K/year additional)
-        if (nps.balance > 0 && nps.contributionsThisYear > 0) {
-            deductions += Math.min(nps.contributionsThisYear, 50000);
-        }
-
-        // CA subscription: extra ₹25,000 deduction via professional tax planning
-        if (caSubscribed) deductions += 25000;
-
-        const taxableIncome = Math.max(0, annualIncome - deductions);
-        const annualTax = calculateIncomeTax(taxableIncome);
-        return Math.round(annualTax / 12);
+    const getMonthlyTax = () => {
+        // A subscribed CA always picks whichever regime is cheaper for you
+        const regime = caSubscribed ? (computeAnnualTax('old') < computeAnnualTax('new') ? 'old' : 'new') : taxRegime;
+        return Math.round(computeAnnualTax(regime) / 12);
     };
 
     // =========================================================================
@@ -1237,6 +1235,7 @@ export const GameProvider = ({ children }) => {
         setPropertyBuyMonths({});
         setCars([]);
         setActiveCarUid(null);
+        setTaxRegime('new');
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
         setExpectingChild(null);
@@ -1883,7 +1882,8 @@ export const GameProvider = ({ children }) => {
 
     const computeITRTaxFull = () => {
         const annualSalary = currentJob ? currentJob.salary * 12 : 0;
-        const standardDeduction = Math.min(annualSalary, 50000);
+        const regime = caSubscribed ? getRegimeComparison().better : taxRegime;
+        const standardDeduction = Math.min(annualSalary, STANDARD_DEDUCTION[regime]);
         const netSalary = annualSalary - standardDeduction;
 
         const fdInterestTotal = fixedDeposits.reduce((sum, fd) => {
@@ -1930,10 +1930,12 @@ export const GameProvider = ({ children }) => {
         }, 0);
         const sec24b = Math.min(homeLoanInterestAnnual, 200000);
 
-        const totalDeductions = sec80C + sec80CCD + sec80D + sec24b;
+        // Under the new regime these deductions are not allowed (only the standard deduction above)
+        const allowed = regime === 'old';
+        const totalDeductions = allowed ? sec80C + sec80CCD + sec80D + sec24b : 0;
         const taxableIncome = Math.max(0, grossTotalIncome - totalDeductions);
 
-        const incomeTax = calculateIncomeTax(taxableIncome);
+        const incomeTax = calculateTaxByRegime(taxableIncome, regime);
         const cess = Math.round(incomeTax * 0.04);
         const totalTaxLiability = incomeTax + cess;
 
@@ -1950,10 +1952,11 @@ export const GameProvider = ({ children }) => {
             fdInterestTotal, savingsInterest, savingsInterestTaxable,
             rentalIncomeGross, rentalMunicipalDeduction, netRentalIncome,
             grossTotalIncome,
-            ppf80C, lifeInsPremAnnual, homeLoanPrincipalAnnual, sec80C,
-            sec80CCD,
-            healthInsPremAnnual, sec80D,
-            homeLoanInterestAnnual, sec24b,
+            regime, deductionsAllowed: allowed,
+            ppf80C, lifeInsPremAnnual, homeLoanPrincipalAnnual, sec80C: allowed ? sec80C : 0,
+            sec80CCD: allowed ? sec80CCD : 0,
+            healthInsPremAnnual, sec80D: allowed ? sec80D : 0,
+            homeLoanInterestAnnual, sec24b: allowed ? sec24b : 0,
             totalDeductions, taxableIncome,
             incomeTax, cess, totalTaxLiability,
             estimatedSalaryTDS, bankTDS, totalTDS,
@@ -2855,6 +2858,7 @@ export const GameProvider = ({ children }) => {
         setPropertyBuyMonths({});
         setCars([]);
         setActiveCarUid(null);
+        setTaxRegime('new');
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
         setExpectingChild(null);
@@ -4654,6 +4658,7 @@ export const GameProvider = ({ children }) => {
         transferToChildSavings,
         itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
         selectITRForm, collectITRDoc, computeITRTaxFull, submitITR,
+        taxRegime, setTaxRegime, getRegimeComparison,
         pendingFamilyDemand, resolveFamilyDemand,
         pendingDeathEvent, setPendingDeathEvent,
         deathEventQueue, setDeathEventQueue,

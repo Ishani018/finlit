@@ -39,7 +39,7 @@ export default function PixelDialog({
 
     const t = TYPE[type] || TYPE.info;
     // Long messages used to push the OK button off the screen. Cap the card and scroll the message instead.
-    const maxH = Dimensions.get('window').height * 0.86;
+    const maxH = Dimensions.get('window').height * 0.86 - (image?.isSprite ? 70 : 0); // the floating avatar sticks out 52px above the card
     const bannerH = Math.min(300, Math.round(Dimensions.get('window').height * 0.26));
 
     return (

@@ -145,7 +145,7 @@ export const BUDGET_EVENTS = [
         message: "FM announces ₹10L crore infra spend. PSU stocks rally 12%. Standard deduction raised to ₹75K. Where does your money go?",
         choices: [
             { label: 'BUY PSU STOCKS NOW', color: '#4ade80', effect: { type: 'market_boost', sector: 'PSU', pct: 0.12, msg: 'PSU stocks surged on infra push. Smart move.' } },
-            { label: 'MAX OUT PPF (80C)', color: '#60a5fa', effect: { type: 'ppf_boost', amount: 50000, msg: 'Topped up PPF ₹50K. Tax saved, corpus growing.' } },
+            { label: 'MAX OUT PPF', color: '#60a5fa', effect: { type: 'ppf_boost', amount: 50000, msg: 'Topped up PPF ₹50K. Corpus growing, tax-free at maturity.' } },
             { label: 'WAIT AND WATCH', color: '#6b7280', effect: { type: 'none' } },
         ],
     },

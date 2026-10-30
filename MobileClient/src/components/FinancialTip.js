@@ -77,7 +77,7 @@ export const FINANCIAL_TIPS = {
     mf: {
         key: 'mf',
         title: 'Mutual Funds',
-        body: 'A mutual fund pools your money with thousands of others to buy a diversified basket of stocks or bonds. A fund manager makes the decisions for you. ELSS funds also give you a ₹1.5L tax deduction under Section 80C.',
+        body: 'A mutual fund pools your money with thousands of others to buy a diversified basket of stocks or bonds. A fund manager makes the decisions for you. ELSS funds give a ₹1.5L deduction under Section 80C, but only in the old tax regime. Under the default new regime it saves no tax, so pick ELSS for returns, not tax.',
         stat: 'Index funds beat 80% of actively managed funds over 10+ years.',
     },
     sip: {
@@ -89,14 +89,14 @@ export const FINANCIAL_TIPS = {
     ppf: {
         key: 'ppf',
         title: 'Public Provident Fund (PPF)',
-        body: 'PPF is a government-backed savings scheme giving 7.1% tax-free returns guaranteed. Contributions up to ₹1.5L/year are deductible under Section 80C. Maturity proceeds are completely tax-free.',
+        body: 'PPF is a government-backed savings scheme giving 7.1% tax-free returns guaranteed. Contributions up to ₹1.5L/year are deductible under Section 80C in the old tax regime only. Under the new regime there is no deduction, but maturity is still completely tax-free.',
         stat: '15-year lock-in. Best risk-free, tax-saving instrument available to Indians.',
     },
     nps: {
         key: 'nps',
         title: 'National Pension System (NPS)',
-        body: 'NPS is a market-linked pension scheme. Your corpus grows through equity and debt investments. At retirement (60), you get 60% as lump sum (tax-free) and 40% as monthly pension. Extra ₹50,000 deduction under 80CCD(1B) beyond the 80C limit.',
-        stat: 'NPS gives you ₹50,000 extra tax deduction — on top of your 80C limit.',
+        body: 'NPS is a market-linked pension scheme. Your corpus grows through equity and debt investments. At retirement (60), you get 60% as lump sum (tax-free) and 40% as monthly pension. Extra ₹50,000 deduction under 80CCD(1B) beyond the 80C limit, in the old regime only.',
+        stat: 'In the old regime, NPS gives you ₹50,000 extra tax deduction on top of your 80C limit.',
     },
     fd: {
         key: 'fd',

@@ -42,6 +42,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
         turn, totalMonthsPlayed,
         itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
         selectITRForm, collectITRDoc, computeITRTaxFull, submitITR,
+        taxRegime, setTaxRegime, getRegimeComparison,
         goldHoldings, goldPrice, buyGold, sellGold, getGoldValue,
         creditCard, activeCreditCards, openCreditCard, payCreditCardBill, closeCreditCard,
         getFinancialTips,
@@ -712,7 +713,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                     )}
                                     {lt.id === 'home_loan' && (
                                         <View style={{ backgroundColor: '#4ade8010', borderRadius: 8, padding: 12 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80' }}>Interest up to ₹2L/yr deductible (Sec 24b). Principal under 80C.</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#4ade80' }}>Interest up to ₹2L/yr deductible (Sec 24b) and principal under 80C, in the old tax regime only.</Text>
                                         </View>
                                     )}
 
@@ -768,6 +769,38 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                 </View>
                             </View>
 
+                            {/* Tax regime — the choice that decides whether 80C and friends matter */}
+                            {(() => {
+                                const cmp = getRegimeComparison();
+                                const active = caSubscribed ? cmp.better : taxRegime;
+                                const Opt = ({ id, label, sub }) => (
+                                    <TouchableOpacity disabled={caSubscribed} onPress={() => setTaxRegime(id)} activeOpacity={0.85}
+                                        style={{ flex: 1, borderRadius: 10, padding: 12, backgroundColor: active === id ? '#1a2e56' : '#060810', borderWidth: 1, borderColor: active === id ? '#60a5fa' : '#141b36', opacity: caSubscribed && active !== id ? 0.5 : 1 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: active === id ? '#c8d4f0' : '#7d8ab0', lineHeight: 20 }}>{label}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#5a6890', lineHeight: 14 }}>{sub}</Text>
+                                    </TouchableOpacity>
+                                );
+                                return (
+                                    <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#60a5fa', letterSpacing: 3, marginBottom: 8 }}>TAX REGIME</Text>
+                                        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+                                            <Opt id="new" label="NEW REGIME" sub="Low slabs, no deductions" />
+                                            <Opt id="old" label="OLD REGIME" sub="Higher slabs, 80C / 80D / 24(b)" />
+                                        </View>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#7d8ab0' }}>Your tax this year</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>New ₹{cmp.newTax.toLocaleString()}  ·  Old ₹{cmp.oldTax.toLocaleString()}</Text>
+                                        </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: cmp.saving > 0 ? '#4ade80' : '#7d8ab0', marginTop: 4 }}>
+                                            {cmp.saving > 0 ? `${cmp.better === 'old' ? 'Old' : 'New'} regime saves you ₹${cmp.saving.toLocaleString()} a year.` : 'Both come to the same tax right now.'}
+                                        </Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#5a6890', marginTop: 6, lineHeight: 16 }}>
+                                            {caSubscribed ? 'Your CA always files under whichever regime is cheaper.' : 'New is the default. Under it, PPF, life and health insurance, NPS and home-loan interest save no tax. They only help in the old regime, and only if your deductions are big enough to beat its higher slabs.'}
+                                        </Text>
+                                    </View>
+                                );
+                            })()}
+
                             {/* Filing options label */}
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a3860', letterSpacing: 3 }}>
                                 {itrThisYear ? 'PLAN AHEAD FOR NEXT YEAR' : 'HOW DO YOU WANT TO FILE?'}
@@ -811,7 +844,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                             </View>
                                         ))}
                                     </View>
-                                    {['Auto-files ITR every July with optimised deductions', 'Finds ₹25,000+ extra deductions', 'Handles IT notices — you don\'t deal with the dept', 'Advises on 80C investments each April'].map((t, i) => (
+                                    {['Auto-files ITR every July with optimised deductions', 'Picks whichever tax regime is cheaper for you and finds extra deductions', 'Handles IT notices — you don\'t deal with the dept', 'Advises on tax-saving investments each April'].map((t, i) => (
                                         <View key={i} style={{ flexDirection: 'row', gap: 10, alignItems: 'center', paddingVertical: 6, borderTopWidth: i === 0 ? 0 : 1, borderColor: '#0f1525' }}>
                                             <Image source={require('../../assets/ui_comp/taxdept.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
                                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#445070', flex: 1 }}>{t}</Text>
@@ -1351,7 +1384,8 @@ function ITRSelfFilingWizard({ filing, getRequiredITRDocs, getITRForms, selectIT
 
                             {/* Deductions */}
                             <View style={{ borderRadius: 10, backgroundColor: '#08101e', padding: 14 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>DEDUCTIONS</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 3, marginBottom: 8 }}>DEDUCTIONS · {c.regime === 'old' ? 'OLD REGIME' : 'NEW REGIME'}</Text>
+                                {c.regime === 'new' && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, marginBottom: 6, lineHeight: 16 }}>The new regime allows only the standard deduction. 80C, 80D, 80CCD(1B) and Sec 24(b) are not available. Switch to the old regime under Taxes if your deductions would save more.</Text>}
                                 {c.sec80C > 0 && (
                                     <>
                                         {row('Section 80C (max ₹1,50,000)', '', C.sage)}

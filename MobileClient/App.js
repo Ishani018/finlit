@@ -2069,7 +2069,7 @@ const GameLayout = ({ onHardReset }) => {
                               <View style={{ flexDirection: 'row', gap: 16, marginBottom: 14 }}>
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#92400e' }}>THIS YEAR</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>₹{ppf.contributionsThisYear.toLocaleString()}</Text></View>
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#92400e' }}>MAX/YEAR</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>₹1,50,000</Text></View>
-                                <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#92400e' }}>TAX</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>80C deduction</Text></View>
+                                <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#92400e' }}>TAX</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>80C (old regime)</Text></View>
                               </View>
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 12 }}>CONTRIBUTE AMOUNT</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -2095,7 +2095,7 @@ const GameLayout = ({ onHardReset }) => {
                               </View>
                               <View style={{ flexDirection: 'row', gap: 16, marginBottom: 14 }}>
                                 <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1e4080' }}>EST RETURN</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>8-14% p.a.</Text></View>
-                                <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1e4080' }}>TAX</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>80CCD +₹50K</Text></View>
+                                <View><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1e4080' }}>TAX</Text><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4ade80' }}>80CCD (old regime)</Text></View>
                               </View>
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', marginBottom: 8 }}>EQUITY % (higher = more growth + risk)</Text>
                               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
@@ -2117,8 +2117,8 @@ const GameLayout = ({ onHardReset }) => {
 
                             <View style={{ backgroundColor: '#060810', borderWidth: 1, borderRadius: 10, borderColor: '#1a2040', padding: 12 }}>
                               <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#4a5580', lineHeight: 22 }}>
-                                PPF: Guaranteed 7.1%, tax-free maturity, 15-year lock-in. Max 80C deduction.{'\n'}
-                                NPS: Market-linked, 60% lump sum at 60, 40% annuity. Extra ₹50K deduction under 80CCD.
+                                PPF: Guaranteed 7.1%, tax-free maturity, 15-year lock-in. The 80C deduction only counts in the old tax regime.{'\n'}
+                                NPS: Market-linked, 60% lump sum at 60, 40% annuity. The extra ₹50K deduction is old-regime only.
                               </Text>
                             </View>
                           </StyledView>
