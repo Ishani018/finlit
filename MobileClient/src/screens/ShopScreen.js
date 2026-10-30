@@ -25,30 +25,31 @@ const C = {
 };
 
 const MEDICINE_IMAGES = {
-    paracetamol:  require('../../assets/medicine/paracetemol.png'),
-    cough_syrup:  require('../../assets/medicine/cough_syrup.png'),
-    antacid:      require('../../assets/medicine/antacid.png'),
-    vitamin_c:    require('../../assets/medicine/ChatGPT_Image_May_16,_2026,_05_22_51_PM.png'),
-    multivitamin: require('../../assets/medicine/mulivitamins.png'),
-    first_aid:    require('../../assets/medicine/first_aid.png'),
-    antibiotics:  require('../../assets/medicine/antibiotic.png'),
-    bp_medicine:  require('../../assets/medicine/blood_pressure.png'),
-    ayurvedic:    require('../../assets/medicine/chyawanprash.png'),
-    calcium:      require('../../assets/medicine/ChatGPT_Image_May_16,_2026,_05_34_49_PM.png'),
+    paracetamol:  require('../../assets/medicine/v2/paracetamol.png'),
+    cough_syrup:  require('../../assets/medicine/v2/cough_syrup.png'),
+    antacid:      require('../../assets/medicine/v2/antacid.png'),
+    vitamin_c:    require('../../assets/medicine/v2/vitamin_c.png'),
+    multivitamin: require('../../assets/medicine/v2/multivitamin.png'),
+    first_aid:    require('../../assets/medicine/v2/first_aid.png'),
+    antibiotics:  require('../../assets/medicine/v2/antibiotics.png'),
+    bp_medicine:  require('../../assets/medicine/v2/bp_monitor.png'),
+    ayurvedic:    require('../../assets/medicine/v2/chyawanprash.png'),
+    calcium:      require('../../assets/medicine/v2/calcium.png'),
 };
 
 const CLOTHES_IMAGES = {
-    school_bag:     require('../../assets/clothing_and_others/schoolbag.png'),
-    school_uniform: require('../../assets/clothing_and_others/school_uniform.png'),
-    kids_books:     require('../../assets/clothing_and_others/storybooks.png'),
-    sports_kit:     require('../../assets/clothing_and_others/sports_kit.png'),
-    video_game:     require('../../assets/clothing_and_others/video_game.png'),
-    casual_wear:    require('../../assets/clothing_and_others/daily_casual_wear.png'),
-    ethnic_set:     require('../../assets/clothing_and_others/ethnic_wear.png'),
-    formal_suit:    require('../../assets/clothing_and_others/suit.png'),
-    party_outfit:   require('../../assets/clothing_and_others/fancy_party_wear.png'),
-    sneakers:       require('../../assets/clothing_and_others/shoes.png'),
-    jewellery:      require('../../assets/clothing_and_others/jewellery.png'),
+    school_bag:     require('../../assets/clothing_and_others/v2/school_bag.png'),
+    toy_set:        require('../../assets/clothing_and_others/v2/toy_set.png'),
+    school_uniform: require('../../assets/clothing_and_others/v2/school_uniform.png'),
+    kids_books:     require('../../assets/clothing_and_others/v2/kids_books.png'),
+    sports_kit:     require('../../assets/clothing_and_others/v2/sports_kit.png'),
+    video_game:     require('../../assets/clothing_and_others/v2/video_game.png'),
+    casual_wear:    require('../../assets/clothing_and_others/v2/casual_wear.png'),
+    ethnic_set:     require('../../assets/clothing_and_others/v2/ethnic_set.png'),
+    formal_suit:    require('../../assets/clothing_and_others/v2/formal_suit.png'),
+    party_outfit:   require('../../assets/clothing_and_others/v2/party_outfit.png'),
+    sneakers:       require('../../assets/clothing_and_others/v2/sneakers.png'),
+    jewellery:      require('../../assets/clothing_and_others/v2/jewellery.png'),
 };
 
 // ── Header ────────────────────────────────────────────────────────────────────
@@ -102,7 +103,7 @@ function PharmacySection({ onBack, onClose }) {
                             return (
                                 <View key={item.id} style={{ flex: 1, borderRadius: 10, backgroundColor: C.panel, overflow: 'hidden' }}>
                                     <View style={{ height: 160, position: 'relative' }}>
-                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: C.sage + '15' }} />}
+                                        {img ? <Image source={img} style={{ width: '72%', height: '72%', alignSelf: 'center', marginTop: '7%' }} resizeMode="contain" /> : <View style={{ flex: 1, backgroundColor: C.sage + '15' }} />}
                                     </View>
                                     <View style={{ padding: 10 }}>
                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream, marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
@@ -187,7 +188,7 @@ function ClothesSection({ onBack, onClose }) {
                             return (
                                 <View key={item.id} style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 10 }}>
                                     <View style={{ width: '100%', aspectRatio: 1, backgroundColor: C.card }}>
-                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                        {img ? <Image source={img} style={{ width: '72%', height: '72%', alignSelf: 'center', marginTop: '7%' }} resizeMode="contain" />
                                             : <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                                                 <Image source={require('../../assets/ui_comp/clothing.png')} style={{ width: 60, height: 60 }} resizeMode="contain" />
                                               </View>}
