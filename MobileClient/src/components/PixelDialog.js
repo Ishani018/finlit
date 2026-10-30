@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Image, ScrollView, Dimensions } from 'react-native';
 
 const TYPE = {
     info:     { accent: '#3b82f6', confirmBg: '#1d4ed8', confirmBorder: '#2563eb' },
@@ -38,10 +38,13 @@ export default function PixelDialog({
     if (!visible) return null;
 
     const t = TYPE[type] || TYPE.info;
+    // Long messages used to push the OK button off the screen. Cap the card and scroll the message instead.
+    const maxH = Dimensions.get('window').height * 0.86;
+    const bannerH = Math.min(300, Math.round(Dimensions.get('window').height * 0.26));
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 900, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.75)' }} pointerEvents="auto">
-            <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }], width: '90%', maxWidth: 400, alignSelf: 'center', marginTop: image?.isSprite ? 50 : 0 }}>
+            <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }], width: '90%', maxWidth: 400, maxHeight: maxH, alignSelf: 'center', marginTop: image?.isSprite ? 50 : 0 }}>
 
                 {/* Floating sprite avatar */}
                 {image?.isSprite && (
@@ -52,11 +55,11 @@ export default function PixelDialog({
                     </View>
                 )}
 
-                <View style={{ backgroundColor: '#08101e', borderRadius: 12, overflow: 'hidden' }}>
+                <View style={{ backgroundColor: '#08101e', borderRadius: 12, overflow: 'hidden', maxHeight: maxH }}>
 
                     {/* Banner image — full pixel art scene */}
                     {image?.source && !image?.isSprite && !image?.icon && (
-                        <Image source={image.source} style={{ width: '100%', height: 300 }} resizeMode="cover" />
+                        <Image source={image.source} style={{ width: '100%', height: bannerH }} resizeMode="cover" />
                     )}
                     {/* Icon image — small, centred on dark bg */}
                     {image?.source && !image?.isSprite && image?.icon && (
@@ -77,31 +80,31 @@ export default function PixelDialog({
                         </Text>
                     </View>
 
-                    {/* Message */}
-                    <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 }}>
+                    {/* Message — scrolls when long */}
+                    <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 12 }} showsVerticalScrollIndicator={false}>
                         {typeof message === 'string' ? (
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#6070a0', lineHeight: 24, textAlign: 'center', marginBottom: 20 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#6070a0', lineHeight: 24, textAlign: 'center' }}>
                                 {message}
                             </Text>
                         ) : (
-                            <View style={{ marginBottom: 20 }}>{message}</View>
+                            <View>{message}</View>
                         )}
+                    </ScrollView>
 
-                        {/* Buttons */}
-                        <View style={{ flexDirection: 'row', gap: 10 }}>
-                            {cancelText && onCancel && (
-                                <TouchableOpacity onPress={onCancel} style={{ flex: 1, paddingVertical: 13, alignItems: 'center', backgroundColor: '#0d1428', borderRadius: 8 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070', letterSpacing: 1 }}>{cancelText}</Text>
-                                </TouchableOpacity>
-                            )}
-                            <TouchableOpacity
-                                onPress={onConfirm}
-                                activeOpacity={0.8}
-                                style={{ flex: 1, paddingVertical: 13, alignItems: 'center', backgroundColor: t.confirmBg, borderRadius: 8 }}
-                            >
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 2 }}>{confirmText}</Text>
+                    {/* Buttons — always visible */}
+                    <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingBottom: 20, paddingTop: 4 }}>
+                        {cancelText && onCancel && (
+                            <TouchableOpacity onPress={onCancel} style={{ flex: 1, paddingVertical: 13, alignItems: 'center', backgroundColor: '#0d1428', borderRadius: 8 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#445070', letterSpacing: 1 }}>{cancelText}</Text>
                             </TouchableOpacity>
-                        </View>
+                        )}
+                        <TouchableOpacity
+                            onPress={onConfirm}
+                            activeOpacity={0.8}
+                            style={{ flex: 1, paddingVertical: 13, alignItems: 'center', backgroundColor: t.confirmBg, borderRadius: 8 }}
+                        >
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fff', letterSpacing: 2 }}>{confirmText}</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Animated.View>
