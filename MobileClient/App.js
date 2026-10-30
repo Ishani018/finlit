@@ -379,6 +379,7 @@ const GameLayout = ({ onHardReset }) => {
   const [newGameConfirm, setNewGameConfirm] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHomeScreen, setShowHomeScreen] = useState(false);
+  const [dismissedMoveIn, setDismissedMoveIn] = useState([]);
   const [activeTab, setActiveTab] = useState('home');
   const [careerSubTab, setCareerSubTab] = useState(null); // null = landing | jobs | study
   const [moneySubTab, setMoneySubTab] = useState(null);
@@ -1110,6 +1111,28 @@ const GameLayout = ({ onHardReset }) => {
             style={{ position: 'absolute', width: '100%', height: '100%' }}
             resizeMode="contain"
           />
+
+          {/* A home you own but don't live in: say so on the main screen, with a one-tap way to move in */}
+          {(() => {
+            const spare = RESIDENTIAL_PROPERTIES.find(p => properties.includes(p.id) && p.id !== currentHousing.id && !dismissedMoveIn.includes(p.id));
+            if (!spare) return null;
+            return (
+              <View style={{ position: 'absolute', left: 10, right: 10, top: 60, zIndex: 35, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(13,34,24,0.96)', borderWidth: 1, borderColor: '#4ade8088', borderRadius: 12, padding: 10 }}>
+                <Image source={spare.image} style={{ width: 54, height: 54, borderRadius: 8 }} resizeMode="cover" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4ade80', letterSpacing: 3 }}>YOU OWN THIS</Text>
+                  <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', lineHeight: 18 }}>{spare.name}</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#9fd8b4' }}>You still live in {currentHousing.name}</Text>
+                </View>
+                <TouchableOpacity onPress={() => setShowHomeScreen(true)} activeOpacity={0.85} style={{ paddingHorizontal: 12, height: 38, borderRadius: 8, backgroundColor: '#fbbf24', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#2a1c00', letterSpacing: 1 }}>MOVE IN</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setDismissedMoveIn(d => [...d, spare.id])} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#7d8ab0' }}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })()}
 
           {/* Next up — the single most useful thing to do right now */}
           {(() => {

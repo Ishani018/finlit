@@ -140,22 +140,21 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
                                     const qualityDelta = prop.life_quality - currentQuality;
                                     const deltaColor = qualityDelta > 0 ? C.sage : qualityDelta < 0 ? C.red : '#6b7280';
                                     return (
-                                        <View key={prop.id} style={{ borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
-                                            <Image source={prop.image} style={{ width: '100%', height: 130 }} resizeMode="cover" />
-                                            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 90, backgroundColor: 'rgba(6,8,15,0.88)' }} />
-                                            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12 }}>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.cream }}>{prop.name}</Text>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: deltaColor }}>
+                                        <View key={prop.id} style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: C.panel, borderWidth: 1, borderColor: justBought === prop.id ? '#fbbf2477' : C.border }}>
+                                            <Image source={prop.image} style={{ width: '100%', height: 150 }} resizeMode="cover" />
+                                            <View style={{ padding: 12 }}>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, flex: 1 }}>{prop.name}</Text>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: deltaColor }}>
                                                         {qualityDelta > 0 ? `+${qualityDelta} quality` : qualityDelta < 0 ? `${qualityDelta} quality` : 'same'}
                                                     </Text>
                                                 </View>
                                                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                                                    <TouchableOpacity onPress={() => onSellProperty && onSellProperty(prop)} style={{ flex: 1, paddingVertical: 8, alignItems: 'center', backgroundColor: 'rgba(127,29,29,0.5)', borderRadius: 6 }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.red }}>SELL</Text>
+                                                    <TouchableOpacity onPress={() => onSellProperty && onSellProperty(prop)} style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: '#2a0d0d', borderRadius: 8 }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.red }}>SELL</Text>
                                                     </TouchableOpacity>
-                                                    <TouchableOpacity onPress={() => handleMoveIn(prop)} style={{ flex: 2, paddingVertical: 10, alignItems: 'center', backgroundColor: justBought === prop.id ? '#fbbf24' : '#1e3a8a', borderRadius: 6 }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: justBought === prop.id ? '#2a1c00' : '#bfdbfe', letterSpacing: 2 }}>MOVE IN</Text>
+                                                    <TouchableOpacity onPress={() => handleMoveIn(prop)} style={{ flex: 2, paddingVertical: 10, alignItems: 'center', backgroundColor: '#fbbf24', borderRadius: 8 }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#2a1c00', letterSpacing: 2 }}>MOVE IN</Text>
                                                     </TouchableOpacity>
                                                 </View>
                                             </View>
