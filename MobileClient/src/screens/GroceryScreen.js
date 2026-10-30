@@ -6,7 +6,7 @@ import { GROCERY_ITEMS, CATEGORY_COLORS, DIET_COLORS, SICK_LEAVE_THRESHOLD, CRIT
 import { ITEM_IMAGES } from '../data/groceryImages';
 
 const PAD = 14;
-const TAB_BAR_H = 74; // the bottom tab bar sits above this overlay, so the cart bar clears it
+const TAB_BAR_H = 120; // the bottom tab bar sits above this overlay, so the cart bar clears it
 const GAP = 8;
 
 const C = {

@@ -1057,9 +1057,9 @@ const GameLayout = ({ onHardReset }) => {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#38b2ac', lineHeight: 26 }}>₹{balance?.toLocaleString()}</Text>
-                  {currentJob && (
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4fd1c5', lineHeight: 14 }}>+₹{currentJob.salary.toLocaleString()}/mo</Text>
-                  )}
+                  {(() => { const net = typeof getMonthPreview === 'function' ? getMonthPreview().net : 0; return (
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: net >= 0 ? '#4ade80' : '#f87171', lineHeight: 15 }}>{net >= 0 ? '+' : '−'}₹{Math.abs(Math.round(net)).toLocaleString()} expected</Text>
+                  ); })()}
                 </View>
                 <TouchableOpacity onPress={() => setShowHub(true)} style={{ width: 34, height: 34, alignItems: 'center', justifyContent: 'center' }}>
                   <FontAwesome5 name="th-large" size={20} color="#7d8ab0" />
@@ -1070,73 +1070,36 @@ const GameLayout = ({ onHardReset }) => {
               </View>
             </View>
 
-            {/* Row 2: Health + Happiness */}
+            {/* Row 2: Health + Mood bars */}
             {(() => {
               const hpColor  = health >= 60 ? '#4ade80' : health >= 30 ? '#fbbf24' : '#f87171';
               const hapColor = happiness >= 70 ? '#4ade80' : happiness >= 40 ? '#fbbf24' : '#f87171';
+              const hpWord  = health >= 60 ? 'Good' : health >= 30 ? 'Okay' : 'Low';
+              const hapWord = happiness >= 70 ? 'Good' : happiness >= 40 ? 'Okay' : 'Low';
+              const Bar = ({ icon, label, word, value, color, onPress }) => (
+                <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                      <Image source={icon} style={{ width: 14, height: 14, opacity: 0.8 }} resizeMode="contain" />
+                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color, lineHeight: 16 }}>{label} · {word}</Text>
+                    </View>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', lineHeight: 16 }}>{Math.round(value)}</Text>
+                  </View>
+                  <View style={{ height: 6, borderRadius: 3, backgroundColor: '#1a2040', overflow: 'hidden' }}>
+                    <View style={{ width: `${Math.max(2, Math.min(100, value))}%`, height: '100%', backgroundColor: color, borderRadius: 3 }} />
+                  </View>
+                </TouchableOpacity>
+              );
               return (
-                <View style={{ flexDirection: 'row', marginTop: 10, gap: 10 }}>
-                  <TouchableOpacity onPress={() => setShowHealthReport(true)} activeOpacity={0.8}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#0a0d18', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 }}>
-                    <Image source={require('./assets/ui_comp/healthicon.png')} style={{ width: 16, height: 16, opacity: 0.7 }} resizeMode="contain" />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: hpColor, lineHeight: 22, flex: 1 }}>{Math.round(health)}<Text style={{ fontSize: 13, color: hpColor + '80' }}>/100</Text></Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setShowHappinessReport(true)} activeOpacity={0.8}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#0a0d18', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 }}>
-                    <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 16, height: 16, opacity: 0.7 }} resizeMode="contain" />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: hapColor, lineHeight: 22, flex: 1 }}>{Math.round(happiness)}<Text style={{ fontSize: 13, color: hapColor + '80' }}>/100</Text></Text>
-                  </TouchableOpacity>
+                <View style={{ flexDirection: 'row', marginTop: 8, gap: 14 }}>
+                  <Bar icon={require('./assets/ui_comp/healthicon.png')} label="Health" word={hpWord} value={health} color={hpColor} onPress={() => setShowHealthReport(true)} />
+                  <Bar icon={require('./assets/ui_comp/happyicon.png')} label="Mood" word={hapWord} value={happiness} color={hapColor} onPress={() => setShowHappinessReport(true)} />
                 </View>
               );
             })()}
 
           </View>
         )}
-
-        {/* ===== OBJECTIVE BANNER ===== */}
-        {(() => {
-          const obj = typeof getCurrentObjective === 'function' ? getCurrentObjective() : null;
-          if (!obj) return null;
-          return (
-            <View style={{ backgroundColor: '#06080f', borderBottomWidth: 1, borderColor: '#1a2040', paddingHorizontal: 14, paddingVertical: 10 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <Image source={require('./assets/ui_comp/bulb.png')} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3 }}>CURRENT OBJECTIVES</Text>
-              </View>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', lineHeight: 20, marginBottom: 2 }}>{obj.title}</Text>
-              <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginBottom: 10 }}>{obj.desc}</Text>
-
-              {obj.steps && obj.steps.map((step, i) => (
-                <TouchableOpacity
-                  key={step.id}
-                  onPress={() => {
-                    if (step.action?.isAdvanceTime) { requestNextMonth(); return; }
-                    if (step.action?.tab) setActiveTab(step.action.tab);
-                    if (step.action?.subTab === 'shop') setShowGrocery(true);
-                    if (step.action?.subTab && step.action.tab === 'money') setMoneySubTab(step.action.subTab);
-                  }}
-                  activeOpacity={0.8}
-                  style={{
-                    flexDirection: 'row', alignItems: 'center', gap: 10,
-                    backgroundColor: step.done ? '#070a14' : '#0a0f1e',
-                    paddingVertical: 8, paddingHorizontal: 10,
-                    borderRadius: 4,
-                    marginBottom: 5, opacity: step.done ? 0.55 : 1,
-                  }}
-                >
-                  <Image source={step.icon} style={{ width: 20, height: 20, opacity: step.done ? 0.4 : 0.8 }} resizeMode="contain" />
-                  <Text style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 15, color: step.done ? '#2a5040' : '#c8d4f0', textDecorationLine: step.done ? 'line-through' : 'none' }}>
-                    {step.label}
-                  </Text>
-                  {step.done
-                    ? <Image source={require('./assets/ui_comp/achivements.png')} style={{ width: 14, height: 14, opacity: 0.6 }} resizeMode="contain" />
-                    : <Image source={require('./assets/ui_comp/play_button.png')} style={{ width: 14, height: 14, opacity: 0.7 }} resizeMode="contain" />
-                  }
-                </TouchableOpacity>
-              ))}
-            </View>
-          );
-        })()}
 
         {/* ===== CONTENT AREA (switches by tab) ===== */}
         <View style={{ flex: 1, overflow: 'hidden', borderRadius: 12 }}>
@@ -1158,6 +1121,36 @@ const GameLayout = ({ onHardReset }) => {
             resizeMode="contain"
           />
 
+          {/* Next up — the single most useful thing to do right now */}
+          {(() => {
+            const obj = typeof getCurrentObjective === 'function' ? getCurrentObjective() : null;
+            const steps = obj?.steps || [];
+            const idx = steps.findIndex(st => !st.done);
+            if (!obj || idx === -1) return null;
+            const step = steps[idx];
+            const run = () => {
+              if (step.action?.isAdvanceTime) { requestNextMonth(); return; }
+              if (step.action?.tab) setActiveTab(step.action.tab);
+              if (step.action?.subTab === 'shop') setShowGrocery(true);
+              if (step.action?.subTab && step.action.tab === 'money') setMoneySubTab(step.action.subTab);
+            };
+            return (
+              <View style={{ position: 'absolute', left: 10, right: 10, bottom: 8, zIndex: 30, backgroundColor: 'rgba(6,8,15,0.94)', borderWidth: 1, borderColor: '#fbbf2455', borderRadius: 12, padding: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24', letterSpacing: 4 }}>NEXT UP · {idx + 1} OF {steps.length}</Text>
+                  <View style={{ flexDirection: 'row', gap: 4 }}>
+                    {steps.map((st, i) => <View key={st.id} style={{ width: 16, height: 3, borderRadius: 2, backgroundColor: st.done ? '#4ade80' : i === idx ? '#60a5fa' : '#1e2840' }} />)}
+                  </View>
+                </View>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24, marginTop: 4 }}>{step.label}</Text>
+                {obj.desc ? <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0', lineHeight: 16, marginTop: 2 }}>{obj.desc}</Text> : null}
+                <TouchableOpacity onPress={run} activeOpacity={0.85} style={{ marginTop: 8, height: 38, borderRadius: 8, backgroundColor: '#1a2e56', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', letterSpacing: 3 }}>{step.action?.isAdvanceTime ? 'END MONTH' : 'LET\'S GO'}</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })()}
+
           <Vignette />
           <CRTOverlay />
 
@@ -1166,7 +1159,7 @@ const GameLayout = ({ onHardReset }) => {
             <TouchableOpacity
               onPress={() => { setActiveTab('family'); }}
               activeOpacity={0.8}
-              style={{ position: 'absolute', bottom: -182, right: -18, zIndex: 10 }}
+              style={{ position: 'absolute', bottom: -40, right: -18, zIndex: 10 }}
             >
               <PlayerSprite source={spriteImage} spriteId={playerSprite} age={playerAge} look={playerLook} style={{ width: 178, height: 330 }} />
               {dependents.length > 0 && (
@@ -2456,6 +2449,8 @@ const GameLayout = ({ onHardReset }) => {
           showGrocery={showGrocery}
           showGoals={showGoals}
           onNextMonth={requestNextMonth}
+          expectedNet={typeof getMonthPreview === 'function' ? getMonthPreview().net : 0}
+          monthLabel={`END ${['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][(turn.month - 1) % 12]} ›`}
           turnsLeft={turnsLeftToday()}
           dailyLimit={DAILY_TURN_LIMIT}
           badges={{

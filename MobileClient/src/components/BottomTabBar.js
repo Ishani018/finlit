@@ -29,6 +29,9 @@ const ALT_TABS = [
     { key: 'goals',   label: 'GOALS',   color: '#fbbf24',  isGoals: true },
 ];
 
+export const DOCK_H = 58;
+export const TABS_H = 62;
+export const TAB_STACK_H = DOCK_H + TABS_H;
 const R = 28;
 const CIRC = 2 * Math.PI * R;
 
@@ -55,7 +58,7 @@ function TurnsRing({ turnsLeft, dailyLimit }) {
 
 export default function BottomTabBar({
     activeTab, onTabPress,
-    onNextMonth,
+    onNextMonth, expectedNet, monthLabel,
     turnsLeft, dailyLimit,
     onGrocery,
     onGoals,
@@ -114,53 +117,34 @@ export default function BottomTabBar({
         </TouchableOpacity>
     );
 
-    if (activeTab !== 'home') {
-        return (
-            <View style={{ flexDirection: 'row', backgroundColor: '#090c18', height: 68, alignItems: 'stretch' }}>
-                {ALT_TABS.map(tab => {
-                    const isGoalsActive = showGoals;
-                    const isActive = tab.isGoals ? isGoalsActive : (!isGoalsActive && tab.key === activeTab);
-                    const onPress = tab.isGoals ? onGoals : () => onTabPress(tab.key);
-                    return renderTab(
-                        tab,
-                        isActive,
-                        onPress,
-                        badges[tab.key],
-                    );
-                })}
+    const dockBar = onNextMonth ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0a0d1a', borderTopWidth: 1, borderColor: '#1a2040', paddingHorizontal: 14, height: DOCK_H }}>
+            <Animated.View style={{ transform: [{ scale: btnScale }] }}>
+                <Image source={COIN_IMG} style={{ width: 40, height: 40 }} resizeMode="contain" />
+            </Animated.View>
+            <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0', lineHeight: 15 }}>Expected this month</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: (expectedNet || 0) >= 0 ? '#4ade80' : '#f87171', lineHeight: 20 }}>
+                    {(expectedNet || 0) >= 0 ? '+' : '−'}₹{Math.abs(Math.round(expectedNet || 0)).toLocaleString()}
+                </Text>
             </View>
-        );
-    }
+            <TouchableOpacity onPress={handleNextMonth} activeOpacity={0.85}
+                style={{ paddingHorizontal: 18, height: 42, borderRadius: 10, backgroundColor: '#fbbf24', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#2a1c00', letterSpacing: 2 }}>{monthLabel || 'END MONTH ›'}</Text>
+            </TouchableOpacity>
+        </View>
+    ) : null;
 
     return (
-        <View style={{ flexDirection: 'row', backgroundColor: '#090c18', height: 72, alignItems: 'stretch' }}>
-            {TABS.map(tab => {
-                if (tab.isCenter) {
-                    return (
-                        <View key="next" style={{ flex: 1.3, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4, position: 'relative' }}>
-                            <Animated.View pointerEvents="none" style={{
-                                position: 'absolute', width: 52, height: 52, borderRadius: 26,
-                                borderWidth: 2, borderColor: '#fbbf24',
-                                transform: [{ scale: rippleScale }], opacity: rippleOpacity,
-                                bottom: 18,
-                            }} />
-                            <Animated.View style={{ transform: [{ scale: btnScale }], alignItems: 'center', justifyContent: 'center', position: 'relative', marginBottom: 2 }}>
-                                <TouchableOpacity
-                                    onPress={handleNextMonth}
-                                    activeOpacity={0.8}
-                                    style={{ alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                    <Image source={COIN_IMG} style={{ width: 62, height: 62 }} resizeMode="contain" />
-                                </TouchableOpacity>
-                            </Animated.View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#60a5fa', letterSpacing: 2, lineHeight: 14 }}>NEXT MONTH</Text>
-                        </View>
-                    );
-                }
-
-                const isActive = activeTab === tab.key;
-                return renderTab(tab, isActive, () => onTabPress(tab.key), badges[tab.key]);
-            })}
+        <View>
+            {dockBar}
+            <View style={{ flexDirection: 'row', backgroundColor: '#090c18', height: TABS_H, alignItems: 'stretch' }}>
+                {ALT_TABS.map(tab => {
+                    const isActive = tab.isGoals ? showGoals : (!showGoals && tab.key === activeTab);
+                    const onPress = tab.isGoals ? onGoals : () => onTabPress(tab.key);
+                    return renderTab(tab, isActive, onPress, badges[tab.key]);
+                })}
+            </View>
         </View>
     );
 }
