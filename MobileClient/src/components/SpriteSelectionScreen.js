@@ -194,6 +194,12 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', letterSpacing: 1 }}>{trait.name}</Text>
                     </View>
                 )}
+                {[['‹', -1, { left: 8 }], ['›', 1, { right: 8 }]].map(([ch, d, pos]) => (
+                    <TouchableOpacity key={ch} onPress={() => { setIdx((idx + d + SPRITES.length) % SPRITES.length); setStage(0); }} activeOpacity={0.8}
+                        style={[{ position: 'absolute', top: '42%', width: 36, height: 44, borderRadius: 10, backgroundColor: 'rgba(13,16,32,0.8)', borderWidth: 1, borderColor: '#2a3560', alignItems: 'center', justifyContent: 'center' }, pos]}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 30 }}>{ch}</Text>
+                    </TouchableOpacity>
+                ))}
             </Hero>
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: PAD, paddingTop: 10, paddingBottom: 10 }} showsVerticalScrollIndicator={false}>
@@ -207,16 +213,6 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
                             <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4ade80' }}>{trait.effect}</Text>
                         </View>
                     )}
-                </View>
-
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, marginTop: 12, marginBottom: 6 }}>ALL CHARACTERS</Text>
-                <View style={{ flexDirection: 'row', gap: 6 }}>
-                    {SPRITES.map((sp, i) => (
-                        <TouchableOpacity key={sp.id} onPress={() => { setIdx(i); setStage(0); }} activeOpacity={0.8}
-                            style={{ width: thumbW, height: 54, borderRadius: 8, overflow: 'hidden', backgroundColor: '#0d1020', borderWidth: 1, borderColor: i === idx ? '#818cf8' : '#1e2840' }}>
-                            <Image source={sp.image} style={{ width: thumbW * 1.7, height: 54 * 4.2, marginLeft: -thumbW * 0.35, marginTop: -2 }} resizeMode="stretch" />
-                        </TouchableOpacity>
-                    ))}
                 </View>
 
                 {!childMode && (
