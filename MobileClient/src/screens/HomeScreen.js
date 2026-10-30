@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useGame } from '../context/GameContext';
 import { RESIDENTIAL_PROPERTIES } from '../data/realEstate';
@@ -46,6 +46,17 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
     const browseable = RESIDENTIAL_PROPERTIES
         .filter(p => !properties.includes(p.id))
         .sort((a, b) => sortBy === 'price' ? a.price - b.price : b.life_quality - a.life_quality);
+
+    // A purchase that doesn't move you in moves the house out of Browse, so jump to Owned where MOVE IN lives
+    const prevOwned = useRef(ownedResidential.length);
+    const [justBought, setJustBought] = useState(null);
+    useEffect(() => {
+        if (ownedResidential.length > prevOwned.current) {
+            setTab('owned');
+            setJustBought(ownedResidential[ownedResidential.length - 1]?.id || null);
+        }
+        prevOwned.current = ownedResidential.length;
+    }, [ownedResidential.length]);
 
     const handleMoveIn = (prop) => { const res = moveIn(prop.id); if (res.success) onClose(); };
     const happinessLabel = happiness >= 80 ? 'Thriving' : happiness >= 60 ? 'Content' : happiness >= 40 ? 'Okay' : happiness >= 20 ? 'Stressed' : 'Miserable';
@@ -110,6 +121,12 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
                 {/* ── OWNED TAB ── */}
                 {tab === 'owned' && (
                     <View style={{ paddingHorizontal: PAD }}>
+                        {justBought && ownedResidential.some(p => p.id === justBought) && (
+                            <View style={{ backgroundColor: '#0d2218', borderWidth: 1, borderColor: '#4ade8066', borderRadius: 10, padding: 12, marginBottom: 12 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.sage }}>You bought a new home!</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#9fd8b4' }}>You still live in {currentHousing.name}. Tap MOVE IN below to switch.</Text>
+                            </View>
+                        )}
                         {ownedResidential.length === 0 ? (
                             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
                                 <Image source={require('../../assets/ui_comp/home.png')} style={{ width: 32, height: 32, opacity: 0.2, marginBottom: 12 }} resizeMode="contain" />
@@ -137,8 +154,8 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
                                                     <TouchableOpacity onPress={() => onSellProperty && onSellProperty(prop)} style={{ flex: 1, paddingVertical: 8, alignItems: 'center', backgroundColor: 'rgba(127,29,29,0.5)', borderRadius: 6 }}>
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.red }}>SELL</Text>
                                                     </TouchableOpacity>
-                                                    <TouchableOpacity onPress={() => handleMoveIn(prop)} style={{ flex: 2, paddingVertical: 8, alignItems: 'center', backgroundColor: 'rgba(30,58,138,0.5)', borderRadius: 6 }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#60a5fa', letterSpacing: 1 }}>MOVE IN</Text>
+                                                    <TouchableOpacity onPress={() => handleMoveIn(prop)} style={{ flex: 2, paddingVertical: 10, alignItems: 'center', backgroundColor: justBought === prop.id ? '#fbbf24' : '#1e3a8a', borderRadius: 6 }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: justBought === prop.id ? '#2a1c00' : '#bfdbfe', letterSpacing: 2 }}>MOVE IN</Text>
                                                     </TouchableOpacity>
                                                 </View>
                                             </View>
@@ -211,14 +228,14 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
                                             </TouchableOpacity>
                                             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 6 }}>
                                                 <TouchableOpacity onPress={() => canAfford && onBuyProperty(prop, true)} disabled={!canAfford} style={{ flex: 1, paddingVertical: 12, alignItems: 'center', backgroundColor: canAfford ? '#0d1e3a' : '#0a0d1a', borderRadius: 8, opacity: canAfford ? 1 : 0.4 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa' }}>BUY + LIVE IN</Text>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#60a5fa' }}>BUY + MOVE IN</Text>
                                                 </TouchableOpacity>
                                                 <TouchableOpacity onPress={() => onBuyProperty(prop, false)} style={{ flex: 1, paddingVertical: 12, alignItems: 'center', backgroundColor: '#0a0d1a', borderRadius: 8 }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>LOAN + LIVE IN</Text>
+                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>LOAN + MOVE IN</Text>
                                                 </TouchableOpacity>
                                             </View>
-                                            <TouchableOpacity onPress={() => canAfford && onBuyProperty(prop, false, false)} disabled={!canAfford} style={{ paddingVertical: 8, alignItems: 'center', opacity: canAfford ? 0.6 : 0.2 }}>
-                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim }}>BUY TO INVEST</Text>
+                                            <TouchableOpacity onPress={() => canAfford && onBuyProperty(prop, false, false)} disabled={!canAfford} style={{ paddingVertical: 8, alignItems: 'center', opacity: canAfford ? 0.9 : 0.3 }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#a8b4d8' }}>Buy but keep living at {currentHousing.name} ›</Text>
                                             </TouchableOpacity>
                                         </View>
                                     </View>

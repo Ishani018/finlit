@@ -814,7 +814,8 @@ const GameLayout = ({ onHardReset }) => {
   const handleBuyProperty = (prop) => {
     const res = buyProperty(prop);
     if (res.success) setSelectedProperty(null);
-    showDialog(res.success ? 'Property Purchased!' : 'Cannot Buy', res.msg, res.success ? 'success' : 'error');
+    const hint = res.success && prop.category === 'residential' ? `\n\nTo live there, open HOME (the For Sale sign on the Home tab), then Owned, then MOVE IN.` : '';
+    showDialog(res.success ? 'Property Purchased!' : 'Cannot Buy', res.msg + hint, res.success ? 'success' : 'error');
   };
 
   const handleBuyPropertyLoan = (prop) => {
@@ -840,10 +841,11 @@ const GameLayout = ({ onHardReset }) => {
     }
     showDialog(
       res.success ? (doMoveIn ? 'Welcome Home!' : 'Property Purchased!') : 'Cannot Buy',
-      res.msg,
+      res.success && !doMoveIn ? `${res.msg}\n\nYou still live in ${currentHousing.name}. To live here, open the Owned tab and tap MOVE IN.` : res.msg,
       res.success ? 'success' : 'error'
     );
-    if (res.success) setShowHomeScreen(false);
+    // Moving in leaves the screen; a plain purchase stays so the new home is right there with MOVE IN
+    if (res.success && doMoveIn) setShowHomeScreen(false);
   };
 
   const handleApply = (job) => {
