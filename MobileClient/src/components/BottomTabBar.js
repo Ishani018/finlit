@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Animated, Image } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 const COIN_IMG = require('../../assets/ui_comp/nextbutton.png');
+const CONTROL_IMG = require('../../assets/ui_comp/menu_dashboard.png');
 
 const TAB_ICONS = {
     home:    require('../../assets/ui_comp/home.png'),
@@ -58,7 +59,7 @@ function TurnsRing({ turnsLeft, dailyLimit }) {
 
 export default function BottomTabBar({
     activeTab, onTabPress,
-    onNextMonth, expectedNet, monthLabel,
+    onNextMonth, expectedNet, monthLabel, onHub, hubTodo,
     turnsLeft, dailyLimit,
     onGrocery,
     onGoals,
@@ -119,9 +120,14 @@ export default function BottomTabBar({
 
     const dockBar = onNextMonth ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0a0d1a', borderTopWidth: 1, borderColor: '#1a2040', paddingHorizontal: 14, height: DOCK_H }}>
-            <Animated.View style={{ transform: [{ scale: btnScale }] }}>
-                <Image source={COIN_IMG} style={{ width: 40, height: 40 }} resizeMode="contain" />
-            </Animated.View>
+            <TouchableOpacity onPress={onHub} activeOpacity={0.8} disabled={!onHub} style={{ width: 52, height: 42, alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={onHub ? CONTROL_IMG : COIN_IMG} style={{ width: 52, height: 40 }} resizeMode="contain" />
+                {hubTodo > 0 && (
+                    <View style={{ position: 'absolute', top: -4, right: -2, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: '#f87171', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, borderWidth: 1.5, borderColor: '#0a0d1a' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#fff', lineHeight: 14 }}>{hubTodo}</Text>
+                    </View>
+                )}
+            </TouchableOpacity>
             <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0', lineHeight: 15 }}>Expected this month</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: (expectedNet || 0) >= 0 ? '#4ade80' : '#f87171', lineHeight: 20 }}>

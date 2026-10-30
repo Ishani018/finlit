@@ -1185,22 +1185,36 @@ const GameLayout = ({ onHardReset }) => {
             </TouchableOpacity>
           )}
 
-          {/* Command Centre — one control-panel button holds every shortcut that used to crowd this row */}
+          {/* For sale icon — top-left, home view only */}
           {activeMenu !== 'advisor' && viewMode === 'home' && (() => {
+            // Compute birthday info
             let playerBdayMonth = null;
             if (playerBirthday && playerBirthday.includes('/')) playerBdayMonth = parseInt(playerBirthday.split('/')[1], 10);
             const currentMonth = (totalMonthsPlayed % 12) + 1;
-            const isBdayMonth = playerBdayMonth === currentMonth || !!dependents.find(d => d.bdayMonth === currentMonth);
-            const todo = buildHubData().attention.length + (isBdayMonth ? 1 : 0);
+            const isPlayerBday = playerBdayMonth === currentMonth;
+            const bdayDep = dependents.find(d => d.bdayMonth === currentMonth);
+            const isBdayMonth = isPlayerBday || !!bdayDep;
             return (
-              <TouchableOpacity onPress={() => setShowHub(true)} activeOpacity={0.8} style={{ position: 'absolute', top: 8, left: 10, zIndex: 20 }}>
-                <Image source={require('./assets/ui_comp/menu_dashboard.png')} style={{ width: 54, height: 42 }} resizeMode="contain" />
-                {todo > 0 && (
-                  <View style={{ position: 'absolute', top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: '#f87171', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, borderWidth: 1.5, borderColor: '#06080f' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#fff', lineHeight: 14 }}>{todo}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
+              <View style={{ position: 'absolute', top: 8, left: 12, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setShowPantry(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
+                  <Image source={require('./assets/ui_comp/pantry.png')} style={{ width: 44, height: 44 }} resizeMode="contain" />
+                  {(pantry || []).reduce((s, p) => s + (p.qty || 0), 0) <= 3 && (
+                    <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#f87171', borderWidth: 1.5, borderColor: '#06080f' }} />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowHomeScreen(true)} activeOpacity={0.8}>
+                  <Image source={require('./assets/ui_comp/forsale.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { setShopInitial('cars'); setShowGrocery(true); }} activeOpacity={0.8}>
+                  <Image source={(CAR_BY_ID[(cars.find(c => c.uid === activeCarUid) || cars[0])?.id] || CAR_BY_ID.honda_city).image} style={{ width: 44, height: 36, opacity: cars.length ? 1 : 0.45 }} resizeMode="contain" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowBirthdayRoom(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
+                  <Image source={require('./assets/ui_comp/birthday_cake.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                  {isBdayMonth && (
+                    <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#ec4899', borderWidth: 1.5, borderColor: '#06080f' }} />
+                  )}
+                </TouchableOpacity>
+              </View>
             );
           })()}
 
@@ -1208,18 +1222,24 @@ const GameLayout = ({ onHardReset }) => {
           {activeMenu !== 'advisor' && (() => {
             const unread = eventInbox.filter(e => !e.read).length;
             return (
-              <View style={{ position: 'absolute', top: 8, right: 8, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ position: 'absolute', top: 8, right: 8, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 {currentJob && (
                   <TouchableOpacity onPress={() => switchViewMode(viewMode === 'home' ? 'work' : 'home')} activeOpacity={0.8}>
                     <Image
                       source={viewMode === 'home' ? require('./assets/ui_comp/currentjob.png') : require('./assets/ui_comp/home.png')}
-                      style={{ width: 38, height: 38 }}
+                      style={{ width: 36, height: 36 }}
                       resizeMode="contain"
                     />
                   </TouchableOpacity>
                 )}
+                <TouchableOpacity onPress={() => setShowGrocery(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
+                  <Image source={require('./assets/ui_comp/groceryshop.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                  {health < 30 && (
+                    <View style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: 4, backgroundColor: '#f87171', borderWidth: 1, borderColor: '#06080f' }} />
+                  )}
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowEventsInbox(true); markAllEventsRead(); }} style={{ position: 'relative' }}>
-                  <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 38, height: 38 }} resizeMode="contain" />
+                  <Image source={require('./assets/ui_comp/inbox.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
                   {unread > 0 && (
                     <View style={{ position: 'absolute', top: -4, right: -4, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: '#a855f7', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3, borderWidth: 1, borderColor: '#06080f' }}>
                       <Text style={{ fontSize: 9, color: '#fff', fontWeight: 'bold' }}>{unread > 9 ? '9+' : unread}</Text>
@@ -2467,6 +2487,8 @@ const GameLayout = ({ onHardReset }) => {
           showGrocery={showGrocery}
           showGoals={showGoals}
           onNextMonth={requestNextMonth}
+          onHub={() => setShowHub(true)}
+          hubTodo={(() => { let m = null; if (playerBirthday && playerBirthday.includes('/')) m = parseInt(playerBirthday.split('/')[1], 10); const cm = (totalMonthsPlayed % 12) + 1; return buildHubData().attention.length + ((m === cm || dependents.some(d => d.bdayMonth === cm)) ? 1 : 0); })()}
           expectedNet={typeof getMonthPreview === 'function' ? getMonthPreview().net : 0}
           monthLabel={`END ${['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][(turn.month - 1) % 12]} ›`}
           turnsLeft={turnsLeftToday()}
