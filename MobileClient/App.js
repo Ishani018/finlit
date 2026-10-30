@@ -35,6 +35,8 @@ import PixelDialog from './src/components/PixelDialog';
 import BottomTabBar from './src/components/BottomTabBar';
 import MonthSummaryCard from './src/components/MonthSummaryCard';
 import MonthPreviewSheet from './src/components/MonthPreviewSheet';
+import HubMenu from './src/components/HubMenu';
+import { INSURANCE_PLANS } from './src/data/insurance';
 import DailyLimitScreen from './src/components/DailyLimitScreen';
 import BirthdayCelebrationRoom from './src/components/BirthdayCelebrationRoom';
 import CrisisSimulator from './src/components/CrisisSimulator';
@@ -456,6 +458,12 @@ const GameLayout = ({ onHardReset }) => {
 
   // End-month preview sheet — shown before NEXT MONTH actually runs
   const [showMonthPreview, setShowMonthPreview] = useState(false);
+
+  // Command Centre menu
+  const [showHub, setShowHub] = useState(false);
+
+  // Which store the Shop overlay opens on (null = the store list)
+  const [shopInitial, setShopInitial] = useState(null);
 
   const showDialog = (title, message, type = 'info', onConfirm = null, confirmText = 'OK', cancelText = null, onCancel = null, image = null) => {
     setDialog({ visible: true, title, message, type, onConfirm: onConfirm || (() => setDialog(d => ({ ...d, visible: false }))), confirmText, cancelText, onCancel, image });
@@ -973,6 +981,44 @@ const GameLayout = ({ onHardReset }) => {
   }
 
   const spriteImage = getSpriteImage(playerSprite, playerAge);
+
+  // ── Command Centre data: a live status line per tile, plus what needs attention ──
+  const buildHubData = () => {
+    const pantryQty = (pantry || []).reduce((n, p) => n + (p.qty || 0), 0);
+    const hasHealthCover = activeInsurance.some(i => INSURANCE_PLANS.find(p => p.id === i.planId)?.type === 'health');
+    const holdings = Object.keys(portfolio).filter(k => (portfolio[k]?.qty || 0) > 0).length;
+    const rent = currentHousing.rental_income || currentHousing.maintenance || 0;
+    const statuses = {
+      work: currentJob ? `₹${Math.round(currentJob.salary / 1000)}k/mo` : 'No job yet',
+      study: activeEnrollment ? 'Enrolled' : `${degrees.length} degree${degrees.length === 1 ? '' : 's'}`,
+      invest: holdings + sipPlans.length > 0 ? `${holdings} stock${holdings === 1 ? '' : 's'} · ${sipPlans.length} SIP` : 'Not started',
+      bank: loans.length > 0 ? `${loans.length} loan${loans.length === 1 ? '' : 's'} · EMI ₹${Math.round(getTotalEMI() / 1000)}k` : 'No loans',
+      insurance: hasHealthCover ? 'Health covered' : 'No health cover',
+      home: properties.includes(currentHousing.id) ? 'You own it' : `Rent ₹${Math.round(rent / 1000)}k`,
+      family: dependents.length > 0 ? `${dependents.length} dependent${dependents.length === 1 ? '' : 's'}` : 'Just you',
+      grocery: pantryQty === 0 ? 'Pantry empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'} left`,
+    };
+    const attention = [];
+    const attentionStatuses = {};
+    if (health < 40 || pantryQty === 0) { attention.push('grocery'); attentionStatuses.grocery = `Health ${Math.round(health)} · ${pantryQty === 0 ? 'pantry empty' : pantryQty + ' left'}`; }
+    if (!currentJob && totalMonthsPlayed > 0) attention.push('work');
+    if (!hasHealthCover && totalMonthsPlayed >= 3) attention.push('insurance');
+    const mp = getMonthPreview();
+    return { statuses, attentionStatuses, attention, net: mp.net };
+  };
+  const openHubTarget = (key) => {
+    setShowGoals(false); setShowGrocery(false); setShowPantry(false);
+    if (key === 'work')      { setActiveTab('career'); setCareerSubTab(null); }
+    if (key === 'study')     { setActiveTab('career'); setCareerSubTab('study'); }
+    if (key === 'invest')    { setActiveTab('money'); setMoneySubTab('invest'); }
+    if (key === 'bank')      { setActiveTab('money'); setMoneySubTab('bank'); }
+    if (key === 'insurance') { setActiveTab('money'); setMoneySubTab('insure'); }
+    if (key === 'home')      { setActiveTab('home'); setShowHomeScreen(true); }
+    if (key === 'family')    { setActiveTab('family'); }
+    if (key === 'grocery')   { setShopInitial('grocery'); setShowGrocery(true); }
+    if (key === 'goals')     { setShowGoals(true); }
+    if (key === 'help')      { setActiveTab('home'); setShowHelp(true); }
+  };
   const lifeProgress = Math.min(totalMonthsPlayed / GAME_END_MONTH, 1);
   const retirementMarker = RETIREMENT_MONTH / GAME_END_MONTH; // ~0.70 — where retirement starts on the bar
 
@@ -1004,6 +1050,9 @@ const GameLayout = ({ onHardReset }) => {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#4fd1c5', lineHeight: 14 }}>+₹{currentJob.salary.toLocaleString()}/mo</Text>
                   )}
                 </View>
+                <TouchableOpacity onPress={() => setShowHub(true)} style={{ width: 34, height: 34, alignItems: 'center', justifyContent: 'center' }}>
+                  <FontAwesome5 name="th-large" size={20} color="#7d8ab0" />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowSettings(true)} style={{ width: 34, height: 34, alignItems: 'center', justifyContent: 'center' }}>
                   <Image source={require('./assets/ui_comp/settingsicon.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
                 </TouchableOpacity>
@@ -2289,7 +2338,7 @@ const GameLayout = ({ onHardReset }) => {
         {/* ── GROCERY OVERLAY ── */}
         {showGrocery && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
-            <ShopScreen onClose={() => setShowGrocery(false)} />
+            <ShopScreen key={shopInitial || 'hub'} initialSection={shopInitial} onClose={() => { setShowGrocery(false); setShopInitial(null); }} />
           </View>
         )}
 
@@ -2340,6 +2389,23 @@ const GameLayout = ({ onHardReset }) => {
           onClose={() => setShowCrisisSimulator(false)}
         />
 
+        {showHub && (() => {
+          const hub = buildHubData();
+          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return (
+            <HubMenu
+              onClose={() => setShowHub(false)}
+              onAction={openHubTarget}
+              onNextMonth={requestNextMonth}
+              nextMonthLabel={`END ${months[(turn.month - 1) % 12].toUpperCase()} ›`}
+              profile={{ name: playerName, age: playerAge, job: currentJob?.name, dateLabel: `${months[(turn.month - 1) % 12]} ${turn.year}`, balance, net: hub.net, sprite: spriteImage }}
+              statuses={hub.statuses}
+              attentionStatuses={hub.attentionStatuses}
+              attention={hub.attention}
+            />
+          );
+        })()}
+
         <MonthPreviewSheet
           visible={showMonthPreview}
           preview={showMonthPreview ? getMonthPreview() : null}
@@ -2348,7 +2414,7 @@ const GameLayout = ({ onHardReset }) => {
           onConfirm={() => { setShowMonthPreview(false); handleAdvanceTime(); }}
           onAction={(action) => {
             setShowMonthPreview(false);
-            if (action === 'grocery') { setShowGoals(false); setShowGrocery(true); }
+            if (action === 'grocery') { setShowGoals(false); setShopInitial('grocery'); setShowGrocery(true); }
             if (action === 'insure') { setShowGrocery(false); setShowGoals(false); setActiveTab('money'); setMoneySubTab('insure'); }
           }}
         />

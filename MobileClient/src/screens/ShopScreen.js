@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useGame } from '../context/GameContext';
-import { GROCERY_ITEMS, CATEGORY_COLORS } from '../data/groceries';
-import { ITEM_IMAGES } from '../data/groceryImages';
+import GroceryScreen from './GroceryScreen';
 import { PHARMACY_ITEMS, CLOTHES_ITEMS, SHOP_CATEGORY_COLORS } from '../data/shopItems';
 
 const PAD = 14;
@@ -49,97 +48,6 @@ function ScreenHeader({ title, subtitle, onBack, onClose }) {
 }
 
 
-// ── Grocery section (inline) ──────────────────────────────────────────────────
-function GrocerySection({ onBack, onClose }) {
-    const { balance, buyGrocery } = useGame();
-    const [toast, setToast] = useState(null);
-
-    const showToast = (msg, ok, extra) => { setToast({ msg, ok, extra }); setTimeout(() => setToast(null), 2500); };
-
-    const handleBuy = (item) => {
-        const r = buyGrocery(item.id);
-        if (r.success) {
-            showToast(`${item.name} added to pantry`, true, `Balance: ₹${(balance - item.price).toLocaleString()}`);
-        } else {
-            showToast(r.msg, false);
-        }
-    };
-
-    return (
-        <View style={{ flex: 1 }}>
-            <ScreenHeader title="Grocery Store" subtitle="GROCERY" onBack={onBack} onClose={onClose} />
-
-            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }}>
-                {Array.from({ length: Math.ceil(GROCERY_ITEMS.length / 2) }).map((_, row) => (
-                    <View key={row} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
-                        {GROCERY_ITEMS.slice(row * 2, row * 2 + 2).map(item => {
-                            const catColor = CATEGORY_COLORS[item.category] || C.dim;
-                            const canAfford = balance >= item.price;
-                            const img = ITEM_IMAGES[item.id];
-                            return (
-                                <View key={item.id} style={{ flex: 1, borderRadius: 10, backgroundColor: C.panel, overflow: 'hidden' }}>
-                                    <View style={{ height: 90, position: 'relative' }}>
-                                        {img ? <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : <View style={{ flex: 1, backgroundColor: catColor + '15' }} />}
-                                        <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,8,15,0.15)' }} />
-                                    </View>
-                                    <View style={{ padding: 8 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream }} numberOfLines={1}>{item.name}</Text>
-                                        <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>+{item.healthRestore}HP</Text>
-                                            {item.happiness > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.gold }}>+{item.happiness}</Text>}
-                                        </View>
-                                        <TouchableOpacity onPress={() => handleBuy(item)} disabled={!canAfford}
-                                            style={{ marginTop: 6, backgroundColor: canAfford ? C.gold + '18' : C.card, borderRadius: 6, paddingVertical: 7, alignItems: 'center', opacity: canAfford ? 1 : 0.4 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: canAfford ? C.gold : C.dark }}>₹{item.price.toLocaleString()}</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            );
-                        })}
-                    </View>
-                ))}
-            </ScrollView>
-
-            {toast && (
-                <View style={{ position: 'absolute', bottom: 70, alignSelf: 'center', left: PAD * 2, right: PAD * 2, backgroundColor: 'rgba(8,12,24,0.94)', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: toast.ok ? '#4ade80' : '#f87171' }} />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: toast.ok ? '#c8d4f0' : '#f87171', flex: 1 }}>{toast.msg}</Text>
-                    {toast.extra && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>{toast.extra}</Text>}
-                </View>
-            )}
-        </View>
-    );
-}
-
-
-const MEDICINE_IMAGES = {
-    paracetamol:  require('../../assets/medicine/paracetemol.png'),
-    cough_syrup:  require('../../assets/medicine/cough_syrup.png'),
-    antacid:      require('../../assets/medicine/antacid.png'),
-    vitamin_c:    require('../../assets/medicine/ChatGPT_Image_May_16,_2026,_05_22_51_PM.png'),
-    multivitamin: require('../../assets/medicine/mulivitamins.png'),
-    first_aid:    require('../../assets/medicine/first_aid.png'),
-    antibiotics:  require('../../assets/medicine/antibiotic.png'),
-    bp_medicine:  require('../../assets/medicine/blood_pressure.png'),
-    ayurvedic:    require('../../assets/medicine/chyawanprash.png'),
-    calcium:      require('../../assets/medicine/ChatGPT_Image_May_16,_2026,_05_34_49_PM.png'),
-};
-
-const CLOTHES_IMAGES = {
-    school_bag:     require('../../assets/clothing_and_others/schoolbag.png'),
-    school_uniform: require('../../assets/clothing_and_others/school_uniform.png'),
-    kids_books:     require('../../assets/clothing_and_others/storybooks.png'),
-    sports_kit:     require('../../assets/clothing_and_others/sports_kit.png'),
-    video_game:     require('../../assets/clothing_and_others/video_game.png'),
-    casual_wear:    require('../../assets/clothing_and_others/daily_casual_wear.png'),
-    ethnic_set:     require('../../assets/clothing_and_others/ethnic_wear.png'),
-    formal_suit:    require('../../assets/clothing_and_others/suit.png'),
-    party_outfit:   require('../../assets/clothing_and_others/fancy_party_wear.png'),
-    sneakers:       require('../../assets/clothing_and_others/shoes.png'),
-    jewellery:      require('../../assets/clothing_and_others/jewellery.png'),
-};
-
-// ── Pharmacy section ──────────────────────────────────────────────────────────
 function PharmacySection({ onBack, onClose }) {
     const { balance, dependents, buyPharmacyItem } = useGame();
     const [toast, setToast] = useState(null);
@@ -296,11 +204,11 @@ function ClothesSection({ onBack, onClose }) {
 }
 
 // ── Main ShopScreen ───────────────────────────────────────────────────────────
-export default function ShopScreen({ onClose }) {
-    const [section, setSection] = useState(null);
+export default function ShopScreen({ onClose, initialSection = null }) {
+    const [section, setSection] = useState(initialSection);
     const { balance, health, happiness } = useGame();
 
-    if (section === 'grocery')  return <GrocerySection  onBack={() => setSection(null)} onClose={onClose} />;
+    if (section === 'grocery')  return <GroceryScreen onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'pharmacy') return <PharmacySection onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'clothes')  return <ClothesSection  onBack={() => setSection(null)} onClose={onClose} />;
 

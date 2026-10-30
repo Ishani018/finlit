@@ -6,6 +6,7 @@ import { GROCERY_ITEMS, CATEGORY_COLORS, DIET_COLORS, SICK_LEAVE_THRESHOLD, CRIT
 import { ITEM_IMAGES } from '../data/groceryImages';
 
 const PAD = 14;
+const TAB_BAR_H = 74; // the bottom tab bar sits above this overlay, so the cart bar clears it
 const GAP = 8;
 
 const C = {
@@ -122,7 +123,7 @@ function ItemGrid({ children }) {
     return <View>{rows}</View>;
 }
 
-export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop }) {
+export default function GroceryScreen({ onClose, onBack, initialTab = 'shop', onOpenShop }) {
     const { balance, health, pantry, buyGrocery, consumeFood } = useGame();
     const pantryOnly = initialTab === 'pantry' && !!onOpenShop;
     const [tab, setTab] = useState(initialTab);
@@ -177,6 +178,11 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 70, backgroundColor: 'rgba(4,6,14,0.78)' }} />
 
                 <View style={{ position: 'absolute', top: 10, left: PAD, right: PAD, flexDirection: 'row', alignItems: 'center' }}>
+                    {onBack && (
+                        <TouchableOpacity onPress={onBack} style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,6,14,0.85)', borderRadius: 14, marginRight: 10 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.dim, lineHeight: 24 }}>‹</Text>
+                        </TouchableOpacity>
+                    )}
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dim, letterSpacing: 4, flex: 1 }}>DAILY ESSENTIALS</Text>
                     <TouchableOpacity onPress={onClose} style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,6,14,0.85)', borderRadius: 14 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim }}>✕</Text>
@@ -220,7 +226,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
                 </View>
             )}
 
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: PAD, paddingBottom: pantryOnly ? 40 : 110 }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: PAD, paddingBottom: pantryOnly ? 40 : 110 + TAB_BAR_H }} showsVerticalScrollIndicator={false}>
 
                 {pantryOnly ? (
                     /* ── Pantry-only mode (opened from home pantry button) ── */
@@ -312,7 +318,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
             </ScrollView>
 
             {!pantryOnly && (
-                <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0a0d1a', borderTopWidth: 1, borderColor: C.border, paddingHorizontal: PAD, paddingVertical: 10 }}>
+                <View style={{ position: 'absolute', left: 0, right: 0, bottom: TAB_BAR_H, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0a0d1a', borderTopWidth: 1, borderColor: C.border, paddingHorizontal: PAD, paddingVertical: 10 }}>
                     <View style={{ width: 46, height: 46, borderRadius: 12, backgroundColor: '#111733', alignItems: 'center', justifyContent: 'center' }}>
                         <Image source={require('../../assets/ui_comp/pantry.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
                         {totalPantryQty > 0 && (
@@ -333,7 +339,7 @@ export default function GroceryScreen({ onClose, initialTab = 'shop', onOpenShop
             )}
 
             {toast && (
-                <View style={{ position: 'absolute', bottom: pantryOnly ? 24 : 88, left: PAD, right: PAD, backgroundColor: C.panel, borderWidth: 1, borderRadius: 10, borderColor: toast.color + '60', padding: 12, alignItems: 'center' }}>
+                <View style={{ position: 'absolute', bottom: pantryOnly ? 24 : 88 + TAB_BAR_H, left: PAD, right: PAD, backgroundColor: C.panel, borderWidth: 1, borderRadius: 10, borderColor: toast.color + '60', padding: 12, alignItems: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: toast.color }}>{toast.msg}</Text>
                 </View>
             )}
