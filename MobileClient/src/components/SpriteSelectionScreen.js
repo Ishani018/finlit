@@ -175,8 +175,8 @@ const TRAIT_AGE_FLAVOUR = {
 };
 
 // ─── Step 1: Choose character ────────────────────────────────────────────────
-function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, childName }) {
-    const idx = selectedIdx ?? 6;                       // PRIYA / SCHOLAR is the default highlight
+function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, childName }) {
+    const [idx, setIdx] = useState(startIdx ?? 6);
     const sprite = SPRITES[idx], trait = TRAITS[sprite.id], flavour = TRAIT_AGE_FLAVOUR[sprite.id] || [];
     const [stage, setStage] = useState(0);
     const heroH = Math.min(SH * 0.40, 340);
@@ -185,7 +185,7 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
 
     return (
         <View style={{ flex: 1, backgroundColor: '#06080f' }}>
-            <StepHeader step={childMode ? 'NEXT GENERATION' : 'STEP 1 OF 2'} title={childMode ? `Pick a look for ${childName || 'your child'}` : 'Choose your character'} />
+            <StepHeader step={childMode ? 'NEXT GENERATION' : 'STEP 1 OF 2'} title={childMode ? `Pick a look for ${childName || 'your child'}` : 'Choose your character'} onBack={onBack} />
 
             <Hero height={heroH} sprite={stageSrc} spriteId={null}>
                 {!childMode && (
@@ -212,7 +212,7 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, marginTop: 12, marginBottom: 6 }}>ALL CHARACTERS</Text>
                 <View style={{ flexDirection: 'row', gap: 6 }}>
                     {SPRITES.map((sp, i) => (
-                        <TouchableOpacity key={sp.id} onPress={() => { setSelectedIdx(i); setStage(0); }} activeOpacity={0.8}
+                        <TouchableOpacity key={sp.id} onPress={() => { setIdx(i); setStage(0); }} activeOpacity={0.8}
                             style={{ width: thumbW, height: 54, borderRadius: 8, overflow: 'hidden', backgroundColor: '#0d1020', borderWidth: 1, borderColor: i === idx ? '#818cf8' : '#1e2840' }}>
                             <Image source={sp.image} style={{ width: thumbW * 1.7, height: 54 * 4.2, marginLeft: -thumbW * 0.35, marginTop: -2 }} resizeMode="stretch" />
                         </TouchableOpacity>
@@ -240,6 +240,96 @@ function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, chil
                     style={{ height: 50, borderRadius: 10, backgroundColor: '#818cf8', alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#0a0e22', letterSpacing: 4 }}>{childMode ? 'SELECT THIS LOOK' : `PLAY AS ${NAMES[sprite.id]}`}</Text>
                 </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
+
+// ─── Step 1: Browse characters (card grid). Tapping a card opens its profile. ─────────────────────────
+function PickSpriteScreen({ selectedIdx, setSelectedIdx, onNext, childMode, childName }) {
+    const [detailIdx, setDetailIdx] = useState(null);
+
+    if (detailIdx !== null) {
+        return (
+            <CharacterDetail
+                startIdx={detailIdx}
+                setSelectedIdx={setSelectedIdx}
+                childMode={childMode}
+                childName={childName}
+                onBack={() => setDetailIdx(null)}
+                onNext={onNext}
+            />
+        );
+    }
+
+    const rows = [];
+    for (let i = 0; i < SPRITES.length; i += 2) rows.push(SPRITES.slice(i, i + 2));
+
+    return (
+        <View style={{ flex: 1, backgroundColor: '#06080f' }}>
+            {/* Header */}
+            <View style={{ alignItems: 'center', paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderColor: '#0a0f1e' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#1a2440', letterSpacing: 5 }}>FINLIT  v1.0</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 2, lineHeight: 28, textAlign: 'center', paddingHorizontal: 20 }}>
+                    {childMode ? `PICK A SPRITE FOR ${childName ? childName.toUpperCase() : 'YOUR CHILD'}` : 'CHOOSE YOUR PLAYER'}
+                </Text>
+            </View>
+
+            {/* 2-column card grid */}
+            <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 14 }}
+                showsVerticalScrollIndicator={false}
+            >
+                {rows.map((row, rowIdx) => (
+                    <View key={rowIdx} style={{ flexDirection: 'row', marginBottom: CARD_GAP }}>
+                        {row.map((sprite, colIdx) => {
+                            const idx   = rowIdx * 2 + colIdx;
+                            const isSel = idx === selectedIdx;
+                            const t     = TRAITS[sprite.id];
+                            return (
+                                <TouchableOpacity
+                                    key={sprite.id}
+                                    onPress={() => setDetailIdx(idx)}
+                                    activeOpacity={0.85}
+                                    style={{
+                                        width: CARD_W,
+                                        marginRight: colIdx === 0 ? CARD_GAP : 0,
+                                        backgroundColor: isSel ? t.bg || '#0a0c18' : '#06080f',
+                                        overflow: 'hidden', borderRadius: 12, position: 'relative',
+                                    }}
+                                >
+                                    <View style={{ height: SPRITE_H, overflow: 'hidden', borderRadius: 12, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 4 }}>
+                                        <Image source={sprite.image} style={{ width: CARD_W, height: SPRITE_H * 1.55 }} resizeMode="contain" />
+                                    </View>
+                                    <View style={{ height: 1, backgroundColor: '#0d1228' }} />
+                                    <View style={{ flex: 1, paddingHorizontal: 8, paddingTop: 6, paddingBottom: 8, justifyContent: 'center' }}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                                            {!childMode && TRAIT_ICONS[sprite.id] && (
+                                                <Image source={TRAIT_ICONS[sprite.id]} style={{ width: 13, height: 13, opacity: isSel ? 0.8 : 0.45 }} resizeMode="contain" />
+                                            )}
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: isSel ? t.color : '#4a5580', letterSpacing: 1, lineHeight: 20 }}>
+                                                {childMode ? 'SELECT' : t.name}
+                                            </Text>
+                                        </View>
+                                        {!childMode && (
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: isSel ? '#a0b0d0' : '#222a40', lineHeight: 15, marginTop: 1 }}>
+                                                {t.effect}
+                                            </Text>
+                                        )}
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                ))}
+            </ScrollView>
+
+            {/* Footer hint */}
+            <View style={{ paddingVertical: 10, alignItems: 'center', borderTopWidth: 1, borderColor: '#0a0f1e', backgroundColor: '#06080f' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#1a2440', letterSpacing: 2 }}>
+                    TAP ANY CHARACTER TO VIEW FULL PROFILE
+                </Text>
             </View>
         </View>
     );
