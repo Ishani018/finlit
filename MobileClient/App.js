@@ -46,6 +46,7 @@ import InterviewModal from './src/components/InterviewModal';
 import LoadingScreen from './src/components/LoadingScreen';
 import { getSpriteImage } from './src/data/spriteMap';
 import PlayerSprite from './src/components/PlayerSprite';
+import { CAR_BY_ID } from './src/data/cars';
 import CustomiseScreen from './src/components/CustomiseScreen';
 import { useFonts, VT323_400Regular } from '@expo-google-fonts/vt323';
 import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
@@ -351,7 +352,7 @@ const GameLayout = ({ onHardReset }) => {
     isRetired, pensionIncome,
     nextMonth, happiness, buyAndMoveIn,
     eventInbox, markEventRead, markAllEventsRead,
-    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer,
+    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer, cars, activeCarUid,
     pendingDecision, resolveDecision,
     newAchievement, setNewAchievement,
     achievements,
@@ -997,6 +998,7 @@ const GameLayout = ({ onHardReset }) => {
       home: properties.includes(currentHousing.id) ? 'You own it' : `Rent ₹${Math.round(rent / 1000)}k`,
       family: dependents.length > 0 ? `${dependents.length} dependent${dependents.length === 1 ? '' : 's'}` : 'Just you',
       grocery: pantryQty === 0 ? 'Pantry empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'} left`,
+      cars: cars.length === 0 ? 'No car yet' : `${cars.length} in garage`,
     };
     const attention = [];
     const attentionStatuses = {};
@@ -1016,6 +1018,7 @@ const GameLayout = ({ onHardReset }) => {
     if (key === 'home')      { setActiveTab('home'); setShowHomeScreen(true); }
     if (key === 'family')    { setActiveTab('family'); }
     if (key === 'grocery')   { setShopInitial('grocery'); setShowGrocery(true); }
+    if (key === 'cars')      { setShopInitial('cars'); setShowGrocery(true); }
     if (key === 'goals')     { setShowGoals(true); }
     if (key === 'help')      { setActiveTab('home'); setShowHelp(true); }
   };
@@ -1202,6 +1205,9 @@ const GameLayout = ({ onHardReset }) => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowHomeScreen(true)} activeOpacity={0.8}>
                   <Image source={require('./assets/ui_comp/forsale.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { setShopInitial('cars'); setShowGrocery(true); }} activeOpacity={0.8}>
+                  <Image source={(CAR_BY_ID[(cars.find(c => c.uid === activeCarUid) || cars[0])?.id] || CAR_BY_ID.honda_city).image} style={{ width: 44, height: 36, opacity: cars.length ? 1 : 0.45 }} resizeMode="contain" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowBirthdayRoom(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
                   <Image source={require('./assets/ui_comp/birthday_cake.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />

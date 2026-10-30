@@ -7,6 +7,7 @@ import { MUTUAL_FUNDS } from '../data/mutualFunds';
 import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from '../data/realEstate';
 import { INSURANCE_PLANS } from '../data/insurance';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
+import { CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_TYPE, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, PARKED_COST_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
 import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, MAX_WORKERS_PER_BUSINESS, rollBusinessRevenue, generateStaffCandidates, getStaffedEconomics } from '../data/businesses';
 import { calculateIncomeTax, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
 import { CRISIS_EVENTS, CRISIS_WEIGHTS } from '../data/crisisEvents';
@@ -114,6 +115,8 @@ export const GameProvider = ({ children }) => {
     const [portfolio, setPortfolio] = useState({});
     const [properties, setProperties] = useState([]);
     const [propertyBuyMonths, setPropertyBuyMonths] = useState({});
+    const [cars, setCars] = useState([]);              // [{ uid, id, used, boughtMonth, paid, loanId }]
+    const [activeCarUid, setActiveCarUid] = useState(null);
 
     // Housing
     const [currentHousing, setCurrentHousing] = useState({
@@ -249,7 +252,7 @@ export const GameProvider = ({ children }) => {
                 degrees: stateRef.current.degrees,
                 portfolio: stateRef.current.portfolio,
                 properties: stateRef.current.properties,
-                propertyBuyMonths,
+                propertyBuyMonths, cars, activeCarUid,
                 marketPrices: stateRef.current.marketPrices,
                 priceHistory: stateRef.current.priceHistory,
                 marketCycle: stateRef.current.marketCycle,
@@ -303,7 +306,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -346,6 +349,8 @@ export const GameProvider = ({ children }) => {
             if (s.portfolio) setPortfolio(s.portfolio);
             if (s.properties) setProperties(s.properties);
             if (s.propertyBuyMonths) setPropertyBuyMonths(s.propertyBuyMonths);
+            if (Array.isArray(s.cars)) setCars(s.cars);
+            if (s.activeCarUid) setActiveCarUid(s.activeCarUid);
             if (s.marketPrices) setMarketPrices(s.marketPrices);
             if (s.priceHistory) setPriceHistory(s.priceHistory);
             if (s.marketCycle) setMarketCycle(s.marketCycle);
@@ -491,7 +496,8 @@ export const GameProvider = ({ children }) => {
     }, [properties]);
 
     const getFDValue = () => fixedDeposits.reduce((s, fd) => s + fd.currentValue, 0);
-    const netWorth = balance + getStockValue() + getMFValue() + getRealEstateValue() + ppf.balance + nps.balance + getFDValue();
+    const getCarsValue = () => cars.reduce((t, c) => t + carValue(c, totalMonthsPlayed), 0);
+    const netWorth = balance + getStockValue() + getMFValue() + getRealEstateValue() + ppf.balance + nps.balance + getFDValue() + getCarsValue();
     const totalLoanOutstanding = loans.reduce((sum, l) => sum + l.remainingPrincipal, 0);
 
     // --- INITIALIZE MARKET ---
@@ -1026,6 +1032,65 @@ export const GameProvider = ({ children }) => {
         return { success: true, msg: `Sold for ₹${salePrice.toLocaleString()}${loanRepayment > 0 ? ` (Loan repaid: ₹${loanRepayment.toLocaleString()})` : ''}` };
     };
 
+    // ─── CARS ────────────────────────────────────────────────────────────────
+    // Monthly cost of everything in the garage (the active car runs in full; parked cars cost insurance and parking) and what an earning vehicle brings in.
+    const getCarMonthly = () => {
+        const active = cars.find(c => c.uid === activeCarUid) || cars[0];
+        let cost = 0, income = 0, mood = 0;
+        cars.forEach(c => {
+            const car = CAR_BY_ID[c.id]; if (!car) return;
+            const isActive = active && c.uid === active.uid;
+            cost += isActive ? carRunCost(car, c) : Math.round(carRunCost(car, c) * PARKED_COST_FACTOR);
+            if (isActive) { income += car.income || 0; mood += car.mood; }
+        });
+        return { cost, income, mood };
+    };
+
+    const buyCar = (carId, { used = false, useLoan = false } = {}) => {
+        const car = CAR_BY_ID[carId];
+        if (!car) return { success: false, msg: 'That car is not available.' };
+        const tier = CAR_TIERS.find(t => t.key === car.tier);
+        if (tier && netWorth < tier.minNetWorth) return { success: false, msg: `The ${tier.label} showroom needs ₹${tier.minNetWorth.toLocaleString()} net worth.` };
+        const price = used ? usedPrice(car) : car.price;
+        const uid = `car_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        let loanId = null;
+        if (useLoan) {
+            const down = Math.round(price * CAR_LOAN_DOWN_PCT);
+            if (balance < down) return { success: false, msg: `Need ₹${down.toLocaleString()} down payment.` };
+            const res = takeLoan('car_loan', price - down, CAR_LOAN_TENURE, uid);
+            if (!res.success) return res;
+            loanId = res.loanId;
+            setBalance(prev => prev - price); // takeLoan credited the loan amount; the whole price goes to the dealer
+        } else {
+            if (balance < price) return { success: false, msg: `Not enough cash. You need ₹${price.toLocaleString()}.` };
+            setBalance(prev => prev - price);
+        }
+        setCars(prev => [...prev, { uid, id: carId, used, boughtMonth: totalMonthsPlayed, paid: price, loanId }]);
+        setActiveCarUid(prev => prev || uid);
+        addHistory(`Bought ${used ? 'a used ' : ''}${car.name}`, -(useLoan ? Math.round(price * CAR_LOAN_DOWN_PCT) : price), 'expense');
+        return { success: true, msg: `${car.name} is yours!${useLoan ? ' Your EMI starts next month.' : ''}` };
+    };
+
+    const sellCar = (uid) => {
+        const owned = cars.find(c => c.uid === uid);
+        if (!owned) return { success: false, msg: 'Car not found.' };
+        const car = CAR_BY_ID[owned.id];
+        const value = carValue(owned, totalMonthsPlayed);
+        const linked = loans.filter(l => l.linkedAsset === uid);
+        const owing = linked.reduce((n, l) => n + l.remainingPrincipal, 0);
+        const net = value - owing;
+        if (net < 0) return { success: false, msg: `You still owe ₹${owing.toLocaleString()} on it, more than it is worth (₹${value.toLocaleString()}). Prepay some of the loan first.` };
+        setBalance(prev => prev + net);
+        if (linked.length) setLoans(prev => prev.filter(l => l.linkedAsset !== uid));
+        const rest = cars.filter(c => c.uid !== uid);
+        setCars(rest);
+        if (activeCarUid === uid) setActiveCarUid(rest[0]?.uid || null);
+        addHistory(`Sold ${car?.name || 'car'} (Net: ₹${net.toLocaleString()})`, net, 'income');
+        return { success: true, msg: `Sold for ₹${value.toLocaleString()}${owing ? ` (loan cleared: ₹${owing.toLocaleString()})` : ''}.` };
+    };
+
+    const setActiveCar = (uid) => { if (cars.some(c => c.uid === uid)) setActiveCarUid(uid); };
+
     const moveIn = (propertyId) => {
         if (!properties.includes(propertyId)) return { success: false, msg: 'You do not own this property.' };
         const property = REAL_ESTATE.find(p => p.id === propertyId);
@@ -1170,6 +1235,8 @@ export const GameProvider = ({ children }) => {
         setPortfolio({});
         setProperties([]);
         setPropertyBuyMonths({});
+        setCars([]);
+        setActiveCarUid(null);
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
         setExpectingChild(null);
@@ -1225,7 +1292,7 @@ export const GameProvider = ({ children }) => {
     // =========================================================================
 
     const takeLoan = (loanTypeId, amount, tenureMonths, linkedAsset = null) => {
-        const loanType = LOAN_TYPES.find(l => l.id === loanTypeId);
+        const loanType = LOAN_TYPES.find(l => l.id === loanTypeId) || (loanTypeId === 'car_loan' ? CAR_LOAN_TYPE : null);
         if (!loanType) return { success: false, msg: 'Invalid loan type.' };
         amount = Math.floor(Number(amount));
         tenureMonths = Math.floor(Number(tenureMonths));
@@ -2125,9 +2192,10 @@ export const GameProvider = ({ children }) => {
         const sip = sipPlans.reduce((n, p) => n + (p.amount || 0), 0);
         const ca = caSubscribed ? 2000 : 0;
 
-        const income = { salary: effectiveSalary, rental, spouse };
-        const expenses = { housing: housing + investMaint, living, emi, insurance, tax, tuition, sip, ca };
-        const totalIncome = effectiveSalary + rental + spouse;
+        const carM = getCarMonthly();
+        const income = { salary: effectiveSalary, rental, spouse, taxi: carM.income };
+        const expenses = { housing: housing + investMaint, living, emi, insurance, tax, tuition, sip, ca, car: carM.cost };
+        const totalIncome = effectiveSalary + rental + spouse + carM.income;
         const totalExpenses = Object.values(expenses).reduce((n, v) => n + v, 0);
         const net = totalIncome - totalExpenses;
         const healthAfter = Math.max(0, health - MONTHLY_HEALTH_DRAIN);
@@ -2785,6 +2853,8 @@ export const GameProvider = ({ children }) => {
         setPortfolio({});
         setProperties([]);
         setPropertyBuyMonths({});
+        setCars([]);
+        setActiveCarUid(null);
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
         setExpectingChild(null);
@@ -3340,8 +3410,9 @@ export const GameProvider = ({ children }) => {
         }
 
         const caFee = caSubscribed ? 2000 : 0;
-        const totalIncome = effectiveSalary + realEstateIncome + spouseIncome + businessIncome;
-        const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee + businessRunningCost;
+        const carMonthly = getCarMonthly();
+        const totalIncome = effectiveSalary + realEstateIncome + spouseIncome + businessIncome + carMonthly.income;
+        const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee + businessRunningCost + carMonthly.cost;
         const netFlow = totalIncome - totalExpenses;
 
         // Annual salary raise (3–7% base, HUSTLER gets extra 12%)
@@ -3652,7 +3723,7 @@ export const GameProvider = ({ children }) => {
         const neglectEffect = activeEffects.find(e => e.type === 'parent_neglect');
         const neglectStress = neglectEffect ? -1.0 : 0;
         const businessStress = -unstaffedBusinessCount * 0.6; // grinding a business solo on top of a job
-        const happinessDelta = Math.round((housingEffect + debtStress + familyWarmth + jobSatisfaction + financeStress + neglectStress + businessStress) * 10) / 10;
+        const happinessDelta = Math.round((housingEffect + debtStress + familyWarmth + jobSatisfaction + financeStress + neglectStress + businessStress + getCarMonthly().mood) * 10) / 10;
         setLastHappiness(happiness);
         const newHappiness = Math.max(0, Math.min(100, happiness + happinessDelta));
         setHappiness(newHappiness);
@@ -3750,8 +3821,8 @@ export const GameProvider = ({ children }) => {
         // Monthly recap for UI
         setMonthlyRecap({
             month: turn.month, year: turn.year,
-            income: { salary: effectiveSalary, rental: realEstateIncome, spouse: spouseIncome, dividend: dividendIncome },
-            expenses: { housing: housingCost, maintenance: investmentMaintenance, living: livingCosts, emi: totalEMI, insurance: insurancePremiums, tax: monthlyTax, tuition: tuitionCost, sip: totalSIPDeducted },
+            income: { salary: effectiveSalary, rental: realEstateIncome, spouse: spouseIncome, dividend: dividendIncome, taxi: carMonthly.income },
+            expenses: { car: carMonthly.cost, housing: housingCost, maintenance: investmentMaintenance, living: livingCosts, emi: totalEMI, insurance: insurancePremiums, tax: monthlyTax, tuition: tuitionCost, sip: totalSIPDeducted },
             netFlow, happinessDelta,
         });
 
@@ -4576,6 +4647,7 @@ export const GameProvider = ({ children }) => {
         activeInsurance, buyInsurance, cancelInsurance,
 
         // Dependents
+        cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
         buyPharmacyItem, buyClothesItem, setChildSchoolTier, setChildPreschoolTier, renameDependent,

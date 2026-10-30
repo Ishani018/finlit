@@ -27,6 +27,7 @@ const LOAN_TYPE_META = {
     home_loan:            { name: 'Home Loan',             icon: 'home',            color: '#4ade80', img: require('../../assets/properties/1bhk_starter_apartment.png') },
     business_loan:        { name: 'Business Loan',         icon: 'briefcase',       color: '#fbbf24', img: require('../../assets/properties/CA_Office.png') },
     loan_against_property:{ name: 'Loan Against Property', icon: 'building',        color: '#c084fc', img: require('../../assets/properties/city_apartment_with_2_beds_and_1_bath.png') },
+    car_loan:             { name: 'Car Loan',              icon: 'car',             color: '#60a5fa', img: require('../../assets/cars/honda_city.png') },
     marriage_loan:        { name: 'Marriage Loan',         icon: 'heart',           color: '#ec4899', img: require('../../assets/properties/investment_properties/marraige_banquet_hall.png') },
     'Personal Loan':      { name: 'Personal Loan',         icon: 'user',            color: '#f87171', img: require('../../assets/ui_comp/borrow.png') },
 };

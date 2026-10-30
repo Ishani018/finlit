@@ -14,6 +14,7 @@ const IMAGES = {
     home:      require('../../assets/properties/1bhk_starter_apartment.png'),
     family:    require('../../assets/properties/family_house_with_garden_and_backyard.png'),
     grocery:   require('../../assets/jobs/kirana_store.png'),
+    cars:      require('../../assets/cars/honda_city.png'),
 };
 const GOALS_ICON = require('../../assets/ui_comp/achivements.png');
 const HELP_ICON = require('../../assets/ui_comp/bulb.png');
@@ -21,13 +22,13 @@ const COIN = require('../../assets/ui_comp/nextbutton.png');
 
 const LABELS = {
     work: 'WORK', study: 'STUDY', invest: 'INVEST', bank: 'BANK',
-    insurance: 'INSURE', home: 'HOME', family: 'FAMILY', grocery: 'SHOP',
+    insurance: 'INSURE', home: 'HOME', family: 'FAMILY', grocery: 'SHOP', cars: 'CARS',
 };
 
 const SECTIONS = [
     { label: 'CAREER',     color: '#e2b33a', keys: ['work', 'study'] },
     { label: 'FINANCES',   color: '#38b2ac', keys: ['invest', 'bank', 'insurance'] },
-    { label: 'DAILY LIFE', color: '#ec4899', keys: ['home', 'family', 'grocery'] },
+    { label: 'DAILY LIFE', color: '#ec4899', keys: ['home', 'family', 'grocery', 'cars'] },
 ];
 
 const RED = '#f87171';
@@ -50,7 +51,8 @@ function HubTile({ id, color, height, status, urgent, badge, onPress }) {
             activeOpacity={0.8}
             style={{ flex: 1, height, overflow: 'hidden', borderRadius: 12, borderWidth: 1, borderColor: urgent ? RED + 'b0' : color + '55' }}
         >
-            <Image source={IMAGES[id]} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            {id === 'cars' ? <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0a0e22' }} /> : null}
+            <Image source={IMAGES[id]} style={id === 'cars' ? { width: '100%', height: '78%', marginTop: 6 } : { width: '100%', height: '100%' }} resizeMode={id === 'cars' ? 'contain' : 'cover'} />
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: urgent ? 'rgba(6,8,15,0.40)' : 'rgba(6,8,15,0.58)' }} />
             <Corners color={urgent ? RED : color} />
             <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.84)', paddingVertical: 5, paddingHorizontal: 6, borderTopWidth: 1, borderColor: 'rgba(200,212,240,0.1)', alignItems: 'center' }}>
@@ -144,7 +146,7 @@ export default function HubMenu({ onClose, onAction, profile = {}, statuses = {}
                             {section.keys.map(key => (
                                 <HubTile key={key} id={key} color={section.color} height={96} status={statuses[key]} badge={badges[key] || null} onPress={() => go(key)} />
                             ))}
-                            {Array.from({ length: 3 - section.keys.length }).map((_, i) => <View key={i} style={{ flex: 1 }} />)}
+                            {Array.from({ length: Math.max(0, 3 - section.keys.length) }).map((_, i) => <View key={i} style={{ flex: 1 }} />)}
                         </View>
                     </View>
                 ))}
