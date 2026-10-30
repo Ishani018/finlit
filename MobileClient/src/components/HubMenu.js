@@ -117,12 +117,14 @@ export default function HubMenu({ onClose, onAction, profile = {}, statuses = {}
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
                 {/* Status strip */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', borderRadius: 12, padding: 8, paddingRight: 12, marginBottom: 14 }}>
-                    <View style={{ width: 46, height: 56, borderRadius: 8, backgroundColor: '#141b36', overflow: 'hidden' }}>
-                        {profile.sprite ? <Image source={profile.sprite} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : null}
+                    <View style={{ width: 52, height: 60, borderRadius: 8, backgroundColor: '#141b36', overflow: 'hidden' }}>
+                        {/* head and shoulders: the painted sprite is tall, so scale it up and pin the top */}
+                        {profile.sprite ? <Image source={profile.sprite} style={{ position: 'absolute', top: 4, left: 26 - 52 * 2.1 * 0.54, width: 52 * 2.1, height: (52 * 2.1) / 0.363 }} resizeMode="stretch" /> : null}
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 22 }}>{profile.name || 'Player'} · Age {profile.age}</Text>
-                        <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#7d8ab0', lineHeight: 16 }}>{profile.job || 'Unemployed'} · {profile.dateLabel}</Text>
+                        <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#7d8ab0', lineHeight: 16 }}>{profile.job || 'Unemployed'}</Text>
+                        <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#5a6890', lineHeight: 14 }}>{profile.dateLabel}</Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#38b2ac', lineHeight: 22 }}>₹{(profile.balance || 0).toLocaleString()}</Text>

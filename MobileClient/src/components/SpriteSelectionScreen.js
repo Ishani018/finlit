@@ -291,14 +291,12 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
     const [showCustomise, setShowCustomise] = useState(false);
     const [bDay, setBDay] = useState(null);
     const [bMonth, setBMonth] = useState(null);
-    const [bYear, setBYear] = useState(null);
     const [nameError, setNameError] = useState('');
     const [bdayError, setBdayError] = useState('');
 
-    const thisYear = new Date().getFullYear();
-    const yearOptions = Array.from({ length: 100 }, (_, i) => ({ value: thisYear - i, label: String(thisYear - i) }));
     const monthOptions = MONTH_NAMES.map((m, i) => ({ value: i + 1, label: m.slice(0, 3) + ' (' + String(i + 1).padStart(2, '0') + ')' }));
-    const daysInMonth = bMonth && bYear ? new Date(bYear, bMonth, 0).getDate() : 31;
+    // Only the day and month matter (birthdays), so no year is asked for. 2000 is a leap year, so 29 Feb stays available.
+    const daysInMonth = bMonth ? new Date(2000, bMonth, 0).getDate() : 31;
     const dayOptions = Array.from({ length: daysInMonth }, (_, i) => ({ value: i + 1, label: String(i + 1) }));
     const pad = n => String(n).padStart(2, '0');
     const find = (opts, v) => (v == null ? null : opts.find(o => o.value === v) || null);
@@ -310,9 +308,9 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
 
     const handleStart = () => {
         if (trimmed.length < 2) { setNameError('Name must be at least 2 characters.'); return; }
-        if (!bDay || !bMonth || !bYear) { setBdayError('Please select your day, month and year of birth.'); return; }
-        if (bDay > new Date(bYear, bMonth, 0).getDate()) { setBdayError('That date does not exist.'); return; }
-        onConfirm(trimmed, `${pad(bDay)}/${pad(bMonth)}/${bYear}`, look);
+        if (!bDay || !bMonth) { setBdayError('Please pick the day and month of your birthday.'); return; }
+        if (bDay > new Date(2000, bMonth, 0).getDate()) { setBdayError('That date does not exist.'); return; }
+        onConfirm(trimmed, `${pad(bDay)}/${pad(bMonth)}/2000`, look);
     };
 
     return (
@@ -354,11 +352,10 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                             ))}
                         </View>
 
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, marginTop: 12, marginBottom: 6 }}>DATE OF BIRTH</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, marginTop: 12, marginBottom: 6 }}>BIRTHDAY</Text>
                         <View style={{ flexDirection: 'row', gap: 8, marginBottom: bdayError ? 4 : 0 }}>
                             <DropdownField label="Day" flex={1} error={bdayError} value={find(dayOptions, bDay)} options={dayOptions} onSelect={v => { setBDay(v); setBdayError(''); }} />
-                            <DropdownField label="Month" flex={1.4} error={bdayError} value={find(monthOptions, bMonth)} options={monthOptions} onSelect={v => { setBMonth(v); setBdayError(''); }} />
-                            <DropdownField label="Year" flex={1.2} error={bdayError} value={find(yearOptions, bYear)} options={yearOptions} onSelect={v => { setBYear(v); setBdayError(''); }} />
+                            <DropdownField label="Month" flex={1.6} error={bdayError} value={find(monthOptions, bMonth)} options={monthOptions} onSelect={v => { setBMonth(v); setBdayError(''); }} />
                         </View>
                         {bdayError ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171' }}>{bdayError}</Text> : null}
 
