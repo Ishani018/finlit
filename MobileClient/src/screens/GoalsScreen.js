@@ -106,25 +106,19 @@ const LIFE_GOALS = [
     },
 ];
 
-// ── Goal card — clean image with overlaid name, no strips or bars ─────────────
-function GoalCard({ item, state }) {
+// ── Goal tile — 2-column grid, art on top, name + progress under it ──────────
+function GoalTile({ item, state }) {
     const done  = item.check(state);
-    const label = item.progressLabel(state);
     const img   = GOAL_IMAGES[item.id] || null;
-    const { color, name, desc } = item;
-
+    const { color, name } = item;
     return (
-        <View style={{ overflow: 'hidden', borderRadius: 8, opacity: done ? 1 : 0.85 }}>
-            <View style={{ height: 110, position: 'relative', backgroundColor: '#080b18' }}>
-                {img && <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: done ? 'rgba(6,8,15,0.18)' : 'rgba(6,8,15,0.55)' }} />
-                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 14, paddingBottom: 12, paddingTop: 30, backgroundColor: 'rgba(5,7,14,0.72)' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: done ? color : '#c8d4f0', lineHeight: 26 }}>{name}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: done ? color : '#445070', marginLeft: 10 }}>{label}</Text>
-                    </View>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', marginTop: 1 }}>{desc}</Text>
-                </View>
+        <View style={{ flex: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: done ? '#0a1a14' : '#0d1020', borderWidth: 1, borderColor: done ? '#4ade8066' : '#1a2040' }}>
+            <View style={{ height: 78, alignItems: 'center', justifyContent: 'center', backgroundColor: done ? '#08130f' : '#080b18' }}>
+                {img ? <Image source={img} style={{ width: '78%', height: '100%', opacity: done ? 1 : 0.55 }} resizeMode="contain" /> : null}
+            </View>
+            <View style={{ paddingVertical: 7, paddingHorizontal: 8, alignItems: 'center', backgroundColor: 'rgba(6,8,15,0.84)', borderTopWidth: 1, borderColor: 'rgba(200,212,240,0.08)' }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#c8d4f0', lineHeight: 18 }}>{name}</Text>
+                <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: done ? '#4ade80' : color, lineHeight: 14 }}>{done ? 'DONE' : item.progressLabel(state)}</Text>
             </View>
         </View>
     );
@@ -166,56 +160,57 @@ export default function GoalsScreen({ onClose }) {
         ...ACHIEVEMENTS.filter(a => achievements.includes(a.id)).map(a => ({ ...a, type: 'achievement' })),
         ...ACHIEVEMENTS.filter(a => !achievements.includes(a.id)).map(a => ({ ...a, type: 'achievement' })),
     ];
+    const next = LIFE_GOALS.filter(g => !g.check(state) && g.progress(state) < 1).sort((x, y) => y.progress(state) - x.progress(state))[0];
+    const pairs = [];
+    for (let i = 0; i < goalItems.length; i += 2) pairs.push(goalItems.slice(i, i + 2));
     return (
         <View style={{ flex: 1, backgroundColor: '#06080f' }}>
-            {/* Header */}
-            <View style={{ backgroundColor: '#0d1020', paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: '#1a2040', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ paddingTop: 14, paddingBottom: 12, paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: '#1a2040', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
                 <View>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>AGE {playerAge}</Text>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 28 }}>Goals & Achievements</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4 }}>MILESTONES</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 30 }}>Goals</Text>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-
-                    <TouchableOpacity onPress={onClose} style={{ width: 34, height: 34, borderWidth: 1, borderRadius: 10, borderColor: '#1e2840', alignItems: 'center', justifyContent: 'center' }}>
-                        <FontAwesome5 name="times" size={14} color="#445070" />
-                    </TouchableOpacity>
+                <View style={{ alignItems: 'flex-end', width: 120 }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80' }}>{completedGoals.length} of {LIFE_GOALS.length} done</Text>
+                    <View style={{ width: '100%', height: 5, borderRadius: 3, backgroundColor: '#1a2040', overflow: 'hidden', marginTop: 3 }}>
+                        <View style={{ width: `${(completedGoals.length / LIFE_GOALS.length) * 100}%`, height: '100%', backgroundColor: '#4ade80' }} />
+                    </View>
                 </View>
             </View>
 
-            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 50 }} showsVerticalScrollIndicator={false}>
-
-                {/* Summary strip — inline with header feel */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80', lineHeight: 24 }}>{completedGoals.length}<Text style={{ fontSize: 14, color: '#2a5040' }}>/{LIFE_GOALS.length}</Text></Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#2a5040', letterSpacing: 2 }}>GOALS</Text>
+            <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 140 }} showsVerticalScrollIndicator={false}>
+                {next ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#1a1405', borderWidth: 1, borderColor: '#fbbf2455', borderRadius: 12, padding: 12, marginBottom: 12 }}>
+                        <View style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#080b18', alignItems: 'center', justifyContent: 'center' }}>
+                            {GOAL_IMAGES[next.id] ? <Image source={GOAL_IMAGES[next.id]} style={{ width: 56, height: 56 }} resizeMode="contain" /> : null}
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24', letterSpacing: 4 }}>CLOSEST GOAL</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 26 }}>{next.name}</Text>
+                            <View style={{ height: 6, borderRadius: 3, backgroundColor: '#2a2208', overflow: 'hidden', marginVertical: 4 }}>
+                                <View style={{ width: `${Math.max(3, next.progress(state) * 100)}%`, height: '100%', backgroundColor: '#fbbf24' }} />
+                            </View>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#9a8a5a' }}>{next.progressLabel(state)}</Text>
+                        </View>
                     </View>
-                    <View style={{ width: 1, height: 14, backgroundColor: '#1a2040' }} />
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Image source={ACH_ICON} style={{ width: 12, height: 12, opacity: 0.5 }} resizeMode="contain" />
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#fbbf24', lineHeight: 24 }}>{unlockedAch.length}<Text style={{ fontSize: 14, color: '#445070' }}>/{ACHIEVEMENTS.length}</Text></Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 2 }}>UNLOCKED</Text>
-                    </View>
-                </View>
+                ) : null}
 
-                {goalItems.map((item) => (
-                    <View key={item.id} style={{ marginBottom: 12 }}>
-                        <GoalCard item={item} state={state} />
+                {pairs.map((pair, i) => (
+                    <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+                        {pair.map(item => <GoalTile key={item.id} item={item} state={state} />)}
+                        {pair.length === 1 ? <View style={{ flex: 1 }} /> : null}
                     </View>
                 ))}
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 12 }}>
-                    <Image source={ACH_ICON} style={{ width: 20, height: 20 }} resizeMode="contain" />
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3 }}>ACHIEVEMENTS</Text>
-                    <View style={{ flex: 1, height: 1, backgroundColor: '#141828' }} />
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4 }}>ACHIEVEMENTS · {unlockedAch.length}/{ACHIEVEMENTS.length}</Text>
+                    <View style={{ flex: 1, height: 1, backgroundColor: '#1a2040' }} />
                 </View>
-
                 {achItems.map((item) => (
                     <View key={item.id} style={{ marginBottom: 8 }}>
                         <AchievementCard item={item} unlocked={achievements.includes(item.id)} />
                     </View>
                 ))}
-
             </ScrollView>
         </View>
     );

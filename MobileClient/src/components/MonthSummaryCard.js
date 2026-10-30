@@ -58,7 +58,7 @@ function Row({ label, value, color }) {
     );
 }
 
-export default function MonthSummaryCard({ recap, netWorthHistory, currentBalance, loans = [], totalEMI = 0, onContinue }) {
+export default function MonthSummaryCard({ recap, netWorthHistory, currentBalance, loans = [], totalEMI = 0, onContinue, health, pantryEmpty, onBuyGroceries, nextMonthLabel }) {
     const slideAnim = useRef(new Animated.Value(SH)).current;
 
     useEffect(() => {
@@ -101,32 +101,43 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                     showsVerticalScrollIndicator={false}
                     bounces={false}
                 >
-                    {/* ── Header ── */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-                        <View>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 4 }}>MONTH SUMMARY</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 36, color: '#c8d4f0', lineHeight: 38 }}>{monthLabel} {year}</Text>
-                        </View>
-                        {happinessDelta !== undefined && (
-                            <View style={{ alignItems: 'center', gap: 3, marginTop: 6 }}>
-                                <Image source={HAPPY_ICON} style={{ width: 26, height: 26 }} resizeMode="contain" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: happinessDelta >= 0 ? '#fbbf24' : '#f87171' }}>
-                                    {happinessDelta >= 0 ? '+' : ''}{Math.round(happinessDelta)}
-                                </Text>
-                            </View>
+                    {/* ── Header: how the month closed ── */}
+                    <View style={{ backgroundColor: '#07161a', borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: isPositive ? '#38b2ac44' : '#f8717144' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a8a90', letterSpacing: 4 }}>{monthLabel.toUpperCase()} {year} CLOSED</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 58, color: flowColor, lineHeight: 60 }}>
+                            {isPositive ? '+' : '−'}₹{Math.abs(netFlow).toLocaleString()}
+                        </Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#9db4c0' }}>
+                            Cash went from ₹{Math.round((currentBalance || 0) - netFlow).toLocaleString()} to ₹{Math.round(currentBalance || 0).toLocaleString()}
+                        </Text>
+                        {nwDelta !== null && (
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: nwDelta >= 0 ? '#4ade80' : '#f87171', marginTop: 2 }}>
+                                Net worth {nwDelta >= 0 ? '▲' : '▼'} ₹{Math.abs(nwDelta).toLocaleString()}
+                            </Text>
                         )}
                     </View>
 
-                    {/* ── Net flow big number ── */}
-                    <View style={{ alignItems: 'center', paddingVertical: 20, marginBottom: 4 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4a5580', letterSpacing: 3, marginBottom: 4 }}>NET FLOW THIS MONTH</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 54, color: flowColor, lineHeight: 56 }}>
-                            {isPositive ? '+' : ''}₹{Math.abs(netFlow).toLocaleString()}
-                        </Text>
-                        {nwDelta !== null && (
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: nwDelta >= 0 ? '#4ade80' : '#f87171', marginTop: 4 }}>
-                                Net worth {nwDelta >= 0 ? '▲' : '▼'} ₹{Math.abs(nwDelta).toLocaleString()}
-                            </Text>
+                    {/* ── Health + Mood ── */}
+                    <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+                        {health !== undefined && (
+                            <View style={{ flex: 1, backgroundColor: '#0d1020', borderRadius: 10, borderWidth: 1, borderColor: health < 30 ? '#f8717166' : '#1a2040', padding: 10 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <Image source={HEALTH_ICON} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>Health</Text>
+                                    <Text style={{ flex: 1, textAlign: 'right', fontFamily: 'VT323_400Regular', fontSize: 18, color: health < 30 ? '#f87171' : '#4ade80' }}>{Math.round(health)}</Text>
+                                </View>
+                                {health < 30 ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#f87171', marginTop: 2 }}>Low. Under 30 risks sick leave.</Text> : <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0', marginTop: 2 }}>Holding steady.</Text>}
+                            </View>
+                        )}
+                        {happinessDelta !== undefined && (
+                            <View style={{ flex: 1, backgroundColor: '#0d1020', borderRadius: 10, borderWidth: 1, borderColor: '#1a2040', padding: 10 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <Image source={HAPPY_ICON} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0' }}>Mood</Text>
+                                    <Text style={{ flex: 1, textAlign: 'right', fontFamily: 'VT323_400Regular', fontSize: 18, color: happinessDelta >= 0 ? '#fbbf24' : '#f87171' }}>{happinessDelta >= 0 ? '+' : ''}{Math.round(happinessDelta)}</Text>
+                                </View>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0', marginTop: 2 }}>{happinessDelta >= 0 ? 'Up this month.' : 'Down this month.'}</Text>
+                            </View>
                         )}
                     </View>
 
@@ -188,14 +199,15 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                         </View>
                     )}
 
-                    {/* ── Continue ── */}
-                    <TouchableOpacity
-                        onPress={onContinue}
-                        activeOpacity={0.8}
-                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14, backgroundColor: '#0d1428', paddingVertical: 18, borderRadius: 12 }}
-                    >
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 2 }}>CONTINUE</Text>
-                        <Image source={NEXT_ICON} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                    {pantryEmpty && onBuyGroceries ? (
+                        <TouchableOpacity onPress={onBuyGroceries} activeOpacity={0.85}
+                            style={{ height: 48, borderRadius: 10, backgroundColor: '#1a2e56', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', letterSpacing: 3 }}>BUY GROCERIES</Text>
+                        </TouchableOpacity>
+                    ) : null}
+                    <TouchableOpacity onPress={onContinue} activeOpacity={0.85}
+                        style={{ height: 52, borderRadius: 10, backgroundColor: '#fbbf24', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#2a1c00', letterSpacing: 4 }}>{nextMonthLabel || 'CONTINUE'}</Text>
                     </TouchableOpacity>
                 </ScrollView>
             </View>

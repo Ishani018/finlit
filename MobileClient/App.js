@@ -722,68 +722,54 @@ const GameLayout = ({ onHardReset }) => {
     }
 
     const settingsSprite = getSpriteImage(playerSprite, playerAge);
+    const mths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const Row = ({ icon, label, onPress, color = CREAM }) => (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 14, borderBottomWidth: 1, borderColor: '#1a2040' }}>
+        <Image source={icon} style={{ width: 20, height: 20, opacity: 0.85 }} resizeMode="contain" />
+        <Text style={{ flex: 1, fontFamily: 'VT323_400Regular', fontSize: 21, color }}>{label}</Text>
+        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#5a6890' }}>›</Text>
+      </TouchableOpacity>
+    );
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: BG, justifyContent: 'center', paddingHorizontal: 24 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#06080f', paddingHorizontal: 20 }}>
+        <View style={{ alignItems: 'center', paddingTop: 22, paddingBottom: 18 }}>
+          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#5a6890', letterSpacing: 6 }}>PAUSED</Text>
+          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 52, color: '#c8d4f0', letterSpacing: 8, lineHeight: 54 }}>FINLIT</Text>
+        </View>
 
-        {/* Profile card — sprite + name + stats */}
-        <View style={{ backgroundColor: PANEL, borderRadius: 14, overflow: 'hidden', marginBottom: 28 }}>
-          {/* Top accent with sprite */}
-          <View style={{ height: 210, backgroundColor: '#080d1a', alignItems: 'center', justifyContent: 'flex-end' }}>
-            {settingsSprite && (
-              <PlayerSprite source={settingsSprite} spriteId={playerSprite} age={playerAge} look={playerLook} style={{ width: 120, height: 210 }} />
-            )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', borderRadius: 12, padding: 10, marginBottom: 16 }}>
+          <View style={{ width: 56, height: 72, borderRadius: 8, backgroundColor: '#141b36', overflow: 'hidden' }}>
+            {settingsSprite ? <PlayerSprite source={settingsSprite} spriteId={playerSprite} age={playerAge} look={playerLook} style={{ position: 'absolute', top: 0, left: -18, width: 92, height: 253 }} /> : null}
           </View>
-          <View style={{ padding: 16 }}>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: CREAM, lineHeight: 28 }}>{playerName || '—'}</Text>
-            <View style={{ flexDirection: 'row', gap: 14, marginTop: 6 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <Image source={require('./assets/ui_comp/career.png')} style={{ width: 13, height: 13, opacity: 0.5 }} resizeMode="contain" />
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4a5580' }}>Age {playerAge}</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <Image source={require('./assets/ui_comp/investicon.png')} style={{ width: 13, height: 13, opacity: 0.5 }} resizeMode="contain" />
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: GOLD }}>₹{(netWorth || 0) >= 100000 ? ((netWorth||0)/100000).toFixed(1)+'L' : (netWorth||0).toLocaleString()}</Text>
-              </View>
+          <View style={{ flex: 1 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 26 }}>{playerName || 'Player'} · Age {playerAge}</Text>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0' }}>{mths[(turn.month - 1) % 12]} {turn.year} · Month {totalMonthsPlayed} of {GAME_END_MONTH}</Text>
+            <View style={{ height: 5, borderRadius: 3, backgroundColor: '#1a2040', marginVertical: 4, overflow: 'hidden' }}>
+              <View style={{ width: `${Math.min(100, (totalMonthsPlayed / GAME_END_MONTH) * 100)}%`, height: '100%', backgroundColor: '#38b2ac' }} />
             </View>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#38b2ac' }}>Net worth ₹{(netWorth || 0).toLocaleString()}</Text>
           </View>
         </View>
 
-        {/* Buttons — no borders, rounded */}
-        <View style={{ gap: 10 }}>
-          <TouchableOpacity
-            onPress={() => setShowSettings(false)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0d1428', borderRadius: 10, padding: 16 }}
-          >
-            <Image source={require('./assets/ui_comp/play_button.png')} style={{ width: 18, height: 18, transform: [{ scaleX: -1 }], opacity: 0.7 }} resizeMode="contain" />
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: CREAM, letterSpacing: 2 }}>BACK TO GAME</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowSettings(false)} activeOpacity={0.85} style={{ height: 54, borderRadius: 10, backgroundColor: '#1a2e56', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 5 }}>BACK TO GAME</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => { setShowSettings(false); setShowCustomise(true); }}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0d1428', borderRadius: 10, padding: 16 }}
-          >
-            <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: CREAM, letterSpacing: 2 }}>CUSTOMISE LOOK</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => { setShowSettings(false); setPlayerSprite(null); }}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#080d1a', borderRadius: 10, padding: 16 }}
-          >
-            <Image source={require('./assets/ui_comp/home.png')} style={{ width: 18, height: 18, opacity: 0.4 }} resizeMode="contain" />
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#445070', letterSpacing: 2 }}>TITLE SCREEN</Text>
-          </TouchableOpacity>
-
-          <View style={{ height: 1, backgroundColor: '#1a2040', marginVertical: 6 }} />
-
-          <TouchableOpacity
-            onPress={() => setNewGameConfirm(true)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: RED + '12', borderRadius: 10, padding: 16 }}
-          >
-            <Image source={require('./assets/ui_comp/warning.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: RED, letterSpacing: 2 }}>START NEW GAME</Text>
-          </TouchableOpacity>
+        <View style={{ backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', borderRadius: 12, overflow: 'hidden' }}>
+          <Row icon={require('./assets/ui_comp/bulb.png')} label="How to play" onPress={() => { setShowSettings(false); setActiveTab('home'); setShowHelp(true); }} />
+          <Row icon={require('./assets/ui_comp/happyicon.png')} label="Customise look" onPress={() => { setShowSettings(false); setShowCustomise(true); }} />
+          <Row icon={require('./assets/ui_comp/achivements.png')} label="Goals" onPress={() => { setShowSettings(false); setShowGoals(true); }} />
         </View>
+
+        <View style={{ flex: 1 }} />
+
+        <TouchableOpacity onPress={() => { setShowSettings(false); setPlayerSprite(null); }} activeOpacity={0.85} style={{ height: 46, borderRadius: 10, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#a8b4d8', letterSpacing: 4 }}>TITLE SCREEN</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setNewGameConfirm(true)} activeOpacity={0.85} style={{ height: 46, borderRadius: 10, backgroundColor: '#1a0a0a', borderWidth: 1, borderColor: '#7a2a2a', alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#f87171', letterSpacing: 4 }}>START NEW GAME</Text>
+        </TouchableOpacity>
+        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#5a6890', textAlign: 'center', marginTop: 8, marginBottom: 18 }}>Starting over deletes this life. You will be asked to confirm.</Text>
       </SafeAreaView>
     );
   }
@@ -1285,6 +1271,10 @@ const GameLayout = ({ onHardReset }) => {
               loans={loans}
               totalEMI={getTotalEMI ? getTotalEMI() : 0}
               onContinue={() => setShowSummary(false)}
+              health={health}
+              pantryEmpty={(pantry || []).reduce((n, p) => n + (p.qty || 0), 0) === 0}
+              onBuyGroceries={() => { setShowSummary(false); setShopInitial('grocery'); setShowGrocery(true); }}
+              nextMonthLabel={`START ${['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'][turn.month - 1 < 0 ? 0 : (turn.month - 1) % 12]} ›`}
             />
           )}
 
@@ -1488,62 +1478,55 @@ const GameLayout = ({ onHardReset }) => {
             {/* Money Hub — landing screen when no sub-tab selected */}
             {!moneySubTab && (
               <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
-                <View style={{ marginBottom: 16, marginTop: 4 }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>FINANCES</Text>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 30 }}>Money</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 14, marginTop: 4 }}>
+                  <View>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>FINANCES</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 30 }}>Money</Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 4 }}>NET WORTH</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#38b2ac', lineHeight: 26 }}>₹{(netWorth || 0).toLocaleString()}</Text>
+                  </View>
                 </View>
 
-
-                {/* INVEST card — full width */}
-                <TouchableOpacity onPress={() => setMoneySubTab('invest')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12, marginBottom: 10 }}>
-                  <View style={{ height: 140, position: 'relative' }}>
-                    <Image source={require('./assets/jobs/gold_business.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
-                    <View style={{ position: 'absolute', inset: 0, padding: 16, justifyContent: 'flex-end' }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4ade80', letterSpacing: 4 }}>GROW YOUR WEALTH</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>INVEST</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Stocks · Mutual Funds · PPF · NPS · FD</Text>
+                {(() => {
+                  const hub = buildHubData(); const mp = getMonthPreview();
+                  const Row = ({ img, eyebrow, color, title, status, danger, onPress }) => (
+                    <TouchableOpacity onPress={onPress} activeOpacity={0.85}
+                      style={{ flexDirection: 'row', height: 96, borderRadius: 12, overflow: 'hidden', backgroundColor: '#0d1020', borderWidth: 1, borderColor: danger ? '#f8717199' : '#1a2040', marginBottom: 10 }}>
+                      <View style={{ width: 100 }}>
+                        <Image source={img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(6,8,15,0.25)' }} />
+                      </View>
+                      <View style={{ flex: 1, paddingHorizontal: 12, justifyContent: 'center' }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: danger ? '#f87171' : color, letterSpacing: 3 }}>{eyebrow}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: '#c8d4f0', lineHeight: 28 }}>{title}</Text>
+                        <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: danger ? '#f87171' : '#7d8ab0' }}>{status}</Text>
+                      </View>
+                      <View style={{ justifyContent: 'center', paddingRight: 12 }}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#5a6890' }}>›</Text></View>
+                      {danger ? <View style={{ position: 'absolute', top: 6, right: 8, width: 16, height: 16, borderRadius: 8, backgroundColor: '#f87171', alignItems: 'center', justifyContent: 'center' }}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fff' }}>!</Text></View> : null}
+                    </TouchableOpacity>
+                  );
+                  const att = hub.attention;
+                  return (
+                    <View>
+                      <Row img={require('./assets/jobs/gold_business.png')} eyebrow="GROW YOUR WEALTH" color="#38b2ac" title="INVEST" status={hub.statuses.invest} onPress={() => setMoneySubTab('invest')} />
+                      <Row img={require('./assets/bank.png')} eyebrow="BANKING & LOANS" color="#38b2ac" title="BANK" status={hub.statuses.bank} onPress={() => setMoneySubTab('bank')} />
+                      <Row img={require('./assets/jobs/chemist_drugstore.png')} eyebrow="PROTECT YOUR FAMILY" color="#38b2ac" title="INSURE" status={hub.statuses.insurance} danger={att.includes('insurance')} onPress={() => setMoneySubTab('insure')} />
+                      <Row img={require('./assets/jobs/kirana_store.png')} eyebrow="FOOD & HEALTH" color="#ec4899" title="GROCERY" status={hub.statuses.grocery} danger={att.includes('grocery')} onPress={() => { setShopInitial('grocery'); setShowGrocery(true); }} />
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', borderRadius: 12, padding: 12, marginTop: 2 }}>
+                        <View>
+                          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#5a6890', letterSpacing: 4 }}>THIS MONTH</Text>
+                          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0' }}>Salary +₹{Math.round(mp.income.salary).toLocaleString()}</Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: mp.net >= 0 ? '#4ade80' : '#f87171', lineHeight: 22 }}>{mp.net >= 0 ? '+' : '−'}₹{Math.abs(Math.round(mp.net)).toLocaleString()}</Text>
+                          <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0' }}>Bills −₹{Math.round(mp.totalExpenses).toLocaleString()}</Text>
+                        </View>
+                      </View>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
-                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-
-                {/* BANK card */}
-                <TouchableOpacity onPress={() => setMoneySubTab('bank')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12, marginBottom: 10 }}>
-                  <View style={{ height: 140, position: 'relative' }}>
-                    <Image source={require('./assets/bank.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
-                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, padding: 16, justifyContent: 'flex-end' }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#38b2ac', letterSpacing: 4 }}>BANKING & LOANS</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>BANK</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>FD · Loans · CA · ITR</Text>
-                    </View>
-                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
-                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-
-                {/* INSURE card */}
-                <TouchableOpacity onPress={() => setMoneySubTab('insure')} activeOpacity={0.85}
-                  style={{ borderWidth: 1, borderColor: '#1a2040', backgroundColor: '#0d1020', overflow: 'hidden', borderRadius: 12, marginBottom: 10 }}>
-                  <View style={{ height: 140, position: 'relative' }}>
-                    <Image source={require('./assets/jobs/chemist_drugstore.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.62)' }} />
-                    <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, padding: 16, justifyContent: 'flex-end' }}>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#22c55e', letterSpacing: 4 }}>PROTECTION</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#ffffff', lineHeight: 32 }}>INSURE</Text>
-                      <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0' }}>Health · Life · Property</Text>
-                    </View>
-                    <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
-                      <Image source={require('./assets/ui_comp/nextbutton.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                  );
+                })()}
               </ScrollView>
             )}
             {moneySubTab === 'invest' && (
