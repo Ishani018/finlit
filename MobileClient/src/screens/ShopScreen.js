@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useGame } from '../context/GameContext';
 import { GROCERY_ITEMS, CATEGORY_COLORS } from '../data/groceries';
+import { ITEM_IMAGES } from '../data/groceryImages';
 import { PHARMACY_ITEMS, CLOTHES_ITEMS, SHOP_CATEGORY_COLORS } from '../data/shopItems';
 
 const PAD = 14;
@@ -21,31 +22,6 @@ const C = {
     cream:   '#c8d4f0',
     dim:     '#445070',
     dark:    '#2a3560',
-};
-
-const ITEM_IMAGES = {
-    dal_chawal:       require('../../assets/groceries/dal_chawal.png'),
-    bread_eggs:       require('../../assets/groceries/bread_and_eggs.png'),
-    instant_noodles:  require('../../assets/groceries/cup_noodles.png'),
-    fresh_veggies:    require('../../assets/groceries/veggies.png'),
-    fruits:           require('../../assets/groceries/fruits.png'),
-    organic_meal_kit: require('../../assets/groceries/healthy_meal_box.png'),
-    protein_pack:     require('../../assets/groceries/paneer_tofu.png'),
-    snack_box:        require('../../assets/groceries/chips_snacks_box.png'),
-    chai:             require('../../assets/groceries/chai.png'),
-    milk:             require('../../assets/groceries/milk.png'),
-    paratha:          require('../../assets/groceries/paratha.png'),
-    rajma_rice:       require('../../assets/groceries/rajma_rice.png'),
-    thaali:           require('../../assets/groceries/thaali.png'),
-    smoothie:         require('../../assets/groceries/smoothis.png'),
-    mithai_box:       require('../../assets/groceries/mithai_box.png'),
-    chicken_biryani:  require('../../assets/groceries/chicken_biryani.png'),
-    butter_chicken:   require('../../assets/groceries/butter_chicken.png'),
-    mutton_rogan_josh: require('../../assets/groceries/mutton_rogan_josh.png'),
-    fish_fry:         require('../../assets/groceries/fish_fry.png'),
-    prawn_masala:     require('../../assets/groceries/prawn_masala.png'),
-    tandoori_chicken: require('../../assets/groceries/tandoori_chicken.png'),
-    seekh_kebab:      require('../../assets/groceries/seekh_kebab.png'),
 };
 
 // ── Header ────────────────────────────────────────────────────────────────────
