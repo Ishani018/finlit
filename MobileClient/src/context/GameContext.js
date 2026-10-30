@@ -77,6 +77,7 @@ export const GameProvider = ({ children }) => {
     const [playerSprite, setPlayerSprite] = useState(null);
     const [playerName, setPlayerName] = useState('');
     const [playerBirthday, setPlayerBirthday] = useState(null);
+    const [playerLook, setPlayerLook] = useState({ head: null, neck: null, hair: null });
     // Derived — no extra state needed; recompute from playerSprite
     const trait = TRAIT_MODIFIERS[playerSprite] || {};
     const [gameOver, setGameOver] = useState(false);
@@ -244,7 +245,7 @@ export const GameProvider = ({ children }) => {
                 pendingDecisionQueue: stateRef.current.pendingDecisionQueue,
                 pendingJobInterview: stateRef.current.pendingJobInterview,
                 currentHousingId: stateRef.current.currentHousing?.id || 'hostel',
-                playerSprite, playerName, playerBirthday,
+                playerSprite, playerName, playerBirthday, playerLook,
                 degrees: stateRef.current.degrees,
                 portfolio: stateRef.current.portfolio,
                 properties: stateRef.current.properties,
@@ -302,7 +303,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, propertyBuyMonths, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -340,6 +341,7 @@ export const GameProvider = ({ children }) => {
             if (s.playerSprite) setPlayerSprite(s.playerSprite);
             if (s.playerName) setPlayerName(s.playerName);
             if (s.playerBirthday) setPlayerBirthday(s.playerBirthday);
+            if (s.playerLook) setPlayerLook(s.playerLook);
             if (s.degrees) setDegrees(s.degrees);
             if (s.portfolio) setPortfolio(s.portfolio);
             if (s.properties) setProperties(s.properties);
@@ -1194,6 +1196,7 @@ export const GameProvider = ({ children }) => {
         setPlayerSprite(null);
         setPlayerName('');
         setPlayerBirthday(null);
+        setPlayerLook({ head: null, neck: null, hair: null });
         setGeneration(1);
         setGameOver(false);
         setIsLegacyMode(false);
@@ -4493,6 +4496,7 @@ export const GameProvider = ({ children }) => {
         currentJob, pendingApplications, pendingJobInterview, setPendingJobInterview, resolveInterview, currentHousing, playerSprite, setPlayerSprite,
         playerName, setPlayerName,
         playerBirthday, setPlayerBirthday,
+        playerLook, setPlayerLook,
         degrees, portfolio, properties, marketPrices, priceHistory,
         totalMonthsPlayed, playerAge, gameOver, finalScore,
         netWorthHistory, lastMonthFlow, monthlyRecap,

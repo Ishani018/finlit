@@ -45,6 +45,8 @@ import Vignette from './src/components/Vignette';
 import InterviewModal from './src/components/InterviewModal';
 import LoadingScreen from './src/components/LoadingScreen';
 import { getSpriteImage } from './src/data/spriteMap';
+import PlayerSprite from './src/components/PlayerSprite';
+import CustomiseScreen from './src/components/CustomiseScreen';
 import { useFonts, VT323_400Regular } from '@expo-google-fonts/vt323';
 import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -335,7 +337,7 @@ const GameLayout = ({ onHardReset }) => {
     gameSpeed, setGameSpeed,
     degrees, portfolio, properties, marketPrices, priceHistory,
     enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice, getMonthPreview,
-    playerSprite, setPlayerSprite, playerName,
+    playerSprite, setPlayerSprite, playerName, setPlayerName, playerLook, setPlayerLook,
     playerAge, totalMonthsPlayed, gameOver, finalScore, RETIREMENT_MONTH, GAME_END_MONTH,
     netWorthHistory, lastMonthFlow, monthlyRecap,
     loans, buyPropertyWithLoan, sellProperty,
@@ -373,6 +375,7 @@ const GameLayout = ({ onHardReset }) => {
   const [showBirthdayRoom, setShowBirthdayRoom] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showCustomise, setShowCustomise] = useState(false);
   const [newGameConfirm, setNewGameConfirm] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHomeScreen, setShowHomeScreen] = useState(false);
@@ -727,7 +730,7 @@ const GameLayout = ({ onHardReset }) => {
           {/* Top accent with sprite */}
           <View style={{ height: 210, backgroundColor: '#080d1a', alignItems: 'center', justifyContent: 'flex-end' }}>
             {settingsSprite && (
-              <Image source={settingsSprite} style={{ width: 120, height: 210 }} resizeMode="contain" />
+              <PlayerSprite source={settingsSprite} spriteId={playerSprite} age={playerAge} look={playerLook} style={{ width: 120, height: 210 }} />
             )}
           </View>
           <View style={{ padding: 16 }}>
@@ -753,6 +756,14 @@ const GameLayout = ({ onHardReset }) => {
           >
             <Image source={require('./assets/ui_comp/play_button.png')} style={{ width: 18, height: 18, transform: [{ scaleX: -1 }], opacity: 0.7 }} resizeMode="contain" />
             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: CREAM, letterSpacing: 2 }}>BACK TO GAME</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => { setShowSettings(false); setShowCustomise(true); }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#0d1428', borderRadius: 10, padding: 16 }}
+          >
+            <Image source={require('./assets/ui_comp/happyicon.png')} style={{ width: 18, height: 18, opacity: 0.7 }} resizeMode="contain" />
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: CREAM, letterSpacing: 2 }}>CUSTOMISE LOOK</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -1157,7 +1168,7 @@ const GameLayout = ({ onHardReset }) => {
               activeOpacity={0.8}
               style={{ position: 'absolute', bottom: -182, right: -18, zIndex: 10 }}
             >
-              <Image source={spriteImage} style={{ width: 178, height: 330 }} resizeMode="contain" />
+              <PlayerSprite source={spriteImage} spriteId={playerSprite} age={playerAge} look={playerLook} style={{ width: 178, height: 330 }} />
               {dependents.length > 0 && (
                 <View style={{ position: 'absolute', top: 14, right: 0, backgroundColor: '#ec4899', width: 16, height: 16, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#fff' }}>{dependents.length}</Text>
@@ -2388,6 +2399,17 @@ const GameLayout = ({ onHardReset }) => {
           }}
           onClose={() => setShowCrisisSimulator(false)}
         />
+
+        {showCustomise && (
+          <CustomiseScreen
+            spriteId={playerSprite}
+            name={playerName}
+            look={playerLook}
+            startAge={playerAge}
+            onClose={() => setShowCustomise(false)}
+            onSave={({ name, look }) => { setPlayerName(name); setPlayerLook(look); setShowCustomise(false); }}
+          />
+        )}
 
         {showHub && (() => {
           const hub = buildHubData();
