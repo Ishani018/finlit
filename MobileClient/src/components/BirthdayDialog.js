@@ -129,7 +129,7 @@ export default function BirthdayDialog({ event, onChoice }) {
                             return (
                                 <View key={index} style={{ width: CARD_W, borderRadius: 8, overflow: 'hidden', opacity: active ? 1 : 0.5 }}>
                                     <View style={{ height: 300, position: 'relative' }}>
-                                        <Image source={img} style={{ width: CARD_W, height: 300 }} resizeMode="cover" />
+                                        {event.containImage ? <View style={{ width: CARD_W, height: 300, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}><Image source={img} style={{ width: CARD_W * 0.7, height: 270 }} resizeMode="contain" /></View> : <Image source={img} style={{ width: CARD_W, height: 300 }} resizeMode="cover" />}
                                         {/* Gradient scrim — no hard border */}
                                         <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 90, backgroundColor: 'rgba(5,7,12,0.0)' }} pointerEvents="none" />
                                         <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 14, paddingBottom: 12, paddingTop: 40, backgroundColor: 'rgba(5,7,14,0.78)' }}>

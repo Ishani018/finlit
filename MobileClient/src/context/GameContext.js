@@ -7,6 +7,8 @@ import { MUTUAL_FUNDS } from '../data/mutualFunds';
 import { RESIDENTIAL_PROPERTIES, COMMERCIAL_PROPERTIES } from '../data/realEstate';
 import { INSURANCE_PLANS } from '../data/insurance';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
+import { ADOPTION_MIN_AGE, ADOPTION_MAX_CHILDREN, ADOPTION_OPTIONS } from '../data/adoption';
+import { getKidSprite } from '../data/kidSprites';
 import { CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_TYPE, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, PARKED_COST_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
 import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, MAX_WORKERS_PER_BUSINESS, rollBusinessRevenue, generateStaffCandidates, getStaffedEconomics } from '../data/businesses';
 import { calculateIncomeTax, calculateTaxByRegime, STANDARD_DEDUCTION, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
@@ -254,7 +256,7 @@ export const GameProvider = ({ children }) => {
                 degrees: stateRef.current.degrees,
                 portfolio: stateRef.current.portfolio,
                 properties: stateRef.current.properties,
-                propertyBuyMonths, cars, activeCarUid, taxRegime,
+                propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild,
                 marketPrices: stateRef.current.marketPrices,
                 priceHistory: stateRef.current.priceHistory,
                 marketCycle: stateRef.current.marketCycle,
@@ -308,7 +310,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -352,6 +354,7 @@ export const GameProvider = ({ children }) => {
             if (s.properties) setProperties(s.properties);
             if (s.propertyBuyMonths) setPropertyBuyMonths(s.propertyBuyMonths);
             if (s.taxRegime === 'old' || s.taxRegime === 'new') setTaxRegime(s.taxRegime);
+            if (s.expectingChild) setExpectingChild(s.expectingChild);
             if (Array.isArray(s.cars)) setCars(s.cars);
             if (s.activeCarUid) setActiveCarUid(s.activeCarUid);
             if (s.marketPrices) setMarketPrices(s.marketPrices);
@@ -1591,6 +1594,24 @@ export const GameProvider = ({ children }) => {
         setExpectingChild({ name: '', gender, remaining: 9, spouseId: spouse.id });
         addHistory('Expecting a baby!', 0, 'info');
         return { success: true, msg: `You are expecting a baby! They will arrive in 9 months. Upgrade your housing before then if needed!` };
+    };
+
+    // Adopt a child. Works whether or not you are married. The fee is paid now, the child arrives after the paperwork months.
+    const adoptChild = ({ gender, ageKey }) => {
+        const opt = ADOPTION_OPTIONS.find(o => o.key === ageKey);
+        if (!opt || (gender !== 'male' && gender !== 'female')) return { success: false, msg: 'Pick a gender and an age group.' };
+        const age = STARTING_AGE + Math.floor(totalMonthsPlayed / 12);
+        if (age < ADOPTION_MIN_AGE) return { success: false, msg: `You must be at least ${ADOPTION_MIN_AGE} to adopt.` };
+        if (expectingChild) return { success: false, msg: 'You already have a child on the way.' };
+        const living = dependents.filter(d => !d.isDead && d.custody !== 'ex');
+        if (living.filter(d => d.type === 'child').length >= ADOPTION_MAX_CHILDREN) return { success: false, msg: `You already have ${ADOPTION_MAX_CHILDREN} children.` };
+        if (balance < opt.fee) return { success: false, msg: `The adoption fee is ₹${opt.fee.toLocaleString()}. You have ₹${Math.round(balance).toLocaleString()}.` };
+        if (!currentJob && !living.some(d => d.type === 'spouse' && d.isWorking)) return { success: false, msg: 'Adoption agencies need a steady income. Get a job first.' };
+        const spouse = dependents.find(d => d.type === 'spouse' && !d.isDead);
+        setBalance(prev => prev - opt.fee);
+        setExpectingChild({ name: '', gender, remaining: opt.wait, spouseId: spouse ? spouse.id : null, adopted: true, startMonths: opt.startMonths });
+        addHistory(`Adoption application (${opt.label.toLowerCase()})`, -opt.fee, 'expense');
+        return { success: true, msg: `Your application is approved. Fee paid: ₹${opt.fee.toLocaleString()}. Your child arrives in ${opt.wait} months. Make sure your home has room.` };
     };
 
     const feedDependent = (dependentId, healthAmount) => {
@@ -3937,8 +3958,9 @@ export const GameProvider = ({ children }) => {
                     type: 'child',
                     name: finalChildName,
                     gender: expectingChild.gender,
-                    ageMonths: 0,
-                    childAgeMonths: 0,
+                    ageMonths: expectingChild.startMonths || 0,
+                    childAgeMonths: expectingChild.startMonths || 0,
+                    adopted: !!expectingChild.adopted,
                     health: 100,
                     schoolTier: 'none',
                     preschoolTier: 'none',
@@ -3951,7 +3973,7 @@ export const GameProvider = ({ children }) => {
                 
                 // If divorced from the child's other parent, trigger Custody Dilemma for the newborn
                 const currentSpouse = dependents.find(d => d.type === 'spouse');
-                const isExSpouseChild = !currentSpouse || currentSpouse.id !== expectingChild.spouseId;
+                const isExSpouseChild = !expectingChild.adopted && (!currentSpouse || currentSpouse.id !== expectingChild.spouseId);
 
                 if (isExSpouseChild) {
                     decisionsToQueue.push({
@@ -3967,6 +3989,19 @@ export const GameProvider = ({ children }) => {
                     });
                 }
 
+                if (expectingChild.adopted) {
+                    decisionsToQueue.push({
+                        id: `child_adopted_${totalMonthsPlayed}`,
+                        name: 'Welcome Home! 🏡',
+                        isBaby: true,   // uses the picture dialog, which shows the child
+                        containImage: true,
+                        gender: expectingChild.gender,
+                        message: `${finalChildName} has come home. The adoption is final and you are officially a family.${emergencyMoveMsg}`,
+                        category: emergencyMoveMsg ? 'crisis' : 'positive',
+                        choices: [{ label: 'Welcome home!', color: '#4ade80', effect: { type: 'none' } }],
+                        image: getKidSprite(expectingChild.gender, expectingChild.startMonths || 0, true),
+                    });
+                } else
                 decisionsToQueue.push({
                     id: `child_born_${totalMonthsPlayed}`,
                     name: 'A New Life! 🍼',
@@ -4660,6 +4695,7 @@ export const GameProvider = ({ children }) => {
         activeInsurance, buyInsurance, cancelInsurance,
 
         // Dependents
+        adoptChild,
         propertyBuyMonths, cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,

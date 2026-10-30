@@ -5,6 +5,9 @@ import { useGame } from '../context/GameContext';
 import { INSURANCE_PLANS } from '../data/insurance';
 import { GROCERY_ITEMS } from '../data/groceries';
 import { getSpriteImage } from '../data/spriteMap';
+import { getKidSprite } from '../data/kidSprites';
+import AdoptSheet from '../components/AdoptSheet';
+import { ADOPTION_MIN_AGE } from '../data/adoption';
 import PixelDialog from '../components/PixelDialog';
 
 const PAD = 14;
@@ -74,13 +77,7 @@ const SPOUSE_IMAGES = {
 
 const getSpouseImage = (s) => SPOUSE_IMAGES[s] || null;
 
-const getChildImage = (gender, ageMonths) => {
-    const f = gender === 'female';
-    if (ageMonths < 12)  return f ? DEP_IMAGES.baby_daughter     : DEP_IMAGES.baby_son;
-    if (ageMonths < 60)  return f ? DEP_IMAGES.toddler_daughter   : DEP_IMAGES.toddler_son;
-    if (ageMonths < 216) return f ? DEP_IMAGES.preschool_daughter : DEP_IMAGES.preschool_son;
-    return                      f ? DEP_IMAGES.teenage_daughter   : DEP_IMAGES.teenage_son;
-};
+const getChildImage = (gender, ageMonths, adopted) => getKidSprite(gender, ageMonths, adopted);
 
 const getChildStage = (ageMonths) => {
     if (ageMonths < 12)  return { label: 'INFANT',      color: '#ec4899', cost: '₹8k/mo' };
@@ -156,7 +153,7 @@ function ChildCard({ child, onPress }) {
     const isDead = child.isDead;
     const stage = isDead ? { label: 'DECEASED', color: '#666', cost: '₹0/mo' } : getChildStage(child.childAgeMonths || 0);
     const ageYr = Math.floor((child.childAgeMonths || 0) / 12);
-    const img   = isDead ? GRAVESTONE_IMG : getChildImage(child.gender, child.childAgeMonths || 0);
+    const img   = isDead ? GRAVESTONE_IMG : getChildImage(child.gender, child.childAgeMonths || 0, child.adopted);
     const hp    = child.health ?? 80;
     
     const isEx = child.custody === 'ex';
@@ -212,19 +209,35 @@ function AddChildCard({ onPress }) {
 }
 
 // ── Expecting child card ────────────────────────────────────────────────────────────
+function AdoptCard({ onPress }) {
+    return (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.85}
+            style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
+            <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.pink + '08' }}>
+                <Image source={DEP_IMAGES.adopted_baby} style={{ width: 64, height: 64, opacity: 0.75 }} resizeMode="contain" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.pink + 'cc', letterSpacing: 2 }}>+ ADOPT</Text>
+            </View>
+            <View style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>Adopt a Child</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>Single or married</Text>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
 function ExpectingChildCard({ data }) {
-    const babyImg = data.gender === 'female' ? DEP_IMAGES.baby_daughter : DEP_IMAGES.baby_son;
+    const babyImg = data.adopted ? getKidSprite(data.gender, data.startMonths || 0, true) : (data.gender === 'female' ? DEP_IMAGES.baby_daughter : DEP_IMAGES.baby_son);
     return (
         <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', backgroundColor: C.pink + '08' }}>
                 <Image source={babyImg} style={{ width: '80%', height: '80%', opacity: 0.4 }} resizeMode="contain" />
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.pink, letterSpacing: 2, position: 'absolute', top: 10, left: 10 }}>EXPECTING</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.pink, letterSpacing: 2, position: 'absolute', top: 10, left: 10 }}>{data.adopted ? 'ADOPTING' : 'EXPECTING'}</Text>
                 <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(6,8,15,0.85)', paddingVertical: 5, alignItems: 'center' }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.cream, letterSpacing: 1 }}>{data.remaining} MONTHS LEFT</Text>
                 </View>
             </View>
             <View style={{ padding: 10 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.pink + 'cc' }}>{data.name || 'Baby'} (9mo)</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.pink + 'cc' }}>{data.adopted ? 'Adoption in progress' : `${data.name || 'Baby'} (9mo)`}</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>Needs 1 extra capacity!</Text>
             </View>
         </View>
@@ -364,7 +377,7 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
     const parentImg = dep.parentType === 'mother' ? DEP_IMAGES.elderly_mother
                     : dep.parentType === 'father'  ? DEP_IMAGES.elderly_father
                     : DEP_IMAGES.elderly_couple;
-    const img      = isChild  ? getChildImage(dep.gender, dep.childAgeMonths || 0)
+    const img      = isChild  ? getChildImage(dep.gender, dep.childAgeMonths || 0, dep.adopted)
                    : isParent ? parentImg
                    : isSpouse ? (getSpouseImage(dep.spouseSprite) || BRIDE_IMG)
                    : null;
@@ -774,7 +787,7 @@ function MarriagePickModal({ onPick, onClose }) {
 export default function FamilyScreen({ onClose, onGoToBank }) {
     const {
         playerName, playerAge, playerSprite, balance, creditScore, happiness, currentJob,
-        dependents, marry, haveChild, feedDependent, addParent, expectingChild,
+        dependents, marry, haveChild, adoptChild, feedDependent, addParent, expectingChild,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
         activeInsurance, buyInsurance, cancelInsurance,
         ppf, fixedDeposits,
@@ -787,6 +800,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
     const [dialog, setDialog]                     = useState({ visible: false, title: '', message: '', type: 'info', onConfirm: null, confirmText: 'OK', cancelText: null, onCancel: null, image: null });
     const [selectedDep, setSelectedDep]           = useState(null);
     const [showMarriagePick, setShowMarriagePick] = useState(false);
+    const [showAdopt, setShowAdopt] = useState(false);
     const [showParentPick, setShowParentPick]     = useState(false);
     const [showLoanAdvisory, setShowLoanAdvisory] = useState(false);
     const [showNameBaby, setShowNameBaby]         = useState(false);
@@ -915,7 +929,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 </View>
 
                 {/* Children */}
-                {(children.length > 0 || spouse) && <SectionLabel label="CHILDREN" />}
+                {(children.length > 0 || spouse || expectingChild || playerAge >= ADOPTION_MIN_AGE) && <SectionLabel label="CHILDREN" />}
 
                 {(() => {
                     // Build list: children + optional add-child slot
@@ -923,6 +937,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                     if (expectingChild) slots.push({ type: 'expecting', data: expectingChild });
                     const activeChildrenWithCurrentSpouse = children.filter(c => c.custody !== 'ex' && c.spouseId === spouse?.id);
                     if (spouse && activeChildrenWithCurrentSpouse.length < 3 && !expectingChild) slots.push({ type: 'add' });
+                    if (!expectingChild && playerAge >= ADOPTION_MIN_AGE && children.filter(c => c.custody !== 'ex' && !c.isDead).length < 4) slots.push({ type: 'adopt' });
 
                     const rows = [];
                     for (let i = 0; i < slots.length; i += 2) {
@@ -934,6 +949,8 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                     ? <ChildCard child={left.data} onPress={() => setSelectedDep(left.data)} />
                                     : left.type === 'expecting'
                                     ? <ExpectingChildCard data={left.data} />
+                                    : left.type === 'adopt'
+                                    ? <AdoptCard onPress={() => setShowAdopt(true)} />
                                     : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
                                 }
                                 {right ? (
@@ -941,6 +958,8 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                         ? <ChildCard child={right.data} onPress={() => setSelectedDep(right.data)} />
                                         : right.type === 'expecting'
                                         ? <ExpectingChildCard data={right.data} />
+                                        : right.type === 'adopt'
+                                        ? <AdoptCard onPress={() => setShowAdopt(true)} />
                                         : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
                                 ) : <View style={{ flex: 1 }} />}
                             </View>
@@ -1043,6 +1062,15 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
             {selectedDep && (
                 <DependentDetail dep={selectedDep} pantry={pantry} onFeed={handleFeed} onClose={() => setSelectedDep(null)} showDialog={showDialog} totalMonthsPlayed={totalMonthsPlayed} upskillSpouse={upskillSpouse} divorce={divorce} giftChild={giftChild} buyMedicine={buyMedicine} toggleCaretaker={toggleCaretaker} planVacation={planVacation} activeInsurance={activeInsurance} ppf={ppf} fixedDeposits={fixedDeposits} dependents={dependents} setChildSchoolTier={setChildSchoolTier} setChildPreschoolTier={setChildPreschoolTier} />
             )}
+
+            <AdoptSheet
+                visible={showAdopt}
+                balance={balance}
+                playerAge={playerAge}
+                married={!!spouse}
+                onClose={() => setShowAdopt(false)}
+                onAdopt={(opts) => { const r = adoptChild(opts); setShowAdopt(false); showDialog(r.success ? 'Adoption started' : 'Cannot adopt', r.msg, r.success ? 'success' : 'error'); }}
+            />
 
             {showMarriagePick && (
                 <MarriagePickModal

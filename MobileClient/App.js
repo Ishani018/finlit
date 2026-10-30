@@ -47,6 +47,7 @@ import LoadingScreen from './src/components/LoadingScreen';
 import { getSpriteImage } from './src/data/spriteMap';
 import PlayerSprite from './src/components/PlayerSprite';
 import { CAR_BY_ID } from './src/data/cars';
+import { getKidSprite } from './src/data/kidSprites';
 import CustomiseScreen from './src/components/CustomiseScreen';
 import { useFonts, VT323_400Regular } from '@expo-google-fonts/vt323';
 import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
@@ -587,13 +588,7 @@ const GameLayout = ({ onHardReset }) => {
     if (lastCrisisEvent.depId && !eventImage) {
       const { depType, depGender, depChildAgeMonths, depParentType, depId } = lastCrisisEvent;
       if (depType === 'child') {
-        const f = (depGender || '').toLowerCase() === 'female';
-        const ageM = depChildAgeMonths || 0;
-        let src;
-        if (ageM < 12) src = f ? require('./assets/dependents/baby_daughter.png') : require('./assets/dependents/baby_son.png');
-        else if (ageM < 60) src = f ? require('./assets/dependents/toddler_daughter.png') : require('./assets/dependents/toddler_son.png');
-        else if (ageM < 216) src = f ? require('./assets/dependents/pre_schooler_daughter.png') : require('./assets/dependents/pre_schooler_son.png');
-        else src = f ? require('./assets/dependents/teenage_daughter.png') : require('./assets/dependents/teenage_son.png');
+        const src = getKidSprite(depGender, depChildAgeMonths || 0, !!lastCrisisEvent.depAdopted);
         if (src) eventImage = { isSprite: true, source: src, scale: 1.1 };
       } else if (depType === 'spouse') {
         const sp = dependents.find(d => d.id === depId);
@@ -632,13 +627,7 @@ const GameLayout = ({ onHardReset }) => {
             const src = getSpriteImage(dep.spouseSprite, playerAge);
             if (src) depImage = { isSprite: true, source: src, scale: 1.6 };
         } else if (dep.type === 'child') {
-            const f = dep.gender === 'female';
-            const ageM = dep.childAgeMonths || 0;
-            let src;
-            if (ageM < 12) src = f ? require('./assets/dependents/baby_daughter.png') : require('./assets/dependents/baby_son.png');
-            else if (ageM < 60) src = f ? require('./assets/dependents/toddler_daughter.png') : require('./assets/dependents/toddler_son.png');
-            else if (ageM < 216) src = f ? require('./assets/dependents/pre_schooler_daughter.png') : require('./assets/dependents/pre_schooler_son.png');
-            else src = f ? require('./assets/dependents/teenage_daughter.png') : require('./assets/dependents/teenage_son.png');
+            const src = getKidSprite(dep.gender, dep.childAgeMonths || 0, !!dep.adopted);
             if (src) depImage = { isSprite: true, source: src, scale: 1.1 };
         } else if (dep.type === 'parent') {
             const isMother = dep.parentType === 'mother' || dep.name === 'Mother';

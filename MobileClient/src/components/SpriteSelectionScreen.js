@@ -57,7 +57,6 @@ const TRAITS = {
 // ─── Shared bits ─────────────────────────────────────────────────────────────
 const ROOM_BG = require('../../assets/hostel.png');
 const VAULT = require('../../assets/ui_comp/investicon.png');
-const NAMES = { young_pia_1: 'PIA', young_raj_1: 'RAJ', young_soms_1: 'SOMS', young_soni_1: 'SONI', young_sia_1: 'SIA', young_rahul_1: 'RAHUL', young_priya_1: 'PRIYA', young_kav_1: 'KAV' };
 const NAME_IDEAS = ['Meera', 'Aarav', 'Zoya', 'Kabir', 'Ananya', 'Dev'];
 const GOLD = '#fbbf24';
 
@@ -188,12 +187,6 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
             <StepHeader step={childMode ? 'NEXT GENERATION' : 'STEP 1 OF 2'} title={childMode ? `Pick a look for ${childName || 'your child'}` : 'Choose your character'} onBack={onBack} />
 
             <Hero height={heroH} sprite={stageSrc} spriteId={null}>
-                {!childMode && (
-                    <View style={{ position: 'absolute', top: 10, left: 10, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(13,16,32,0.9)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: trait.color + '66' }}>
-                        {TRAIT_ICONS[sprite.id] ? <Image source={TRAIT_ICONS[sprite.id]} style={{ width: 14, height: 14 }} resizeMode="contain" /> : null}
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#c8d4f0', letterSpacing: 1 }}>{trait.name}</Text>
-                    </View>
-                )}
                 {[['‹', -1, { left: 8 }], ['›', 1, { right: 8 }]].map(([ch, d, pos]) => (
                     <TouchableOpacity key={ch} onPress={() => { setIdx((idx + d + SPRITES.length) % SPRITES.length); setStage(0); }} activeOpacity={0.8}
                         style={[{ position: 'absolute', top: '42%', width: 36, height: 44, borderRadius: 10, backgroundColor: 'rgba(13,16,32,0.8)', borderWidth: 1, borderColor: '#2a3560', alignItems: 'center', justifyContent: 'center' }, pos]}>
@@ -205,7 +198,7 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: PAD, paddingTop: 10, paddingBottom: 10 }} showsVerticalScrollIndicator={false}>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
                     <View style={{ flex: 1 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: trait.color, letterSpacing: 2, lineHeight: 34 }}>{NAMES[sprite.id]}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: trait.color, letterSpacing: 2, lineHeight: 34 }}>{trait.name}</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#7d8ab0' }}>{trait.desc}</Text>
                     </View>
                     {!childMode && (
@@ -241,7 +234,7 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
             <View style={{ paddingHorizontal: PAD, paddingTop: 8, paddingBottom: 14, borderTopWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f' }}>
                 <TouchableOpacity onPress={() => { setSelectedIdx(idx); onNext(); }} activeOpacity={0.85}
                     style={{ height: 50, borderRadius: 10, backgroundColor: '#818cf8', alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#0a0e22', letterSpacing: 4 }}>{childMode ? 'SELECT THIS LOOK' : `PLAY AS ${NAMES[sprite.id]}`}</Text>
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#0a0e22', letterSpacing: 4 }}>{childMode ? 'SELECT THIS LOOK' : 'CHOOSE THIS CHARACTER'}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -412,7 +405,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                 <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
                     <Hero height={heroH} sprite={selected.image} spriteId={selected.id} look={look}>
                         <View style={{ position: 'absolute', bottom: 10, alignSelf: 'center', minWidth: 160, paddingHorizontal: 20, paddingVertical: 4, borderRadius: 6, borderWidth: 1, borderColor: GOLD, backgroundColor: 'rgba(6,8,15,0.92)', alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: GOLD, letterSpacing: 4 }}>{(trimmed || NAMES[selected.id]).toUpperCase()}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: GOLD, letterSpacing: 4 }}>{(trimmed || 'YOUR NAME').toUpperCase()}</Text>
                         </View>
                     </Hero>
 
@@ -465,7 +458,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
 
                 <View style={{ paddingHorizontal: PAD, paddingTop: 8, paddingBottom: 14, borderTopWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f' }}>
                     <TouchableOpacity onPress={handleStart} activeOpacity={0.85} style={{ height: 50, borderRadius: 10, backgroundColor: '#818cf8', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#0a0e22', letterSpacing: 4 }}>START AS {(trimmed || NAMES[selected.id]).toUpperCase()}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#0a0e22', letterSpacing: 4 }}>{trimmed ? `START AS ${trimmed.toUpperCase()}` : 'START MY LIFE'}</Text>
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
