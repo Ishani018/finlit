@@ -1030,7 +1030,12 @@ const GameLayout = ({ onHardReset }) => {
 
             {/* Row 1: Name/Age/Job — left | Cash/Income/Settings — right */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <View>
+              <TouchableOpacity onPress={() => setShowHub(true)} activeOpacity={0.8}
+                style={{ width: 40, height: 44, marginRight: 10, borderRadius: 10, backgroundColor: '#141b36', borderWidth: 1, borderColor: '#2a3560', alignItems: 'center', justifyContent: 'center' }}>
+                <FontAwesome5 name="th-large" size={16} color="#c8d4f0" />
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 10, color: '#7d8ab0', letterSpacing: 1, lineHeight: 11, marginTop: 1 }}>MENU</Text>
+              </TouchableOpacity>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0', lineHeight: 22 }}>{playerName || 'Player'}  ·  Age {playerAge}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: '#445070', lineHeight: 18 }}>{currentJob?.name || 'Unemployed'}</Text>
@@ -1047,9 +1052,6 @@ const GameLayout = ({ onHardReset }) => {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: net >= 0 ? '#4ade80' : '#f87171', lineHeight: 15 }}>{net >= 0 ? '+' : '−'}₹{Math.abs(Math.round(net)).toLocaleString()} expected</Text>
                   ); })()}
                 </View>
-                <TouchableOpacity onPress={() => setShowHub(true)} style={{ width: 34, height: 34, alignItems: 'center', justifyContent: 'center' }}>
-                  <FontAwesome5 name="th-large" size={20} color="#7d8ab0" />
-                </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowSettings(true)} style={{ width: 34, height: 34, alignItems: 'center', justifyContent: 'center' }}>
                   <Image source={require('./assets/ui_comp/settingsicon.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
                 </TouchableOpacity>
@@ -1143,7 +1145,7 @@ const GameLayout = ({ onHardReset }) => {
           {/* Player sprite — peeking from bottom-right, tap to open Life screen */}
           {activeMenu !== 'advisor' && spriteImage && (
             <TouchableOpacity
-              onPress={() => { setActiveTab('family'); }}
+              onPress={() => setShowCustomise(true)}
               activeOpacity={0.8}
               style={{ position: 'absolute', bottom: -40, right: -18, zIndex: 10 }}
             >

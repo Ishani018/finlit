@@ -28,13 +28,13 @@ function Corners({ color }) {
 }
 
 // Head-and-shoulders crop of the sprite wearing `look`, used inside the option tiles.
-function Preview({ spriteId, age, look, w, h }) {
+function Preview({ spriteId, age, look, w, h, slot }) {
     const src = getSpriteImage(spriteId, age);
     const sw = w * 2.1, sh = sw / 0.363;
     return (
         <View style={{ width: w, height: h, overflow: 'hidden' }}>
             <PlayerSprite source={src} spriteId={spriteId} age={age} look={look}
-                style={{ position: 'absolute', width: sw, height: sh, left: w / 2 - sw * 0.54, top: sh * 0.04 }} />
+                style={{ position: 'absolute', width: sw, height: sh, left: w / 2 - sw * 0.54, top: slot === 'neck' ? -sh * 0.145 : sh * 0.04 }} />
         </View>
     );
 }
@@ -124,7 +124,7 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                                     <TouchableOpacity key={it.id || 'none'} activeOpacity={0.85}
                                         onPress={() => setLook(l => ({ ...l, [slot]: it.id }))}
                                         style={{ width: tileW, height: 118, borderRadius: 10, overflow: 'hidden', backgroundColor: '#0d1020', borderWidth: 1, borderColor: on ? GOLD : '#1e2840' }}>
-                                        <Preview spriteId={spriteId} age={age} look={{ ...look, [slot]: it.id }} w={tileW - 2} h={84} />
+                                        <Preview spriteId={spriteId} age={age} look={{ ...look, [slot]: it.id }} w={tileW - 2} h={84} slot={slot} />
                                         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(6,8,15,0.84)', borderTopWidth: 1, borderColor: 'rgba(200,212,240,0.1)' }}>
                                             <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: on ? GOLD : '#c8d4f0' }}>{it.label}</Text>
                                         </View>
