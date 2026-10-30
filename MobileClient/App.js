@@ -352,7 +352,7 @@ const GameLayout = ({ onHardReset }) => {
     isRetired, pensionIncome,
     nextMonth, happiness, buyAndMoveIn,
     eventInbox, markEventRead, markAllEventsRead,
-    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer, cars, activeCarUid,
+    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer, cars, activeCarUid, propertyBuyMonths,
     pendingDecision, resolveDecision,
     newAchievement, setNewAchievement,
     achievements,
@@ -1116,7 +1116,8 @@ const GameLayout = ({ onHardReset }) => {
 
           {/* A home you own but don't live in: say so on the main screen, with a one-tap way to move in */}
           {(() => {
-            const spare = RESIDENTIAL_PROPERTIES.find(p => properties.includes(p.id) && p.id !== currentHousing.id && !dismissedMoveIn.includes(p.id));
+            // only nag about a home you bought in the last 3 months, so investors with spare flats are not pestered forever
+            const spare = RESIDENTIAL_PROPERTIES.find(p => properties.includes(p.id) && p.id !== currentHousing.id && !dismissedMoveIn.includes(p.id) && totalMonthsPlayed - ((propertyBuyMonths || {})[p.id] ?? -99) <= 3);
             if (!spare) return null;
             return (
               <View style={{ position: 'absolute', left: 10, right: 10, top: 60, zIndex: 35, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(13,34,24,0.96)', borderWidth: 1, borderColor: '#4ade8088', borderRadius: 12, padding: 10 }}>

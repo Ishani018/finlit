@@ -204,15 +204,17 @@ export default function CrisisSimulator({ visible, gameState, onClose }) {
     const slideAnim = useRef(new Animated.Value(SH)).current;
     const [selected, setSelected] = useState(null);
     const [result, setResult]     = useState(null);
+    const [mounted, setMounted]   = useState(!!visible);   // unmount once slid away; off-screen it stretched the page on web
 
     useEffect(() => {
         if (visible) {
+            setMounted(true);
             setSelected(null);
             setResult(null);
             slideAnim.setValue(SH);
             Animated.spring(slideAnim, { toValue: 0, friction: 14, tension: 100, useNativeDriver: true }).start();
         } else {
-            Animated.timing(slideAnim, { toValue: SH, duration: 220, useNativeDriver: true }).start();
+            Animated.timing(slideAnim, { toValue: SH, duration: 220, useNativeDriver: true }).start(({ finished }) => { if (finished) setMounted(false); });
         }
     }, [visible]);
 
@@ -220,6 +222,8 @@ export default function CrisisSimulator({ visible, gameState, onClose }) {
         setSelected(scenario);
         setResult(scenario.simulate(gameState));
     };
+
+    if (!mounted && !visible) return null;
 
     const os = result ? OUTCOME_STYLE[result.outcome] || OUTCOME_STYLE['CLOSE CALL'] : null;
 

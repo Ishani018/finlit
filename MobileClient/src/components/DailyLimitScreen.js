@@ -36,13 +36,16 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
     const slideAnim = useRef(new Animated.Value(visible ? 0 : SH)).current;
     const [countdown, setCountdown] = useState(getSecondsUntilMidnight());
     const [tip] = useState(() => TIPS[Math.floor(Math.random() * TIPS.length)]);
+    // Unmount once it has slid away. Left mounted off-screen it stretched the page on web and showed through under other sheets.
+    const [mounted, setMounted] = useState(!!visible);
 
     useEffect(() => {
         if (visible) {
+            setMounted(true);
             slideAnim.setValue(SH);
             Animated.spring(slideAnim, { toValue: 0, friction: 14, tension: 100, useNativeDriver: true }).start();
         } else {
-            Animated.timing(slideAnim, { toValue: SH, duration: 250, useNativeDriver: true }).start();
+            Animated.timing(slideAnim, { toValue: SH, duration: 250, useNativeDriver: true }).start(({ finished }) => { if (finished) setMounted(false); });
         }
     }, [visible]);
 
@@ -52,6 +55,8 @@ export default function DailyLimitScreen({ visible, turnsUsed, dailyLimit, month
         const id = setInterval(() => setCountdown(getSecondsUntilMidnight()), 1000);
         return () => clearInterval(id);
     }, [visible]);
+
+    if (!mounted && !visible) return null;
 
     return (
         <Animated.View pointerEvents={visible ? 'auto' : 'none'} style={{

@@ -211,6 +211,7 @@ export const GameProvider = ({ children }) => {
     const stateRef = useRef({});
     useEffect(() => {
         stateRef.current = {
+            cars,
             balance, currentJob, pendingApplications, pendingDecision, pendingDecisionQueue, pendingJobInterview, currentHousing, properties, portfolio,
             dependents, loans, ownedBusinesses, activeInsurance, creditScore, activeEffects,
             marketPrices, degrees, totalMonthsPlayed, turn, gameOver,
@@ -2901,6 +2902,7 @@ export const GameProvider = ({ children }) => {
         setMarketCycle({ phase: 'sideways', monthsLeft: 12 });
         setBalance(STARTING_BALANCE);
         setPlayerSprite(newSpriteId);
+        setPlayerLook({ head: null, neck: null, hair: null });
         setPlayerName('');
         setPlayerBirthday(null);
         setGeneration(prev => prev + 1);
@@ -3884,7 +3886,13 @@ export const GameProvider = ({ children }) => {
             const defaulted = prev.filter(l => l.missedPayments >= 3);
             if (defaulted.length > 0) {
                 defaulted.forEach(l => {
-                    if (l.linkedAsset) {
+                    if (typeof l.linkedAsset === 'string' && l.linkedAsset.startsWith('car_')) {
+                        // a car bought on finance is repossessed
+                        const car = stateRef.current?.cars?.find(c => c.uid === l.linkedAsset);
+                        setCars(cs => cs.filter(c => c.uid !== l.linkedAsset));
+                        setActiveCarUid(u => (u === l.linkedAsset ? null : u));
+                        addHistory(`LOAN DEFAULT: ${car ? (CAR_BY_ID[car.id]?.name || 'car') : 'car'} repossessed by the bank!`, 0, 'expense');
+                    } else if (l.linkedAsset) {
                         setProperties(p => p.filter(id => id !== l.linkedAsset));
                         if (currentHousing.id === l.linkedAsset) {
                             setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', image: require('../../assets/rooms/hostel.png') });
@@ -4652,7 +4660,7 @@ export const GameProvider = ({ children }) => {
         activeInsurance, buyInsurance, cancelInsurance,
 
         // Dependents
-        cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
+        propertyBuyMonths, cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
         buyPharmacyItem, buyClothesItem, setChildSchoolTier, setChildPreschoolTier, renameDependent,

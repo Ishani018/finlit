@@ -66,5 +66,8 @@ export const calculateTaxByRegime = (taxableIncome, regime = 'new') => {
         if (inSlab <= 0) break;
         tax += inSlab * slab.rate; remaining -= inSlab; prev = slab.upto;
     }
+    // Marginal relief: just above the rebate limit you never pay more tax than the income you earned over that limit
+    const limit = REBATE_87A_LIMIT[regime] || 0;
+    if (limit > 0) tax = Math.min(tax, taxableIncome - limit);
     return Math.round(tax);
 };

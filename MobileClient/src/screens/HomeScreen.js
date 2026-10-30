@@ -48,15 +48,19 @@ export default function HomeScreen({ onClose, onBuyProperty, onSellProperty }) {
         .sort((a, b) => sortBy === 'price' ? a.price - b.price : b.life_quality - a.life_quality);
 
     // A purchase that doesn't move you in moves the house out of Browse, so jump to Owned where MOVE IN lives
-    const prevOwned = useRef(ownedResidential.length);
+    // Keyed on the number of properties you own, so moving between homes you already own never counts as a purchase
+    const prevOwned = useRef(properties.length);
     const [justBought, setJustBought] = useState(null);
     useEffect(() => {
-        if (ownedResidential.length > prevOwned.current) {
-            setTab('owned');
-            setJustBought(ownedResidential[ownedResidential.length - 1]?.id || null);
+        if (properties.length > prevOwned.current) {
+            const newest = properties[properties.length - 1];
+            if (RESIDENTIAL_PROPERTIES.some(p => p.id === newest) && newest !== currentHousing.id) {
+                setTab('owned');
+                setJustBought(newest);
+            }
         }
-        prevOwned.current = ownedResidential.length;
-    }, [ownedResidential.length]);
+        prevOwned.current = properties.length;
+    }, [properties.length]);
 
     const handleMoveIn = (prop) => { const res = moveIn(prop.id); if (res.success) onClose(); };
     const happinessLabel = happiness >= 80 ? 'Thriving' : happiness >= 60 ? 'Content' : happiness >= 40 ? 'Okay' : happiness >= 20 ? 'Stressed' : 'Miserable';
