@@ -1093,6 +1093,23 @@ export const GameProvider = ({ children }) => {
         return { allowed: true, msg: 'Application submitted! Check back next month.' };
     };
 
+    // An unsolicited offer is a real job: accepting it hires you straight away.
+    const acceptJobOffer = (job) => {
+        const target = job || pendingJobOffer;
+        if (!target) return { allowed: false, reason: 'No offer to accept.' };
+        setCurrentJob(target);
+        setPendingJobOffer(null);
+        addHistory(`Accepted offer: ${target.name}`, 0, 'info');
+        const entry = {
+            id: `job_offer_accepted_${Date.now()}`, name: '✅ New Job',
+            message: `You accepted the offer and start as ${target.name} at ₹${target.salary.toLocaleString()}/mo.`,
+            category: 'positive', impact: 0, month: totalMonthsPlayed, read: false,
+        };
+        setEventInbox(prev => [entry, ...prev].slice(0, 50));
+        return { allowed: true, msg: 'Offer accepted!' };
+    };
+    const declineJobOffer = () => setPendingJobOffer(null);
+
     // ─── JOB INTERVIEW RESOLUTION ────────────────────────────────────────────
     const resolveInterview = useCallback((choice, job) => {
         setPendingJobInterview(null);
@@ -2139,7 +2156,10 @@ export const GameProvider = ({ children }) => {
     // CRISIS ENGINE
     // =========================================================================
 
+    const crisisAlreadyFired = (e) => !!(e.once && (stateRef.current?.firedDecisions || []).includes('crisis_' + e.id));
+
     const getEligibleCrisisEvents = (state) => CRISIS_EVENTS.filter(e => {
+        if (crisisAlreadyFired(e, state)) return false;
         if (totalMonthsPlayed < 12 && e.severity === 'major') return false;
         if (e.minMonthsPlayed && totalMonthsPlayed < e.minMonthsPlayed) return false;
         if (typeof e.condition === 'function') return e.condition(state);
@@ -2533,6 +2553,11 @@ export const GameProvider = ({ children }) => {
     };
 
     const applyCrisisEvent = (event) => {
+        if (event.once) {
+            const key = 'crisis_' + event.id;
+            if (stateRef.current?.firedDecisions?.includes(key)) return;
+            setFiredDecisions(prev => (prev.includes(key) ? prev : [...prev, key]));
+        }
         let financialImpact = 0;
         const state = { balance, currentJob, currentHousing, properties, portfolio, dependents, playerAge, netWorth, loans, activeInsurance, activeEffects };
         let message = event.getMessage ? event.getMessage(state) : (event.message || event.name);
@@ -2967,7 +2992,7 @@ export const GameProvider = ({ children }) => {
                 } else {
                     // Minor crisis
                     const eligible = CRISIS_EVENTS.filter(e =>
-                        e.severity !== 'major' && e.condition(state)
+                        e.severity !== 'major' && e.condition(state) && !crisisAlreadyFired(e, state)
                     );
                     if (eligible.length > 0 && applyCrisisRef.current) {
                         const event = eligible[Math.floor(Math.random() * eligible.length)];
@@ -3132,7 +3157,10 @@ export const GameProvider = ({ children }) => {
                     { name: 'Medical Emergency', message: 'Sudden hospitalisation for a week. Insurance covered most of it.', impact: activeInsurance.length > 0 ? -50000 : -400000, category: 'crisis' },
                     { name: 'Inheritance Received', message: 'A distant relative left you something in their will.', impact: 300000, category: 'positive' },
                 ];
-                const ev = retirementEvents[Math.floor(Math.random() * retirementEvents.length)];
+                const inhFired = (stateRef.current?.firedDecisions || []).includes('crisis_inheritance');
+                const pool = inhFired ? retirementEvents.filter(x => x.name !== 'Inheritance Received') : retirementEvents;
+                const ev = pool[Math.floor(Math.random() * pool.length)];
+                if (ev.name === 'Inheritance Received') setFiredDecisions(prev => (prev.includes('crisis_inheritance') ? prev : [...prev, 'crisis_inheritance']));
                 if (ev.impact !== 0) setBalance(prev => prev + ev.impact);
                 const retirementEntry = { ...ev, id: `retirement_${Date.now()}`, month: totalMonthsPlayed, read: false };
                 setEventInbox(prev => [retirementEntry, ...prev].slice(0, 50));
@@ -4579,7 +4607,7 @@ export const GameProvider = ({ children }) => {
         setGeneration, setChildSavings, setLegacySummary, setIsLegacyMode,
 
         // Career
-        pendingJobOffer, setPendingJobOffer,
+        pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer,
 
         // Wellbeing
         happiness, monthlyExpenses,

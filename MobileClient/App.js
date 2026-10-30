@@ -351,7 +351,7 @@ const GameLayout = ({ onHardReset }) => {
     isRetired, pensionIncome,
     nextMonth, happiness, buyAndMoveIn,
     eventInbox, markEventRead, markAllEventsRead,
-    pendingJobOffer, setPendingJobOffer,
+    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer,
     pendingDecision, resolveDecision,
     newAchievement, setNewAchievement,
     achievements,
@@ -1455,7 +1455,7 @@ const GameLayout = ({ onHardReset }) => {
               </ScrollView>
             )}
 
-            {careerSubTab === 'jobs' && <CareersScreen onClose={() => setCareerSubTab(null)} onApply={(job) => handleApply(job)} onShowDialog={(title, msg, type) => showDialog(title, msg, type)} />}
+            {careerSubTab === 'jobs' && <CareersScreen onClose={() => setCareerSubTab(null)} onApply={(job) => handleApply(job)} onAcceptOffer={(job) => { const r = acceptJobOffer(job); showDialog(r.allowed ? 'Offer accepted!' : 'Cannot accept', r.allowed ? `You start as ${job.name}.` : r.reason, r.allowed ? 'success' : 'error'); }} onShowDialog={(title, msg, type) => showDialog(title, msg, type)} />}
             {careerSubTab === 'study' && <EducationScreen onClose={() => setCareerSubTab(null)} onEnroll={handleEnroll} onEnrollLoan={(course) => { const r = enrollWithLoan(course); showDialog(r.success ? 'Edu Loan Approved' : 'Loan Failed', r.msg, r.success ? 'success' : 'error'); }} />}
           </View>
         )}
@@ -2375,6 +2375,29 @@ const GameLayout = ({ onHardReset }) => {
           }}
           onClose={() => setShowCrisisSimulator(false)}
         />
+
+        {pendingJobOffer && !showSettings && (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 650, justifyContent: 'center', padding: 22, backgroundColor: 'rgba(3,4,9,0.82)' }}>
+            <View style={{ backgroundColor: '#0d1020', borderRadius: 14, borderWidth: 1, borderColor: '#4ade8066', overflow: 'hidden' }}>
+              <View style={{ height: 110 }}>
+                <Image source={pendingJobOffer.office_image || pendingJobOffer.image} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(6,8,15,0.45)' }} />
+              </View>
+              <View style={{ padding: 16 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#4ade80', letterSpacing: 4 }}>JOB OFFER</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#c8d4f0', lineHeight: 30 }}>{pendingJobOffer.name}</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#4ade80', marginTop: 2 }}>₹{pendingJobOffer.salary.toLocaleString()}/mo{currentJob ? `  (now ₹${currentJob.salary.toLocaleString()})` : ''}</Text>
+                <Text numberOfLines={3} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0', marginTop: 6 }}>{pendingJobOffer.description}</Text>
+                <TouchableOpacity onPress={() => acceptJobOffer(pendingJobOffer)} activeOpacity={0.85} style={{ marginTop: 14, height: 48, borderRadius: 10, backgroundColor: '#4ade80', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#06210f', letterSpacing: 3 }}>ACCEPT OFFER</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => declineJobOffer()} activeOpacity={0.8} style={{ marginTop: 8, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#7d8ab0', letterSpacing: 2 }}>NO THANKS</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
 
         {showCustomise && (
           <CustomiseScreen

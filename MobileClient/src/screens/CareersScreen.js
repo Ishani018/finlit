@@ -405,7 +405,7 @@ function BusinessHub({ onBack, onShowDialog }) {
     );
 }
 
-export default function CareersScreen({ onClose, onApply, onShowDialog }) {
+export default function CareersScreen({ onClose, onApply, onAcceptOffer, onShowDialog }) {
     const { currentJob, checkJobRequirements, netWorth, pendingJobOffer, degrees, pendingApplications = [], ownedBusinesses } = useGame();
     const [selectedTier, setSelectedTier] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
@@ -506,7 +506,7 @@ export default function CareersScreen({ onClose, onApply, onShowDialog }) {
                         </View>
                     ) : (
                         <TouchableOpacity
-                            onPress={() => { onApply(selectedJob); setSelectedJob(null); }}
+                            onPress={() => { if (isOffer && onAcceptOffer) onAcceptOffer(selectedJob); else onApply(selectedJob); setSelectedJob(null); }}
                             style={{ padding: 16, borderRadius: 10, backgroundColor: '#0d1e12', alignItems: 'center' }}
                         >
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#4ade80', letterSpacing: 2 }}>
@@ -585,10 +585,11 @@ export default function CareersScreen({ onClose, onApply, onShowDialog }) {
                             <View style={{ height: '100%', width: `${Math.min(currentJob.salary / MAX_SALARY, 1) * 100}%`, backgroundColor: C.blue }} />
                         </View>
                         {pendingJobOffer && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderTopWidth: 1, borderColor: C.border }}>
-                                <FontAwesome5 name="envelope" size={11} color="#22c55e" />
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#22c55e', letterSpacing: 1, flex: 1 }}>NEW OFFER — {pendingJobOffer.name} @ ₹{pendingJobOffer.salary.toLocaleString()}/mo</Text>
-                            </View>
+                            <TouchableOpacity onPress={() => setSelectedJob(pendingJobOffer)} activeOpacity={0.8} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderTopWidth: 1, borderColor: C.border, backgroundColor: '#0d1e12' }}>
+                                <FontAwesome5 name="envelope" size={12} color="#22c55e" />
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#22c55e', letterSpacing: 1, flex: 1 }}>NEW OFFER — {pendingJobOffer.name} @ ₹{pendingJobOffer.salary.toLocaleString()}/mo</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#4ade80' }}>VIEW ›</Text>
+                            </TouchableOpacity>
                         )}
                     </View>
                 )}

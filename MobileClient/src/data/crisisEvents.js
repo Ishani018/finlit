@@ -270,6 +270,7 @@ export const CRISIS_EVENTS = [
     {
         id: 'inheritance',
         name: 'Surprise Inheritance',
+        once: true, // a lifetime event — never fires twice
         category: 'positive',
         severity: 'positive',
         amount_min: 200000,
