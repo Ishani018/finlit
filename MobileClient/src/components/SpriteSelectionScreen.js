@@ -106,21 +106,21 @@ function EntryScreen({ onStart, hasSave, onResume }) {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#06080f' }}>
-            <View style={{ flex: 1, overflow: 'hidden' }}>
-                <Image source={ROOM_BG} style={{ position: 'absolute', left: -60, top: 0, width: SW + 200, height: SH * 0.78, opacity: 0.55 }} resizeMode="cover" />
-                {Array.from({ length: 10 }).map((_, i) => (
-                    <View key={i} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: `${85 - i * 7}%`, backgroundColor: 'rgba(6,8,15,0.16)' }} />
-                ))}
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 }}>
-                    <Animated.View style={{ transform: [{ translateY: bob }], marginBottom: 14 }}>
-                        <Image source={require('../../assets/icon.png')} style={{ width: 120, height: 120, borderRadius: 24 }} resizeMode="contain" />
+            <View style={{ flex: 1, overflow: 'hidden', alignItems: 'center' }}>
+                <View style={{ alignItems: 'center', paddingTop: 34, paddingHorizontal: 30 }}>
+                    <Animated.View style={{ transform: [{ translateY: bob }], marginBottom: 6 }}>
+                        <Image source={require('../../assets/icon.png')} style={{ width: 84, height: 84, borderRadius: 18 }} resizeMode="contain" />
                     </Animated.View>
-                    <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 84, color: '#0b1228', letterSpacing: 8, position: 'absolute', top: 5, left: 5, lineHeight: 84 }}>FINLIT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 84, color: '#172860', letterSpacing: 8, position: 'absolute', top: 2, left: 2, lineHeight: 84 }}>FINLIT</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 84, color: '#c8d4f0', letterSpacing: 8, lineHeight: 84 }}>FINLIT</Text>
+                    <View style={{ alignItems: 'center', marginBottom: 6 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 72, color: '#0b1228', letterSpacing: 8, position: 'absolute', top: 5, left: 5, lineHeight: 72 }}>FINLIT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 72, color: '#172860', letterSpacing: 8, position: 'absolute', top: 2, left: 2, lineHeight: 72 }}>FINLIT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 72, color: '#c8d4f0', letterSpacing: 8, lineHeight: 72 }}>FINLIT</Text>
                     </View>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#9db4e0', textAlign: 'center', lineHeight: 22 }}>Live a whole life. See what{'\n'}money does to it.</Text>
+                </View>
+                {/* The whole room, uncropped, sitting under the title */}
+                <View style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                    <Image source={ROOM_BG} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
                 </View>
             </View>
 
