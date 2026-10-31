@@ -842,15 +842,25 @@ const GameLayout = ({ onHardReset }) => {
   const handleApply = (job) => {
     const check = checkJobRequirements(job);
     if (!check.allowed) { showDialog('Locked', `Cannot apply: ${check.reason}`, 'error'); return; }
+    // Tier 1 gigs have no hiring process: you start the moment you accept, in place of whatever you do now.
+    const instant = (job.type || '').startsWith('Tier 1');
+    const replacing = currentJob && currentJob.id !== job.id
+      ? `\n\nThis REPLACES your current job: ${currentJob.name} (₹${currentJob.salary.toLocaleString()}/mo).` : '';
     showDialog(
-      'SUBMIT APPLICATION',
-      `Apply for ${job.name}?\n\nBase Salary: ₹${job.salary.toLocaleString()}/mo\n\nYour application will be reviewed over the coming months. If shortlisted, you will be invited for an interview.`,
-      'info',
+      instant ? 'START THIS GIG?' : 'SUBMIT APPLICATION',
+      instant
+        ? `${job.name}\nBase Salary: ₹${job.salary.toLocaleString()}/mo\n\nNo interview needed: you start immediately.${replacing}`
+        : `Apply for ${job.name}?\n\nBase Salary: ₹${job.salary.toLocaleString()}/mo\n\nYour application will be reviewed over the coming months. If shortlisted, you will be invited for an interview. Your current job stays until you are hired.`,
+      instant && replacing ? 'warning' : 'info',
       () => {
         const result = applyForJob(job);
-        if (result.allowed) { setSelectedJob(null); setActiveMenu(null); closeDialog(); }
+        if (result.allowed) {
+          setSelectedJob(null); setActiveMenu(null);
+          if (instant) showDialog('YOU ARE HIRED', `You now work as ${job.name} (₹${job.salary.toLocaleString()}/mo).`, 'success');
+          else closeDialog();
+        }
       },
-      'SUBMIT',
+      instant ? 'START' : 'SUBMIT',
       'CANCEL',
       closeDialog
     );
