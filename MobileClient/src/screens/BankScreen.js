@@ -439,76 +439,46 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                         return issues;
                     };
 
-                    // ── Loan type card landing ──
+                    // ── Borrowing landing: your situation first, then what you already owe, then what you can borrow ──
                     if (!applyingLoanId) {
-                        const CARD_H = 130;
+                        const emiPct = salary > 0 ? totalEMI / salary : 0;
+                        const emiColor = emiPct > 0.4 ? '#f87171' : emiPct > 0.25 ? '#fbbf24' : '#4ade80';
+                        const fmtMax = (lt) => (lt.max_amount ? (lt.max_amount >= 10000000 ? `₹${(lt.max_amount / 10000000).toFixed(0)}Cr` : `₹${(lt.max_amount / 100000).toFixed(0)}L`) : 'up to 70% of property');
+                        const fmtYears = (m) => (m >= 12 ? `${Math.round(m / 12)} yr` : `${m} mo`);
+                        const options = LOAN_TYPES.filter(lt => lt.id !== 'car_loan').map(lt => ({ lt, issues: getEligibility(lt), rate: getAdjustedRate(lt.base_interest, creditScore) }))
+                            .sort((x, y) => (x.issues.length === 0 ? 0 : 1) - (y.issues.length === 0 ? 0 : 1) || x.rate - y.rate);
+                        const Stat = ({ label, value, sub, color }) => (
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#5a6890', letterSpacing: 2 }}>{label}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color, lineHeight: 24 }}>{value}</Text>
+                                {sub ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#7d8ab0', lineHeight: 14 }}>{sub}</Text> : null}
+                            </View>
+                        );
+                        const Label = ({ text, right }) => (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4 }}>{text}</Text>
+                                <View style={{ flex: 1, height: 1, backgroundColor: '#1a2040' }} />
+                                {right ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#7d8ab0' }}>{right}</Text> : null}
+                            </View>
+                        );
                         return (
                             <View style={{ gap: 10 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 4 }}>
-                                    CREDIT: <Text style={{ color: creditBand.color }}>{creditScore} {creditBand.label}</Text>
-                                </Text>
-
-                                {/* 2-col loan card grid */}
-                                {(() => {
-                                    const rows = [];
-                                    for (let i = 0; i < LOAN_TYPES.length; i += 2) {
-                                        const pair = [LOAN_TYPES[i], LOAN_TYPES[i + 1]].filter(Boolean);
-                                        rows.push(
-                                            <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
-                                                {pair.map(lt => {
-                                                    const meta = LOAN_TYPE_META[lt.id] || { name: lt.name, color: '#f87171', img: null };
-                                                    const issues = getEligibility(lt);
-                                                    const eligible = issues.length === 0;
-                                                    const adjRate = getAdjustedRate(lt.base_interest, creditScore);
-                                                    return (
-                                                        <TouchableOpacity
-                                                            key={lt.id}
-                                                            onPress={() => { setApplyingLoanId(lt.id); setLoanAmount(''); setLoanTenureIdx(1); }}
-                                                            activeOpacity={0.8}
-                                                            style={{ flex: 1, borderRadius: 10, overflow: 'hidden', backgroundColor: '#08101e', opacity: eligible ? 1 : 0.45 }}
-                                                        >
-                                                            <View style={{ height: CARD_H, position: 'relative' }}>
-                                                                {meta.img && <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" />}
-                                                                <View style={{ position: 'absolute', inset: 0, backgroundColor: eligible ? 'rgba(4,6,14,0.35)' : 'rgba(4,6,14,0.65)' }} />
-                                                                {!eligible && <View style={{ position: 'absolute', top: 8, right: 8 }}><Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 24, height: 24 }} resizeMode="contain" /></View>}
-                                                                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(4,6,14,0.8)', padding: 8 }}>
-                                                                    <View style={{ marginBottom: 1 }}>
-                                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: eligible ? '#c8d4f0' : '#445070', lineHeight: 19 }} numberOfLines={1}>{meta.name}</Text>
-                                                                    </View>
-                                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070', lineHeight: 15 }}>
-                                                                        {adjRate.toFixed(1)}% · {lt.max_amount ? `₹${(lt.max_amount / 100000).toFixed(0)}L` : 'LTV'}
-                                                                    </Text>
-                                                                </View>
-                                                            </View>
-                                                        </TouchableOpacity>
-                                                    );
-                                                })}
-                                                {pair.length === 1 && <View style={{ flex: 1 }} />}
-                                            </View>
-                                        );
-                                    }
-                                    return rows;
-                                })()}
-
-                                {/* ── Active loans section ── */}
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, marginTop: 6 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, flex: 1 }}>MY ACTIVE LOANS</Text>
-                                {loans.length > 0 && <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#445070' }}>{loans.length} active</Text>}
-                            </View>
-
-                            {loans.length === 0 ? (
-                                <View style={{ alignItems: 'center', padding: 28, backgroundColor: '#08101e', borderRadius: 10 }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#4ade80' }}>Debt Free</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#2a4a3a', marginTop: 4 }}>No outstanding loans</Text>
+                                {/* 1. Where you stand */}
+                                <View style={{ flexDirection: 'row', gap: 10, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#1a2040', borderRadius: 12, padding: 12 }}>
+                                    <Stat label="CREDIT" value={String(creditScore)} sub={creditBand.label} color={creditBand.color} />
+                                    <Stat label="YOU OWE" value={loans.length ? `₹${totalLoanDebt.toLocaleString()}` : 'Nothing'} sub={loans.length ? `${loans.length} loan${loans.length !== 1 ? 's' : ''}` : 'Debt free'} color={loans.length ? '#f87171' : '#4ade80'} />
+                                    <Stat label="EMI / MO" value={totalEMI ? `₹${totalEMI.toLocaleString()}` : '—'} sub={salary > 0 && totalEMI ? `${Math.round(emiPct * 100)}% of salary` : 'No payments'} color={totalEMI ? emiColor : '#7d8ab0'} />
                                 </View>
-                            ) : (
-                                <>
-                                    <View style={{ backgroundColor: '#0a0c14', borderRadius: 10, padding: 14, marginBottom: 2 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 3, marginBottom: 4 }}>TOTAL DEBT</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 34, color: '#f87171', lineHeight: 36 }}>₹{totalLoanDebt.toLocaleString()}</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{totalEMI.toLocaleString()}/mo EMI · {loans.length} loan{loans.length !== 1 ? 's' : ''}</Text>
+                                {emiPct > 0.4 && (
+                                    <View style={{ backgroundColor: '#2a0d0d', borderWidth: 1, borderColor: '#7a2a2a', borderRadius: 10, padding: 10 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#f8a8a8' }}>Your EMIs take {Math.round(emiPct * 100)}% of your salary. Pay some loans down before borrowing more.</Text>
                                     </View>
+                                )}
 
+                                {/* 2. What you already owe, with pay buttons */}
+                                {loans.length > 0 && (
+                                    <View style={{ gap: 8 }}>
+                                        <Label text="YOUR LOANS" right="tap one to pay" />
                                     {loans.map((loan) => {
                                         const meta = LOAN_TYPE_META[loan.loanTypeId] || LOAN_TYPE_META[loan.type] || { name: loan.type || 'Loan', icon: 'file-invoice-dollar', color: '#f87171' };
                                         const originalPrincipal = loan.principal || loan.totalPrincipal || loan.remainingPrincipal;
@@ -595,10 +565,35 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                             </View>
                                         );
                                     })}
-                                </>
-                            )}
-                        </View>
-                        ); // end card landing
+                                    </View>
+                                )}
+
+                                {/* 3. What you can borrow */}
+                                <Label text={loans.length ? 'BORROW MORE' : 'BORROW'} right={`${options.filter(o => o.issues.length === 0).length} available`} />
+                                {options.map(({ lt, issues, rate }) => {
+                                    const meta = LOAN_TYPE_META[lt.id] || { name: lt.name, color: '#f87171', img: null };
+                                    const ok = issues.length === 0;
+                                    return (
+                                        <TouchableOpacity key={lt.id} activeOpacity={0.85}
+                                            onPress={() => { setApplyingLoanId(lt.id); setLoanAmount(''); setLoanTenureIdx(1); }}
+                                            style={{ flexDirection: 'row', height: 84, borderRadius: 12, overflow: 'hidden', backgroundColor: '#0d1020', borderWidth: 1, borderColor: ok ? meta.color + '55' : '#1a2040', opacity: ok ? 1 : 0.7 }}>
+                                            <View style={{ width: 84 }}>
+                                                {meta.img ? <Image source={meta.img} style={{ width: '100%', height: '100%' }} resizeMode="cover" /> : null}
+                                                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: ok ? 'rgba(6,8,15,0.15)' : 'rgba(6,8,15,0.55)' }} />
+                                            </View>
+                                            <View style={{ flex: 1, paddingHorizontal: 12, justifyContent: 'center' }}>
+                                                <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 22 }}>{meta.name}</Text>
+                                                <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: meta.color }}>{rate.toFixed(1)}% a year · {fmtMax(lt)} · up to {fmtYears(lt.max_tenure)}</Text>
+                                                <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: ok ? '#4ade80' : '#f87171' }}>{ok ? 'You qualify' : `${issues[0]}${issues.length > 1 ? ` +${issues.length - 1} more` : ''}`}</Text>
+                                            </View>
+                                            <View style={{ justifyContent: 'center', paddingRight: 12 }}>
+                                                {ok ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#5a6890' }}>›</Text> : <Image source={require('../../assets/ui_comp/lock.png')} style={{ width: 20, height: 20, tintColor: '#f87171' }} resizeMode="contain" />}
+                                            </View>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+                        );
                     } // end !applyingLoanId
 
                     // ── Loan application detail view ──
@@ -655,15 +650,24 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                                 placeholder={`Max ₹${lt.max_amount ? (lt.max_amount / 100000).toFixed(0) + 'L' : 'varies'}`}
                                                 placeholderTextColor="#2a3560" style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: '#c8d4f0' }} />
                                         </View>
-                                        {lt.max_amount && [0.25, 0.5, 1].map(frac => {
-                                            const a = Math.round(lt.max_amount * frac);
-                                            return (
-                                                <TouchableOpacity key={frac} onPress={() => setLoanAmount(String(a))} style={{ borderRadius: 8, backgroundColor: '#0d1020', paddingHorizontal: 10, justifyContent: 'center' }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#445070' }}>₹{(a / 100000).toFixed(0)}L</Text>
-                                                </TouchableOpacity>
-                                            );
-                                        })}
                                     </View>
+                                    {(() => {
+                                        const cap = lt.max_amount || 5000000;
+                                        // the biggest amount whose EMI stays at 40% of salary on the chosen tenure
+                                        const perLakh = selTenure ? calculateEMI(100000, adjRate, selTenure) : 0;
+                                        const safe = salary > 0 && perLakh > 0 ? Math.min(cap, Math.floor((salary * 0.4 / perLakh) * 100000 / 10000) * 10000) : 0;
+                                        const chips = [...(safe >= 10000 ? [{ label: 'SAFE', value: safe }] : []), ...[0.25, 0.5, 1].map(f => ({ label: `${Math.round(f * 100)}%`, value: Math.round(cap * f / 1000) * 1000 }))];
+                                        return (
+                                            <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                                                {chips.map((c, i) => (
+                                                    <TouchableOpacity key={i} onPress={() => setLoanAmount(String(c.value))} activeOpacity={0.8}
+                                                        style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: c.label === 'SAFE' ? '#0d2a1f' : '#141b36', borderWidth: 1, borderColor: c.label === 'SAFE' ? '#4ade8077' : 'transparent' }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: c.label === 'SAFE' ? '#4ade80' : '#a8b4d8' }}>{c.label} · ₹{c.value >= 100000 ? `${(c.value / 100000).toFixed(c.value % 100000 ? 1 : 0)}L` : c.value.toLocaleString()}</Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        );
+                                    })()}
 
                                     {/* Tenure */}
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#445070', letterSpacing: 2 }}>TENURE</Text>
