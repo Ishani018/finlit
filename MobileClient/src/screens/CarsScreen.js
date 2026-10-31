@@ -32,6 +32,7 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
     const [tier, setTier] = useState('all');
     const [kind, setKind] = useState('all');
     const [pending, setPending] = useState(null);   // { car, used, loan }
+    const [detail, setDetail] = useState(null);     // the vehicle whose page is open
     const [sellId, setSellId] = useState(null);
     const [toast, setToast] = useState(null);
     const say = (msg, ok = true) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 3200); };
@@ -107,52 +108,31 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, textAlign: 'center', paddingVertical: 40 }}>Nothing here. Try another filter.</Text>
                 )}
 
-                {tab !== 'garage' && list.map(car => {
-                    const t = CAR_TIERS.find(x => x.key === car.tier);
-                    const need = vehicleMinNetWorth(car);
-                    const locked = netWorth < need;
-                    const price = priceOf(car);
-                    const run = carRunCost(car, { used });
-                    const down = Math.round(price * CAR_LOAN_DOWN_PCT);
-                    const canCash = balance >= price, canLoan = balance >= down;
-                    return (
-                        <View key={car.id} style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 12, opacity: locked ? 0.55 : 1 }}>
-                            <View style={{ height: 140, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
-                                <Image source={car.image} style={{ width: 200, height: 120 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ padding: 12 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 3 }}>{t.label}{used ? ' · USED' : ''}{car.dep < 0 ? ' · GAINS VALUE' : ''}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 24 }}>{car.name}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 8 }}>{car.perk}</Text>
-                                <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-                                    <Stat label="PRICE" value={short(price)} color={C.gold} />
-                                    <Stat label="RUNNING / MO" value={`−${money(run)}`} color={C.red} />
-                                    <Stat label="MOOD / MO" value={`+${car.mood}`} color={C.sage} />
-                                </View>
-                                {car.income ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.sage, marginBottom: 6 }}>Earns +{money(car.income)}/mo when active</Text> : null}
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: car.dep < 0 ? C.sage : C.dim, marginBottom: 10 }}>
-                                    {car.dep < 0 ? `Value grows about ${Math.round(-car.dep * 100)}% a year` : car.dep === 0 ? 'Holds its value' : `Loses about ${Math.round((used ? car.dep * 0.75 : car.dep) * 100)}% of its value a year${used ? '' : ', and ~10% the day you drive it off'}`}
-                                </Text>
-                            </View>
-                            {locked ? (
-                                <View style={{ height: 40, borderTopWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dark }}>Locked · needs {short(need)} net worth</Text>
-                                </View>
-                            ) : (
-                                <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: C.border }}>
-                                    <TouchableOpacity disabled={!canCash} onPress={() => setPending({ car, used, loan: false })} activeOpacity={0.6} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', opacity: canCash ? 1 : 0.4 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, letterSpacing: 2 }}>BUY CASH</Text>
-                                    </TouchableOpacity>
-                                    <View style={{ width: 1, backgroundColor: C.border }} />
-                                    <TouchableOpacity disabled={!canLoan} onPress={() => setPending({ car, used, loan: true })} activeOpacity={0.6} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', opacity: canLoan ? 1 : 0.4 }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 2, lineHeight: 17 }}>FINANCE</Text>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, lineHeight: 12 }}>{short(down)} down · {short(emiOf(price))}/mo</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        </View>
-                    );
-                })}
+                {tab !== 'garage' && (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                        {list.map(car => {
+                            const t = CAR_TIERS.find(x => x.key === car.tier);
+                            const need = vehicleMinNetWorth(car);
+                            const locked = netWorth < need;
+                            const price = priceOf(car);
+                            const run = carRunCost(car, { used });
+                            return (
+                                <TouchableOpacity key={car.id} onPress={() => setDetail(car)} activeOpacity={0.85}
+                                    style={{ width: '48.5%', backgroundColor: C.panel, borderRadius: 10, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 10, opacity: locked ? 0.5 : 1 }}>
+                                    <View style={{ height: 96, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Image source={car.image} style={{ width: '92%', height: 86 }} resizeMode="contain" />
+                                    </View>
+                                    <View style={{ padding: 8 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: t.color, letterSpacing: 2 }}>{t.label}{used ? ' · USED' : ''}</Text>
+                                        <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.cream, lineHeight: 19 }}>{car.name}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: locked ? C.dark : C.gold, lineHeight: 24 }}>{short(price)}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: locked ? C.dark : C.dim }}>{locked ? `needs ${short(need)} net worth` : `runs −${short(run)}/mo`}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                )}
 
                 {tab === 'garage' && (
                     cars.length === 0 ? (
@@ -210,6 +190,63 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                     )
                 )}
             </ScrollView>
+
+            {detail && !pending && (() => {
+                const car = detail, t = CAR_TIERS.find(x => x.key === car.tier);
+                const need = vehicleMinNetWorth(car), locked = netWorth < need;
+                const price = priceOf(car), run = carRunCost(car, { used });
+                const down = Math.round(price * CAR_LOAN_DOWN_PCT);
+                const canCash = balance >= price, canLoan = balance >= down;
+                const Opt = ({ title, line, price: p, btn, enabled, why, onPress }) => (
+                    <View style={{ borderTopWidth: 1, borderColor: C.border, paddingVertical: 12 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 21, color: C.cream }}>{title}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.gold }}>{p}</Text>
+                        </View>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, lineHeight: 17, marginBottom: 8 }}>{line}</Text>
+                        <TouchableOpacity disabled={!enabled} onPress={onPress} activeOpacity={0.8} style={{ height: 42, borderRadius: 8, backgroundColor: enabled ? C.gold : '#141b36', alignItems: 'center', justifyContent: 'center', opacity: enabled ? 1 : 0.6 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: enabled ? '#2a1c00' : C.dim, letterSpacing: 2 }}>{enabled ? btn : why}</Text>
+                        </TouchableOpacity>
+                    </View>
+                );
+                return (
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'flex-end', zIndex: 15 }}>
+                        <TouchableOpacity activeOpacity={1} onPress={() => setDetail(null)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(3,4,9,0.8)' }} />
+                        <View style={{ backgroundColor: C.panel, borderTopWidth: 1, borderColor: '#2a3560', borderTopLeftRadius: 18, borderTopRightRadius: 18, maxHeight: '88%', overflow: 'hidden', paddingBottom: TAB_STACK }}>
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <View style={{ height: 190, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Image source={car.image} style={{ width: '88%', height: 170 }} resizeMode="contain" />
+                                </View>
+                                <View style={{ padding: 14 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 3 }}>{t.label}{used ? ' · SECOND-HAND' : ' · NEW'}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 28 }}>{car.name}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, marginBottom: 10 }}>{car.perk}</Text>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Stat label="PRICE" value={short(price)} color={C.gold} />
+                                        <Stat label="RUNNING / MO" value={`−${money(run)}`} color={C.red} />
+                                        <Stat label="MOOD / MO" value={`+${car.mood}`} color={C.sage} />
+                                    </View>
+                                    {car.income ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.sage, marginTop: 6 }}>Earns +{money(car.income)}/mo when active</Text> : null}
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: car.dep < 0 ? C.sage : C.dim, marginTop: 6 }}>
+                                        {car.dep < 0 ? `Value grows about ${Math.round(-car.dep * 100)}% a year` : car.dep === 0 ? 'Holds its value' : `Loses about ${Math.round((used ? car.dep * 0.75 : car.dep) * 100)}% of its value a year${used ? '' : ', and ~10% the day you drive it off'}`}
+                                    </Text>
+                                    {locked ? (
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dark, textAlign: 'center', paddingVertical: 18 }}>Locked · needs {short(need)} net worth</Text>
+                                    ) : (
+                                        <View style={{ marginTop: 10 }}>
+                                            <Opt title="Pay in cash" p={short(price)} line="Pay it all now. No loan, no EMI." btn="BUY" enabled={canCash} why={`NEED ${short(price - balance)} MORE`} onPress={() => { setPending({ car, used, loan: false }); setDetail(null); }} />
+                                            <Opt title="Finance it" p={`${short(down)} now`} line={`Pay ${money(down)} down, then about ${money(emiOf(price))} a month for ${CAR_LOAN_TENURE} months.`} btn="FINANCE" enabled={canLoan} why={`NEED ${short(down - balance)} MORE`} onPress={() => { setPending({ car, used, loan: true }); setDetail(null); }} />
+                                        </View>
+                                    )}
+                                    <TouchableOpacity onPress={() => setDetail(null)} style={{ height: 40, alignItems: 'center', justifyContent: 'center' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim }}>Back</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
+                        </View>
+                    </View>
+                );
+            })()}
 
             {pending && (
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'flex-end', zIndex: 20 }}>
