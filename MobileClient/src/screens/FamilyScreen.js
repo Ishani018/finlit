@@ -455,11 +455,11 @@ function DependentDetail({ dep, pantry, onFeed, onClose, showDialog, totalMonths
 
             {/* Fixed hero — full sprite, nothing starts until below it */}
             <View style={{ height: 340, backgroundColor: '#060810', alignItems: 'center', justifyContent: 'flex-end', overflow: 'hidden' }}>
-                {roomFor(dep) && <Image source={roomFor(dep)} style={{ position: 'absolute', left: 0, right: 0, top: -60, width: '100%', aspectRatio: 1 }} resizeMode="cover" />}
+                {roomFor(dep) && <Image source={roomFor(dep)} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }} resizeMode="contain" />}
                 {img && (
                     roomFor(dep)
                         // Standing on the room's floor, sized so they look like they belong in it rather than filling it.
-                        ? <Image source={img} style={{ width: '60%', height: isParent ? '68%' : (dep.childAgeMonths || 0) < 60 ? '50%' : '62%', marginBottom: 46 }} resizeMode="contain" />
+                        ? <Image source={img} style={{ width: '40%', height: isParent ? '50%' : (dep.childAgeMonths || 0) < 60 ? '32%' : '42%', marginBottom: 100 }} resizeMode="contain" />
                         : <Image source={img} style={{ width: '75%', height: '100%' }} resizeMode="contain" />
                 )}
             </View>
