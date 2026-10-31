@@ -1004,6 +1004,7 @@ const GameLayout = ({ onHardReset }) => {
       gadgets: gadgets.length === 0 ? 'None yet' : `${gadgets.length} owned`,
       pantry: pantryQty === 0 ? 'Empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'}`,
       birthday: 'Celebrate',
+      wardrobe: 'Change your look',
       vacation: (totalMonthsPlayed - lastVacationMonth) < 3 ? 'Just back' : (dependents.some(d => !d.isDead && d.custody !== 'ex') ? 'Solo or family' : 'Solo trip'),
     };
     const attention = [];
@@ -1030,6 +1031,7 @@ const GameLayout = ({ onHardReset }) => {
     if (key === 'pantry')    { setActiveTab('home'); setShowPantry(true); }
     if (key === 'birthday')  { setActiveTab('home'); setShowBirthdayRoom(true); }
     if (key === 'vacation')  { setActiveTab('home'); setShowVacation(true); }
+    if (key === 'wardrobe')  { setActiveTab('home'); setShowCustomise(true); }
     if (key === 'goals')     { setShowGoals(true); }
     if (key === 'help')      { setActiveTab('home'); setShowHelp(true); }
   };
