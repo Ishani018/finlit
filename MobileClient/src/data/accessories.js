@@ -19,6 +19,12 @@ export const ACC_ITEMS = {
         { id: 'tops/red',     label: 'Red' },
         { id: 'tops/teal',    label: 'Teal' },
         { id: 'tops/violet',  label: 'Violet' },
+        { id: 'tops/stripe_navy', label: 'Navy stripes' },
+        { id: 'tops/stripe_red',  label: 'Red stripes' },
+        { id: 'tops/check_red',   label: 'Red check' },
+        { id: 'tops/check_blue',  label: 'Blue check' },
+        { id: 'tops/dots_pink',   label: 'Pink dots' },
+        { id: 'tops/dots_navy',   label: 'Navy dots' },
     ],
     shoes: [
         { id: 'shoes/black', label: 'Black' },
