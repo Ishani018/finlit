@@ -88,13 +88,15 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                 </View>
             )}
             {tab !== 'garage' && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 16, paddingHorizontal: PAD, paddingTop: 6, paddingBottom: 10 }}>
+                <View style={{ height: 38 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, height: 38 }} contentContainerStyle={{ gap: 18, paddingHorizontal: PAD, alignItems: 'center', height: 38 }}>
                     {[{ key: 'all', label: 'ANY BUDGET', color: C.cream }, ...CAR_TIERS].map(t => (
                         <TouchableOpacity key={t.key} onPress={() => setTier(t.key)} activeOpacity={0.7}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: tier === t.key ? t.color : C.dark, letterSpacing: 1 }}>{t.label}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, lineHeight: 20, color: tier === t.key ? t.color : C.dark, letterSpacing: 1 }}>{t.label}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
+                </View>
             )}
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 150 }} showsVerticalScrollIndicator={false}>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useGame } from '../context/GameContext';
+import PetsScreen from './PetsScreen';
 import { GADGETS, PETS, MAX_PETS, GADGET_BY_ID, PET_BY_ID, gadgetValue, lifestyleImage, GADGET_RESALE } from '../data/lifestyle';
 
 const PAD = 14;
@@ -18,7 +19,7 @@ function Stat({ label, value, color }) {
 }
 
 // mode 'gadgets' or 'pets': each has its own shop, with a Mine tab for what you already own
-export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
+function GadgetsScreen({ onBack, mode = 'gadgets' }) {
     const { balance, gadgets, pets, buyGadget, sellGadget, adoptPet, rehomePet, getLifestyleMonthly, totalMonthsPlayed } = useGame();
     const isPets = mode === 'pets';
     const [tab, setTab] = useState('shop');
@@ -78,7 +79,7 @@ export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
                     const poor = balance < g.price;
                     return (
                         <Card key={g.id} id={g.id} title={g.name} sub={g.perk} owned={owned}
-                            stats={<><Stat label="MOOD" value={`+${g.mood}`} color={C.sage} /><Stat label="RUNS" value={g.run ? `−${money(g.run)}` : 'free'} color={g.run ? C.red : C.dim} />{g.health ? <Stat label="HEALTH" value={`+${g.health}`} color={C.sage} /> : null}</>}
+                            stats={<><Stat label="RUNS" value={g.run ? `−${money(g.run)}` : 'free'} color={g.run ? C.red : C.dim} />{g.saves ? <Stat label="SAVES" value={`+${money(g.saves)}`} color={C.sage} /> : null}</>}
                             priceLabel={owned ? 'OWNED' : `BUY ${money(g.price)}`}
                             button={{ fg: C.gold }} disabled={owned || poor}
                             onPress={() => { const r = buyGadget(g.id); say(r.msg, r.success); }} />
@@ -111,8 +112,7 @@ export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
                         <View>
                             <View style={{ flexDirection: 'row', backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: C.border, padding: 12, marginBottom: 12 }}>
                                 <Stat label="ALL COSTS / MO" value={`−${money(monthly.cost)}`} color={C.red} />
-                                <Stat label="MOOD / MO" value={`+${monthly.mood.toFixed(1)}`} color={C.sage} />
-                                <Stat label="HEALTH / MO" value={`+${monthly.health.toFixed(1)}`} color={C.sage} />
+                                {monthly.saved > 0 ? <Stat label="SAVED / MO" value={`+${money(monthly.saved)}`} color={C.sage} /> : null}
                             </View>
                             {isPets && pets.map(o => {
                                 const p = PET_BY_ID[o.id]; if (!p) return null;
@@ -161,4 +161,9 @@ export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
             )}
         </View>
     );
+}
+
+// Gadgets keep the shop layout; pets have their own room-and-adopt screen
+export default function LifestyleScreen(props) {
+    return props.mode === 'pets' ? <PetsScreen onBack={props.onBack} /> : <GadgetsScreen {...props} />;
 }

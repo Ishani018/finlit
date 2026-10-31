@@ -1099,12 +1099,13 @@ export const GameProvider = ({ children }) => {
     };
 
     // ─── GADGETS AND PETS ────────────────────────────────────────────────────
+    // Gadgets cost to run but can save money (a fridge wastes less food, a TV replaces the cinema); pets just cost.
+    // Neither gives mood or health: that has to come from how you live.
     const getLifestyleMonthly = () => {
-        let cost = 0, mood = 0, health = 0;
-        gadgets.forEach(o => { const g = GADGET_BY_ID[o.id]; if (g) { cost += g.run; mood += g.mood; health += g.health; } });
-        mood = Math.min(mood, GADGET_MOOD_CAP); health = Math.min(health, GADGET_HEALTH_CAP);
-        pets.forEach(o => { const p = PET_BY_ID[o.id]; if (p) { cost += p.run; mood += p.mood; health += p.health; } });
-        return { cost, mood, health };
+        let cost = 0, saved = 0;
+        gadgets.forEach(o => { const g = GADGET_BY_ID[o.id]; if (g) { const net = Math.max(0, g.run - (g.saves || 0)); cost += net; saved += Math.min(g.run, g.saves || 0); } });
+        pets.forEach(o => { const p = PET_BY_ID[o.id]; if (p) cost += p.run; });
+        return { cost, mood: 0, health: 0, saved };
     };
 
     const buyGadget = (id) => {
