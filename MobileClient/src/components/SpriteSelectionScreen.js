@@ -432,8 +432,8 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, marginTop: 12, marginBottom: 6 }}>NEED IDEAS?</Text>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                             {NAME_IDEAS.map(n => (
-                                <TouchableOpacity key={n} onPress={() => { setNameInput(n); setNameError(''); }} activeOpacity={0.8} style={{ paddingHorizontal: 12, paddingVertical: 4, borderRadius: 14, backgroundColor: '#141b36' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#a8b4d8' }}>{n}</Text>
+                                <TouchableOpacity key={n} onPress={() => { setNameInput(n); setNameError(''); }} activeOpacity={0.8} style={{ paddingVertical: 4, paddingRight: 8 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#a8b4d8', textDecorationLine: 'underline' }}>{n}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>

@@ -67,8 +67,8 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                         </View>
                     </View>
                     <TouchableOpacity onPress={() => setLook({ head: null, neck: null, hair: null })} activeOpacity={0.8}
-                        style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, backgroundColor: '#141b36' }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#a8b4d8', letterSpacing: 1 }}>RESET</Text>
+                        style={{ paddingVertical: 5 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#a8b4d8', letterSpacing: 2, textDecorationLine: 'underline' }}>RESET</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -87,8 +87,8 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                         <View style={{ position: 'absolute', left: 10, top: 10, gap: 6 }}>
                             {STAGES.map((s, i) => (
                                 <TouchableOpacity key={s.label} onPress={() => setStage(i)} activeOpacity={0.8}
-                                    style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, backgroundColor: i === stage ? GOLD : 'rgba(13,16,32,0.9)' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: i === stage ? '#2a1c00' : '#a8b4d8', letterSpacing: 1 }}>{s.label}</Text>
+                                    style={{ paddingVertical: 2 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: i === stage ? GOLD : '#7d8ab0', letterSpacing: 2, textDecorationLine: i === stage ? 'underline' : 'none' }}>{s.label}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -107,11 +107,11 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                         </View>
 
                         {/* Slot tabs */}
-                        <View style={{ flexDirection: 'row', gap: 6 }}>
+                        <View style={{ flexDirection: 'row', gap: 22, borderBottomWidth: 1, borderColor: '#1a2040' }}>
                             {ACC_SLOTS.map(s => (
                                 <TouchableOpacity key={s.id} onPress={() => setSlot(s.id)} activeOpacity={0.8}
-                                    style={{ paddingHorizontal: 14, paddingVertical: 5, borderRadius: 14, backgroundColor: slot === s.id ? GOLD : '#141b36' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: slot === s.id ? '#2a1c00' : '#a8b4d8', letterSpacing: 1 }}>{s.label}</Text>
+                                    style={{ paddingVertical: 6, borderBottomWidth: 2, borderColor: slot === s.id ? GOLD : 'transparent' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: slot === s.id ? GOLD : '#7d8ab0', letterSpacing: 2 }}>{s.label}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>

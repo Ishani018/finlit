@@ -28,8 +28,8 @@ export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
     const monthly = getLifestyleMonthly();
 
     const Tab = ({ id, label }) => (
-        <TouchableOpacity onPress={() => setTab(id)} activeOpacity={0.8} style={{ flex: 1, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: tab === id ? C.gold : '#141b36' }}>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: tab === id ? '#2a1c00' : '#a8b4d8', letterSpacing: 1 }}>{label}</Text>
+        <TouchableOpacity onPress={() => setTab(id)} activeOpacity={0.8} style={{ flex: 1, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 2, borderColor: tab === id ? C.gold : 'transparent' }}>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: tab === id ? C.gold : C.dark, letterSpacing: 2 }}>{label}</Text>
         </TouchableOpacity>
     );
 
@@ -44,8 +44,8 @@ export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', rowGap: 6 }}>
                     <View style={{ flex: 1, flexDirection: 'row', gap: 12, minWidth: 130 }}>{stats}</View>
                     <TouchableOpacity disabled={disabled} onPress={onPress} activeOpacity={0.8}
-                        style={{ paddingHorizontal: 12, height: 32, borderRadius: 16, borderWidth: 1, borderColor: disabled ? '#1a2040' : button.fg + '88', backgroundColor: disabled ? 'transparent' : button.fg + '14', alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.55 : 1 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: disabled ? C.dark : button.fg, letterSpacing: 1 }}>{priceLabel}</Text>
+                        style={{ paddingHorizontal: 4, height: 32, alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.4 : 1 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: disabled ? C.dark : button.fg, letterSpacing: 1, textDecorationLine: 'underline' }}>{priceLabel}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -68,7 +68,7 @@ export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
                 </View>
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: PAD, paddingTop: 10 }}>
+            <View style={{ flexDirection: 'row', paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border }}>
                 <Tab id="shop" label={isPets ? 'ADOPT' : 'SHOP'} /><Tab id="mine" label={`MINE (${isPets ? pets.length : gadgets.length})`} />
             </View>
 

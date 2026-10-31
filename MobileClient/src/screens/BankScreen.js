@@ -661,8 +661,8 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                                             <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
                                                 {chips.map((c, i) => (
                                                     <TouchableOpacity key={i} onPress={() => setLoanAmount(String(c.value))} activeOpacity={0.8}
-                                                        style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: c.label === 'SAFE' ? '#0d2a1f' : '#141b36', borderWidth: 1, borderColor: c.label === 'SAFE' ? '#4ade8077' : 'transparent' }}>
-                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: c.label === 'SAFE' ? '#4ade80' : '#a8b4d8' }}>{c.label} · ₹{c.value >= 100000 ? `${(c.value / 100000).toFixed(c.value % 100000 ? 1 : 0)}L` : c.value.toLocaleString()}</Text>
+                                                        style={{ paddingVertical: 4 }}>
+                                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: c.label === 'SAFE' ? '#4ade80' : '#a8b4d8', textDecorationLine: 'underline' }}>{c.label} · ₹{c.value >= 100000 ? `${(c.value / 100000).toFixed(c.value % 100000 ? 1 : 0)}L` : c.value.toLocaleString()}</Text>
                                                     </TouchableOpacity>
                                                 ))}
                                             </View>

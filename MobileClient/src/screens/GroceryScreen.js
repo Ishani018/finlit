@@ -294,8 +294,8 @@ export default function GroceryScreen({ onClose, onBack, initialTab = 'shop', on
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }} contentContainerStyle={{ gap: 8 }}>
                             {FILTERS.map(([key, label]) => (
                                 <TouchableOpacity key={key} onPress={() => setFilter(key)} activeOpacity={0.8}
-                                    style={{ paddingHorizontal: 14, paddingVertical: 5, borderRadius: 14, backgroundColor: filter === key ? C.gold : '#111733' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: filter === key ? '#2a1c00' : C.cream, letterSpacing: 1 }}>{label}</Text>
+                                    style={{ paddingHorizontal: 6, paddingVertical: 4 }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: filter === key ? C.gold : C.dim, letterSpacing: 1, textDecorationLine: filter === key ? 'underline' : 'none' }}>{label}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
