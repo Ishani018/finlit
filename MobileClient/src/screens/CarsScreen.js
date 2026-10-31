@@ -52,8 +52,8 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
     };
 
     const Tab = ({ id, label }) => (
-        <TouchableOpacity onPress={() => setTab(id)} activeOpacity={0.8} style={{ flex: 1, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: tab === id ? C.gold : '#141b36' }}>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: tab === id ? '#2a1c00' : '#a8b4d8', letterSpacing: 1 }}>{label}</Text>
+        <TouchableOpacity onPress={() => setTab(id)} activeOpacity={0.8} style={{ flex: 1, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 2, borderColor: tab === id ? C.gold : 'transparent' }}>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: tab === id ? C.gold : C.dark, letterSpacing: 2 }}>{label}</Text>
         </TouchableOpacity>
     );
 
@@ -73,24 +73,24 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                 </View>
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: PAD, paddingTop: 10 }}>
+            <View style={{ flexDirection: 'row', paddingHorizontal: PAD, borderBottomWidth: 1, borderColor: C.border }}>
                 <Tab id="new" label="NEW" /><Tab id="used" label="SECOND-HAND" /><Tab id="garage" label={`GARAGE (${cars.length})`} />
             </View>
 
             {tab !== 'garage' && (
-                <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: PAD, paddingTop: 10 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: PAD, paddingTop: 12 }}>
                     {VEHICLE_KINDS.map(k => (
-                        <TouchableOpacity key={k.key} onPress={() => { setKind(k.key); if (k.key === 'toy') setTier('all'); }} activeOpacity={0.8} style={{ flex: 1, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: kind === k.key ? C.blue + '33' : '#141b36', borderWidth: 1, borderColor: kind === k.key ? C.blue : 'transparent' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: kind === k.key ? C.blue : '#a8b4d8', letterSpacing: 0 }}>{k.label}</Text>
+                        <TouchableOpacity key={k.key} onPress={() => { setKind(k.key); if (k.key === 'toy') setTier('all'); }} activeOpacity={0.7}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: kind === k.key ? C.cream : C.dark, letterSpacing: 1, textDecorationLine: kind === k.key ? 'underline' : 'none' }}>{k.label}</Text>
                         </TouchableOpacity>
                     ))}
                 </View>
             )}
             {tab !== 'garage' && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 6, paddingHorizontal: PAD, paddingVertical: 10 }}>
-                    {[{ key: 'all', label: 'ALL', color: C.cream }, ...CAR_TIERS].map(t => (
-                        <TouchableOpacity key={t.key} onPress={() => setTier(t.key)} activeOpacity={0.8} style={{ paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: 'center', backgroundColor: tier === t.key ? t.color + '33' : '#141b36', borderWidth: 1, borderColor: tier === t.key ? t.color : 'transparent' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: tier === t.key ? t.color : '#a8b4d8', letterSpacing: 1 }}>{t.label}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 16, paddingHorizontal: PAD, paddingTop: 6, paddingBottom: 10 }}>
+                    {[{ key: 'all', label: 'ANY BUDGET', color: C.cream }, ...CAR_TIERS].map(t => (
+                        <TouchableOpacity key={t.key} onPress={() => setTier(t.key)} activeOpacity={0.7}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: tier === t.key ? t.color : C.dark, letterSpacing: 1 }}>{t.label}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
@@ -98,8 +98,8 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 150 }} showsVerticalScrollIndicator={false}>
                 {tab !== 'garage' && used && (
-                    <View style={{ backgroundColor: '#101a36', borderWidth: 1, borderColor: '#22305c', borderRadius: 10, padding: 10, marginBottom: 12 }}>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#9db4e0' }}>Second-hand cars are a few years old. You pay much less and lose less value, but servicing costs {Math.round((USED_RUN_FACTOR - 1) * 100)}% more.</Text>
+                    <View style={{ borderLeftWidth: 2, borderColor: '#22305c', paddingLeft: 10, marginBottom: 12 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim }}>Second-hand cars are a few years old. You pay much less and lose less value, but servicing costs {Math.round((USED_RUN_FACTOR - 1) * 100)}% more.</Text>
                     </View>
                 )}
 
@@ -118,14 +118,10 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                     return (
                         <View key={car.id} style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 12, opacity: locked ? 0.55 : 1 }}>
                             <View style={{ height: 140, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
-                                <View style={{ position: 'absolute', bottom: 18, width: 180, height: 22, borderRadius: 100, backgroundColor: '#141b36' }} />
                                 <Image source={car.image} style={{ width: 200, height: 120 }} resizeMode="contain" />
-                                <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(6,8,15,0.9)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: t.color + '77' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: t.color, letterSpacing: 2 }}>{t.label}{used ? ' · USED' : ''}</Text>
-                                </View>
-                                {car.dep < 0 && <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: '#0d2a1f', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 }}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.sage }}>GAINS VALUE</Text></View>}
                             </View>
                             <View style={{ padding: 12 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 3 }}>{t.label}{used ? ' · USED' : ''}{car.dep < 0 ? ' · GAINS VALUE' : ''}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 24 }}>{car.name}</Text>
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 8 }}>{car.perk}</Text>
                                 <View style={{ flexDirection: 'row', marginBottom: 10 }}>
@@ -137,22 +133,23 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: car.dep < 0 ? C.sage : C.dim, marginBottom: 10 }}>
                                     {car.dep < 0 ? `Value grows about ${Math.round(-car.dep * 100)}% a year` : car.dep === 0 ? 'Holds its value' : `Loses about ${Math.round((used ? car.dep * 0.75 : car.dep) * 100)}% of its value a year${used ? '' : ', and ~10% the day you drive it off'}`}
                                 </Text>
-                                {locked ? (
-                                    <View style={{ height: 40, borderRadius: 8, backgroundColor: '#0a0d1a', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dark }}>Locked · needs {short(need)} net worth</Text>
-                                    </View>
-                                ) : (
-                                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                                        <TouchableOpacity disabled={!canCash} onPress={() => setPending({ car, used, loan: false })} activeOpacity={0.8} style={{ flex: 1, height: 38, borderRadius: 19, borderWidth: 1, borderColor: canCash ? C.gold + '88' : '#1a2040', backgroundColor: canCash ? C.gold + '14' : 'transparent', alignItems: 'center', justifyContent: 'center', opacity: canCash ? 1 : 0.55 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: canCash ? C.gold : C.dark, letterSpacing: 1 }}>BUY CASH</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity disabled={!canLoan} onPress={() => setPending({ car, used, loan: true })} activeOpacity={0.8} style={{ flex: 1, height: 38, borderRadius: 19, borderWidth: 1, borderColor: canLoan ? C.blue + '88' : '#1a2040', backgroundColor: canLoan ? C.blue + '14' : 'transparent', alignItems: 'center', justifyContent: 'center', opacity: canLoan ? 1 : 0.55 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: canLoan ? C.blue : C.dark, lineHeight: 16 }}>FINANCE</Text>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#7d8ab0', lineHeight: 12 }}>{short(down)} down · {short(emiOf(price))}/mo</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
                             </View>
+                            {locked ? (
+                                <View style={{ height: 40, borderTopWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dark }}>Locked · needs {short(need)} net worth</Text>
+                                </View>
+                            ) : (
+                                <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: C.border }}>
+                                    <TouchableOpacity disabled={!canCash} onPress={() => setPending({ car, used, loan: false })} activeOpacity={0.6} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', opacity: canCash ? 1 : 0.4 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.gold, letterSpacing: 2 }}>BUY CASH</Text>
+                                    </TouchableOpacity>
+                                    <View style={{ width: 1, backgroundColor: C.border }} />
+                                    <TouchableOpacity disabled={!canLoan} onPress={() => setPending({ car, used, loan: true })} activeOpacity={0.6} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', opacity: canLoan ? 1 : 0.4 }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.blue, letterSpacing: 2, lineHeight: 17 }}>FINANCE</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dim, lineHeight: 12 }}>{short(down)} down · {short(emiOf(price))}/mo</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                         </View>
                     );
                 })}
@@ -180,9 +177,8 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                                 return (
                                     <View key={o.uid} style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: isActive ? C.gold + '99' : C.border, overflow: 'hidden', marginBottom: 12 }}>
                                         <View style={{ height: 120, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
-                                            <View style={{ position: 'absolute', bottom: 14, width: 170, height: 20, borderRadius: 100, backgroundColor: '#141b36' }} />
-                                            <Image source={car.image} style={{ width: 180, height: 104 }} resizeMode="contain" />
-                                            {isActive && <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: C.gold, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 }}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#2a1c00', letterSpacing: 2 }}>DRIVING</Text></View>}
+                                                                                        <Image source={car.image} style={{ width: 180, height: 104 }} resizeMode="contain" />
+                                            {isActive && <Text style={{ position: 'absolute', top: 8, left: 10, fontFamily: 'VT323_400Regular', fontSize: 14, color: C.gold, letterSpacing: 3 }}>● DRIVING</Text>}
                                             {isActive && <Corners color={C.gold} />}
                                         </View>
                                         <View style={{ padding: 12 }}>
@@ -193,16 +189,19 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                                                 <Stat label="COSTS / MO" value={`−${money(isActive ? carRunCost(car, o) : carRunCost(car, o) * 0.35)}`} color={C.red} />
                                             </View>
                                             {loan ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: '#9db4e0', marginBottom: 6 }}>Finance: {money(loan.emi)}/mo · {money(loan.remainingPrincipal)} still owed</Text> : null}
-                                            <View style={{ flexDirection: 'row', gap: 8 }}>
-                                                {!isActive && (
-                                                    <TouchableOpacity onPress={() => { setActiveCar(o.uid); say(`Now driving the ${car.name}.`); }} activeOpacity={0.85} style={{ flex: 2, height: 40, borderRadius: 8, backgroundColor: '#1a2e56', alignItems: 'center', justifyContent: 'center' }}>
+                                        </View>
+                                        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: C.border }}>
+                                            {!isActive && (
+                                                <>
+                                                    <TouchableOpacity onPress={() => { setActiveCar(o.uid); say(`Now driving the ${car.name}.`); }} activeOpacity={0.6} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                                                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.cream, letterSpacing: 2 }}>DRIVE THIS</Text>
                                                     </TouchableOpacity>
-                                                )}
-                                                <TouchableOpacity onPress={() => { if (!confirming) { setSellId(o.uid); return; } const r = sellCar(o.uid); setSellId(null); say(r.msg, r.success); }} activeOpacity={0.85} style={{ flex: 1, height: 40, borderRadius: 8, backgroundColor: confirming ? C.red : '#2a0d0d', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: confirming ? '#2a0000' : C.red, letterSpacing: 1 }}>{confirming ? `SELL ${short(value)}?` : 'SELL'}</Text>
-                                                </TouchableOpacity>
-                                            </View>
+                                                    <View style={{ width: 1, backgroundColor: C.border }} />
+                                                </>
+                                            )}
+                                            <TouchableOpacity onPress={() => { if (!confirming) { setSellId(o.uid); return; } const r = sellCar(o.uid); setSellId(null); say(r.msg, r.success); }} activeOpacity={0.6} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.red, letterSpacing: 2 }}>{confirming ? `SELL ${short(value)}? TAP AGAIN` : 'SELL'}</Text>
+                                            </TouchableOpacity>
                                         </View>
                                     </View>
                                 );
