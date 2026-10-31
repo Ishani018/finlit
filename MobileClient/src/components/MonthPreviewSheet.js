@@ -41,7 +41,7 @@ const EXPENSE_ROWS = [
     ['housing', 'Rent and upkeep'],
     ['living', 'Living costs'],
     ['car', 'Vehicle running costs'],
-    ['lifestyle', 'Gadgets and pets'],
+    ['lifestyle', 'Gadgets and pets upkeep'],
     ['emi', 'Loan EMIs'],
     ['insurance', 'Insurance premiums'],
     ['tax', 'Income tax'],

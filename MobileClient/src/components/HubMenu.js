@@ -18,21 +18,22 @@ const IMAGES = {
     pantry:    require('../../assets/ui_comp/pantry.png'),
     birthday:  require('../../assets/ui_comp/birthday_cake.png'),
     pets:      require('../../assets/lifestyle/pet_dog.png'),
+    gadgets:   require('../../assets/lifestyle/laptop.png'),
 };
-const ICON_TILES = ['cars', 'pantry', 'birthday', 'pets']; // painted icons, drawn on a plain panel instead of cropped scene art
+const ICON_TILES = ['cars', 'pantry', 'birthday', 'pets', 'gadgets']; // painted icons, drawn on a plain panel instead of cropped scene art
 const GOALS_ICON = require('../../assets/ui_comp/achivements.png');
 const HELP_ICON = require('../../assets/ui_comp/bulb.png');
 const COIN = require('../../assets/ui_comp/nextbutton.png');
 
 const LABELS = {
     work: 'WORK', study: 'STUDY', invest: 'INVEST', bank: 'BANK',
-    insurance: 'INSURE', home: 'HOME', family: 'FAMILY', grocery: 'SHOP', cars: 'CARS', pantry: 'PANTRY', birthday: 'PARTY', pets: 'PETS',
+    insurance: 'INSURE', home: 'HOME', family: 'FAMILY', grocery: 'SHOP', cars: 'CARS', pantry: 'PANTRY', birthday: 'PARTY', pets: 'PETS', gadgets: 'GADGETS',
 };
 
 const SECTIONS = [
     { label: 'CAREER',     color: '#e2b33a', keys: ['work', 'study'] },
     { label: 'FINANCES',   color: '#38b2ac', keys: ['invest', 'bank', 'insurance'] },
-    { label: 'DAILY LIFE', color: '#ec4899', keys: ['home', 'family', 'grocery', 'cars', 'pantry', 'birthday', 'pets'] },
+    { label: 'DAILY LIFE', color: '#ec4899', keys: ['home', 'family', 'grocery', 'cars', 'pantry', 'birthday', 'pets', 'gadgets'] },
 ];
 
 const RED = '#f87171';

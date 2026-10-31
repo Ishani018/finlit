@@ -143,12 +143,12 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                                     </View>
                                 ) : (
                                     <View style={{ flexDirection: 'row', gap: 8 }}>
-                                        <TouchableOpacity disabled={!canCash} onPress={() => setPending({ car, used, loan: false })} activeOpacity={0.85} style={{ flex: 1, height: 42, borderRadius: 8, backgroundColor: canCash ? C.gold : '#0a0d1a', alignItems: 'center', justifyContent: 'center', opacity: canCash ? 1 : 0.5 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: canCash ? '#2a1c00' : C.dark, letterSpacing: 1 }}>BUY CASH</Text>
+                                        <TouchableOpacity disabled={!canCash} onPress={() => setPending({ car, used, loan: false })} activeOpacity={0.8} style={{ flex: 1, height: 38, borderRadius: 19, borderWidth: 1, borderColor: canCash ? C.gold + '88' : '#1a2040', backgroundColor: canCash ? C.gold + '14' : 'transparent', alignItems: 'center', justifyContent: 'center', opacity: canCash ? 1 : 0.55 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: canCash ? C.gold : C.dark, letterSpacing: 1 }}>BUY CASH</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity disabled={!canLoan} onPress={() => setPending({ car, used, loan: true })} activeOpacity={0.85} style={{ flex: 1, height: 42, borderRadius: 8, backgroundColor: '#1a2e56', alignItems: 'center', justifyContent: 'center', opacity: canLoan ? 1 : 0.5 }}>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.cream, lineHeight: 16 }}>FINANCE</Text>
-                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: '#9db4e0', lineHeight: 13 }}>{short(down)} down · {short(emiOf(price))}/mo</Text>
+                                        <TouchableOpacity disabled={!canLoan} onPress={() => setPending({ car, used, loan: true })} activeOpacity={0.8} style={{ flex: 1, height: 38, borderRadius: 19, borderWidth: 1, borderColor: canLoan ? C.blue + '88' : '#1a2040', backgroundColor: canLoan ? C.blue + '14' : 'transparent', alignItems: 'center', justifyContent: 'center', opacity: canLoan ? 1 : 0.55 }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: canLoan ? C.blue : C.dark, lineHeight: 16 }}>FINANCE</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#7d8ab0', lineHeight: 12 }}>{short(down)} down · {short(emiOf(price))}/mo</Text>
                                         </TouchableOpacity>
                                     </View>
                                 )}

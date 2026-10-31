@@ -242,7 +242,8 @@ export default function ShopScreen({ onClose, initialSection = null }) {
     if (section === 'pharmacy') return <PharmacySection onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'clothes')  return <ClothesSection  onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'cars')     return <CarsScreen onBack={() => setSection(null)} onClose={onClose} />;
-    if (section === 'lifestyle') return <LifestyleScreen onBack={() => setSection(null)} />;
+    if (section === 'gadgets')  return <LifestyleScreen mode="gadgets" onBack={() => setSection(null)} />;
+    if (section === 'pets')     return <LifestyleScreen mode="pets" onBack={() => setSection(null)} />;
 
     return (
         <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -264,7 +265,8 @@ export default function ShopScreen({ onClose, initialSection = null }) {
                         { key: 'pharmacy', label: 'Pharmacy',        sub: 'HEALTH & MEDICINE', img: require('../../assets/ui_comp/pharmacy.png'),     color: C.sage },
                         { key: 'clothes',  label: 'Clothes & Toys', sub: 'SHOPPING',          img: require('../../assets/ui_comp/clothing.png'),     color: C.pink },
                         { key: 'cars',     label: 'Vehicles',        sub: 'WHEELS',            img: require('../../assets/cars/honda_city.png'),      color: '#60a5fa' },
-                        { key: 'lifestyle', label: 'Gadgets & Pets', sub: 'HOME & HEART',      img: require('../../assets/lifestyle/pet_dog.png'),    color: '#ec4899' },
+                        { key: 'gadgets',  label: 'Gadgets',         sub: 'HOME & TECH',       img: require('../../assets/lifestyle/laptop.png'),     color: '#fbbf24' },
+                        { key: 'pets',     label: 'Pet Shop',        sub: 'COMPANIONS',        img: require('../../assets/lifestyle/pet_dog.png'),    color: '#ec4899' },
                     ].map(cat => (
                         <TouchableOpacity key={cat.key} onPress={() => setSection(cat.key)} activeOpacity={0.85}
                             style={{ width: '48%', aspectRatio: 1, borderRadius: 12, backgroundColor: C.panel, marginBottom: GAP, alignItems: 'center', justifyContent: 'center', padding: 12, overflow: 'hidden' }}>

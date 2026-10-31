@@ -10,16 +10,18 @@ const money = (n) => `₹${Math.round(n).toLocaleString()}`;
 
 function Stat({ label, value, color }) {
     return (
-        <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 2 }}>{label}</Text>
-            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: color || C.cream, lineHeight: 19 }}>{value}</Text>
+        <View style={{ flexShrink: 0 }}>
+            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: C.dark, letterSpacing: 1 }}>{label}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: color || C.cream, lineHeight: 18 }}>{value}</Text>
         </View>
     );
 }
 
-export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
+// mode 'gadgets' or 'pets': each has its own shop, with a Mine tab for what you already own
+export default function LifestyleScreen({ onBack, mode = 'gadgets' }) {
     const { balance, gadgets, pets, buyGadget, sellGadget, adoptPet, rehomePet, getLifestyleMonthly, totalMonthsPlayed } = useGame();
-    const [tab, setTab] = useState(initialTab);
+    const isPets = mode === 'pets';
+    const [tab, setTab] = useState('shop');
     const [toast, setToast] = useState(null);
     const [confirm, setConfirm] = useState(null);   // uid awaiting a second tap
     const say = (msg, ok = true) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 3000); };
@@ -31,21 +33,22 @@ export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
         </TouchableOpacity>
     );
 
-    const Card = ({ id, title, sub, price, priceLabel, stats, button, onPress, disabled, owned }) => (
-        <View style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: owned ? C.sage + '66' : C.border, overflow: 'hidden', marginBottom: 12 }}>
-            <View style={{ flexDirection: 'row' }}>
-                <View style={{ width: 112, height: 112, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
-                    <Image source={lifestyleImage(id)} style={{ width: 88, height: 88 }} resizeMode="contain" />
-                </View>
-                <View style={{ flex: 1, padding: 10 }}>
-                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, lineHeight: 22 }}>{title}</Text>
-                    <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, lineHeight: 15, marginBottom: 4 }}>{sub}</Text>
-                    <View style={{ flexDirection: 'row' }}>{stats}</View>
+    const Card = ({ id, title, sub, stats, button, priceLabel, onPress, disabled, owned }) => (
+        <View style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: owned ? C.sage + '66' : C.border, overflow: 'hidden', marginBottom: 10, flexDirection: 'row' }}>
+            <View style={{ width: 96, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={lifestyleImage(id)} style={{ width: 76, height: 76 }} resizeMode="contain" />
+            </View>
+            <View style={{ flex: 1, padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, lineHeight: 22 }}>{title}</Text>
+                <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.dim, lineHeight: 15, marginBottom: 4 }}>{sub}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', rowGap: 6 }}>
+                    <View style={{ flex: 1, flexDirection: 'row', gap: 12, minWidth: 130 }}>{stats}</View>
+                    <TouchableOpacity disabled={disabled} onPress={onPress} activeOpacity={0.8}
+                        style={{ paddingHorizontal: 12, height: 32, borderRadius: 16, borderWidth: 1, borderColor: disabled ? '#1a2040' : button.fg + '88', backgroundColor: disabled ? 'transparent' : button.fg + '14', alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.55 : 1 }}>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: disabled ? C.dark : button.fg, letterSpacing: 1 }}>{priceLabel}</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-            <TouchableOpacity disabled={disabled} onPress={onPress} activeOpacity={0.85} style={{ height: 40, backgroundColor: disabled ? '#0a0d1a' : button.bg, alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.5 : 1 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: disabled ? C.dark : button.fg, letterSpacing: 1 }}>{priceLabel}</Text>
-            </TouchableOpacity>
         </View>
     );
 
@@ -55,8 +58,8 @@ export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <TouchableOpacity onPress={onBack} activeOpacity={0.7}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: C.dim, lineHeight: 26 }}>‹</Text></TouchableOpacity>
                     <View>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, letterSpacing: 4 }}>HOME & HEART</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 28 }}>Gadgets & Pets</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, letterSpacing: 4 }}>{isPets ? 'COMPANIONS' : 'HOME & TECH'}</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 28 }}>{isPets ? 'Pet Shop' : 'Gadgets'}</Text>
                     </View>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
@@ -66,23 +69,23 @@ export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
             </View>
 
             <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: PAD, paddingTop: 10 }}>
-                <Tab id="gadgets" label="GADGETS" /><Tab id="pets" label="PETS" /><Tab id="mine" label={`MINE (${gadgets.length + pets.length})`} />
+                <Tab id="shop" label={isPets ? 'ADOPT' : 'SHOP'} /><Tab id="mine" label={`MINE (${isPets ? pets.length : gadgets.length})`} />
             </View>
 
             <ScrollView contentContainerStyle={{ padding: PAD, paddingBottom: 150 }} showsVerticalScrollIndicator={false}>
-                {tab === 'gadgets' && GADGETS.map(g => {
+                {!isPets && tab === 'shop' && GADGETS.map(g => {
                     const owned = gadgets.some(o => o.id === g.id);
                     const poor = balance < g.price;
                     return (
                         <Card key={g.id} id={g.id} title={g.name} sub={g.perk} owned={owned}
                             stats={<><Stat label="MOOD" value={`+${g.mood}`} color={C.sage} /><Stat label="RUNS" value={g.run ? `−${money(g.run)}` : 'free'} color={g.run ? C.red : C.dim} />{g.health ? <Stat label="HEALTH" value={`+${g.health}`} color={C.sage} /> : null}</>}
-                            priceLabel={owned ? 'OWNED' : poor ? `${money(g.price)} · NOT ENOUGH CASH` : `BUY ${money(g.price)}`}
-                            button={{ bg: C.gold, fg: '#2a1c00' }} disabled={owned || poor}
+                            priceLabel={owned ? 'OWNED' : `BUY ${money(g.price)}`}
+                            button={{ fg: C.gold }} disabled={owned || poor}
                             onPress={() => { const r = buyGadget(g.id); say(r.msg, r.success); }} />
                     );
                 })}
 
-                {tab === 'pets' && (
+                {isPets && tab === 'shop' && (
                     <View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 10 }}>Pets love you back and cost a little every month. They need the vet now and then, and they do not live forever. You can have up to {MAX_PETS}.</Text>
                         {PETS.map(p => {
@@ -90,8 +93,8 @@ export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
                             return (
                                 <Card key={p.id} id={p.id} title={p.name} sub={`${p.perk} Lives about ${p.lifeYears} years.`}
                                     stats={<><Stat label="MOOD" value={`+${p.mood}`} color={C.sage} /><Stat label="CARE / MO" value={`−${money(p.run)}`} color={C.red} /></>}
-                                    priceLabel={full ? 'YOU HAVE ENOUGH PETS' : poor ? `${money(p.price)} · NOT ENOUGH CASH` : `ADOPT ${money(p.price)}`}
-                                    button={{ bg: C.pink, fg: '#2a0014' }} disabled={full || poor}
+                                    priceLabel={full ? 'FULL' : `ADOPT ${money(p.price)}`}
+                                    button={{ fg: C.pink }} disabled={full || poor}
                                     onPress={() => { const r = adoptPet(p.id); say(r.msg, r.success); }} />
                             );
                         })}
@@ -99,19 +102,19 @@ export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
                 )}
 
                 {tab === 'mine' && (
-                    gadgets.length + pets.length === 0 ? (
+                    (isPets ? pets.length : gadgets.length) === 0 ? (
                         <View style={{ alignItems: 'center', paddingVertical: 50 }}>
-                            <Image source={lifestyleImage('pet_cat')} style={{ width: 110, height: 110, opacity: 0.3 }} resizeMode="contain" />
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.dim, textAlign: 'center', marginTop: 8 }}>Nothing yet.{'\n'}Buy a gadget or adopt a pet.</Text>
+                            <Image source={lifestyleImage(isPets ? 'pet_cat' : 'phone')} style={{ width: 110, height: 110, opacity: 0.3 }} resizeMode="contain" />
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 20, color: C.dim, textAlign: 'center', marginTop: 8 }}>{isPets ? 'No pets yet.\nAdopt one from the shop.' : 'No gadgets yet.\nBuy one from the shop.'}</Text>
                         </View>
                     ) : (
                         <View>
                             <View style={{ flexDirection: 'row', backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: C.border, padding: 12, marginBottom: 12 }}>
-                                <Stat label="COSTS / MO" value={`−${money(monthly.cost)}`} color={C.red} />
+                                <Stat label="ALL COSTS / MO" value={`−${money(monthly.cost)}`} color={C.red} />
                                 <Stat label="MOOD / MO" value={`+${monthly.mood.toFixed(1)}`} color={C.sage} />
                                 <Stat label="HEALTH / MO" value={`+${monthly.health.toFixed(1)}`} color={C.sage} />
                             </View>
-                            {pets.map(o => {
+                            {isPets && pets.map(o => {
                                 const p = PET_BY_ID[o.id]; if (!p) return null;
                                 const age = totalMonthsPlayed - o.boughtMonth;
                                 const confirming = confirm === o.uid;
@@ -130,7 +133,7 @@ export default function LifestyleScreen({ onBack, initialTab = 'gadgets' }) {
                                     </View>
                                 );
                             })}
-                            {gadgets.map(o => {
+                            {!isPets && gadgets.map(o => {
                                 const g = GADGET_BY_ID[o.id]; if (!g) return null;
                                 const value = Math.round(gadgetValue(o, totalMonthsPlayed) * GADGET_RESALE);
                                 return (

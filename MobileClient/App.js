@@ -988,7 +988,8 @@ const GameLayout = ({ onHardReset }) => {
       family: dependents.length > 0 ? `${dependents.length} dependent${dependents.length === 1 ? '' : 's'}` : 'Just you',
       grocery: pantryQty === 0 ? 'Pantry empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'} left`,
       cars: cars.length === 0 ? 'No vehicle yet' : `${cars.length} in garage`,
-      pets: (gadgets.length + pets.length) === 0 ? 'Nothing yet' : `${pets.length} pet${pets.length === 1 ? '' : 's'} · ${gadgets.length} gadget${gadgets.length === 1 ? '' : 's'}`,
+      pets: pets.length === 0 ? 'No pets yet' : `${pets.length} pet${pets.length === 1 ? '' : 's'}`,
+      gadgets: gadgets.length === 0 ? 'None yet' : `${gadgets.length} owned`,
       pantry: pantryQty === 0 ? 'Empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'}`,
       birthday: 'Celebrate',
     };
@@ -1011,7 +1012,8 @@ const GameLayout = ({ onHardReset }) => {
     if (key === 'family')    { setActiveTab('family'); }
     if (key === 'grocery')   { setShopInitial('grocery'); setShowGrocery(true); }
     if (key === 'cars')      { setShopInitial('cars'); setShowGrocery(true); }
-    if (key === 'pets')      { setShopInitial('lifestyle'); setShowGrocery(true); }
+    if (key === 'pets')      { setShopInitial('pets'); setShowGrocery(true); }
+    if (key === 'gadgets')   { setShopInitial('gadgets'); setShowGrocery(true); }
     if (key === 'pantry')    { setActiveTab('home'); setShowPantry(true); }
     if (key === 'birthday')  { setActiveTab('home'); setShowBirthdayRoom(true); }
     if (key === 'goals')     { setShowGoals(true); }
