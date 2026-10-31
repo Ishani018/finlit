@@ -5,7 +5,7 @@ import PlayerSprite from './PlayerSprite';
 import { getSpriteImage } from '../data/spriteMap';
 import { ACC_SLOTS, ACC_ITEMS } from '../data/accessories';
 
-const ROOM = require('../../assets/hostel.png');
+const ROOM = require('../../assets/fitting_room.png');
 const GOLD = '#fbbf24';
 const PAD = 14;
 const COLS = 3;
@@ -77,9 +77,7 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                 <ScrollView contentContainerStyle={{ paddingBottom: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     {/* Hero: room, platform, sprite, name plate */}
                     <View style={{ height: 330, backgroundColor: '#0a0e22', overflow: 'hidden', borderBottomWidth: 1, borderColor: '#2a3560', alignItems: 'center' }}>
-                        <Image source={ROOM} style={{ position: 'absolute', left: -60, top: -50, width: 520, height: 520, opacity: 0.22 }} resizeMode="cover" />
-                        <View style={{ position: 'absolute', bottom: 40, width: 200, height: 34, borderRadius: 100, backgroundColor: '#1a2244', borderWidth: 2, borderColor: '#2a3560' }} />
-                        <View style={{ position: 'absolute', bottom: 48, width: 164, height: 18, borderRadius: 100, backgroundColor: '#10163a' }} />
+                        <Image source={ROOM} style={{ position: 'absolute', left: 0, right: 0, top: -48, width: '100%', aspectRatio: 1 }} resizeMode="cover" />
                         <PlayerSprite source={heroSrc} spriteId={spriteId} age={age} look={look}
                             style={{ position: 'absolute', bottom: 56, width: 190, height: 262 }} />
                         <View style={{ position: 'absolute', bottom: 8, minWidth: 130, paddingHorizontal: 18, paddingVertical: 3, borderRadius: 6, borderWidth: 1, borderColor: GOLD, backgroundColor: 'rgba(6,8,15,0.92)', alignItems: 'center' }}>

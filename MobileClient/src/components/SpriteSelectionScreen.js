@@ -56,6 +56,7 @@ const TRAITS = {
 
 // ─── Shared bits ─────────────────────────────────────────────────────────────
 const ROOM_BG = require('../../assets/hostel.png');
+const FITTING_ROOM = require('../../assets/fitting_room.png');
 const VAULT = require('../../assets/ui_comp/investicon.png');
 const NAME_IDEAS = ['Meera', 'Aarav', 'Zoya', 'Kabir', 'Ananya', 'Dev'];
 const GOLD = '#fbbf24';
@@ -80,8 +81,8 @@ function Hero({ height, children, sprite, look, spriteId }) {
     const sh = height / 0.56, sw = sh * 0.363;
     return (
         <View style={{ height, overflow: 'hidden', backgroundColor: '#0a0e22', alignItems: 'center' }}>
-            <Image source={ROOM_BG} style={{ position: 'absolute', left: -40, top: -30, width: SW + 120, height: height + 160, opacity: 0.28 }} resizeMode="cover" />
-            <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 60, backgroundColor: 'rgba(6,8,15,0.55)' }} />
+            <Image source={FITTING_ROOM} style={{ position: 'absolute', left: 0, right: 0, top: -height * 0.12, width: '100%', aspectRatio: 1 }} resizeMode="cover" />
+            <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 40, backgroundColor: 'rgba(3,5,15,0.35)' }} />
             <PlayerSprite source={sprite} spriteId={spriteId} age={18} look={look} style={{ position: 'absolute', top: 14, width: sw, height: sh }} />
             {children}
         </View>
