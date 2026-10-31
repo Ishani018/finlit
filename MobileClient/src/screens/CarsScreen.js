@@ -119,22 +119,18 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                     const canCash = balance >= price, canLoan = balance >= down;
                     return (
                         <View key={car.id} style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 12, opacity: locked ? 0.55 : 1 }}>
-                            <View style={{ height: 210, backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
-                                <Image source={car.image} style={{ width: '94%', height: 196 }} resizeMode="contain" />
-                            </View>
-                            <View style={{ padding: 12 }}>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 3 }}>{t.label}{used ? ' · USED' : ''}{car.dep < 0 ? ' · GAINS VALUE' : ''}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.cream, lineHeight: 24 }}>{car.name}</Text>
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, marginBottom: 8 }}>{car.perk}</Text>
-                                <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-                                    <Stat label="PRICE" value={short(price)} color={C.gold} />
-                                    <Stat label="RUNNING / MO" value={`−${money(run)}`} color={C.red} />
-                                    <Stat label="MOOD / MO" value={`+${car.mood}`} color={C.sage} />
+                            <View style={{ flexDirection: 'row', minHeight: 150 }}>
+                                <View style={{ width: '46%', backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Image source={car.image} style={{ width: '96%', height: 140 }} resizeMode="contain" />
                                 </View>
-                                {car.income ? <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.sage, marginBottom: 6 }}>Earns +{money(car.income)}/mo when active</Text> : null}
-                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: car.dep < 0 ? C.sage : C.dim, marginBottom: 10 }}>
-                                    {car.dep < 0 ? `Value grows about ${Math.round(-car.dep * 100)}% a year` : car.dep === 0 ? 'Holds its value' : `Loses about ${Math.round((used ? car.dep * 0.75 : car.dep) * 100)}% of its value a year${used ? '' : ', and ~10% the day you drive it off'}`}
-                                </Text>
+                                <View style={{ flex: 1, padding: 12, justifyContent: 'center' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 2 }}>{t.label}{used ? ' · USED' : ''}{car.dep < 0 ? ' · GAINS VALUE' : ''}</Text>
+                                    <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, lineHeight: 22 }}>{car.name}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.gold, lineHeight: 30 }}>{short(price)}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.red, lineHeight: 16 }}>runs −{money(run)}/mo</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.sage, lineHeight: 15 }}>+{car.mood} mood a month{car.income ? ` · earns ${short(car.income)}/mo` : ''}</Text>
+                                    <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, lineHeight: 14, marginTop: 3 }}>{car.perk}</Text>
+                                </View>
                             </View>
                             {locked ? (
                                 <View style={{ height: 40, borderTopWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>

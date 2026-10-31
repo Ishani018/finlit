@@ -81,7 +81,7 @@ function Hero({ height, children, sprite, look, spriteId }) {
     const sh = height / 0.56, sw = sh * 0.363;
     return (
         <View style={{ height, overflow: 'hidden', backgroundColor: '#0a0e22', alignItems: 'center' }}>
-            <Image source={FITTING_ROOM} style={{ position: 'absolute', left: 0, right: 0, top: -height * 0.12, width: '100%', aspectRatio: 1 }} resizeMode="cover" />
+            <Image source={FITTING_ROOM} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }} resizeMode="contain" />
             <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 40, backgroundColor: 'rgba(3,5,15,0.35)' }} />
             <PlayerSprite source={sprite} spriteId={spriteId} age={18} look={look} style={{ position: 'absolute', top: 14, width: sw, height: sh }} />
             {children}
