@@ -1168,7 +1168,7 @@ const GameLayout = ({ onHardReset }) => {
             <TouchableOpacity
               onPress={() => setShowCustomise(true)}
               activeOpacity={0.8}
-              style={{ position: 'absolute', bottom: -40, right: -18, zIndex: 10 }}
+              style={{ position: 'absolute', bottom: -150, right: -14, zIndex: 10 }}
             >
               <PlayerSprite source={spriteImage} spriteId={playerSprite} age={playerAge} look={playerLook} style={{ width: 178, height: 330 }} />
               {dependents.length > 0 && (
