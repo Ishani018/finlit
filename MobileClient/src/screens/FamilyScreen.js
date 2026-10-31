@@ -223,17 +223,17 @@ function GrandchildCard({ g }) {
     );
 }
 
-function AdoptCard({ onPress }) {
+function AdoptCard({ onPress, locked }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
             style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.pink + '08' }}>
-                <Image source={DEP_IMAGES.adopted_baby} style={{ width: 64, height: 64, opacity: 0.75 }} resizeMode="contain" />
+                <Image source={DEP_IMAGES.adopted_baby} style={{ width: 64, height: 64, opacity: locked ? 0.4 : 0.75 }} resizeMode="contain" />
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.pink + 'cc', letterSpacing: 2 }}>+ ADOPT</Text>
             </View>
             <View style={{ padding: 10 }}>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>Adopt a Child</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>Single or married</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>{locked ? `Open from age ${ADOPTION_MIN_AGE}` : 'Single or married'}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -944,7 +944,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 </View>
 
                 {/* Children */}
-                {(children.length > 0 || spouse || expectingChild || playerAge >= ADOPTION_MIN_AGE) && <SectionLabel label="CHILDREN" />}
+                <SectionLabel label="CHILDREN" />
 
                 {(() => {
                     // Build list: children + optional add-child slot
@@ -952,7 +952,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                     if (expectingChild) slots.push({ type: 'expecting', data: expectingChild });
                     const activeChildrenWithCurrentSpouse = children.filter(c => c.custody !== 'ex' && c.spouseId === spouse?.id);
                     if (spouse && activeChildrenWithCurrentSpouse.length < 3 && !expectingChild) slots.push({ type: 'add' });
-                    if (!expectingChild && playerAge >= ADOPTION_MIN_AGE && children.filter(c => c.custody !== 'ex' && !c.isDead).length < 4) slots.push({ type: 'adopt' });
+                    if (!expectingChild && children.filter(c => c.custody !== 'ex' && !c.isDead).length < 4) slots.push({ type: 'adopt' });
 
                     const rows = [];
                     for (let i = 0; i < slots.length; i += 2) {
@@ -965,7 +965,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                     : left.type === 'expecting'
                                     ? <ExpectingChildCard data={left.data} />
                                     : left.type === 'adopt'
-                                    ? <AdoptCard onPress={() => setShowAdopt(true)} />
+                                    ? <AdoptCard locked={playerAge < ADOPTION_MIN_AGE} onPress={() => setShowAdopt(true)} />
                                     : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
                                 }
                                 {right ? (
@@ -974,7 +974,7 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                                         : right.type === 'expecting'
                                         ? <ExpectingChildCard data={right.data} />
                                         : right.type === 'adopt'
-                                        ? <AdoptCard onPress={() => setShowAdopt(true)} />
+                                        ? <AdoptCard locked={playerAge < ADOPTION_MIN_AGE} onPress={() => setShowAdopt(true)} />
                                         : <AddChildCard onPress={() => { const r = haveChild(); showDialog(r.success ? 'Expecting!' : 'Cannot', r.msg, r.success ? 'success' : 'error'); }} />
                                 ) : <View style={{ flex: 1 }} />}
                             </View>
