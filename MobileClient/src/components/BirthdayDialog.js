@@ -26,7 +26,7 @@ const getChoiceImage = (choice, event) => {
     return WARN_IMG;
 };
 
-export default function BirthdayDialog({ event, onChoice }) {
+export default function BirthdayDialog({ event, onChoice, balance = 0, jar = 0 }) {
     const { width: W } = useWindowDimensions();
 
     const MODAL_W = Math.min(W * 0.92, 380);
@@ -65,6 +65,60 @@ export default function BirthdayDialog({ event, onChoice }) {
 
     const ACCENT = event.isHospital ? '#f87171' : (isDependent ? '#a855f7' : '#ec4899');
     const TEXT_PRIMARY = event.isHospital ? '#fecaca' : (isDependent ? '#e9d5ff' : '#fbcfe8');
+
+    // A plain birthday: the party options as a simple list, the way the rest of the game lays out choices
+    if (event.isBirthday && !event.isHospital && !event.isBaby && multiChoice) {
+        const cur = choices[activeIndex] || choices[0];
+        const cost = cur?.effect?.amount || 0;
+        const fromJar = Math.min(jar, cost);
+        return (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 600, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)' }} />
+                <Animated.View style={{ width: MODAL_W, backgroundColor: '#0d1020', borderRadius: 12, borderWidth: 1, borderColor: '#1a2040', overflow: 'hidden', transform: [{ scale: scaleAnim }], opacity: opacityAnim }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12, borderBottomWidth: 1, borderColor: '#1a2040' }}>
+                        <Image source={cakeImage} style={{ width: 52, height: 52 }} resizeMode="contain" />
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: TEXT_PRIMARY, lineHeight: 26 }}>{event.name}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0', lineHeight: 16 }}>{event.message}</Text>
+                        </View>
+                    </View>
+                    <ScrollView style={{ maxHeight: 330 }} showsVerticalScrollIndicator={false}>
+                        {choices.map((choice, index) => {
+                            const e = choice.effect || {};
+                            const on = index === activeIndex;
+                            const bits = [];
+                            if (e.happiness) bits.push(`${e.happiness > 0 ? '+' : ''}${e.happiness} mood`);
+                            if (e.health) bits.push(`${e.health > 0 ? '+' : ''}${e.health} health`);
+                            if (e.salaryBonusPct > 0) bits.push(`+${(e.salaryBonusPct * 100).toFixed(0)}% pay`);
+                            if (e.creditScore > 0) bits.push(`+${e.creditScore} CIBIL`);
+                            return (
+                                <TouchableOpacity key={index} onPress={() => setActiveIndex(index)} activeOpacity={0.8}
+                                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: on ? '#131a36' : 'transparent', borderLeftWidth: 3, borderColor: on ? (choice.color || ACCENT) : 'transparent', borderBottomWidth: 1, borderBottomColor: '#141b36' }}>
+                                    <Image source={getChoiceImage(choice, event)} style={{ width: 68, height: 68 }} resizeMode="cover" />
+                                    <View style={{ flex: 1 }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#d0daf0' }}>{choice.label}</Text>
+                                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: e.amount > 0 ? '#fbbf24' : '#4ade80' }}>{e.amount > 0 ? `₹${e.amount.toLocaleString()}` : 'Free'}</Text>
+                                        </View>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0', lineHeight: 16 }}>{bits.join('  ·  ')}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
+                    <View style={{ padding: 14 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0' }}>Cash ₹{Math.round(balance).toLocaleString()}</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: jar > 0 ? '#fbbf24' : '#5a6890' }}>{jar > 0 ? `Birthday jar ₹${jar.toLocaleString()} pays ₹${fromJar.toLocaleString()}` : 'Birthday jar empty'}</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => onChoice(cur)} activeOpacity={0.85} style={{ backgroundColor: '#fbbf24', borderRadius: 8, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 21, color: '#2a1c00', letterSpacing: 3 }}>{cost > 0 ? `CELEBRATE · ₹${Math.max(0, cost - fromJar).toLocaleString()}` : cur?.label?.toUpperCase()}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Animated.View>
+            </View>
+        );
+    }
 
     const snapToCard = (i) => {
         setActiveIndex(i);

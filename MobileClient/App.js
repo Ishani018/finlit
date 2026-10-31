@@ -341,6 +341,7 @@ const GameLayout = ({ onHardReset }) => {
     degrees, portfolio, properties, marketPrices, priceHistory,
     enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice, getMonthPreview,
     playerSprite, setPlayerSprite, playerName, setPlayerName, playerLook, setPlayerLook, lastVacationMonth,
+    addToBirthdayJar, sendBirthdayWish, birthdayJar, bdayWishes,
     playerAge, totalMonthsPlayed, gameOver, finalScore, RETIREMENT_MONTH, GAME_END_MONTH,
     netWorthHistory, lastMonthFlow, monthlyRecap,
     loans, buyPropertyWithLoan, sellProperty,
@@ -1203,6 +1204,11 @@ const GameLayout = ({ onHardReset }) => {
             const isPlayerBday = playerBdayMonth === currentMonth;
             const bdayDep = dependents.find(d => d.bdayMonth === currentMonth);
             const isBdayMonth = isPlayerBday || !!bdayDep;
+            // months until the next birthday in the household, so the cake icon says what it is for
+            const allBdayMonths = [playerBdayMonth, ...dependents.filter(d => !d.isDead && d.custody !== 'ex').map(d => d.bdayMonth)].filter(Boolean);
+            const nextBdayAway = allBdayMonths.length ? Math.min(...allBdayMonths.map(m => (m - currentMonth + 12) % 12)) : null;
+            const nextBdayMonth = nextBdayAway === null ? null : ((currentMonth - 1 + nextBdayAway) % 12);
+            const MON3 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             return (
               <View style={{ position: 'absolute', top: 8, left: 12, zIndex: 20, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => setShowPantry(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
@@ -1219,6 +1225,9 @@ const GameLayout = ({ onHardReset }) => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowBirthdayRoom(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
                   <Image source={require('./assets/ui_comp/birthday_cake.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
+                  {nextBdayMonth !== null && (
+                    <Text style={{ position: 'absolute', bottom: -11, left: 0, right: 0, textAlign: 'center', fontFamily: 'VT323_400Regular', fontSize: 11, color: isBdayMonth ? '#ec4899' : '#5a6890', letterSpacing: 1 }}>{isBdayMonth ? 'THIS MO' : MON3[nextBdayMonth]}</Text>
+                  )}
                   {isBdayMonth && (
                     <View style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: '#ec4899', borderWidth: 1.5, borderColor: '#06080f' }} />
                   )}
@@ -2664,6 +2673,11 @@ const GameLayout = ({ onHardReset }) => {
         playerName={playerName}
         dependents={dependents}
         lastCelebrationChoice={lastCelebrationChoice}
+        balance={balance}
+        jar={birthdayJar}
+        wishes={bdayWishes}
+        onAddJar={addToBirthdayJar}
+        onWish={sendBirthdayWish}
       />
 
       {/* ── First-load intro overlay ── */}
@@ -2784,6 +2798,8 @@ const GameLayout = ({ onHardReset }) => {
         <BirthdayDialog
           event={pendingDecision}
           onChoice={(choice) => resolveDecision(choice)}
+          balance={balance}
+          jar={birthdayJar}
         />
       ) : (
         <ChoiceDialog

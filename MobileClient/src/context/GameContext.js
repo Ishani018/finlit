@@ -176,6 +176,8 @@ export const GameProvider = ({ children }) => {
     const [activeInsurance, setActiveInsurance] = useState([]);
     const [creditScore, setCreditScore] = useState(STARTING_CREDIT_SCORE);
     const [activeEffects, setActiveEffects] = useState([]);
+    const [birthdayJar, setBirthdayJar] = useState(0);        // money set aside for party costs
+    const [bdayWishes, setBdayWishes] = useState([]);          // birthdays already wished this year
     const [lastVacationMonth, setLastVacationMonth] = useState(-99);   // for the holiday cool-down
     const [activeEnrollment, setActiveEnrollment] = useState(null);
     const [stockNews, setStockNews] = useState([]);
@@ -282,6 +284,7 @@ export const GameProvider = ({ children }) => {
                 activeInsurance: stateRef.current.activeInsurance,
                 creditScore: stateRef.current.creditScore,
                 activeEffects: stateRef.current.activeEffects,
+                birthdayJar, bdayWishes,
                 lastVacationMonth,
                 activeEnrollment: stateRef.current.activeEnrollment,
                 eventInbox,
@@ -317,7 +320,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, lastVacationMonth, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, lastVacationMonth, birthdayJar, bdayWishes, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -386,6 +389,8 @@ export const GameProvider = ({ children }) => {
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
             if (s.creditScore !== undefined) setCreditScore(s.creditScore);
             if (s.activeEffects) setActiveEffects(s.activeEffects);
+            if (s.birthdayJar !== undefined) setBirthdayJar(s.birthdayJar);
+            if (s.bdayWishes) setBdayWishes(s.bdayWishes);
             if (s.lastVacationMonth !== undefined) setLastVacationMonth(s.lastVacationMonth);
             if (s.activeEnrollment !== undefined) setActiveEnrollment(s.activeEnrollment);
             if (s.eventInbox) setEventInbox(s.eventInbox);
@@ -1354,6 +1359,8 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(600);
         setActiveEffects([]);
+        setBirthdayJar(0);
+        setBdayWishes([]);
         setLastVacationMonth(-99);
         setActiveEnrollment(null);
         setEventInbox([]);
@@ -1583,6 +1590,21 @@ export const GameProvider = ({ children }) => {
         });
         addHistory(`Bought ${item.name} x${qty}`, -totalCost, 'expense');
         return { success: true, msg: `${item.name} added to pantry!` };
+    };
+
+    // Birthday jar: set money aside now, it pays for the next party
+    const addToBirthdayJar = (amount) => {
+        if (balance < amount) return { success: false, msg: 'Not enough cash.' };
+        setBalance(prev => prev - amount);
+        setBirthdayJar(j => j + amount);
+        return { success: true, msg: `₹${amount.toLocaleString()} set aside. The jar holds ₹${(birthdayJar + amount).toLocaleString()}.` };
+    };
+    // A free birthday wish, once per person per year
+    const sendBirthdayWish = (key, name) => {
+        if (bdayWishes.includes(key)) return { success: false, msg: `You already wished ${name} this year.` };
+        setBdayWishes(w => [...w, key].slice(-40));
+        setHappiness(prev => Math.min(100, prev + 1));
+        return { success: true, msg: `You called ${name} to wish them a happy birthday. +1 mood.` };
     };
 
     const consumeFood = (itemId, forDependent = false) => {
@@ -2457,8 +2479,12 @@ export const GameProvider = ({ children }) => {
             } else { msg = "Not enough balance."; }
             if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
         } else if (eff.type === 'birthday_celebration') {
-            if (balance >= eff.amount) {
-                setBalance(prev => prev - eff.amount);
+            // Money saved in the birthday jar pays for the party first
+            const jarUse = Math.min(birthdayJar, eff.amount || 0);
+            const payNow = (eff.amount || 0) - jarUse;
+            if (balance >= payNow) {
+                setBalance(prev => prev - payNow);
+                if (jarUse > 0) setBirthdayJar(j => Math.max(0, j - jarUse));
                 if (eff.happiness) setHappiness(prev => Math.max(0, Math.min(100, prev + eff.happiness)));
                 if (eff.dependentId) {
                     // Use yearToCelebrate stored on the decision to avoid double-incrementing
@@ -3011,6 +3037,8 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(startsWithGoodCredit ? 750 : 600);
         setActiveEffects([]);
+        setBirthdayJar(0);
+        setBdayWishes([]);
         setLastVacationMonth(-99);
         setActiveEnrollment(null);
         setEventInbox([]);
@@ -4975,7 +5003,7 @@ export const GameProvider = ({ children }) => {
         CA_MONTHLY_FEE: 2000,
 
         // Health & Grocery
-        health, pantry, sickLeaveMonths, buyGrocery, consumeFood,
+        health, pantry, sickLeaveMonths, buyGrocery, consumeFood, addToBirthdayJar, sendBirthdayWish, birthdayJar, bdayWishes,
 
         // Persistence
         saveGame, loadGame, deleteSave, saveLoaded,
