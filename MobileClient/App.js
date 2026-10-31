@@ -18,6 +18,7 @@ import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { styled } from 'nativewind';
 import { useBackgroundMusic } from './src/hooks/useBackgroundMusic';
 import SpriteSelectionScreen from './src/components/SpriteSelectionScreen';
+import VacationScreen from './src/screens/VacationScreen';
 import LegacyScreen from './src/components/LegacyScreen';
 import FamilyScreen from './src/screens/FamilyScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -339,7 +340,7 @@ const GameLayout = ({ onHardReset }) => {
     gameSpeed, setGameSpeed,
     degrees, portfolio, properties, marketPrices, priceHistory,
     enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice, getMonthPreview,
-    playerSprite, setPlayerSprite, playerName, setPlayerName, playerLook, setPlayerLook,
+    playerSprite, setPlayerSprite, playerName, setPlayerName, playerLook, setPlayerLook, lastVacationMonth,
     playerAge, totalMonthsPlayed, gameOver, finalScore, RETIREMENT_MONTH, GAME_END_MONTH,
     netWorthHistory, lastMonthFlow, monthlyRecap,
     loans, buyPropertyWithLoan, sellProperty,
@@ -375,6 +376,7 @@ const GameLayout = ({ onHardReset }) => {
   } = useGame();
 
   const [showBirthdayRoom, setShowBirthdayRoom] = useState(false);
+  const [showVacation, setShowVacation] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomise, setShowCustomise] = useState(false);
@@ -1002,6 +1004,7 @@ const GameLayout = ({ onHardReset }) => {
       gadgets: gadgets.length === 0 ? 'None yet' : `${gadgets.length} owned`,
       pantry: pantryQty === 0 ? 'Empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'}`,
       birthday: 'Celebrate',
+      vacation: (totalMonthsPlayed - lastVacationMonth) < 3 ? 'Just back' : (dependents.some(d => !d.isDead && d.custody !== 'ex') ? 'Solo or family' : 'Solo trip'),
     };
     const attention = [];
     const attentionStatuses = {};
@@ -1026,6 +1029,7 @@ const GameLayout = ({ onHardReset }) => {
     if (key === 'gadgets')   { setShopInitial('gadgets'); setShowGrocery(true); }
     if (key === 'pantry')    { setActiveTab('home'); setShowPantry(true); }
     if (key === 'birthday')  { setActiveTab('home'); setShowBirthdayRoom(true); }
+    if (key === 'vacation')  { setActiveTab('home'); setShowVacation(true); }
     if (key === 'goals')     { setShowGoals(true); }
     if (key === 'help')      { setActiveTab('home'); setShowHelp(true); }
   };
@@ -2361,6 +2365,12 @@ const GameLayout = ({ onHardReset }) => {
         {showGrocery && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
             <ShopScreen key={shopInitial || 'hub'} initialSection={shopInitial} onClose={() => { setShowGrocery(false); setShopInitial(null); }} />
+          </View>
+        )}
+
+        {showVacation && (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
+            <VacationScreen onClose={() => setShowVacation(false)} />
           </View>
         )}
 

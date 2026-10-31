@@ -10,6 +10,7 @@ import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
 import { ADOPTION_MIN_AGE, ADOPTION_MAX_CHILDREN, ADOPTION_OPTIONS } from '../data/adoption';
 import { getKidSprite } from '../data/kidSprites';
 import { GADGET_BY_ID, PET_BY_ID, GADGET_MOOD_CAP, GADGET_HEALTH_CAP, GADGET_RESALE, MAX_PETS, VET_CHANCE, VET_BILL, PET_LOSS_MOOD, gadgetValue } from '../data/lifestyle';
+import { VACATION_BY_ID, VACATION_COOLDOWN_MONTHS } from '../data/vacations';
 import { vehicleMinNetWorth, CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_TYPE, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, PARKED_COST_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
 import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, MAX_WORKERS_PER_BUSINESS, rollBusinessRevenue, generateStaffCandidates, getStaffedEconomics } from '../data/businesses';
 import { calculateIncomeTax, calculateTaxByRegime, STANDARD_DEDUCTION, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
@@ -175,6 +176,7 @@ export const GameProvider = ({ children }) => {
     const [activeInsurance, setActiveInsurance] = useState([]);
     const [creditScore, setCreditScore] = useState(STARTING_CREDIT_SCORE);
     const [activeEffects, setActiveEffects] = useState([]);
+    const [lastVacationMonth, setLastVacationMonth] = useState(-99);   // for the holiday cool-down
     const [activeEnrollment, setActiveEnrollment] = useState(null);
     const [stockNews, setStockNews] = useState([]);
     const [lastCrisisEvent, setLastCrisisEvent] = useState(null);
@@ -280,6 +282,7 @@ export const GameProvider = ({ children }) => {
                 activeInsurance: stateRef.current.activeInsurance,
                 creditScore: stateRef.current.creditScore,
                 activeEffects: stateRef.current.activeEffects,
+                lastVacationMonth,
                 activeEnrollment: stateRef.current.activeEnrollment,
                 eventInbox,
                 firedDecisions: stateRef.current.firedDecisions,
@@ -314,7 +317,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, lastVacationMonth, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -383,6 +386,7 @@ export const GameProvider = ({ children }) => {
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
             if (s.creditScore !== undefined) setCreditScore(s.creditScore);
             if (s.activeEffects) setActiveEffects(s.activeEffects);
+            if (s.lastVacationMonth !== undefined) setLastVacationMonth(s.lastVacationMonth);
             if (s.activeEnrollment !== undefined) setActiveEnrollment(s.activeEnrollment);
             if (s.eventInbox) setEventInbox(s.eventInbox);
             if (s.firedDecisions) setFiredDecisions(s.firedDecisions);
@@ -1349,6 +1353,7 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(600);
         setActiveEffects([]);
+        setLastVacationMonth(-99);
         setActiveEnrollment(null);
         setEventInbox([]);
         setFiredDecisions([]);
@@ -1811,6 +1816,29 @@ export const GameProvider = ({ children }) => {
     const CARETAKER_MONTHLY = 8000;
     const toggleCaretaker = (depId) => {
         setDependents(prev => prev.map(d => d.id === depId ? { ...d, caretaker: !d.caretaker } : d));
+    };
+
+    // A holiday somewhere specific. Solo trips are for anyone (great before marriage); family trips cost per person.
+    const getHouseholdSize = () => 1 + dependents.filter(d => !d.isDead && d.custody !== 'ex').length;
+    const takeVacation = (destId, family = false) => {
+        const dest = VACATION_BY_ID[destId];
+        if (!dest) return { success: false, msg: 'Unknown destination.' };
+        const since = totalMonthsPlayed - lastVacationMonth;
+        if (since < VACATION_COOLDOWN_MONTHS) {
+            const wait = VACATION_COOLDOWN_MONTHS - since;
+            return { success: false, msg: `You only just got back. Wait ${wait} more month${wait === 1 ? '' : 's'} before the next trip.` };
+        }
+        const people = family ? getHouseholdSize() : 1;
+        const cost = dest.cost * people;
+        if (balance < cost) return { success: false, msg: `You need ₹${cost.toLocaleString()} for this trip (₹${dest.cost.toLocaleString()} × ${people}).` };
+        setBalance(prev => prev - cost);
+        setHappiness(prev => Math.min(100, prev + dest.mood));
+        setHealth(prev => Math.min(100, prev + dest.health));
+        setLastVacationMonth(totalMonthsPlayed);
+        addHistory(`${family ? 'Family' : 'Solo'} trip: ${dest.name}`, -cost, 'expense');
+        const entry = { id: `vacation_${Date.now()}`, name: `Back from ${dest.name}`, message: `${family ? `The whole family had a wonderful time in ${dest.name}.` : `A lovely solo trip to ${dest.name}.`} +${dest.mood} mood${dest.health ? `, +${dest.health} health` : ''}. Cost ₹${cost.toLocaleString()}.`, category: 'positive', impact: -cost, month: totalMonthsPlayed, read: false };
+        setEventInbox(prev => [entry, ...prev].slice(0, 50));
+        return { success: true, msg: `${dest.name}! +${dest.mood} mood${dest.health ? `, +${dest.health} health` : ''}. Cost ₹${cost.toLocaleString()}.` };
     };
 
     const planVacation = () => {
@@ -2982,6 +3010,7 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(startsWithGoodCredit ? 750 : 600);
         setActiveEffects([]);
+        setLastVacationMonth(-99);
         setActiveEnrollment(null);
         setEventInbox([]);
         setFiredDecisions([]);
@@ -4890,7 +4919,7 @@ export const GameProvider = ({ children }) => {
         adoptChild, grandchildren, gadgets, pets, buyGadget, sellGadget, adoptPet, rehomePet, getLifestyleMonthly,
         propertyBuyMonths, cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
-        upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
+        upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation, takeVacation, getHouseholdSize, lastVacationMonth,
         buyPharmacyItem, buyClothesItem, setChildSchoolTier, setChildPreschoolTier, renameDependent,
         transferToChildSavings,
         itrSelfFiling, startSelfFiling, getRequiredITRDocs, getITRForms,
