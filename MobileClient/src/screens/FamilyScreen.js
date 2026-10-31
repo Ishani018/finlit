@@ -209,6 +209,20 @@ function AddChildCard({ onPress }) {
 }
 
 // ── Expecting child card ────────────────────────────────────────────────────────────
+function GrandchildCard({ g }) {
+    return (
+        <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
+            <View style={{ width: '100%', aspectRatio: 1.1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.pink + '08' }}>
+                <Image source={DEP_IMAGES.adopted_baby} style={{ width: '70%', height: '70%' }} resizeMode="contain" />
+            </View>
+            <View style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.cream }}>{g.name}</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 2 }}>{g.parentName}'s {g.gender === 'female' ? 'daughter' : 'son'}</Text>
+            </View>
+        </View>
+    );
+}
+
 function AdoptCard({ onPress }) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.85}
@@ -226,7 +240,8 @@ function AdoptCard({ onPress }) {
 }
 
 function ExpectingChildCard({ data }) {
-    const babyImg = data.adopted ? getKidSprite(data.gender, data.startMonths || 0, true) : (data.gender === 'female' ? DEP_IMAGES.baby_daughter : DEP_IMAGES.baby_son);
+    // A natural pregnancy shows the white-blanket baby: boy or girl is a surprise until birth
+    const babyImg = data.adopted ? getKidSprite(data.gender, data.startMonths || 0, true) : DEP_IMAGES.adopted_baby;
     return (
         <View style={{ flex: 1, backgroundColor: C.panel, overflow: 'hidden', borderRadius: 8 }}>
             <View style={{ width: '100%', aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center', backgroundColor: C.pink + '08' }}>
@@ -237,8 +252,8 @@ function ExpectingChildCard({ data }) {
                 </View>
             </View>
             <View style={{ padding: 10 }}>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.pink + 'cc' }}>{data.adopted ? 'Adoption in progress' : `${data.name || 'Baby'} (9mo)`}</Text>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>Needs 1 extra capacity!</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 19, color: C.pink + 'cc' }}>{data.adopted ? 'Adoption in progress' : 'Baby on the way'}</Text>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, marginTop: 3 }}>{data.adopted ? 'Needs 1 extra capacity!' : 'Boy or girl? A surprise.'}</Text>
             </View>
         </View>
     );
@@ -787,7 +802,7 @@ function MarriagePickModal({ onPick, onClose }) {
 export default function FamilyScreen({ onClose, onGoToBank }) {
     const {
         playerName, playerAge, playerSprite, balance, creditScore, happiness, currentJob,
-        dependents, marry, haveChild, adoptChild, feedDependent, addParent, expectingChild,
+        dependents, grandchildren = [], marry, haveChild, adoptChild, feedDependent, addParent, expectingChild,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,
         activeInsurance, buyInsurance, cancelInsurance,
         ppf, fixedDeposits,
@@ -969,6 +984,18 @@ export default function FamilyScreen({ onClose, onGoToBank }) {
                 })()}
 
                 {/* Parents */}
+                {grandchildren.length > 0 && (
+                    <View>
+                        <SectionLabel label="GRANDCHILDREN" />
+                        {Array.from({ length: Math.ceil(grandchildren.length / 2) }).map((_, i) => (
+                            <View key={i} style={{ flexDirection: 'row', gap: GAP, marginBottom: GAP }}>
+                                <GrandchildCard g={grandchildren[i * 2]} />
+                                {grandchildren[i * 2 + 1] ? <GrandchildCard g={grandchildren[i * 2 + 1]} /> : <View style={{ flex: 1 }} />}
+                            </View>
+                        ))}
+                    </View>
+                )}
+
                 <SectionLabel label="PARENTS" />
                 {(() => {
                     const slots = [

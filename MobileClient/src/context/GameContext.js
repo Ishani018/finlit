@@ -119,6 +119,7 @@ export const GameProvider = ({ children }) => {
     const [properties, setProperties] = useState([]);
     const [propertyBuyMonths, setPropertyBuyMonths] = useState({});
     const [taxRegime, setTaxRegime] = useState('new');   // 'new' | 'old'
+    const [grandchildren, setGrandchildren] = useState([]);   // [{ id, name, gender, parentName, bornMonth }]
     const [gadgets, setGadgets] = useState([]);     // [{ uid, id, boughtMonth, paid }]
     const [pets, setPets] = useState([]);           // [{ uid, id, name, boughtMonth }]
     const [cars, setCars] = useState([]);              // [{ uid, id, used, boughtMonth, paid, loanId }]
@@ -259,7 +260,7 @@ export const GameProvider = ({ children }) => {
                 degrees: stateRef.current.degrees,
                 portfolio: stateRef.current.portfolio,
                 properties: stateRef.current.properties,
-                propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets,
+                propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren,
                 marketPrices: stateRef.current.marketPrices,
                 priceHistory: stateRef.current.priceHistory,
                 marketCycle: stateRef.current.marketCycle,
@@ -313,7 +314,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -358,6 +359,7 @@ export const GameProvider = ({ children }) => {
             if (s.propertyBuyMonths) setPropertyBuyMonths(s.propertyBuyMonths);
             if (s.taxRegime === 'old' || s.taxRegime === 'new') setTaxRegime(s.taxRegime);
             if (s.expectingChild) setExpectingChild(s.expectingChild);
+            if (Array.isArray(s.grandchildren)) setGrandchildren(s.grandchildren);
             if (Array.isArray(s.gadgets)) setGadgets(s.gadgets);
             if (Array.isArray(s.pets)) setPets(s.pets);
             if (Array.isArray(s.cars)) setCars(s.cars);
@@ -1295,6 +1297,9 @@ export const GameProvider = ({ children }) => {
         setGadgets([]);
         setPets([]);
         setActiveCarUid(null);
+        setGadgets([]);
+        setPets([]);
+        setGrandchildren([]);
         setTaxRegime('new');
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
@@ -2938,6 +2943,9 @@ export const GameProvider = ({ children }) => {
         setPropertyBuyMonths({});
         setCars([]);
         setActiveCarUid(null);
+        setGadgets([]);
+        setPets([]);
+        setGrandchildren([]);
         setTaxRegime('new');
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
         setDependents([]);
@@ -3209,6 +3217,7 @@ export const GameProvider = ({ children }) => {
             const startingGenBalance = eldestSavings + generalInheritance;
             
             setLegacySummary({
+                grandchildren: grandchildren.length,
                 age: playerAge,
                 netWorth: currentNetWorth - totalLoanAmount,
                 estateTaxRate: estateTaxRate * 100,
@@ -4011,9 +4020,13 @@ export const GameProvider = ({ children }) => {
         // Expecting Child logic
         if (expectingChild) {
             const activeDeps = dependents.filter(d => d.custody !== 'ex' && !d.isDead);
-            if (expectingChild.remaining <= 1) {
+            // A baby can come early (months 2-4 of the countdown). Natural births can also be twins.
+            const premature = !expectingChild.adopted && expectingChild.remaining > 1 && expectingChild.remaining <= 4 && Math.random() < 0.05;
+            if (expectingChild.remaining <= 1 || premature) {
                 // Baby is born!
-                const totalPeople = activeDeps.length + 2; // Player + active dependents + 1 new baby
+                const twins = !expectingChild.adopted && Math.random() < 0.03;
+                const babies = twins ? 2 : 1;
+                const totalPeople = activeDeps.length + 1 + babies; // Player + active dependents + new babies
                 const capacity = currentHousing.capacity || 2;
                 
                 let emergencyMoveMsg = '';
@@ -4035,8 +4048,24 @@ export const GameProvider = ({ children }) => {
                     ? pickUniqueName(INDIAN_FEMALE_NAMES)
                     : pickUniqueName(INDIAN_MALE_NAMES));
 
+                // Hospital bill when the birth is early or twins. Health insurance covers most of it.
+                const hasHealthCover = activeInsurance.some(i => INSURANCE_PLANS.find(pl => pl.id === i.planId)?.type === 'health');
+                const hospitalBill = (premature ? (hasHealthCover ? 25000 : 180000) : 0) + (twins ? (hasHealthCover ? 10000 : 40000) : 0);
+                if (hospitalBill > 0) {
+                    setBalance(prev => prev - hospitalBill);
+                    addHistory(premature ? 'Neonatal care for an early baby' : 'Delivery of twins', -hospitalBill, 'expense');
+                    setEventInbox(prev => [{ id: `hospital_birth_${Date.now()}`, name: premature ? 'Neonatal Care' : 'Twin Delivery', message: `Hospital bill ₹${hospitalBill.toLocaleString()}${hasHealthCover ? ' after your health insurance paid most of it.' : '. You have no health insurance, so you paid it all.'}`, category: 'health', impact: -hospitalBill, month: totalMonthsPlayed, read: false }, ...prev].slice(0, 50));
+                }
+                const secondGender = Math.random() < 0.5 ? 'female' : 'male';
+                const secondName = twins ? pickUniqueName(secondGender === 'female' ? INDIAN_FEMALE_NAMES : INDIAN_MALE_NAMES) : null;
+
                 // Add the child (with custody undefined initially)
-                setDependents(prev => [...prev, {
+                setDependents(prev => [...prev, ...(twins ? [{
+                    id: `dep_child_${Date.now()}_b`, type: 'child', name: secondName, gender: secondGender,
+                    ageMonths: 0, childAgeMonths: 0, adopted: false, health: premature ? 75 : 100,
+                    schoolTier: 'none', preschoolTier: 'none', hobby: 'none',
+                    spouseId: expectingChild.spouseId, bdayMonth: turn.month, monthAdded: totalMonthsPlayed,
+                }] : []), {
                     id: `dep_child_${Date.now()}`,
                     type: 'child',
                     name: finalChildName,
@@ -4044,7 +4073,7 @@ export const GameProvider = ({ children }) => {
                     ageMonths: expectingChild.startMonths || 0,
                     childAgeMonths: expectingChild.startMonths || 0,
                     adopted: !!expectingChild.adopted,
-                    health: 100,
+                    health: premature ? 75 : 100,
                     schoolTier: 'none',
                     preschoolTier: 'none',
                     hobby: 'none',
@@ -4084,10 +4113,25 @@ export const GameProvider = ({ children }) => {
                         choices: [{ label: 'Welcome home!', color: '#4ade80', effect: { type: 'none' } }],
                         image: getKidSprite(expectingChild.gender, expectingChild.startMonths || 0, true),
                     });
+                } else if (premature || twins) {
+                    const weeksEarly = Math.max(1, expectingChild.remaining - 1) * 4;
+                    const billLine = hospitalBill > 0 ? `\n\nHospital bill: ₹${hospitalBill.toLocaleString()}${hasHealthCover ? ' (your health insurance covered most of it)' : ' (you have no health insurance)'}.` : '';
+                    decisionsToQueue.push({
+                        id: `child_born_${totalMonthsPlayed}`,
+                        name: twins ? 'Twins! 🍼🍼' : 'A Small Miracle 🍼',
+                        isBaby: true, containImage: true,
+                        gender: expectingChild.gender,
+                        message: twins
+                            ? `${finalChildName} and ${secondName} arrived together${premature ? `, ${weeksEarly} weeks early` : ''}. Double the joy, double the diapers.${billLine}${emergencyMoveMsg}`
+                            : `${finalChildName} arrived ${weeksEarly} weeks early and spent time in the neonatal unit. They are small but strong, and they are home with you now.${billLine}${emergencyMoveMsg}`,
+                        category: 'crisis',
+                        choices: [{ label: 'Thank goodness', color: '#4ade80', effect: { type: 'none' } }],
+                        image: getKidSprite('male', 3, true),
+                    });
                 } else
                 decisionsToQueue.push({
                     id: `child_born_${totalMonthsPlayed}`,
-                    name: 'A New Life! 🍼',
+                    name: expectingChild.gender === 'female' ? "It's a girl! 🍼" : "It's a boy! 🍼",
                     isBaby: true,
                     gender: expectingChild.gender,
                     message: `${finalChildName} is finally here! A healthy baby ${expectingChild.gender.toLowerCase()} has joined your family. Your life will never be the same.${emergencyMoveMsg}`,
@@ -4120,6 +4164,31 @@ export const GameProvider = ({ children }) => {
                     setLastCrisisEvent(capacityWarning);
                     setIsPlaying(false);
                 }
+            }
+        }
+
+        // ── GRANDCHILDREN: grown-up children may start families of their own ──
+        if (grandchildren.length < 6) {
+            const grownUp = dependents.filter(d => d.type === 'child' && !d.isDead && d.custody !== 'ex' && (d.childAgeMonths || 0) >= 300 && grandchildren.filter(g => g.parentName === d.name).length < 3);
+            const parent = grownUp.find(() => Math.random() < 0.02);
+            if (parent) {
+                const gGender = Math.random() < 0.5 ? 'female' : 'male';
+                const gName = pickUniqueName(gGender === 'female' ? INDIAN_FEMALE_NAMES : INDIAN_MALE_NAMES);
+                setGrandchildren(prev => [...prev, { id: `grand_${Date.now()}`, name: gName, gender: gGender, parentName: parent.name, bornMonth: totalMonthsPlayed }]);
+                addHistory(`Grandchild ${gName} born`, 0, 'info');
+                decisionsToQueue.push({
+                    id: `grandchild_${totalMonthsPlayed}`,
+                    name: 'A Grandchild! 🍼',
+                    isBaby: true, containImage: true,
+                    gender: gGender,
+                    message: `${parent.name} has a baby! ${gName} is your grandchild, a new little branch on the family tree. How will you welcome them?`,
+                    category: 'positive',
+                    choices: [
+                        { label: 'Send a big gift (₹10,000)', color: '#4ade80', effect: { type: 'cash_spend', amount: 10000, happiness: 10, msg: `You sent ${gName} a basket of gifts. The whole family is delighted.` } },
+                        { label: 'Visit with sweets (₹2,000)', color: '#60a5fa', effect: { type: 'cash_spend', amount: 2000, happiness: 5, msg: `You visited ${gName} with sweets. A lovely day.` } },
+                    ],
+                    image: getKidSprite('male', 3, true),
+                });
             }
         }
 
@@ -4778,7 +4847,7 @@ export const GameProvider = ({ children }) => {
         activeInsurance, buyInsurance, cancelInsurance,
 
         // Dependents
-        adoptChild, gadgets, pets, buyGadget, sellGadget, adoptPet, rehomePet, getLifestyleMonthly,
+        adoptChild, grandchildren, gadgets, pets, buyGadget, sellGadget, adoptPet, rehomePet, getLifestyleMonthly,
         propertyBuyMonths, cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,

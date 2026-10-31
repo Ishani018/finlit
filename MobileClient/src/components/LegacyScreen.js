@@ -14,6 +14,7 @@ export default function LegacyScreen() {
         totalChildSavings, numChildren, generalInheritance,
         eldestSavings, startingGenBalance, eldestChild
     } = legacySummary;
+    const grandkids = legacySummary.grandchildren || 0;
 
     const handleStartNextGen = () => {
         setIsLegacyMode(true);
@@ -33,6 +34,20 @@ export default function LegacyScreen() {
                 </View>
 
                 <ScrollView style={{ marginTop: 24, flex: 1 }} showsVerticalScrollIndicator={false}>
+                    {/* The white-blanket baby is the family's legacy symbol */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#0d1020', borderWidth: 1, borderColor: '#2a3560', borderRadius: 12, padding: 12, marginBottom: 20 }}>
+                        <Image source={require('../../assets/dependents/adopted_baby.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4 }}>YOUR LEGACY</Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 22 }}>
+                                {grandkids > 0 ? `${grandkids} grandchild${grandkids === 1 ? '' : 'ren'} carry the family on` : 'The family goes on'}
+                            </Text>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0' }}>
+                                {grandkids > 0 ? 'You lived long enough to hold the next generation.' : 'Everything you built passes to your children.'}
+                            </Text>
+                        </View>
+                    </View>
+
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#60a5fa', marginBottom: 12 }}>ESTATE SETTLEMENT</Text>
                     
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>

@@ -60,12 +60,13 @@ const VAULT = require('../../assets/ui_comp/investicon.png');
 const NAME_IDEAS = ['Meera', 'Aarav', 'Zoya', 'Kabir', 'Ananya', 'Dev'];
 const GOLD = '#fbbf24';
 
-function StepHeader({ step, title, onBack }) {
+function StepHeader({ step, title, onBack, legacy }) {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: PAD, paddingVertical: 10, borderBottomWidth: 1, borderColor: '#1a2040', backgroundColor: '#06080f' }}>
             {onBack ? (
                 <TouchableOpacity onPress={onBack} activeOpacity={0.7}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#7d8ab0', lineHeight: 26 }}>‹</Text></TouchableOpacity>
             ) : null}
+            {legacy ? <Image source={require('../../assets/dependents/adopted_baby.png')} style={{ width: 34, height: 34 }} resizeMode="contain" /> : null}
             <View>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4 }}>{step}</Text>
                 <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 26 }}>{title}</Text>
@@ -184,7 +185,7 @@ function CharacterDetail({ startIdx, setSelectedIdx, onBack, onNext, childMode, 
 
     return (
         <View style={{ flex: 1, backgroundColor: '#06080f' }}>
-            <StepHeader step={childMode ? 'NEXT GENERATION' : 'STEP 1 OF 2'} title={childMode ? `Pick a look for ${childName || 'your child'}` : 'Choose your character'} onBack={onBack} />
+            <StepHeader step={childMode ? 'NEXT GENERATION' : 'STEP 1 OF 2'} title={childMode ? `Pick a look for ${childName || 'your child'}` : 'Choose your character'} onBack={onBack} legacy={childMode} />
 
             <Hero height={heroH} sprite={stageSrc} spriteId={null}>
                 {[['‹', -1, { left: 8 }], ['›', 1, { right: 8 }]].map(([ch, d, pos]) => (
