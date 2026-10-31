@@ -30,11 +30,13 @@ function Corners({ color }) {
 // Head-and-shoulders crop of the sprite wearing `look`, used inside the option tiles.
 function Preview({ spriteId, age, look, w, h, slot }) {
     const src = getSpriteImage(spriteId, age);
-    const sw = w * 2.1, sh = sw / 0.363;
+    // Zoom to where the item sits: scarves at the neck, hats around the top of the head, pins on the hair.
+    const sw = w * (slot === 'head' ? 1.7 : slot === 'neck' ? 2.1 : 2.3), sh = sw / 0.363;
+    const top = slot === 'neck' ? -sh * 0.145 : slot === 'head' ? sh * 0.075 : sh * 0.0;
     return (
         <View style={{ width: w, height: h, overflow: 'hidden' }}>
             <PlayerSprite source={src} spriteId={spriteId} age={age} look={look}
-                style={{ position: 'absolute', width: sw, height: sh, left: w / 2 - sw * 0.54, top: slot === 'neck' ? -sh * 0.145 : sh * 0.04 }} />
+                style={{ position: 'absolute', width: sw, height: sh, left: w / 2 - sw * 0.54, top }} />
         </View>
     );
 }
