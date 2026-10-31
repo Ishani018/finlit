@@ -119,17 +119,15 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                     const canCash = balance >= price, canLoan = balance >= down;
                     return (
                         <View key={car.id} style={{ backgroundColor: C.panel, borderRadius: 12, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 12, opacity: locked ? 0.55 : 1 }}>
-                            <View style={{ flexDirection: 'row', minHeight: 150 }}>
+                            <View style={{ flexDirection: 'row', minHeight: 130 }}>
                                 <View style={{ width: '46%', backgroundColor: '#0a0e22', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Image source={car.image} style={{ width: '96%', height: 140 }} resizeMode="contain" />
+                                    <Image source={car.image} style={{ width: '96%', height: 124 }} resizeMode="contain" />
                                 </View>
                                 <View style={{ flex: 1, padding: 12, justifyContent: 'center' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 2 }}>{t.label}{used ? ' · USED' : ''}{car.dep < 0 ? ' · GAINS VALUE' : ''}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: t.color, letterSpacing: 2 }}>{t.label}{used ? ' · USED' : ''}</Text>
                                     <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: C.cream, lineHeight: 22 }}>{car.name}</Text>
                                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.gold, lineHeight: 30 }}>{short(price)}</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.red, lineHeight: 16 }}>runs −{money(run)}/mo</Text>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: C.sage, lineHeight: 15 }}>+{car.mood} mood a month{car.income ? ` · earns ${short(car.income)}/mo` : ''}</Text>
-                                    <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: C.dim, lineHeight: 14, marginTop: 3 }}>{car.perk}</Text>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: C.dim, lineHeight: 16 }}>runs −{money(run)}/mo</Text>
                                 </View>
                             </View>
                             {locked ? (
