@@ -1144,19 +1144,18 @@ const GameLayout = ({ onHardReset }) => {
               if (step.action?.subTab && step.action.tab === 'money') setMoneySubTab(step.action.subTab);
             };
             return (
-              <View style={{ position: 'absolute', left: 10, right: 10, bottom: 8, zIndex: 30, backgroundColor: 'rgba(6,8,15,0.94)', borderWidth: 1, borderColor: '#fbbf2455', borderRadius: 12, padding: 12 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#fbbf24', letterSpacing: 4 }}>NEXT UP · {idx + 1} OF {steps.length}</Text>
-                  <View style={{ flexDirection: 'row', gap: 4 }}>
-                    {steps.map((st, i) => <View key={st.id} style={{ width: 16, height: 3, borderRadius: 2, backgroundColor: st.done ? '#4ade80' : i === idx ? '#60a5fa' : '#1e2840' }} />)}
-                  </View>
+              <TouchableOpacity onPress={run} activeOpacity={0.85}
+                style={{ position: 'absolute', left: 10, right: 10, bottom: 8, zIndex: 30, flexDirection: 'row', alignItems: 'center', backgroundColor: '#0d1020', borderRadius: 8, borderWidth: 1, borderColor: '#1a2040', padding: 10, gap: 12 }}>
+                {step.icon ? <Image source={step.icon} style={{ width: 46, height: 46 }} resizeMode="contain" /> : null}
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 3 }}>{(obj.title || 'NEXT').toUpperCase()} · {idx + 1}/{steps.length}</Text>
+                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', lineHeight: 24 }}>{step.label}</Text>
                 </View>
-                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: '#c8d4f0', lineHeight: 24, marginTop: 4 }}>{step.label}</Text>
-                {obj.desc ? <Text numberOfLines={2} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#7d8ab0', lineHeight: 16, marginTop: 2 }}>{obj.desc}</Text> : null}
-                <TouchableOpacity onPress={run} activeOpacity={0.85} style={{ marginTop: 8, height: 38, borderRadius: 8, backgroundColor: '#1a2e56', alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0', letterSpacing: 3 }}>{step.action?.isAdvanceTime ? 'END MONTH' : 'LET\'S GO'}</Text>
-                </TouchableOpacity>
-              </View>
+                <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+                  {steps.map((st, i) => st.icon ? <Image key={st.id} source={st.icon} style={{ width: 18, height: 18, opacity: st.done ? 0.9 : i === idx ? 0.55 : 0.2 }} resizeMode="contain" /> : null)}
+                </View>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: '#fbbf24', lineHeight: 30 }}>›</Text>
+              </TouchableOpacity>
             );
           })()}
 
