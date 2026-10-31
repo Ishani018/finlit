@@ -4,6 +4,7 @@ import { useGame } from '../context/GameContext';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
 import { GOLD_ASSETS } from '../data/gold';
+import CibilPanel from './CibilPanel';
 
 const CREDIT_BANDS = [
     { min: 750, label: 'EXCELLENT', color: '#4ade80' },
@@ -149,13 +150,13 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
 
             {/* Credit score + EMI strip — only in sub-sections */}
             {tab && <View style={{ flexDirection: 'row', backgroundColor: '#0d1020', borderBottomWidth: 1, borderColor: '#1a2040', paddingHorizontal: 14, paddingVertical: 8, gap: 16 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setTab('cibil')} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: creditBand.color, lineHeight: 30 }}>{creditScore}</Text>
                     <View>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 13, color: creditBand.color, lineHeight: 14 }}>{creditBand.label}</Text>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', lineHeight: 12 }}>CREDIT</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', lineHeight: 12 }}>CREDIT ›</Text>
                     </View>
-                </View>
+                </TouchableOpacity>
                 <View style={{ width: 1, backgroundColor: '#1a2040' }} />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 22, color: totalEMI > 0 ? '#f87171' : '#4ade80', lineHeight: 24 }}>
@@ -181,7 +182,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                     </TouchableOpacity>
                     <View style={{ width: 1, height: 14, backgroundColor: '#1a2040' }} />
                     <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: '#c8d4f0', letterSpacing: 2 }}>
-                        {tab === 'save' ? 'SAVE & EARN' : tab === 'ca' ? 'TAXES & ITR' : tab === 'gold' ? 'GOLD' : tab === 'card' ? 'CREDIT CARD' : tab === 'retire' ? 'RETIREMENT BUCKETS' : tab === 'childSavings' ? 'CHILD SAVINGS' : applyingLoanId ? (LOAN_TYPE_META[applyingLoanId]?.name || 'LOAN') : 'BORROW'}
+                        {tab === 'save' ? 'SAVE & EARN' : tab === 'ca' ? 'TAXES & ITR' : tab === 'gold' ? 'GOLD' : tab === 'card' ? 'CREDIT CARD' : tab === 'retire' ? 'RETIREMENT BUCKETS' : tab === 'childSavings' ? 'CHILD SAVINGS' : tab === 'cibil' ? 'CIBIL SCORE' : applyingLoanId ? (LOAN_TYPE_META[applyingLoanId]?.name || 'LOAN') : 'BORROW'}
                     </Text>
                 </View>
             )}
@@ -224,6 +225,7 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
                     {(() => {
                         const secondary = [
                             { onPress: () => { if (totalMonthsPlayed < 10) { onShowDialog('Locked', 'CA Services unlock in Month 10.', 'error'); return; } setTab('ca'); }, img: require('../../assets/CA_Office.png'), accent: '#a78bfa', name: 'Taxes & ITR', sub: caSubscribed ? 'CA Active' : (itrFiled?.[turn?.year] ? 'Filed' : 'Pending'), locked: totalMonthsPlayed < 10 },
+                            { onPress: () => setTab('cibil'), img: require('../../assets/ui_comp/credit_card.png'), accent: creditBand.color, name: 'CIBIL Score', sub: `${creditScore} · ${creditBand.label}`, locked: false },
                             { onPress: () => setTab('card'), img: require('../../assets/ui_comp/cards_landing_page_icon.png'), accent: '#60a5fa', name: 'Credit Card', sub: (activeCreditCards?.length > 0 || creditCard) ? 'Active' : 'Build credit', locked: false },
                             { onPress: () => { if (!(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000)) { onShowDialog('Locked', 'Unlocks at Month 6.', 'error'); return; } setTab('retire'); }, img: require('../../assets/ui_comp/retirement_buckets.png'), accent: '#818cf8', name: 'Retirement', sub: ppf?.balance > 0 ? `₹${(ppf.balance/1000).toFixed(0)}k saved` : 'PPF · NPS', locked: !(isRetired || totalMonthsPlayed >= 6 || netWorth >= 50000) },
                             { onPress: () => { if (!dependents.some(d => d.type === 'child')) { onShowDialog('Locked', 'Need a child first.', 'error'); return; } setTab('childSavings'); }, img: require('../../assets/ui_comp/saving_for_child.png'), accent: '#ec4899', name: 'Child Savings', sub: 'Build their future', locked: !dependents.some(d => d.type === 'child') },
@@ -277,6 +279,8 @@ export default function BankScreen({ onClose, onShowDialog, initialTab = null })
             )}
 
             {tab && tab !== 'gold' && tab !== 'card' && tab !== 'retire' && tab !== 'childSavings' && <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
+
+                {tab === 'cibil' && <CibilPanel onShowDialog={onShowDialog} />}
 
                 {/* ── SAVE & EARN ── */}
                 {tab === 'save' && (

@@ -176,6 +176,9 @@ export const GameProvider = ({ children }) => {
     const [activeInsurance, setActiveInsurance] = useState([]);
     const [creditScore, setCreditScore] = useState(STARTING_CREDIT_SCORE);
     const [activeEffects, setActiveEffects] = useState([]);
+    const [creditHistory, setCreditHistory] = useState([]);   // [{ m, s }] score at the end of each month
+    const [creditBuilder, setCreditBuilder] = useState(null); // { amount, startMonth, endMonth } locked deposit that builds credit
+    const [creditBuilderDone, setCreditBuilderDone] = useState(-99);
     const [birthdayJar, setBirthdayJar] = useState(0);        // money set aside for party costs
     const [bdayWishes, setBdayWishes] = useState([]);          // birthdays already wished this year
     const [lastVacationMonth, setLastVacationMonth] = useState(-99);   // for the holiday cool-down
@@ -284,6 +287,7 @@ export const GameProvider = ({ children }) => {
                 activeInsurance: stateRef.current.activeInsurance,
                 creditScore: stateRef.current.creditScore,
                 activeEffects: stateRef.current.activeEffects,
+                creditHistory, creditBuilder, creditBuilderDone,
                 birthdayJar, bdayWishes,
                 lastVacationMonth,
                 activeEnrollment: stateRef.current.activeEnrollment,
@@ -320,7 +324,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, lastVacationMonth, birthdayJar, bdayWishes, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, creditHistory, creditBuilder, creditBuilderDone, lastVacationMonth, birthdayJar, bdayWishes, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -389,6 +393,9 @@ export const GameProvider = ({ children }) => {
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
             if (s.creditScore !== undefined) setCreditScore(s.creditScore);
             if (s.activeEffects) setActiveEffects(s.activeEffects);
+            if (s.creditHistory) setCreditHistory(s.creditHistory);
+            if (s.creditBuilder !== undefined) setCreditBuilder(s.creditBuilder);
+            if (s.creditBuilderDone !== undefined) setCreditBuilderDone(s.creditBuilderDone);
             if (s.birthdayJar !== undefined) setBirthdayJar(s.birthdayJar);
             if (s.bdayWishes) setBdayWishes(s.bdayWishes);
             if (s.lastVacationMonth !== undefined) setLastVacationMonth(s.lastVacationMonth);
@@ -488,6 +495,16 @@ export const GameProvider = ({ children }) => {
             setTimeout(() => setSaveLoaded(true), 2000);
         });
     }, []);
+
+    // Remember the score at the end of each month so the CIBIL screen can draw its history
+    useEffect(() => {
+        if (!saveLoaded || !playerSprite) return;
+        setCreditHistory(h => {
+            const last = h[h.length - 1];
+            if (last && last.m === totalMonthsPlayed) return last.s === creditScore ? h : [...h.slice(0, -1), { m: totalMonthsPlayed, s: creditScore }];
+            return [...h, { m: totalMonthsPlayed, s: creditScore }].slice(-24);
+        });
+    }, [totalMonthsPlayed, creditScore, saveLoaded]);
 
     // Auto-save whenever totalMonthsPlayed increments (after all state settles)
     useEffect(() => {
@@ -1359,6 +1376,9 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(600);
         setActiveEffects([]);
+        setCreditHistory([]);
+        setCreditBuilder(null);
+        setCreditBuilderDone(-99);
         setBirthdayJar(0);
         setBdayWishes([]);
         setLastVacationMonth(-99);
@@ -1458,20 +1478,39 @@ export const GameProvider = ({ children }) => {
         return { success: true, emi, loanId, msg: `Your loan of ₹${amount.toLocaleString()} is approved. EMI: ₹${emi.toLocaleString()}/mo.` };
     };
 
+    // Credit builder: lock a small deposit for six months. If you hold it to the end the bank reports it and your score jumps.
+    const CREDIT_BUILDER = { amount: 10000, months: 6, interestPct: 0.02, points: 30, cooldown: 12 };
+    const startCreditBuilder = () => {
+        if (creditBuilder) return { success: false, msg: 'A credit builder deposit is already running.' };
+        const since = totalMonthsPlayed - creditBuilderDone;
+        if (since < CREDIT_BUILDER.cooldown) return { success: false, msg: `You can start another in ${CREDIT_BUILDER.cooldown - since} months.` };
+        if (creditScore >= 800) return { success: false, msg: 'Your score is already excellent. You do not need this.' };
+        if (balance < CREDIT_BUILDER.amount) return { success: false, msg: `You need ₹${CREDIT_BUILDER.amount.toLocaleString()} to lock in.` };
+        setBalance(prev => prev - CREDIT_BUILDER.amount);
+        setCreditBuilder({ amount: CREDIT_BUILDER.amount, startMonth: totalMonthsPlayed, endMonth: totalMonthsPlayed + CREDIT_BUILDER.months });
+        addHistory('Credit builder deposit locked', -CREDIT_BUILDER.amount, 'expense');
+        return { success: true, msg: `₹${CREDIT_BUILDER.amount.toLocaleString()} locked for ${CREDIT_BUILDER.months} months. You get it back with interest, and +${CREDIT_BUILDER.points} CIBIL.` };
+    };
+
     const prepayLoan = (loanId, amount) => {
         const loan = loans.find(l => l.id === loanId);
         if (!loan) return { success: false, msg: 'Loan not found.' };
         if (balance < amount) return { success: false, msg: 'Insufficient funds.' };
         const actualPayment = Math.min(amount, loan.remainingPrincipal);
         setBalance(prev => prev - actualPayment);
+        let closedOut = actualPayment >= loan.remainingPrincipal;
         setLoans(prev => prev.map(l => {
             if (l.id !== loanId) return l;
             const newPrincipal = l.remainingPrincipal - actualPayment;
-            if (newPrincipal <= 0) return null;
+            if (newPrincipal <= 0) { closedOut = true; return null; }
             const newEmi = calculateEMI(newPrincipal, l.monthlyRate * 12 * 100, l.tenureRemaining);
             return { ...l, remainingPrincipal: newPrincipal, emi: newEmi };
         }).filter(Boolean));
         addHistory(`Prepaid ₹${actualPayment.toLocaleString()} on loan`, -actualPayment, 'expense');
+        if (closedOut) {
+            setCreditScore(prev => Math.min(900, prev + 10));
+            return { success: true, msg: `Loan fully repaid! +10 CIBIL for closing it cleanly.` };
+        }
         return { success: true, msg: `Prepaid ₹${actualPayment.toLocaleString()}.` };
     };
 
@@ -3037,6 +3076,9 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(startsWithGoodCredit ? 750 : 600);
         setActiveEffects([]);
+        setCreditHistory([]);
+        setCreditBuilder(null);
+        setCreditBuilderDone(-99);
         setBirthdayJar(0);
         setBdayWishes([]);
         setLastVacationMonth(-99);
@@ -4056,6 +4098,17 @@ export const GameProvider = ({ children }) => {
             return { ...loan, remainingPrincipal: newRemaining, tenureRemaining: newTenure };
         }).filter(Boolean));
 
+        // Credit builder deposit matures: money back with interest, and the bank reports it
+        if (creditBuilder && totalMonthsPlayed + 1 >= creditBuilder.endMonth) {
+            const back = Math.round(creditBuilder.amount * (1 + CREDIT_BUILDER.interestPct));
+            setBalance(prev => prev + back);
+            setCreditScore(prev => Math.min(900, prev + CREDIT_BUILDER.points));
+            setCreditBuilder(null);
+            setCreditBuilderDone(totalMonthsPlayed + 1);
+            const cbEntry = { id: `credit_builder_${totalMonthsPlayed}`, name: 'Credit Builder Done', message: `Your ₹${creditBuilder.amount.toLocaleString()} deposit matured and came back as ₹${back.toLocaleString()}. The bank reported it: +${CREDIT_BUILDER.points} CIBIL.`, category: 'positive', impact: back - creditBuilder.amount, month: totalMonthsPlayed, read: false };
+            setEventInbox(prev => [cbEntry, ...prev].slice(0, 50));
+        }
+
         // Missed EMI check — drop CIBIL and cascade to higher future loan rates
         if (balance + netFlow < 0 && totalEMI > 0) {
             const prevScore = creditScore;
@@ -5003,7 +5056,7 @@ export const GameProvider = ({ children }) => {
         CA_MONTHLY_FEE: 2000,
 
         // Health & Grocery
-        health, pantry, sickLeaveMonths, buyGrocery, consumeFood, addToBirthdayJar, sendBirthdayWish, birthdayJar, bdayWishes,
+        health, pantry, sickLeaveMonths, buyGrocery, consumeFood, creditHistory, creditBuilder, startCreditBuilder, CREDIT_BUILDER, creditBuilderDone, addToBirthdayJar, sendBirthdayWish, birthdayJar, bdayWishes,
 
         // Persistence
         saveGame, loadGame, deleteSave, saveLoaded,
