@@ -3,6 +3,7 @@ import { ACC_LAYERS, SPRITE_RATIO } from './accessoryLayers';
 // What the player can wear. `slot` decides which tab it lives on; ids match the
 // `category/name` keys in accessoryLayers.js.
 export const ACC_SLOTS = [
+    { id: 'head', label: 'HEAD', cat: 'beanies' },
     { id: 'neck', label: 'NECK', cat: 'scarves' },
     { id: 'hair', label: 'HAIR', cat: 'hair' },
 ];
@@ -44,6 +45,6 @@ export function spriteLayerKey(spriteId, age = 18) {
 export function layersFor(spriteId, age, look) {
     const key = spriteLayerKey(spriteId, age);
     if (!key || !look || !ACC_LAYERS[key]) return { layers: [], ratio: null };
-    const layers = ['neck', 'hair'].map(slot => look[slot] && ACC_LAYERS[key][look[slot]]).filter(Boolean);
+    const layers = ['neck', 'hair', 'head'].map(slot => look[slot] && ACC_LAYERS[key][look[slot]]).filter(Boolean);
     return { layers, ratio: SPRITE_RATIO[key] };
 }
