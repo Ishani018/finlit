@@ -81,7 +81,7 @@ export const GameProvider = ({ children }) => {
     const [playerSprite, setPlayerSprite] = useState(null);
     const [playerName, setPlayerName] = useState('');
     const [playerBirthday, setPlayerBirthday] = useState(null);
-    const [playerLook, setPlayerLook] = useState({ head: null, neck: null, hair: null });
+    const [playerLook, setPlayerLook] = useState({ head: null, neck: null, hair: null, top: null, shoes: null });
     // Derived — no extra state needed; recompute from playerSprite
     const trait = TRAIT_MODIFIERS[playerSprite] || {};
     const [gameOver, setGameOver] = useState(false);
@@ -1344,7 +1344,7 @@ export const GameProvider = ({ children }) => {
         setPlayerSprite(null);
         setPlayerName('');
         setPlayerBirthday(null);
-        setPlayerLook({ head: null, neck: null, hair: null });
+        setPlayerLook({ head: null, neck: null, hair: null, top: null, shoes: null });
         setGeneration(1);
         setGameOver(false);
         setIsLegacyMode(false);
@@ -2988,7 +2988,7 @@ export const GameProvider = ({ children }) => {
         setMarketCycle({ phase: 'sideways', monthsLeft: 12 });
         setBalance(STARTING_BALANCE);
         setPlayerSprite(newSpriteId);
-        setPlayerLook({ head: null, neck: null, hair: null });
+        setPlayerLook({ head: null, neck: null, hair: null, top: null, shoes: null });
         setPlayerName('');
         setPlayerBirthday(null);
         setGeneration(prev => prev + 1);

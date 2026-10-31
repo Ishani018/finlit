@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, Platform } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PlayerSprite from './PlayerSprite';
 import { getSpriteImage } from '../data/spriteMap';
-import { ACC_SLOTS, ACC_ITEMS } from '../data/accessories';
+import { ACC_SLOTS, ACC_ITEMS, hasSlot } from '../data/accessories';
 
 const ROOM = require('../../assets/fitting_room.png');
 const GOLD = '#fbbf24';
@@ -31,8 +31,10 @@ function Corners({ color }) {
 function Preview({ spriteId, age, look, w, h, slot }) {
     const src = getSpriteImage(spriteId, age);
     // Zoom to where the item sits: scarves at the neck, hats around the top of the head, pins on the hair.
-    const sw = w * (slot === 'head' ? 1.7 : slot === 'neck' ? 2.1 : 2.3), sh = sw / 0.363;
-    const top = slot === 'neck' ? -sh * 0.145 : slot === 'head' ? sh * 0.075 : sh * 0.0;
+    // (clothes: the torso band; shoes: the feet)
+    const sh = slot === 'top' ? h / 0.27 : slot === 'shoes' ? h / 0.16 : (w * (slot === 'head' ? 1.7 : slot === 'neck' ? 2.1 : 2.3)) / 0.363;
+    const sw = sh * 0.363;
+    const top = slot === 'neck' ? -sh * 0.145 : slot === 'head' ? sh * 0.075 : slot === 'top' ? -sh * 0.13 : slot === 'shoes' ? -sh * 0.84 : 0;
     return (
         <View style={{ width: w, height: h, overflow: 'hidden' }}>
             <PlayerSprite source={src} spriteId={spriteId} age={age} look={look}
@@ -44,13 +46,16 @@ function Preview({ spriteId, age, look, w, h, slot }) {
 // Props: spriteId, name, look, onSave({ name, look }), onClose, title, saveLabel, canEditName
 export default function CustomiseScreen({ spriteId, name: initialName = '', look: initialLook, onSave, onClose, title = 'Your look', saveLabel = 'SAVE LOOK', startAge = 20 }) {
     const [name, setName] = useState(initialName);
-    const [look, setLook] = useState(initialLook || { head: null, neck: null, hair: null });
+    const [look, setLook] = useState(initialLook || { head: null, neck: null, hair: null, top: null, shoes: null });
     const [slot, setSlot] = useState('head');
     const [stage, setStage] = useState(STAGES.findIndex(s => s.age >= startAge) === -1 ? 0 : Math.max(0, STAGES.findIndex(s => s.age >= startAge)));
     const [gridW, setGridW] = useState(0);
 
     const age = STAGES[stage].age;
-    const items = ACC_ITEMS[slot];
+    // Clothes and shoes only appear for sprites that have art for them.
+    const slots = ACC_SLOTS.filter(s => (s.id === 'top' || s.id === 'shoes') ? hasSlot(spriteId, age, s.id) : true);
+    const slotId = slots.some(s => s.id === slot) ? slot : slots[0].id;
+    const items = ACC_ITEMS[slotId];
     const tileW = gridW ? Math.floor((gridW - TILE_GAP * (COLS - 1)) / COLS) : 100;
     const heroSrc = getSpriteImage(spriteId, age);
     const wearing = ACC_SLOTS.map(s => look[s.id] && ACC_ITEMS[s.id].find(i => i.id === look[s.id])?.label).filter(Boolean);
@@ -68,7 +73,7 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: '#c8d4f0', lineHeight: 26 }}>{title}</Text>
                         </View>
                     </View>
-                    <TouchableOpacity onPress={() => setLook({ head: null, neck: null, hair: null })} activeOpacity={0.8}
+                    <TouchableOpacity onPress={() => setLook({ head: null, neck: null, hair: null, top: null, shoes: null })} activeOpacity={0.8}
                         style={{ paddingVertical: 5 }}>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#a8b4d8', letterSpacing: 2, textDecorationLine: 'underline' }}>RESET</Text>
                     </TouchableOpacity>
@@ -108,10 +113,10 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
 
                         {/* Slot tabs */}
                         <View style={{ flexDirection: 'row', gap: 22, borderBottomWidth: 1, borderColor: '#1a2040' }}>
-                            {ACC_SLOTS.map(s => (
+                            {slots.map(s => (
                                 <TouchableOpacity key={s.id} onPress={() => setSlot(s.id)} activeOpacity={0.8}
-                                    style={{ paddingVertical: 6, borderBottomWidth: 2, borderColor: slot === s.id ? GOLD : 'transparent' }}>
-                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: slot === s.id ? GOLD : '#7d8ab0', letterSpacing: 2 }}>{s.label}</Text>
+                                    style={{ paddingVertical: 6, borderBottomWidth: 2, borderColor: slotId === s.id ? GOLD : 'transparent' }}>
+                                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: slotId === s.id ? GOLD : '#7d8ab0', letterSpacing: 2 }}>{s.label}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -119,12 +124,12 @@ export default function CustomiseScreen({ spriteId, name: initialName = '', look
                         {/* Options */}
                         <View onLayout={e => setGridW(e.nativeEvent.layout.width)} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: TILE_GAP }}>
                             {[{ id: null, label: 'None' }, ...items].map(it => {
-                                const on = (look[slot] || null) === it.id;
+                                const on = (look[slotId] || null) === it.id;
                                 return (
                                     <TouchableOpacity key={it.id || 'none'} activeOpacity={0.85}
-                                        onPress={() => setLook(l => ({ ...l, [slot]: it.id }))}
+                                        onPress={() => setLook(l => ({ ...l, [slotId]: it.id }))}
                                         style={{ width: tileW, height: 118, borderRadius: 10, overflow: 'hidden', backgroundColor: '#0d1020', borderWidth: 1, borderColor: on ? GOLD : '#1e2840' }}>
-                                        <Preview spriteId={spriteId} age={age} look={{ ...look, [slot]: it.id }} w={tileW - 2} h={84} slot={slot} />
+                                        <Preview spriteId={spriteId} age={age} look={{ ...look, [slotId]: it.id }} w={tileW - 2} h={84} slot={slotId} />
                                         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(6,8,15,0.84)', borderTopWidth: 1, borderColor: 'rgba(200,212,240,0.1)' }}>
                                             <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: 15, color: on ? GOLD : '#c8d4f0' }}>{it.label}</Text>
                                         </View>

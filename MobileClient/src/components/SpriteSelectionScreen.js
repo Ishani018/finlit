@@ -374,7 +374,7 @@ function DropdownField({ label, value, options, onSelect, flex = 1, error }) {
 
 function NameScreen({ selectedIdx, onBack, onConfirm }) {
     const [nameInput, setNameInput] = useState('');
-    const [look, setLook] = useState({ head: null, neck: null, hair: null });
+    const [look, setLook] = useState({ head: null, neck: null, hair: null, top: null, shoes: null });
     const [showCustomise, setShowCustomise] = useState(false);
     const [bDay, setBDay] = useState(null);
     const [bMonth, setBMonth] = useState(null);
@@ -391,7 +391,7 @@ function NameScreen({ selectedIdx, onBack, onConfirm }) {
     const selected = SPRITES[selectedIdx];
     const heroH = Math.min(SH * 0.30, 250);
     const trimmed = nameInput.trim();
-    const dressed = look.head || look.neck || look.hair;
+    const dressed = look.head || look.neck || look.hair || look.top || look.shoes;
 
     const handleStart = () => {
         if (trimmed.length < 2) { setNameError('Name must be at least 2 characters.'); return; }
