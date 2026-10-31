@@ -41,7 +41,7 @@ const ROW_ICONS = {
     Salary: CAREER_ICON, Rental: HOME_ICON, Spouse: FAMILY_ICON,
     Dividend: INVEST_ICON, Pension: SAVE_ICON, Living: HAPPY_ICON,
     Housing: HOME_ICON, EMI: BORROW_ICON, Tax: INVEST_ICON,
-    Insurance: HEALTH_ICON, SIP: INVEST_ICON, Tuition: FAMILY_ICON, Car: BORROW_ICON, Vehicle: CAREER_ICON,
+    Insurance: HEALTH_ICON, SIP: INVEST_ICON, Tuition: FAMILY_ICON, Car: BORROW_ICON, Vehicle: CAREER_ICON, Pets: HAPPY_ICON,
 };
 
 function Row({ label, value, color }) {
@@ -161,6 +161,7 @@ export default function MonthSummaryCard({ recap, netWorthHistory, currentBalanc
                             <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 11, color: '#4a5580', letterSpacing: 3, marginBottom: 10 }}>EXPENSES</Text>
                             {expenses.living    > 0 && <Row label="Living"    value={`-₹${expenses.living.toLocaleString()}`}    color="#f87171" />}
                             {expenses.car       > 0 && <Row label="Car"       value={`-₹${expenses.car.toLocaleString()}`}       color="#f87171" />}
+                            {expenses.lifestyle > 0 && <Row label="Pets"      value={`-₹${expenses.lifestyle.toLocaleString()}`} color="#f87171" />}
                             {expenses.housing   > 0 && <Row label="Housing"   value={`-₹${expenses.housing.toLocaleString()}`}   color="#f87171" />}
                             {expenses.emi       > 0 && <Row label="EMI"       value={`-₹${expenses.emi.toLocaleString()}`}       color="#f87171" />}
                             {expenses.tax       > 0 && <Row label="Tax"       value={`-₹${expenses.tax.toLocaleString()}`}       color="#f87171" />}

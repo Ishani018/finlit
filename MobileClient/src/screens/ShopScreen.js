@@ -4,6 +4,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { useGame } from '../context/GameContext';
 import GroceryScreen from './GroceryScreen';
 import CarsScreen from './CarsScreen';
+import LifestyleScreen from './LifestyleScreen';
 import { PHARMACY_ITEMS, CLOTHES_ITEMS, SHOP_CATEGORY_COLORS } from '../data/shopItems';
 
 const PAD = 14;
@@ -241,6 +242,7 @@ export default function ShopScreen({ onClose, initialSection = null }) {
     if (section === 'pharmacy') return <PharmacySection onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'clothes')  return <ClothesSection  onBack={() => setSection(null)} onClose={onClose} />;
     if (section === 'cars')     return <CarsScreen onBack={() => setSection(null)} onClose={onClose} />;
+    if (section === 'lifestyle') return <LifestyleScreen onBack={() => setSection(null)} />;
 
     return (
         <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -261,7 +263,8 @@ export default function ShopScreen({ onClose, initialSection = null }) {
                         { key: 'grocery',  label: 'Grocery Store',  sub: 'FOOD & PANTRY',     img: require('../../assets/ui_comp/food_grocery.png'), color: C.gold },
                         { key: 'pharmacy', label: 'Pharmacy',        sub: 'HEALTH & MEDICINE', img: require('../../assets/ui_comp/pharmacy.png'),     color: C.sage },
                         { key: 'clothes',  label: 'Clothes & Toys', sub: 'SHOPPING',          img: require('../../assets/ui_comp/clothing.png'),     color: C.pink },
-                        { key: 'cars',     label: 'Cars & Bikes',   sub: 'WHEELS',            img: require('../../assets/cars/honda_city.png'),      color: '#60a5fa' },
+                        { key: 'cars',     label: 'Vehicles',        sub: 'WHEELS',            img: require('../../assets/cars/honda_city.png'),      color: '#60a5fa' },
+                        { key: 'lifestyle', label: 'Gadgets & Pets', sub: 'HOME & HEART',      img: require('../../assets/lifestyle/pet_dog.png'),    color: '#ec4899' },
                     ].map(cat => (
                         <TouchableOpacity key={cat.key} onPress={() => setSection(cat.key)} activeOpacity={0.85}
                             style={{ width: '48%', aspectRatio: 1, borderRadius: 12, backgroundColor: C.panel, marginBottom: GAP, alignItems: 'center', justifyContent: 'center', padding: 12, overflow: 'hidden' }}>

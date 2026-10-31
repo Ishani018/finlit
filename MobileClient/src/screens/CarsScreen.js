@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useGame } from '../context/GameContext';
-import { CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, USED_RUN_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
+import { vehicleMinNetWorth, VEHICLE_KINDS, CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, USED_RUN_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
 import { calculateEMI } from '../data/loans';
 
 const PAD = 14;
@@ -30,13 +30,14 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
     const { balance, netWorth, cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, totalMonthsPlayed, loans } = useGame();
     const [tab, setTab] = useState(initialTab);
     const [tier, setTier] = useState('all');
+    const [kind, setKind] = useState('all');
     const [pending, setPending] = useState(null);   // { car, used, loan }
     const [sellId, setSellId] = useState(null);
     const [toast, setToast] = useState(null);
     const say = (msg, ok = true) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 3200); };
 
     const used = tab === 'used';
-    const list = CARS.filter(c => tier === 'all' || c.tier === tier);
+    const list = CARS.filter(c => (tier === 'all' || c.tier === tier) && (kind === 'all' || c.kind === kind));
     const garageValue = cars.reduce((n, c) => n + carValue(c, totalMonthsPlayed), 0);
     const monthly = getCarMonthly();
 
@@ -62,7 +63,7 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <TouchableOpacity onPress={onBack} activeOpacity={0.7}><Text style={{ fontFamily: 'VT323_400Regular', fontSize: 30, color: C.dim, lineHeight: 26 }}>‹</Text></TouchableOpacity>
                     <View>
-                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, letterSpacing: 4 }}>WHEELS</Text>
+                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: C.dark, letterSpacing: 4 }}>WHEELS · WATER · AIR</Text>
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 28, color: C.cream, lineHeight: 28 }}>Showroom</Text>
                     </View>
                 </View>
@@ -76,6 +77,15 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                 <Tab id="new" label="NEW" /><Tab id="used" label="SECOND-HAND" /><Tab id="garage" label={`GARAGE (${cars.length})`} />
             </View>
 
+            {tab !== 'garage' && (
+                <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: PAD, paddingTop: 10 }}>
+                    {VEHICLE_KINDS.map(k => (
+                        <TouchableOpacity key={k.key} onPress={() => { setKind(k.key); if (k.key === 'toy') setTier('all'); }} activeOpacity={0.8} style={{ flex: 1, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: kind === k.key ? C.blue + '33' : '#141b36', borderWidth: 1, borderColor: kind === k.key ? C.blue : 'transparent' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 14, color: kind === k.key ? C.blue : '#a8b4d8', letterSpacing: 0 }}>{k.label}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
             {tab !== 'garage' && (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 6, paddingHorizontal: PAD, paddingVertical: 10 }}>
                     {[{ key: 'all', label: 'ALL', color: C.cream }, ...CAR_TIERS].map(t => (
@@ -93,9 +103,14 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                     </View>
                 )}
 
+                {tab !== 'garage' && list.length === 0 && (
+                    <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: C.dim, textAlign: 'center', paddingVertical: 40 }}>Nothing here. Try another filter.</Text>
+                )}
+
                 {tab !== 'garage' && list.map(car => {
                     const t = CAR_TIERS.find(x => x.key === car.tier);
-                    const locked = netWorth < t.minNetWorth;
+                    const need = vehicleMinNetWorth(car);
+                    const locked = netWorth < need;
                     const price = priceOf(car);
                     const run = carRunCost(car, { used });
                     const down = Math.round(price * CAR_LOAN_DOWN_PCT);
@@ -124,7 +139,7 @@ export default function CarsScreen({ onBack, onClose, initialTab = 'new' }) {
                                 </Text>
                                 {locked ? (
                                     <View style={{ height: 40, borderRadius: 8, backgroundColor: '#0a0d1a', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dark }}>Locked · needs {short(t.minNetWorth)} net worth</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dark }}>Locked · needs {short(need)} net worth</Text>
                                     </View>
                                 ) : (
                                     <View style={{ flexDirection: 'row', gap: 8 }}>

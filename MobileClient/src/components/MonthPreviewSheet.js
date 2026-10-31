@@ -19,6 +19,7 @@ const ICONS = {
     spouse:    require('../../assets/ui_comp/familyicon.png'),
     taxi:      require('../../assets/ui_comp/career.png'),
     car:       require('../../assets/ui_comp/borrow.png'),
+    lifestyle: require('../../assets/ui_comp/happyicon.png'),
     housing:   require('../../assets/ui_comp/home.png'),
     living:    require('../../assets/ui_comp/groceryshop.png'),
     emi:       require('../../assets/ui_comp/borrow.png'),
@@ -39,7 +40,8 @@ const INCOME_ROWS = [
 const EXPENSE_ROWS = [
     ['housing', 'Rent and upkeep'],
     ['living', 'Living costs'],
-    ['car', 'Car running costs'],
+    ['car', 'Vehicle running costs'],
+    ['lifestyle', 'Gadgets and pets'],
     ['emi', 'Loan EMIs'],
     ['insurance', 'Insurance premiums'],
     ['tax', 'Income tax'],

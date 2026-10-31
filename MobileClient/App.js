@@ -353,7 +353,7 @@ const GameLayout = ({ onHardReset }) => {
     isRetired, pensionIncome,
     nextMonth, happiness, buyAndMoveIn,
     eventInbox, markEventRead, markAllEventsRead,
-    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer, cars, activeCarUid, propertyBuyMonths,
+    pendingJobOffer, setPendingJobOffer, acceptJobOffer, declineJobOffer, cars, activeCarUid, propertyBuyMonths, gadgets, pets,
     pendingDecision, resolveDecision,
     newAchievement, setNewAchievement,
     achievements,
@@ -987,7 +987,8 @@ const GameLayout = ({ onHardReset }) => {
       home: properties.includes(currentHousing.id) ? 'You own it' : `Rent ₹${Math.round(rent / 1000)}k`,
       family: dependents.length > 0 ? `${dependents.length} dependent${dependents.length === 1 ? '' : 's'}` : 'Just you',
       grocery: pantryQty === 0 ? 'Pantry empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'} left`,
-      cars: cars.length === 0 ? 'No car yet' : `${cars.length} in garage`,
+      cars: cars.length === 0 ? 'No vehicle yet' : `${cars.length} in garage`,
+      pets: (gadgets.length + pets.length) === 0 ? 'Nothing yet' : `${pets.length} pet${pets.length === 1 ? '' : 's'} · ${gadgets.length} gadget${gadgets.length === 1 ? '' : 's'}`,
       pantry: pantryQty === 0 ? 'Empty' : `${pantryQty} meal${pantryQty === 1 ? '' : 's'}`,
       birthday: 'Celebrate',
     };
@@ -1010,6 +1011,7 @@ const GameLayout = ({ onHardReset }) => {
     if (key === 'family')    { setActiveTab('family'); }
     if (key === 'grocery')   { setShopInitial('grocery'); setShowGrocery(true); }
     if (key === 'cars')      { setShopInitial('cars'); setShowGrocery(true); }
+    if (key === 'pets')      { setShopInitial('lifestyle'); setShowGrocery(true); }
     if (key === 'pantry')    { setActiveTab('home'); setShowPantry(true); }
     if (key === 'birthday')  { setActiveTab('home'); setShowBirthdayRoom(true); }
     if (key === 'goals')     { setShowGoals(true); }

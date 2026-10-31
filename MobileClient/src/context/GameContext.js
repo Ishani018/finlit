@@ -9,7 +9,8 @@ import { INSURANCE_PLANS } from '../data/insurance';
 import { LOAN_TYPES, calculateEMI, getAdjustedRate } from '../data/loans';
 import { ADOPTION_MIN_AGE, ADOPTION_MAX_CHILDREN, ADOPTION_OPTIONS } from '../data/adoption';
 import { getKidSprite } from '../data/kidSprites';
-import { CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_TYPE, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, PARKED_COST_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
+import { GADGET_BY_ID, PET_BY_ID, GADGET_MOOD_CAP, GADGET_HEALTH_CAP, GADGET_RESALE, MAX_PETS, VET_CHANCE, VET_BILL, PET_LOSS_MOOD, gadgetValue } from '../data/lifestyle';
+import { vehicleMinNetWorth, CARS, CAR_BY_ID, CAR_TIERS, CAR_LOAN_TYPE, CAR_LOAN_DOWN_PCT, CAR_LOAN_TENURE, PARKED_COST_FACTOR, usedPrice, carRunCost, carValue } from '../data/cars';
 import { BUSINESS_TYPES, MAX_CONCURRENT_BUSINESSES, MAX_WORKERS_PER_BUSINESS, rollBusinessRevenue, generateStaffCandidates, getStaffedEconomics } from '../data/businesses';
 import { calculateIncomeTax, calculateTaxByRegime, STANDARD_DEDUCTION, CAPITAL_GAINS, TAX_DEDUCTIONS } from '../data/taxes';
 import { CRISIS_EVENTS, CRISIS_WEIGHTS } from '../data/crisisEvents';
@@ -118,6 +119,8 @@ export const GameProvider = ({ children }) => {
     const [properties, setProperties] = useState([]);
     const [propertyBuyMonths, setPropertyBuyMonths] = useState({});
     const [taxRegime, setTaxRegime] = useState('new');   // 'new' | 'old'
+    const [gadgets, setGadgets] = useState([]);     // [{ uid, id, boughtMonth, paid }]
+    const [pets, setPets] = useState([]);           // [{ uid, id, name, boughtMonth }]
     const [cars, setCars] = useState([]);              // [{ uid, id, used, boughtMonth, paid, loanId }]
     const [activeCarUid, setActiveCarUid] = useState(null);
 
@@ -256,7 +259,7 @@ export const GameProvider = ({ children }) => {
                 degrees: stateRef.current.degrees,
                 portfolio: stateRef.current.portfolio,
                 properties: stateRef.current.properties,
-                propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild,
+                propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets,
                 marketPrices: stateRef.current.marketPrices,
                 priceHistory: stateRef.current.priceHistory,
                 marketCycle: stateRef.current.marketCycle,
@@ -310,7 +313,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -355,6 +358,8 @@ export const GameProvider = ({ children }) => {
             if (s.propertyBuyMonths) setPropertyBuyMonths(s.propertyBuyMonths);
             if (s.taxRegime === 'old' || s.taxRegime === 'new') setTaxRegime(s.taxRegime);
             if (s.expectingChild) setExpectingChild(s.expectingChild);
+            if (Array.isArray(s.gadgets)) setGadgets(s.gadgets);
+            if (Array.isArray(s.pets)) setPets(s.pets);
             if (Array.isArray(s.cars)) setCars(s.cars);
             if (s.activeCarUid) setActiveCarUid(s.activeCarUid);
             if (s.marketPrices) setMarketPrices(s.marketPrices);
@@ -1048,11 +1053,60 @@ export const GameProvider = ({ children }) => {
         return { cost, income, mood };
     };
 
+    // ─── GADGETS AND PETS ────────────────────────────────────────────────────
+    const getLifestyleMonthly = () => {
+        let cost = 0, mood = 0, health = 0;
+        gadgets.forEach(o => { const g = GADGET_BY_ID[o.id]; if (g) { cost += g.run; mood += g.mood; health += g.health; } });
+        mood = Math.min(mood, GADGET_MOOD_CAP); health = Math.min(health, GADGET_HEALTH_CAP);
+        pets.forEach(o => { const p = PET_BY_ID[o.id]; if (p) { cost += p.run; mood += p.mood; health += p.health; } });
+        return { cost, mood, health };
+    };
+
+    const buyGadget = (id) => {
+        const g = GADGET_BY_ID[id];
+        if (!g) return { success: false, msg: 'Not available.' };
+        if (gadgets.some(o => o.id === id)) return { success: false, msg: `You already own a ${g.name}.` };
+        if (balance < g.price) return { success: false, msg: `Not enough cash. It costs ₹${g.price.toLocaleString()}.` };
+        setBalance(prev => prev - g.price);
+        setGadgets(prev => [...prev, { uid: `gad_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, id, boughtMonth: totalMonthsPlayed, paid: g.price }]);
+        addHistory(`Bought ${g.name}`, -g.price, 'expense');
+        return { success: true, msg: `${g.name} bought.` };
+    };
+
+    const sellGadget = (uid) => {
+        const o = gadgets.find(x => x.uid === uid); if (!o) return { success: false, msg: 'Not found.' };
+        const value = Math.round(gadgetValue(o, totalMonthsPlayed) * GADGET_RESALE);
+        setBalance(prev => prev + value);
+        setGadgets(prev => prev.filter(x => x.uid !== uid));
+        addHistory(`Sold ${GADGET_BY_ID[o.id]?.name || 'gadget'}`, value, 'income');
+        return { success: true, msg: `Sold for ₹${value.toLocaleString()}.` };
+    };
+
+    const adoptPet = (id, name) => {
+        const p = PET_BY_ID[id];
+        if (!p) return { success: false, msg: 'Not available.' };
+        if (pets.length >= MAX_PETS) return { success: false, msg: `You can look after ${MAX_PETS} pets at most.` };
+        if (balance < p.price) return { success: false, msg: `The adoption fee is ₹${p.price.toLocaleString()}.` };
+        const petName = (name || '').trim() || p.names[Math.floor(Math.random() * p.names.length)];
+        setBalance(prev => prev - p.price);
+        setPets(prev => [...prev, { uid: `pet_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, id, name: petName, boughtMonth: totalMonthsPlayed }]);
+        addHistory(`Adopted a ${p.name.toLowerCase()}, ${petName}`, -p.price, 'expense');
+        return { success: true, msg: `${petName} the ${p.name.toLowerCase()} is home.` };
+    };
+
+    const rehomePet = (uid) => {
+        const o = pets.find(x => x.uid === uid); if (!o) return { success: false, msg: 'Not found.' };
+        setPets(prev => prev.filter(x => x.uid !== uid));
+        setHappiness(prev => Math.max(0, prev - 4));
+        return { success: true, msg: `${o.name} went to a loving new home. You miss them.` };
+    };
+
     const buyCar = (carId, { used = false, useLoan = false } = {}) => {
         const car = CAR_BY_ID[carId];
         if (!car) return { success: false, msg: 'That car is not available.' };
         const tier = CAR_TIERS.find(t => t.key === car.tier);
-        if (tier && netWorth < tier.minNetWorth) return { success: false, msg: `The ${tier.label} showroom needs ₹${tier.minNetWorth.toLocaleString()} net worth.` };
+        const need = vehicleMinNetWorth(car);
+        if (netWorth < need) return { success: false, msg: `The ${car.name} needs ₹${need.toLocaleString()} net worth.` };
         const price = used ? usedPrice(car) : car.price;
         const uid = `car_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         let loanId = null;
@@ -1238,6 +1292,8 @@ export const GameProvider = ({ children }) => {
         setProperties([]);
         setPropertyBuyMonths({});
         setCars([]);
+        setGadgets([]);
+        setPets([]);
         setActiveCarUid(null);
         setTaxRegime('new');
         setCurrentHousing({ id: 'hostel', name: 'Hostel Shared Room', maintenance: HOSTEL_MAINTENANCE, category: 'rental', life_quality: 2, image: require('../../assets/rooms/hostel.png') });
@@ -2218,12 +2274,13 @@ export const GameProvider = ({ children }) => {
         const ca = caSubscribed ? 2000 : 0;
 
         const carM = getCarMonthly();
+        const lifeP = getLifestyleMonthly();
         const income = { salary: effectiveSalary, rental, spouse, taxi: carM.income };
-        const expenses = { housing: housing + investMaint, living, emi, insurance, tax, tuition, sip, ca, car: carM.cost };
+        const expenses = { housing: housing + investMaint, living, emi, insurance, tax, tuition, sip, ca, car: carM.cost, lifestyle: lifeP.cost };
         const totalIncome = effectiveSalary + rental + spouse + carM.income;
         const totalExpenses = Object.values(expenses).reduce((n, v) => n + v, 0);
         const net = totalIncome - totalExpenses;
-        const healthAfter = Math.max(0, health - MONTHLY_HEALTH_DRAIN);
+        const healthAfter = Math.min(100, Math.max(0, health - MONTHLY_HEALTH_DRAIN + lifeP.health));
         const pantryQty = (pantry || []).reduce((n, p) => n + (p.qty || 0), 0);
 
         const warnings = [];
@@ -3439,8 +3496,9 @@ export const GameProvider = ({ children }) => {
 
         const caFee = caSubscribed ? 2000 : 0;
         const carMonthly = getCarMonthly();
+        const lifeM = getLifestyleMonthly();
         const totalIncome = effectiveSalary + realEstateIncome + spouseIncome + businessIncome + carMonthly.income;
-        const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee + businessRunningCost + carMonthly.cost;
+        const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee + businessRunningCost + carMonthly.cost + lifeM.cost;
         const netFlow = totalIncome - totalExpenses;
 
         // Annual salary raise (3–7% base, HUSTLER gets extra 12%)
@@ -3751,7 +3809,7 @@ export const GameProvider = ({ children }) => {
         const neglectEffect = activeEffects.find(e => e.type === 'parent_neglect');
         const neglectStress = neglectEffect ? -1.0 : 0;
         const businessStress = -unstaffedBusinessCount * 0.6; // grinding a business solo on top of a job
-        const happinessDelta = Math.round((housingEffect + debtStress + familyWarmth + jobSatisfaction + financeStress + neglectStress + businessStress + getCarMonthly().mood) * 10) / 10;
+        const happinessDelta = Math.round((housingEffect + debtStress + familyWarmth + jobSatisfaction + financeStress + neglectStress + businessStress + getCarMonthly().mood + getLifestyleMonthly().mood) * 10) / 10;
         setLastHappiness(happiness);
         const newHappiness = Math.max(0, Math.min(100, happiness + happinessDelta));
         setHappiness(newHappiness);
@@ -3792,8 +3850,33 @@ export const GameProvider = ({ children }) => {
         // ── HEALTH DRAIN & SICK LEAVE ──────────────────────────────────────────
         const currentHealth = stateRef.current.health ?? 80;
         const businessHealthDrain = unstaffedBusinessCount * 1.2;
-        const newHealth = Math.max(0, currentHealth - MONTHLY_HEALTH_DRAIN - businessHealthDrain);
+        const newHealth = Math.min(100, Math.max(0, currentHealth - MONTHLY_HEALTH_DRAIN - businessHealthDrain + getLifestyleMonthly().health));
         setHealth(newHealth);
+
+        // ── PETS: surprise vet bills, and the sad day when one grows old ──
+        if (pets.length > 0) {
+            const passed = [];
+            let vetTotal = 0; let vetFor = null;
+            pets.forEach(o => {
+                const pt = PET_BY_ID[o.id]; if (!pt) return;
+                if (totalMonthsPlayed - o.boughtMonth >= pt.lifeYears * 12) { passed.push(o); return; }
+                if (Math.random() < VET_CHANCE) { vetTotal += VET_BILL[0] + Math.floor(Math.random() * (VET_BILL[1] - VET_BILL[0])); vetFor = o; }
+            });
+            if (vetTotal > 0) {
+                setBalance(prev => prev - vetTotal);
+                addHistory(`Vet bill for ${vetFor.name}`, -vetTotal, 'expense');
+                setEventInbox(prev => [{ id: `vet_${Date.now()}`, name: 'Vet Visit', message: `${vetFor.name} was unwell and needed the vet. The bill was ₹${vetTotal.toLocaleString()}.`, category: 'health', impact: -vetTotal, month: totalMonthsPlayed, read: false }, ...prev].slice(0, 50));
+            }
+            if (passed.length > 0) {
+                setPets(prev => prev.filter(o => !passed.some(d => d.uid === o.uid)));
+                setHappiness(prev => Math.max(0, prev - PET_LOSS_MOOD * passed.length));
+                passed.forEach(o => {
+                    const entry = { id: `petloss_${o.uid}`, name: `Goodbye, ${o.name}`, message: `${o.name} has passed away after a long, happy life with you. The house feels quieter.`, category: 'crisis', impact: 0, month: totalMonthsPlayed, read: false };
+                    setEventInbox(prev => [entry, ...prev].slice(0, 50));
+                    setLastCrisisEvent(entry);
+                });
+            }
+        }
 
         if (newHealth < 5) {
             // Severe consequence: Hospitalization
@@ -3850,7 +3933,7 @@ export const GameProvider = ({ children }) => {
         setMonthlyRecap({
             month: turn.month, year: turn.year,
             income: { salary: effectiveSalary, rental: realEstateIncome, spouse: spouseIncome, dividend: dividendIncome, taxi: carMonthly.income },
-            expenses: { car: carMonthly.cost, housing: housingCost, maintenance: investmentMaintenance, living: livingCosts, emi: totalEMI, insurance: insurancePremiums, tax: monthlyTax, tuition: tuitionCost, sip: totalSIPDeducted },
+            expenses: { car: carMonthly.cost, lifestyle: lifeM.cost, housing: housingCost, maintenance: investmentMaintenance, living: livingCosts, emi: totalEMI, insurance: insurancePremiums, tax: monthlyTax, tuition: tuitionCost, sip: totalSIPDeducted },
             netFlow, happinessDelta,
         });
 
@@ -4695,7 +4778,7 @@ export const GameProvider = ({ children }) => {
         activeInsurance, buyInsurance, cancelInsurance,
 
         // Dependents
-        adoptChild,
+        adoptChild, gadgets, pets, buyGadget, sellGadget, adoptPet, rehomePet, getLifestyleMonthly,
         propertyBuyMonths, cars, activeCarUid, buyCar, sellCar, setActiveCar, getCarMonthly, getCarsValue,
         dependents, marry, haveChild, feedDependent, addParent, getDependentCosts, getSpouseIncome,
         upskillSpouse, divorce, giftChild, buyMedicine, toggleCaretaker, planVacation,

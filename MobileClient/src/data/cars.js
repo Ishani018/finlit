@@ -9,6 +9,15 @@ export const CAR_TIERS = [
     { key: 'premium',  label: 'PREMIUM',  color: '#a78bfa', minNetWorth: 2000000 },
     { key: 'luxury',   label: 'LUXURY',   color: '#fbbf24', minNetWorth: 10000000 },
     { key: 'super',    label: 'SUPER',    color: '#f87171', minNetWorth: 30000000 },
+    { key: 'toys',     label: 'TOYS',     color: '#22d3ee', minNetWorth: 50000000 },
+];
+
+// What kind of vehicle it is, for the filter chips.
+export const VEHICLE_KINDS = [
+    { key: 'all',  label: 'ALL' },
+    { key: 'car',  label: 'CARS' },
+    { key: 'bike', label: 'BIKES' },
+    { key: 'toy',  label: 'SEA & AIR' },
 ];
 
 const img = {
@@ -36,13 +45,39 @@ const img = {
     rolls_royce: require('../../assets/cars/rolls_royce.png'),
     bentley: require('../../assets/cars/bentley.png'),
     maybach: require('../../assets/cars/maybach.png'),
+    bicycle: require('../../assets/cars/bicycle.png'),
+    scooter: require('../../assets/cars/scooter.png'),
+    splendor: require('../../assets/cars/splendor.png'),
+    e_scooter: require('../../assets/cars/e_scooter.png'),
+    pulsar: require('../../assets/cars/pulsar.png'),
+    ktm_duke: require('../../assets/cars/ktm_duke.png'),
+    harley: require('../../assets/cars/harley.png'),
+    ducati: require('../../assets/cars/ducati.png'),
+    speedboat: require('../../assets/cars/speedboat.png'),
+    yacht: require('../../assets/cars/yacht.png'),
+    helicopter: require('../../assets/cars/helicopter.png'),
+    private_jet: require('../../assets/cars/private_jet.png'),
 };
 
-const C = (id, name, tier, price, run, mood, dep, perk, extra = {}) => ({ id, name, tier, price, run, mood, dep, perk, image: img[id], ...extra });
+const C = (id, name, tier, price, run, mood, dep, perk, extra = {}) => ({ id, name, tier, price, run, mood, dep, perk, kind: 'car', image: img[id], ...extra });
 
 export const CARS = [
+    // TWO-WHEELERS (cheap, so they are the first thing a new player can afford)
+    C('bicycle', 'Bicycle', 'starter', 8000, 200, 0.1, 0.12, 'Costs almost nothing and keeps you fit.', { kind: 'bike' }),
+    C('scooter', 'Honda Activa', 'starter', 85000, 1500, 0.25, 0.10, 'The everyday scooter. Easy and cheap to run.', { kind: 'bike' }),
+    C('splendor', 'Hero Splendor', 'starter', 95000, 1500, 0.25, 0.09, 'A commuter bike that never lets you down.', { kind: 'bike' }),
+    C('e_scooter', 'Electric Scooter', 'starter', 135000, 500, 0.3, 0.12, 'Almost no running cost.', { kind: 'bike' }),
+    C('pulsar', 'Bajaj Pulsar', 'everyday', 165000, 2500, 0.45, 0.09, 'A sporty bike for weekends.', { kind: 'bike' }),
+    C('ktm_duke', 'KTM Duke', 'everyday', 260000, 3500, 0.6, 0.10, 'Fast and fun.', { kind: 'bike' }),
+    C('harley', 'Harley-Davidson', 'premium', 1700000, 9000, 1.0, 0.07, 'The cruiser. Holds its value well.', { kind: 'bike' }),
+    C('ducati', 'Ducati Panigale', 'premium', 3200000, 14000, 1.3, 0.06, 'A superbike for the thrill.', { kind: 'bike' }),
+    // BOATS AND AIR (the richest players only)
+    C('speedboat', 'Speedboat', 'toys', 15000000, 60000, 2.0, 0.08, 'Weekends on the water.', { kind: 'toy', minNetWorth: 50000000 }),
+    C('yacht', 'Luxury Yacht', 'toys', 180000000, 400000, 3.2, 0.05, 'A floating palace.', { kind: 'toy', minNetWorth: 250000000 }),
+    C('helicopter', 'Private Helicopter', 'toys', 250000000, 600000, 3.5, 0.06, 'Skip the traffic for good.', { kind: 'toy', minNetWorth: 350000000 }),
+    C('private_jet', 'Private Jet', 'toys', 850000000, 1200000, 4.0, 0.04, 'The ultimate status symbol.', { kind: 'toy', minNetWorth: 1000000000 }),
     // STARTER
-    C('royal_enfield', 'Royal Enfield Bullet', 'starter', 200000, 2000, 0.3, 0.08, 'Cheap and fun. Great for a first ride.'),
+    C('royal_enfield', 'Royal Enfield Bullet', 'starter', 200000, 2000, 0.3, 0.08, 'Cheap and fun. Great for a first ride.', { kind: 'bike' }),
     C('omni_van', 'Maruti Omni Van', 'starter', 320000, 4000, 0.15, 0.10, 'Runs as a school van: earns ₹6,000 a month when active.', { income: 6000 }),
     C('auto_rickshaw', 'Auto-rickshaw', 'starter', 330000, 5000, 0.1, 0.10, 'Put it on the road for fares: earns ₹11,000 a month when active.', { income: 11000 }),
     C('alto', 'Maruti Alto', 'starter', 350000, 3500, 0.25, 0.10, 'The classic first car. Cheap to run.'),
@@ -96,7 +131,10 @@ export const carValue = (owned, nowMonth) => {
 
 // Not listed in the Bank's loan menu (it would hand out cash with no car); used only when buying a car on finance.
 export const CAR_LOAN_TYPE = {
-    id: 'car_loan', name: 'Car Loan', type: 'secured', max_amount: 100000000, base_interest: 9.5,
+    id: 'car_loan', name: 'Car Loan', type: 'secured', max_amount: 5000000000, base_interest: 9.5,
     max_tenure: 84, min_income: 20000, min_credit_score: 600,
     description: 'Finance a vehicle. Secured by the car.',
 };
+
+// The net worth you need for one vehicle (its own limit if it has one, otherwise its tier's).
+export const vehicleMinNetWorth = (car) => car.minNetWorth ?? (CAR_TIERS.find(t => t.key === car.tier)?.minNetWorth || 0);
