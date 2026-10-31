@@ -175,6 +175,7 @@ export const GameProvider = ({ children }) => {
     const [activeInsurance, setActiveInsurance] = useState([]);
     const [creditScore, setCreditScore] = useState(STARTING_CREDIT_SCORE);
     const [activeEffects, setActiveEffects] = useState([]);
+    const [wheelPerks, setWheelPerks] = useState({ emi: 0, rent: 0, costs: 0 });   // Lucky Wheel waivers: months left for each
     const [activeEnrollment, setActiveEnrollment] = useState(null);
     const [stockNews, setStockNews] = useState([]);
     const [lastCrisisEvent, setLastCrisisEvent] = useState(null);
@@ -280,6 +281,7 @@ export const GameProvider = ({ children }) => {
                 activeInsurance: stateRef.current.activeInsurance,
                 creditScore: stateRef.current.creditScore,
                 activeEffects: stateRef.current.activeEffects,
+                wheelPerks,
                 activeEnrollment: stateRef.current.activeEnrollment,
                 eventInbox,
                 firedDecisions: stateRef.current.firedDecisions,
@@ -314,7 +316,7 @@ export const GameProvider = ({ children }) => {
         } catch (e) {
             console.warn('Save failed:', e);
         }
-    }, [playerSprite, playerName, playerBirthday, playerLook, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
+    }, [playerSprite, playerName, playerBirthday, playerLook, wheelPerks, propertyBuyMonths, cars, activeCarUid, taxRegime, expectingChild, gadgets, pets, grandchildren, eventInbox, netWorthHistory,
         pensionIncome, corpusDrawdown, bucketListDone, lastMonthTax, lastMonthEMI,
         caSubscribed, caSubscribedMonth, itrFiled, seenTutorials]);
 
@@ -383,6 +385,7 @@ export const GameProvider = ({ children }) => {
             if (s.activeInsurance) setActiveInsurance(s.activeInsurance);
             if (s.creditScore !== undefined) setCreditScore(s.creditScore);
             if (s.activeEffects) setActiveEffects(s.activeEffects);
+            if (s.wheelPerks) setWheelPerks(s.wheelPerks);
             if (s.activeEnrollment !== undefined) setActiveEnrollment(s.activeEnrollment);
             if (s.eventInbox) setEventInbox(s.eventInbox);
             if (s.firedDecisions) setFiredDecisions(s.firedDecisions);
@@ -1349,6 +1352,7 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(600);
         setActiveEffects([]);
+        setWheelPerks({ emi: 0, rent: 0, costs: 0 });
         setActiveEnrollment(null);
         setEventInbox([]);
         setFiredDecisions([]);
@@ -1579,12 +1583,32 @@ export const GameProvider = ({ children }) => {
         return { success: true, msg: `${item.name} added to pantry!` };
     };
 
-    // Lucky Wheel prizes (see data/wheel.js). Everything is a gift: nothing is deducted.
+    // Lucky Wheel prizes (see data/wheel.js): perks inside the game, never cash handed over.
+    const getWheelContext = () => ({
+        hasLoans: loans.length > 0,
+        isRenting: !properties.includes(currentHousing.id),
+        hasRunningCosts: cars.length > 0 || pets.length > 0 || gadgets.length > 0,
+    });
     const applyWheelReward = (seg) => {
         if (!seg) return;
-        if (seg.kind === 'cash') {
-            setBalance(prev => prev + seg.amount);
-            addHistory('Lucky wheel prize', seg.amount, 'income');
+        if (seg.kind === 'emi_holiday') {
+            setWheelPerks(p => ({ ...p, emi: 1 }));
+            addHistory('Lucky wheel: EMI holiday next month', 0, 'income');
+        } else if (seg.kind === 'rent_free') {
+            setWheelPerks(p => ({ ...p, rent: 1 }));
+            addHistory('Lucky wheel: rent-free next month', 0, 'income');
+        } else if (seg.kind === 'costs_free') {
+            setWheelPerks(p => ({ ...p, costs: 1 }));
+            addHistory('Lucky wheel: running costs covered next month', 0, 'income');
+        } else if (seg.kind === 'loan_cut') {
+            setLoans(prev => {
+                if (!prev.length) return prev;
+                const target = prev.reduce((a, b) => (b.remainingPrincipal > a.remainingPrincipal ? b : a));
+                const cut = Math.min(150000, Math.round(target.remainingPrincipal * 0.10));
+                const left = target.remainingPrincipal - cut;
+                addHistory(`Lucky wheel: ₹${cut.toLocaleString()} of your ${target.type || 'loan'} written off`, cut, 'income');
+                return prev.map(l => l.id === target.id ? { ...l, remainingPrincipal: left, emi: Math.round(l.emi * (left / l.remainingPrincipal)) } : l);
+            });
         } else if (seg.kind === 'happiness') {
             setHappiness(prev => Math.min(100, prev + seg.amount));
         } else if (seg.kind === 'health') {
@@ -2317,7 +2341,7 @@ export const GameProvider = ({ children }) => {
 
         const housing = properties.includes(currentHousing.id)
             ? (currentHousing.maintenance || 0)
-            : (currentHousing.rental_income || currentHousing.maintenance || 0);
+            : (wheelPerks.rent > 0 ? 0 : (currentHousing.rental_income || currentHousing.maintenance || 0));
         let investMaint = 0;
         properties.forEach(id => {
             const prop = REAL_ESTATE.find(p => p.id === id);
@@ -2329,7 +2353,7 @@ export const GameProvider = ({ children }) => {
         if (trait.livingCostDiscount) living = Math.round(living * (1 - trait.livingCostDiscount));
         const inflationEffect = activeEffects.find(e => e.type === 'living_cost_increase');
         if (inflationEffect && !trait.inflationImmune) living = Math.round(living * (1 + inflationEffect.pct));
-        const emi = getTotalEMI();
+        const emi = wheelPerks.emi > 0 ? 0 : getTotalEMI();
         const insurance = getInsurancePremiums();
         const tax = getMonthlyTax();
         const rawTuition = activeEnrollment ? (activeEnrollment.monthlyTuition || 0) : 0;
@@ -2337,8 +2361,8 @@ export const GameProvider = ({ children }) => {
         const sip = sipPlans.reduce((n, p) => n + (p.amount || 0), 0);
         const ca = caSubscribed ? 2000 : 0;
 
-        const carM = getCarMonthly();
-        const lifeP = getLifestyleMonthly();
+        const carM = wheelPerks.costs > 0 ? { ...getCarMonthly(), cost: 0 } : getCarMonthly();
+        const lifeP = wheelPerks.costs > 0 ? { ...getLifestyleMonthly(), cost: 0 } : getLifestyleMonthly();
         const income = { salary: effectiveSalary, rental, spouse, taxi: carM.income };
         const expenses = { housing: housing + investMaint, living, emi, insurance, tax, tuition, sip, ca, car: carM.cost, lifestyle: lifeP.cost };
         const totalIncome = effectiveSalary + rental + spouse + carM.income;
@@ -3015,6 +3039,7 @@ export const GameProvider = ({ children }) => {
         setActiveInsurance([]);
         setCreditScore(startsWithGoodCredit ? 750 : 600);
         setActiveEffects([]);
+        setWheelPerks({ emi: 0, rent: 0, costs: 0 });
         setActiveEnrollment(null);
         setEventInbox([]);
         setFiredDecisions([]);
@@ -3466,6 +3491,7 @@ export const GameProvider = ({ children }) => {
             housingCost = currentHousing.maintenance || 0;
         } else {
             housingCost = currentHousing.rental_income || currentHousing.maintenance || 0;
+            if (wheelPerks.rent > 0) housingCost = 0;     // Lucky Wheel: rent-free month
         }
         let investmentMaintenance = 0;
         properties.forEach(id => {
@@ -3479,7 +3505,8 @@ export const GameProvider = ({ children }) => {
         if (trait.livingCostDiscount) livingCosts = Math.round(livingCosts * (1 - trait.livingCostDiscount));
         const inflationEffect = activeEffects.find(e => e.type === 'living_cost_increase');
         if (inflationEffect && !trait.inflationImmune) livingCosts = Math.round(livingCosts * (1 + inflationEffect.pct));
-        const totalEMI = getTotalEMI();
+        const emiHoliday = wheelPerks.emi > 0;           // Lucky Wheel: this month's EMIs are waived
+        const totalEMI = emiHoliday ? 0 : getTotalEMI();
         const insurancePremiums = getInsurancePremiums();
         const monthlyTax = getMonthlyTax();
         const rawTuition = activeEnrollment ? (activeEnrollment.monthlyTuition || 0) : 0;
@@ -3563,8 +3590,8 @@ export const GameProvider = ({ children }) => {
         }
 
         const caFee = caSubscribed ? 2000 : 0;
-        const carMonthly = getCarMonthly();
-        const lifeM = getLifestyleMonthly();
+        const carMonthly = wheelPerks.costs > 0 ? { ...getCarMonthly(), cost: 0 } : getCarMonthly();
+        const lifeM = wheelPerks.costs > 0 ? { ...getLifestyleMonthly(), cost: 0 } : getLifestyleMonthly();
         const totalIncome = effectiveSalary + realEstateIncome + spouseIncome + businessIncome + carMonthly.income;
         const totalExpenses = housingCost + investmentMaintenance + livingCosts + totalEMI + insurancePremiums + monthlyTax + tuitionCost + totalSIPDeducted + caFee + businessRunningCost + carMonthly.cost + lifeM.cost;
         const netFlow = totalIncome - totalExpenses;
@@ -4022,7 +4049,7 @@ export const GameProvider = ({ children }) => {
         }
 
         // Loan processing
-        setLoans(prev => prev.map(loan => {
+        setLoans(prev => emiHoliday ? prev : prev.map(loan => {
             const interestPortion = loan.remainingPrincipal * loan.monthlyRate;
             const principalPortion = loan.emi - interestPortion;
             const newRemaining = Math.max(0, loan.remainingPrincipal - principalPortion);
@@ -4030,6 +4057,9 @@ export const GameProvider = ({ children }) => {
             if (newRemaining <= 0 || newTenure <= 0) return null;
             return { ...loan, remainingPrincipal: newRemaining, tenureRemaining: newTenure };
         }).filter(Boolean));
+
+        // Wheel perks last one month
+        if (wheelPerks.emi > 0 || wheelPerks.rent > 0 || wheelPerks.costs > 0) setWheelPerks(p => ({ emi: Math.max(0, p.emi - 1), rent: Math.max(0, p.rent - 1), costs: Math.max(0, p.costs - 1) }));
 
         // Missed EMI check — drop CIBIL and cascade to higher future loan rates
         if (balance + netFlow < 0 && totalEMI > 0) {
@@ -4964,7 +4994,7 @@ export const GameProvider = ({ children }) => {
         CA_MONTHLY_FEE: 2000,
 
         // Health & Grocery
-        health, pantry, sickLeaveMonths, buyGrocery, consumeFood, applyWheelReward,
+        health, pantry, sickLeaveMonths, buyGrocery, consumeFood, applyWheelReward, getWheelContext,
 
         // Persistence
         saveGame, loadGame, deleteSave, saveLoaded,

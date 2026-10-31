@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
-import Svg, { Path, Circle, Text as SvgText, G } from 'react-native-svg';
+import { View, Text, TouchableOpacity, Animated, Easing, Dimensions, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { WHEEL_SEGMENTS, pickSegment, describeReward } from '../data/wheel';
+import { WHEEL_SEGMENTS, pickSegment } from '../data/wheel';
 import { ADS_ENABLED, MAX_SPINS_PER_DAY } from '../config/ads';
 import { initAds, showRewardedAd, AD_IS_SIMULATED, SIMULATED_AD_SECONDS } from '../services/rewardedAd';
 
@@ -13,44 +12,33 @@ const C = { bg: '#06080f', panel: '#0d1020', border: '#1a2040', gold: '#fbbf24',
 const N = WHEEL_SEGMENTS.length;
 const SEG = 360 / N;
 
-const pt = (cx, cy, r, deg) => { const a = (deg * Math.PI) / 180; return [cx + r * Math.sin(a), cy - r * Math.cos(a)]; };
-const wedge = (cx, cy, r, i) => {
-    const [x0, y0] = pt(cx, cy, r, (i - 0.5) * SEG);
-    const [x1, y1] = pt(cx, cy, r, (i + 0.5) * SEG);
-    return `M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1} Z`;
-};
+const WHEEL_BASE = require('../../assets/ui_comp/wheel_base.png');   // pixel-art wheel, drawn at 192px and enlarged 4x
 
+// The painted wheel with each prize's own icon and short name, turned to sit in its wedge.
 function Wheel({ size }) {
-    const c = size / 2, r = c - 10;
+    const c = size / 2, iconSize = Math.round(size * 0.115), ring = c * 0.67;
     return (
-        <Svg width={size} height={size}>
-            <Circle cx={c} cy={c} r={c - 2} fill="#1a2244" stroke="#2a3560" strokeWidth={3} />
+        <View style={{ width: size, height: size }}>
+            <Image source={WHEEL_BASE} style={{ width: size, height: size, imageRendering: 'pixelated' }} resizeMode="stretch" />
             {WHEEL_SEGMENTS.map((s, i) => (
-                <Path key={s.id} d={wedge(c, c, r, i)} fill={s.color} stroke="#0a0e22" strokeWidth={2} />
+                <View key={s.id} pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: size, height: size, transform: [{ rotate: `${i * SEG}deg` }], alignItems: 'center' }}>
+                    <View style={{ marginTop: c - ring - iconSize * 0.2, alignItems: 'center', width: size * 0.26 }}>
+                        <Image source={s.icon} style={{ width: iconSize, height: iconSize }} resizeMode="contain" />
+                        <Text numberOfLines={1} style={{ fontFamily: 'VT323_400Regular', fontSize: Math.round(size * 0.04), color: '#fff', textShadowColor: '#0a0e22', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0, letterSpacing: 0 }}>{s.label}</Text>
+                    </View>
+                </View>
             ))}
-            {WHEEL_SEGMENTS.map((s, i) => {
-                const [x, y] = pt(c, c, r * 0.68, i * SEG);
-                return (
-                    <G key={s.id + 't'} rotation={i * SEG} originX={x} originY={y}>
-                        <SvgText x={x} y={y - 2} fill="#fff" fontSize={s.label.length > 7 ? 14 : 18} fontFamily="VT323_400Regular" textAnchor="middle" fontWeight="bold">{s.label}</SvgText>
-                        <SvgText x={x} y={y + 14} fill="rgba(255,255,255,0.7)" fontSize={11} fontFamily="VT323_400Regular" textAnchor="middle">{s.sub.toUpperCase()}</SvgText>
-                    </G>
-                );
-            })}
-            {Array.from({ length: N * 2 }).map((_, i) => {
-                const [x, y] = pt(c, c, c - 6, i * (SEG / 2));
-                return <Circle key={i} cx={x} cy={y} r={2.5} fill={i % 2 ? '#fbbf24' : '#fde68a'} />;
-            })}
-            <Circle cx={c} cy={c} r={26} fill="#0a0e22" stroke="#fbbf24" strokeWidth={3} />
-            <SvgText x={c} y={c + 6} fill="#fbbf24" fontSize={18} fontFamily="VT323_400Regular" textAnchor="middle">SPIN</SvgText>
-        </Svg>
+            <View pointerEvents="none" style={{ position: 'absolute', left: c - 22, top: c - 22, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#fbbf24' }}>SPIN</Text>
+            </View>
+        </View>
     );
 }
 
 const today = () => new Date().toDateString();
 
-// Props: onClose(), onReward(segment)  — onReward applies the prize to the game.
-export default function SpinWheelScreen({ onClose, onReward }) {
+// Props: onClose(), onReward(segment) applies the prize to the game, getContext() -> { hasLoans, isRenting, hasRunningCosts }.
+export default function SpinWheelScreen({ onClose, onReward, getContext }) {
     const size = Math.min(Dimensions.get('window').width - 2 * PAD - 24, 330);
     const spin = useRef(new Animated.Value(0)).current;
     const rotation = useRef(0);                 // accumulated degrees, so each spin continues from where the last stopped
@@ -72,7 +60,7 @@ export default function SpinWheelScreen({ onClose, onReward }) {
     const canSpin = phase === 'idle' && (freeSpin || left > 0);
 
     const runSpin = (paid) => {
-        const idx = pickSegment();
+        const idx = pickSegment(getContext ? getContext() : {});
         const seg = WHEEL_SEGMENTS[idx];
         const turns = 5 + Math.floor(Math.random() * 2);
         const jitter = (Math.random() - 0.5) * (SEG * 0.6);                 // land anywhere inside the wedge, not always dead centre
@@ -136,9 +124,12 @@ export default function SpinWheelScreen({ onClose, onReward }) {
 
                 <View style={{ width: '100%', paddingHorizontal: PAD, marginTop: 16, minHeight: 112 }}>
                     {phase === 'result' && result ? (
-                        <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, borderRadius: 8, padding: 12, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 26, color: result.color === '#4b5878' ? C.cream : C.gold, lineHeight: 28 }}>{result.label} {result.sub}</Text>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 17, color: C.dim, textAlign: 'center' }}>{describeReward(result)}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, borderRadius: 8, padding: 12 }}>
+                            <Image source={result.icon} style={{ width: 52, height: 52 }} resizeMode="contain" />
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: C.gold, lineHeight: 24 }}>{result.title}</Text>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, lineHeight: 17 }}>{result.text}</Text>
+                            </View>
                         </View>
                     ) : phase === 'ad' ? (
                         <View style={{ backgroundColor: C.panel, borderWidth: 1, borderColor: C.border, borderRadius: 8, padding: 12, alignItems: 'center' }}>
@@ -149,7 +140,7 @@ export default function SpinWheelScreen({ onClose, onReward }) {
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.red, textAlign: 'center' }}>{note}</Text>
                     ) : (
                         <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: C.dim, textAlign: 'center' }}>
-                            {left > 0 || freeSpin ? 'Watch a short ad to spin the wheel. Prizes are cash, mood, health and meals.' : 'No spins left today. Come back tomorrow!'}
+                            {left > 0 || freeSpin ? 'Watch a short ad to spin. Prizes are perks in your life: waived EMIs and rent, loan write-offs, groceries, check-ups.' : 'No spins left today. Come back tomorrow!'}
                         </Text>
                     )}
                 </View>

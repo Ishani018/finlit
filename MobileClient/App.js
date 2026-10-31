@@ -341,7 +341,7 @@ const GameLayout = ({ onHardReset }) => {
     degrees, portfolio, properties, marketPrices, priceHistory,
     enrollInCourse, tradeStock, buyProperty, moveIn, applyForJob, checkJobRequirements, getCAAdvice, getMonthPreview,
     playerSprite, setPlayerSprite, playerName, setPlayerName, playerLook, setPlayerLook,
-    applyWheelReward,
+    applyWheelReward, getWheelContext,
     playerAge, totalMonthsPlayed, gameOver, finalScore, RETIREMENT_MONTH, GAME_END_MONTH,
     netWorthHistory, lastMonthFlow, monthlyRecap,
     loans, buyPropertyWithLoan, sellProperty,
@@ -2361,7 +2361,7 @@ const GameLayout = ({ onHardReset }) => {
 
         {showWheel && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, backgroundColor: '#06080f' }}>
-            <SpinWheelScreen onClose={() => setShowWheel(false)} onReward={applyWheelReward} />
+            <SpinWheelScreen onClose={() => setShowWheel(false)} onReward={applyWheelReward} getContext={getWheelContext} />
           </View>
         )}
 
