@@ -39,6 +39,14 @@
       "expo-font",
       "expo-av",
       [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingPermission": "This lets us show ads that are more relevant to you."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {

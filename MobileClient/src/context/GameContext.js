@@ -1579,6 +1579,26 @@ export const GameProvider = ({ children }) => {
         return { success: true, msg: `${item.name} added to pantry!` };
     };
 
+    // Lucky Wheel prizes (see data/wheel.js). Everything is a gift: nothing is deducted.
+    const applyWheelReward = (seg) => {
+        if (!seg) return;
+        if (seg.kind === 'cash') {
+            setBalance(prev => prev + seg.amount);
+            addHistory('Lucky wheel prize', seg.amount, 'income');
+        } else if (seg.kind === 'happiness') {
+            setHappiness(prev => Math.min(100, prev + seg.amount));
+        } else if (seg.kind === 'health') {
+            setHealth(prev => Math.min(100, prev + seg.amount));
+        } else if (seg.kind === 'meals') {
+            const staple = GROCERY_ITEMS[0];
+            if (staple) setPantry(prev => {
+                const existing = prev.find(p => p.itemId === staple.id);
+                if (existing) return prev.map(p => p.itemId === staple.id ? { ...p, qty: p.qty + seg.amount } : p);
+                return [...prev, { itemId: staple.id, qty: seg.amount }];
+            });
+        }
+    };
+
     const consumeFood = (itemId, forDependent = false) => {
         const entry = stateRef.current.pantry.find(p => p.itemId === itemId);
         if (!entry || entry.qty < 1) return { success: false, msg: 'Nothing left in pantry.' };
@@ -4944,7 +4964,7 @@ export const GameProvider = ({ children }) => {
         CA_MONTHLY_FEE: 2000,
 
         // Health & Grocery
-        health, pantry, sickLeaveMonths, buyGrocery, consumeFood,
+        health, pantry, sickLeaveMonths, buyGrocery, consumeFood, applyWheelReward,
 
         // Persistence
         saveGame, loadGame, deleteSave, saveLoaded,
