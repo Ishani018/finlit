@@ -43,7 +43,7 @@ function Preview({ spriteId, age, look, w, h, slot }) {
 export default function CustomiseScreen({ spriteId, name: initialName = '', look: initialLook, onSave, onClose, title = 'Your look', saveLabel = 'SAVE LOOK', startAge = 20 }) {
     const [name, setName] = useState(initialName);
     const [look, setLook] = useState(initialLook || { head: null, neck: null, hair: null });
-    const [slot, setSlot] = useState('head');
+    const [slot, setSlot] = useState('neck');
     const [stage, setStage] = useState(STAGES.findIndex(s => s.age >= startAge) === -1 ? 0 : Math.max(0, STAGES.findIndex(s => s.age >= startAge)));
     const [gridW, setGridW] = useState(0);
 
