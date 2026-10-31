@@ -433,6 +433,45 @@ export const GameProvider = ({ children }) => {
         await AsyncStorage.removeItem(SAVE_KEY);
     }, []);
 
+    // Several lives can be kept: starting a new game files the current one under "saved games"
+    // instead of overwriting it, and any saved life can be picked up again from the title screen.
+    const ARCHIVE_KEY = 'finlit_saves_archive';
+    const readArchive = async () => {
+        try { return JSON.parse((await AsyncStorage.getItem(ARCHIVE_KEY)) || '[]') || []; } catch (e) { return []; }
+    };
+    const describeSave = (raw) => {
+        try {
+            const s = JSON.parse(raw);
+            if (!s || !s.playerSprite) return null;
+            return { name: s.playerName || 'Unnamed', months: s.totalMonthsPlayed || 0, balance: s.balance || 0 };
+        } catch (e) { return null; }
+    };
+    const getStoredSave = useCallback(async () => {
+        const raw = await AsyncStorage.getItem(SAVE_KEY);
+        return raw ? describeSave(raw) : null;
+    }, []);
+    const listSavedGames = useCallback(async () => (await readArchive()).map(({ id, savedAt, info }) => ({ id, savedAt, ...info })), []);
+    const archiveCurrentGame = useCallback(async () => {
+        const raw = await AsyncStorage.getItem(SAVE_KEY);
+        const info = raw ? describeSave(raw) : null;
+        if (!raw || !info) return false;
+        const list = await readArchive();
+        list.unshift({ id: 'g' + Date.now(), savedAt: Date.now(), info, raw });
+        await AsyncStorage.setItem(ARCHIVE_KEY, JSON.stringify(list.slice(0, 8)));
+        await AsyncStorage.removeItem(SAVE_KEY);
+        return true;
+    }, []);
+    const restoreSavedGame = useCallback(async (id) => {
+        const list = await readArchive();
+        const entry = list.find(g => g.id === id);
+        if (!entry) return false;
+        await archiveCurrentGame();   // never lose whatever is in the live slot
+        const rest = (await readArchive()).filter(g => g.id !== id);
+        await AsyncStorage.setItem(ARCHIVE_KEY, JSON.stringify(rest));
+        await AsyncStorage.setItem(SAVE_KEY, entry.raw);
+        return loadGame();
+    }, [loadGame, archiveCurrentGame]);
+
     // Load on mount
     const [saveLoaded, setSaveLoaded] = useState(false);
     useEffect(() => {
@@ -4909,6 +4948,7 @@ export const GameProvider = ({ children }) => {
 
         // Persistence
         saveGame, loadGame, deleteSave, saveLoaded,
+        getStoredSave, listSavedGames, archiveCurrentGame, restoreSavedGame,
 
         // New Mechanics
         expectingChild, setExpectingChild, timesMarried, setTimesMarried, resetGame,

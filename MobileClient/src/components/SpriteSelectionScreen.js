@@ -90,7 +90,7 @@ function Hero({ height, children, sprite, look, spriteId }) {
 }
 
 // ─── Entry / Splash ──────────────────────────────────────────────────────────
-function EntryScreen({ onStart, hasSave, onResume }) {
+function EntryScreen({ onStart, hasSave, onResume, saves = [], onOpenSave }) {
     const blink = useRef(new Animated.Value(1)).current;
     const bob = useRef(new Animated.Value(0)).current;
 
@@ -120,14 +120,27 @@ function EntryScreen({ onStart, hasSave, onResume }) {
             </View>
 
             <View style={{ paddingHorizontal: 26, paddingBottom: 30, paddingTop: 8 }}>
-                {hasSave ? (
+                {hasSave || saves.length > 0 ? (
                     <View>
-                        <TouchableOpacity onPress={onResume} activeOpacity={0.85} style={{ backgroundColor: '#1a2e56', borderRadius: 10, height: 52, alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 4 }}>CONTINUE GAME</Text>
+                        {hasSave ? (
+                            <TouchableOpacity onPress={onResume} activeOpacity={0.85} style={{ backgroundColor: '#1a2e56', borderRadius: 10, height: 52, alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 24, color: '#c8d4f0', letterSpacing: 4 }}>CONTINUE GAME</Text>
+                            </TouchableOpacity>
+                        ) : null}
+                        <TouchableOpacity onPress={onStart} activeOpacity={0.85} style={hasSave ? { height: 40, alignItems: 'center', justifyContent: 'center' } : { backgroundColor: '#1a2e56', borderRadius: 10, height: 52, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: hasSave ? 18 : 24, color: hasSave ? '#5a6890' : '#c8d4f0', letterSpacing: 4 }}>NEW GAME</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={onStart} activeOpacity={0.85} style={{ height: 40, alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#5a6890', letterSpacing: 4 }}>NEW GAME</Text>
-                        </TouchableOpacity>
+                        {saves.length > 0 ? (
+                            <View style={{ marginTop: 6 }}>
+                                <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 12, color: '#5a6890', letterSpacing: 4, textAlign: 'center', marginBottom: 2 }}>SAVED LIVES</Text>
+                                {saves.slice(0, 4).map(g => (
+                                    <TouchableOpacity key={g.id} onPress={() => onOpenSave && onOpenSave(g.id)} activeOpacity={0.7} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, borderTopWidth: 1, borderColor: '#141b36' }}>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 18, color: '#c8d4f0' }}>{g.name}</Text>
+                                        <Text style={{ fontFamily: 'VT323_400Regular', fontSize: 16, color: '#7d8ab0' }}>{g.months} months · ₹{Math.round(g.balance).toLocaleString()}  ›</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        ) : null}
                     </View>
                 ) : (
                     <Animated.View style={{ opacity: blink }}>
@@ -489,7 +502,15 @@ const STARTER_JOBS = {
 };
 
 export default function SpriteSelectionScreen({ childMode = false, childName = '', hasSave = false, onResume, onStart }) {
-    const { setPlayerSprite, setPlayerName, setPlayerBirthday, setPlayerLook, applyForJob, startNextGeneration, resetGame } = useGame();
+    const { setPlayerSprite, setPlayerName, setPlayerBirthday, setPlayerLook, applyForJob, startNextGeneration, resetGame,
+        getStoredSave, listSavedGames, archiveCurrentGame, restoreSavedGame, loadGame } = useGame();
+    const [stored, setStored] = useState(false);     // a live save exists
+    const [saves, setSaves]   = useState([]);        // lives filed away by earlier "new game"s
+    useEffect(() => {
+        if (childMode) return;
+        getStoredSave().then(s => setStored(!!s)).catch(() => {});
+        listSavedGames().then(setSaves).catch(() => {});
+    }, []);
     const [step, setStep]           = useState(childMode ? 1 : 0);
     const [selectedIdx, setSelectedIdx] = useState(null);
     const [detailIdx, setDetailIdx] = useState(null);   // which profile is open; kept so Back from the name step returns to it
@@ -516,7 +537,10 @@ export default function SpriteSelectionScreen({ childMode = false, childName = '
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#06080f' }}>
-            {step === 0 && <EntryScreen onStart={() => { if (!childMode) resetGame(); setStep(1); }} hasSave={hasSave} onResume={onResume} />}
+            {step === 0 && <EntryScreen
+                onStart={async () => { if (!childMode) { await archiveCurrentGame().catch(() => {}); resetGame(); } setStep(1); }}
+                hasSave={hasSave || stored} onResume={onResume || (() => loadGame())}
+                saves={saves} onOpenSave={(id) => restoreSavedGame(id)} />}
             {step === 1 && (
                 <PickSpriteScreen
                     selectedIdx={selectedIdx}
