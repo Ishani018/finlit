@@ -2532,21 +2532,14 @@ export const GameProvider = ({ children }) => {
         } else if (eff.type === 'gamble' || eff.type === 'equity_bet') {
             if (balance >= eff.amount) {
                 setBalance(prev => prev - eff.amount);
-                // Schedule payoff
-                const success = Math.random() < eff.chance;
-                setTimeout(() => {
-                    if (success) {
-                        const gain = Math.round(eff.amount * eff.successMult);
-                        setBalance(prev => prev + gain);
-                        const entry = { id: `decision_win_${Date.now()}`, name: 'Decision Paid Off', message: eff.successMsg, category: 'positive', impact: gain - eff.amount, month: stateRef.current.totalMonthsPlayed, read: false };
-                        setEventInbox(prev => [entry, ...prev].slice(0, 50));
-                        setLastCrisisEvent(entry);
-                    } else {
-                        const entry = { id: `decision_fail_${Date.now()}`, name: 'Decision Failed', message: eff.failMsg, category: 'crisis', impact: -eff.amount, month: stateRef.current.totalMonthsPlayed, read: false };
-                        setEventInbox(prev => [entry, ...prev].slice(0, 50));
-                        setLastCrisisEvent(entry);
-                    }
-                }, (eff.months || 12) * 1000); // simulate time passing (1s per month)
+                // The outcome is fixed now but revealed in game time, so it survives closing the app and never goes missing.
+                const months = eff.months || 12;
+                setActiveEffects(prev => [...prev, {
+                    id: `bet_${Date.now()}`, type: 'timed_bet', kind: 'bet', remainingMonths: months,
+                    amount: eff.amount, success: Math.random() < eff.chance, gain: Math.round(eff.amount * eff.successMult),
+                    successMsg: eff.successMsg, failMsg: eff.failMsg,
+                }]);
+                msg = `${msg ? msg + '\n\n' : ''}Your ₹${eff.amount.toLocaleString()} is locked in. You will hear the result in about ${months} month${months === 1 ? '' : 's'}.`;
             } else { msg = "Not enough balance."; }
         } else if (eff.type === 'cash_spend' && eff.recurring) {
             if (eff.amount < 0) {
@@ -2669,20 +2662,14 @@ export const GameProvider = ({ children }) => {
         } else if (eff.type === 'lend') {
             if (balance >= eff.amount) {
                 setBalance(prev => prev - eff.amount);
-                setTimeout(() => {
-                    const returned = Math.random() < eff.returnChance;
-                    if (returned) {
-                        setBalance(prev => prev + eff.amount);
-                        const e = { id: `lend_${Date.now()}`, name: 'Friend Repaid', message: eff.returnMsg, category: 'positive', impact: eff.amount, month: stateRef.current.totalMonthsPlayed, read: false };
-                        setEventInbox(prev => [e, ...prev].slice(0, 50));
-                        setLastCrisisEvent(e);
-                    } else {
-                        const e = { id: `lend_fail_${Date.now()}`, name: 'Money Not Returned', message: eff.noReturnMsg, category: 'crisis', impact: -eff.amount, month: stateRef.current.totalMonthsPlayed, read: false };
-                        setEventInbox(prev => [e, ...prev].slice(0, 50));
-                        setLastCrisisEvent(e);
-                    }
-                }, (eff.months || 6) * 2000);
-            }
+                const months = eff.months || 6;
+                setActiveEffects(prev => [...prev, {
+                    id: `lend_${Date.now()}`, type: 'timed_bet', kind: 'lend', remainingMonths: months,
+                    amount: eff.amount, success: Math.random() < eff.returnChance, gain: eff.amount,
+                    successMsg: eff.returnMsg, failMsg: eff.noReturnMsg,
+                }]);
+                msg = `${msg ? msg + '\n\n' : ''}You lent ₹${eff.amount.toLocaleString()}. You will find out about repayment in about ${months} month${months === 1 ? '' : 's'}.`;
+            } else { msg = "Not enough balance."; }
         } else if (eff.type === 'emi_purchase') {
             const emi = Math.round(eff.amount / eff.months);
             const newLoan = { id: `loan_decision_${Date.now()}`, type: 'Personal Loan', loanTypeId: 'personal_loan', remainingPrincipal: eff.amount, totalPrincipal: eff.amount, emi, monthlyRate: 0, tenureRemaining: eff.months, missedPayments: 0 };
@@ -4578,6 +4565,20 @@ export const GameProvider = ({ children }) => {
 
         activeEffects.forEach(effect => {
             const nextRemaining = effect.remainingMonths - 1;
+
+            if (effect.type === 'timed_bet') {
+                if (nextRemaining > 0) { nextEffects.push({ ...effect, remainingMonths: nextRemaining }); return; }
+                const lend = effect.kind === 'lend';
+                if (effect.success) {
+                    balanceDelta += effect.gain;
+                    const e = { id: `${effect.id}_won`, name: lend ? 'Friend Repaid' : 'Decision Paid Off', message: effect.successMsg || 'It worked out.', category: 'positive', impact: lend ? effect.amount : effect.gain - effect.amount, month: totalMonthsPlayed, read: false };
+                    newInboxEvents.push(e); latestCrisis = e;
+                } else {
+                    const e = { id: `${effect.id}_lost`, name: lend ? 'Money Not Returned' : 'Decision Failed', message: effect.failMsg || 'It did not work out.', category: 'crisis', impact: -effect.amount, month: totalMonthsPlayed, read: false };
+                    newInboxEvents.push(e); latestCrisis = e;
+                }
+                return;
+            }
 
             if (effect.type === 'recurring_expense') {
                 if (effect.monthlyAmount) {
